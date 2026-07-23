@@ -9,6 +9,7 @@ import { readFile } from "node:fs/promises";
 import { createClient } from "@supabase/supabase-js";
 
 const SEASON_NAME = process.env.SEASON_NAME || "Season 4";
+const REAL_TEAM_NAME = "Gurugram Spartans";
 const MOCK_TEAM_NAMES = ["Mock Team Alpha", "Mock Team Beta", "Mock Team Gamma"];
 const DEFAULT_PURSE = 2_000_000;
 const DEFAULT_BASE_PRICE = 1_000;
@@ -37,28 +38,34 @@ async function ensureSeason() {
   return data.id;
 }
 
-async function ensureMockTeams(seasonId) {
+async function ensureTeams(seasonId) {
   const { data: existing, error: findError } = await supabase
     .from("teams")
-    .select("id, name")
-    .eq("season_id", seasonId)
-    .eq("is_mock", true);
+    .select("id, name, is_mock")
+    .eq("season_id", seasonId);
   if (findError) throw findError;
 
   const existingNames = new Set(existing.map((t) => t.name));
-  const toCreate = MOCK_TEAM_NAMES.filter((name) => !existingNames.has(name)).map((name) => ({
-    season_id: seasonId,
-    name,
-    is_mock: true,
-    purse_total: DEFAULT_PURSE,
-    purse_remaining: DEFAULT_PURSE,
-  }));
+  const allNames = [REAL_TEAM_NAME, ...MOCK_TEAM_NAMES];
+  const toCreate = allNames
+    .filter((name) => !existingNames.has(name))
+    .map((name) => ({
+      season_id: seasonId,
+      name,
+      is_mock: name !== REAL_TEAM_NAME,
+      purse_total: DEFAULT_PURSE,
+      purse_remaining: DEFAULT_PURSE,
+    }));
 
   if (toCreate.length > 0) {
     const { error } = await supabase.from("teams").insert(toCreate);
     if (error) throw error;
   }
-  console.log(`Mock teams ready: ${MOCK_TEAM_NAMES.join(", ")}`);
+  console.log(`Teams ready: ${allNames.join(", ")}`);
+  console.log(
+    `NOTE: link "${REAL_TEAM_NAME}" to your profile after signup:\n` +
+      `  update teams set owner_profile_id = '<your-auth-uid>' where name = '${REAL_TEAM_NAME}' and season_id = '${seasonId}';`
+  );
 }
 
 async function ensureAuctionState(seasonId) {
@@ -116,7 +123,7 @@ async function main() {
     throw new Error("Run with: node --env-file=.env.local scripts/seed-players.mjs");
   }
   const seasonId = await ensureSeason();
-  await ensureMockTeams(seasonId);
+  await ensureTeams(seasonId);
   await ensureAuctionState(seasonId);
   await seedPlayers(seasonId);
 }

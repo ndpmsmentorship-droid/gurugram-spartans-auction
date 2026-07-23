@@ -28,6 +28,7 @@ export interface Database {
           display_name: string;
           role: Role;
         }>;
+        Relationships: [];
       };
       seasons: {
         Row: {
@@ -41,6 +42,7 @@ export interface Database {
           is_active?: boolean;
         };
         Update: Partial<{ name: string; is_active: boolean }>;
+        Relationships: [];
       };
       teams: {
         Row: {
@@ -71,6 +73,7 @@ export interface Database {
           purse_remaining: number;
           logo_url: string | null;
         }>;
+        Relationships: [];
       };
       players: {
         Row: {
@@ -123,6 +126,7 @@ export interface Database {
           bowling_style: string | null;
           photo_url: string | null;
         }>;
+        Relationships: [];
       };
       player_season_stats: {
         Row: {
@@ -182,6 +186,15 @@ export interface Database {
           max_price: number | null;
           status: PlayerStatus;
         }>;
+        Relationships: [
+          {
+            foreignKeyName: "player_season_stats_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "players";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       roster_entries: {
         Row: {
@@ -199,6 +212,15 @@ export interface Database {
           sold_price: number;
         };
         Update: Partial<{ team_id: string; sold_price: number }>;
+        Relationships: [
+          {
+            foreignKeyName: "roster_entries_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "players";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       auction_state: {
         Row: {
@@ -222,6 +244,7 @@ export interface Database {
           current_leading_team_id: string | null;
           status: AuctionStatus;
         }>;
+        Relationships: [];
       };
       bids: {
         Row: {
@@ -238,7 +261,23 @@ export interface Database {
           team_id: string;
           amount: number;
         };
-        Update: never;
+        Update: Partial<{ amount: number }>;
+        Relationships: [];
+      };
+    };
+    Views: Record<string, never>;
+    Functions: {
+      place_bid: {
+        Args: {
+          p_season_id: string;
+          p_team_id: string;
+          p_amount: number;
+        };
+        Returns: void;
+      };
+      mark_current_player_settled: {
+        Args: { p_season_id: string };
+        Returns: void;
       };
     };
   };

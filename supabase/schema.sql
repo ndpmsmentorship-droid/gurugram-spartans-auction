@@ -311,3 +311,7 @@ $$;
 
 alter publication supabase_realtime add table auction_state;
 alter publication supabase_realtime add table bids;
+
+-- Realtime UPDATE payloads only include the full "old" row (needed to tell
+-- whether current_player_id actually changed) when replica identity is FULL.
+alter table auction_state replica identity full;

@@ -36,6 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# player PII exports/cleaned data — never commit
+scripts/cleaned_players.json
+*.csv
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

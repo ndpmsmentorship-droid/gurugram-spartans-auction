@@ -50,6 +50,18 @@ const SCOUT_NUMERIC = [
   "overall_index",
   "bought_price",
   "suggested_batting_order",
+  "recent_bat_innings",
+  "recent_not_out",
+  "recent_runs",
+  "recent_bat_avg",
+  "recent_bat_sr",
+  "recent_fours",
+  "recent_sixes",
+  "recent_bowl_matches",
+  "recent_wickets",
+  "recent_economy",
+  "recent_bowl_avg",
+  "recent_bowl_sr",
 ] as const;
 
 type ScoutNumericCols = { [K in (typeof SCOUT_NUMERIC)[number]]: number | null };

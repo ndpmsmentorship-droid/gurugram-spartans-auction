@@ -73,6 +73,20 @@ create table if not exists scout_players (
   scouting_clip_url text,
   scouting_note text,
 
+  -- recent form (last ~2 years) — blended 70% into rate metrics when present
+  recent_bat_innings numeric,
+  recent_not_out numeric,
+  recent_runs numeric,
+  recent_bat_avg numeric,
+  recent_bat_sr numeric,
+  recent_fours numeric,
+  recent_sixes numeric,
+  recent_bowl_matches numeric,
+  recent_wickets numeric,
+  recent_economy numeric,
+  recent_bowl_avg numeric,
+  recent_bowl_sr numeric,
+
   created_at timestamptz not null default now()
 );
 

@@ -30,6 +30,18 @@ function toRawStats(r: ScoutPlayerRow): RawStats {
     stumpings: r.stumpings,
     keeping_catches: r.keeping_catches,
     primary_role: r.primary_role,
+    recent_bat_innings: r.recent_bat_innings,
+    recent_not_out: r.recent_not_out,
+    recent_runs: r.recent_runs,
+    recent_bat_avg: r.recent_bat_avg,
+    recent_bat_sr: r.recent_bat_sr,
+    recent_fours: r.recent_fours,
+    recent_sixes: r.recent_sixes,
+    recent_bowl_matches: r.recent_bowl_matches,
+    recent_wickets: r.recent_wickets,
+    recent_economy: r.recent_economy,
+    recent_bowl_avg: r.recent_bowl_avg,
+    recent_bowl_sr: r.recent_bowl_sr,
   };
 }
 

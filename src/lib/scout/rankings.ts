@@ -36,7 +36,60 @@ export type RawStats = {
   keeping_catches: number | null;
   // role hint
   primary_role: string | null;
+  // recent form (last ~2 years) — optional; blended into RATE metrics only.
+  recent_bat_innings?: number | null;
+  recent_not_out?: number | null;
+  recent_runs?: number | null;
+  recent_bat_avg?: number | null;
+  recent_bat_sr?: number | null;
+  recent_fours?: number | null;
+  recent_sixes?: number | null;
+  recent_bowl_matches?: number | null;
+  recent_wickets?: number | null;
+  recent_economy?: number | null;
+  recent_bowl_avg?: number | null;
+  recent_bowl_sr?: number | null;
 };
+
+// How heavily recent form outweighs career in the blended RATE metrics.
+export const RECENT_WEIGHT = 0.7;
+
+const blendRate = (recent: number | null, career: number | null): number | null => {
+  if (recent == null) return career;
+  if (career == null) return recent;
+  return RECENT_WEIGHT * recent + (1 - RECENT_WEIGHT) * career;
+};
+
+// recent rate helpers (return the recent value, or null if not enough recent data)
+const recentBoundaryPct = (s: RawStats): number | null => {
+  const r = num(s.recent_runs ?? null);
+  const f = num(s.recent_fours ?? null);
+  const x = num(s.recent_sixes ?? null);
+  if (r == null || r <= 0 || f == null || x == null) return null;
+  return ((f * 4 + x * 6) / r) * 100;
+};
+const recentFinishing = (s: RawStats): number | null => {
+  const no = num(s.recent_not_out ?? null);
+  const inn = num(s.recent_bat_innings ?? null);
+  if (no == null || inn == null || inn <= 0) return null;
+  return (no / inn) * 100;
+};
+const recentWktsPerMatch = (s: RawStats): number | null => {
+  const w = num(s.recent_wickets ?? null);
+  const m = num(s.recent_bowl_matches ?? null);
+  if (w == null || m == null || m <= 0) return null;
+  return w / m;
+};
+
+export function hasRecentForm(s: RawStats): boolean {
+  return (
+    s.recent_runs != null ||
+    s.recent_bat_avg != null ||
+    s.recent_bat_sr != null ||
+    s.recent_wickets != null ||
+    s.recent_economy != null
+  );
+}
 
 export type IndexScores = {
   bat_index: number;
@@ -186,11 +239,19 @@ export function computeIndices(players: RawStats[]): IndexScores[] {
   const MIN_BAT_INNINGS = 5;
   const MIN_BOWL_MATCHES = 5;
 
-  // batting percentile columns
-  const pAvg = percentileColumn(players.map((p) => num(p.bat_avg)));
-  const pSr = percentileColumn(players.map((p) => num(p.bat_sr)));
+  // batting percentile columns. RATE metrics (avg, sr, boundary%, finishing)
+  // blend recent form at RECENT_WEIGHT; VOLUME metrics (runs, conversion) stay
+  // career so a small recent sample can't erase a player's body of work.
+  const pAvg = percentileColumn(
+    players.map((p) => blendRate(num(p.recent_bat_avg ?? null), num(p.bat_avg)))
+  );
+  const pSr = percentileColumn(
+    players.map((p) => blendRate(num(p.recent_bat_sr ?? null), num(p.bat_sr)))
+  );
   const pRuns = percentileColumn(players.map((p) => num(p.runs)));
-  const pBoundary = percentileColumn(derived.map((d) => d.boundaryPct));
+  const pBoundary = percentileColumn(
+    players.map((p, i) => blendRate(recentBoundaryPct(p), derived[i].boundaryPct))
+  );
   const pConversion = percentileColumn(
     players.map((p) =>
       num(p.hundreds) != null && num(p.fifties) != null
@@ -198,13 +259,26 @@ export function computeIndices(players: RawStats[]): IndexScores[] {
         : null
     )
   );
-  const pFinishing = percentileColumn(derived.map((d) => d.finishingRate));
+  const pFinishing = percentileColumn(
+    players.map((p, i) => blendRate(recentFinishing(p), derived[i].finishingRate))
+  );
 
   // bowling percentile columns (economy/avg/sr inverted: lower is better)
-  const pEcon = percentileColumn(players.map((p) => num(p.economy)), true);
-  const pWkts = percentileColumn(derived.map((d) => d.wicketsPerMatch));
-  const pBowlAvg = percentileColumn(players.map((p) => num(p.bowl_avg)), true);
-  const pBowlSr = percentileColumn(players.map((p) => num(p.bowl_sr)), true);
+  const pEcon = percentileColumn(
+    players.map((p) => blendRate(num(p.recent_economy ?? null), num(p.economy))),
+    true
+  );
+  const pWkts = percentileColumn(
+    players.map((p, i) => blendRate(recentWktsPerMatch(p), derived[i].wicketsPerMatch))
+  );
+  const pBowlAvg = percentileColumn(
+    players.map((p) => blendRate(num(p.recent_bowl_avg ?? null), num(p.bowl_avg))),
+    true
+  );
+  const pBowlSr = percentileColumn(
+    players.map((p) => blendRate(num(p.recent_bowl_sr ?? null), num(p.bowl_sr))),
+    true
+  );
   const pDots = percentileColumn(players.map((p) => num(p.dot_balls)));
   const pFiveW = percentileColumn(players.map((p) => num(p.five_w)));
 

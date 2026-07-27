@@ -26,6 +26,9 @@ const RAW_KEYS = [
   "bowl_matches", "bowl_innings", "overs", "maidens", "wickets", "bowl_runs",
   "economy", "bowl_avg", "bowl_sr", "three_w", "five_w", "dot_balls",
   "wides", "noballs", "catches", "run_outs", "stumpings", "keeping_catches",
+  "recent_bat_innings", "recent_not_out", "recent_runs", "recent_bat_avg",
+  "recent_bat_sr", "recent_fours", "recent_sixes", "recent_bowl_matches",
+  "recent_wickets", "recent_economy", "recent_bowl_avg", "recent_bowl_sr",
 ];
 
 function toRaw(r) {
@@ -38,6 +41,12 @@ function toRaw(r) {
     dot_balls: r.dot_balls, five_w: r.five_w, catches: r.catches,
     run_outs: r.run_outs, is_keeper: r.is_keeper, stumpings: r.stumpings,
     keeping_catches: r.keeping_catches, primary_role: r.primary_role,
+    recent_bat_innings: r.recent_bat_innings, recent_not_out: r.recent_not_out,
+    recent_runs: r.recent_runs, recent_bat_avg: r.recent_bat_avg,
+    recent_bat_sr: r.recent_bat_sr, recent_fours: r.recent_fours,
+    recent_sixes: r.recent_sixes, recent_bowl_matches: r.recent_bowl_matches,
+    recent_wickets: r.recent_wickets, recent_economy: r.recent_economy,
+    recent_bowl_avg: r.recent_bowl_avg, recent_bowl_sr: r.recent_bowl_sr,
   };
 }
 

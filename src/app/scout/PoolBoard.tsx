@@ -29,6 +29,7 @@ export type PoolPlayer = RankedPlayer<{
   archetype: string;
   vor: number;
   topRisk: RiskFlag | null;
+  hasRecentForm: boolean;
   boundary_pct: number | null;
   fit_score: number;
 };
@@ -209,6 +210,14 @@ function Row({ p }: { p: PoolPlayer }) {
         <Link href={`/scout/${p.id}`} className="font-medium hover:text-accent-text">
           {p.full_name}
         </Link>
+        {p.hasRecentForm && (
+          <span
+            className="ml-1 align-middle text-[10px] font-semibold text-up"
+            title="Score is form-adjusted (recent 2-year data captured)"
+          >
+            ● Form
+          </span>
+        )}
         <span className="block text-[11px] text-muted">
           {p.archetype}
           {p.topRisk && (

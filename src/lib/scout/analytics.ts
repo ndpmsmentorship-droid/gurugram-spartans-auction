@@ -3,7 +3,7 @@
 // risk flags, and a squad-need-weighted fit score. Everything is derived from
 // what's already stored on scout_players — no external service.
 
-import { deriveMetrics, type RawStats } from "./rankings";
+import { deriveMetrics, hasRecentForm, type RawStats } from "./rankings";
 
 export type RoleGroup = "Batter" | "Bowler" | "All-rounder" | "Keeper" | "Other";
 
@@ -32,6 +32,7 @@ export type PlayerAnalytics = {
   vor: number; // points above replacement level for the role
   riskFlags: RiskFlag[];
   similarIds: string[]; // nearest 4
+  hasRecentForm: boolean; // index is form-adjusted for this player
 };
 
 const n = (v: number | null | undefined): number | null =>
@@ -229,6 +230,7 @@ export function computeAnalytics(players: AnalyticsInput[]): Map<string, PlayerA
       vor: Math.round(((p.overall_index ?? 0) - (repl.get(g) ?? 0)) * 10) / 10,
       riskFlags: riskFlags(p),
       similarIds: dists,
+      hasRecentForm: hasRecentForm(p),
     });
   });
   return result;

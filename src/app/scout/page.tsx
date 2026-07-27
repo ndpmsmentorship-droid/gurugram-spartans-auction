@@ -50,6 +50,7 @@ export default async function ScoutPage() {
       archetype: a.archetype,
       vor: a.vor,
       topRisk: a.riskFlags[0] ?? null,
+      hasRecentForm: a.hasRecentForm,
       boundary_pct: m.boundaryPct == null ? null : Math.round(m.boundaryPct * 10) / 10,
       fit_score:
         Math.round(fitScore(p as unknown as AnalyticsInput, needs) * 10) / 10,

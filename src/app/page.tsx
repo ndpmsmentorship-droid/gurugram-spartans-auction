@@ -21,46 +21,51 @@ export default async function Home() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-16">
-      <p className="eyebrow">Gurugram Spartans · Auction Day</p>
-      <h1 className="mt-3 max-w-2xl text-4xl font-bold leading-tight sm:text-5xl">
-        Scout smarter. Bid sharper. Build the squad.
-      </h1>
-      <p className="mt-4 max-w-xl text-[1.05rem] text-muted">
-        Upload the auction pool, rank every player by batting, bowling, fielding
-        and keeping index, and mark who you buy — the squad builds itself.
-      </p>
-
-      <div className="mt-8 flex flex-wrap gap-3">
-        {profile ? (
-          <>
-            <Link href="/scout" className="btn-primary">
-              Open the pool
+    <main className="flex flex-1 flex-col">
+      {/* hero */}
+      <section className="mx-auto w-full max-w-3xl px-6 pt-24 pb-16 text-center">
+        <p className="eyebrow">Gurugram Spartans</p>
+        <h1 className="mt-3 text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
+          Scout smarter.
+          <br />
+          Build the squad.
+        </h1>
+        <p className="mx-auto mt-5 max-w-xl text-lg text-muted sm:text-xl">
+          Upload the auction pool, rank every player on form-weighted batting,
+          bowling, fielding and keeping — and buy with conviction.
+        </p>
+        <div className="mt-8 flex flex-wrap justify-center gap-4">
+          {profile ? (
+            <>
+              <Link href="/scout" className="btn-primary">
+                Open the pool
+              </Link>
+              <Link href="/scout/import" className="btn-ghost">
+                Import players
+              </Link>
+            </>
+          ) : (
+            <Link href="/login" className="btn-primary">
+              Sign in to start
             </Link>
-            <Link href="/scout/import" className="btn-ghost">
-              Import players
-            </Link>
-          </>
-        ) : (
-          <Link href="/login" className="btn-primary">
-            Sign in to start
-          </Link>
-        )}
-      </div>
+          )}
+        </div>
+      </section>
 
+      {/* stat tiles */}
       {profile && (
-        <div className="mt-12 grid max-w-md grid-cols-2 gap-4">
-          <div className="card">
-            <p className="eyebrow">In the pool</p>
-            <p className="mt-1 font-display text-3xl font-bold">{poolCount}</p>
+        <section className="mx-auto grid w-full max-w-3xl grid-cols-2 gap-4 px-6 pb-24">
+          <div className="rounded-[18px] bg-wash p-8 text-center">
+            <p className="text-5xl font-semibold tracking-tight">{poolCount}</p>
+            <p className="mt-2 text-sm text-muted">Players in the pool</p>
           </div>
-          <div className="card">
-            <p className="eyebrow">Bought</p>
-            <p className="mt-1 font-display text-3xl font-bold text-accent-text">
+          <div className="rounded-[18px] bg-wash p-8 text-center">
+            <p className="text-5xl font-semibold tracking-tight text-accent-text">
               {boughtCount}
             </p>
+            <p className="mt-2 text-sm text-muted">Bought</p>
           </div>
-        </div>
+        </section>
       )}
     </main>
   );

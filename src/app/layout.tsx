@@ -1,24 +1,11 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Inter } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 import { getCurrentProfile } from "@/lib/auth";
 import { signOut } from "@/app/login/actions";
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  title: "Spartans Scout — Auction Command",
+  title: "Spartans Scout",
   description: "Rank, analyze and buy players on auction day for The Gurugram Spartans",
 };
 
@@ -30,45 +17,36 @@ export default async function RootLayout({
   const profile = await getCurrentProfile();
 
   return (
-    <html
-      lang="en"
-      className={`${spaceGrotesk.variable} ${inter.variable} h-full antialiased`}
-    >
+    <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <header className="sticky top-0 z-20 border-b border-border bg-surface/90 backdrop-blur">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
-            <Link href="/" className="flex items-center gap-2 font-display font-bold">
-              <span className="grid h-7 w-7 place-items-center rounded-[9px] bg-accent text-ink">
-                S
-              </span>
+        <header className="sticky top-0 z-30 border-b border-border/70 bg-[color-mix(in_srgb,var(--background)_80%,transparent)] backdrop-blur-xl">
+          <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-5">
+            <Link href="/" className="text-[0.95rem] font-semibold tracking-tight">
               Spartans Scout
             </Link>
-            <nav className="flex items-center gap-4 text-[0.9rem]">
+            <nav className="flex items-center gap-6 text-[0.8rem] text-muted">
               {profile ? (
                 <>
-                  <Link href="/scout" className="hover:text-accent-text">
+                  <Link href="/scout" className="transition hover:text-foreground">
                     Pool
                   </Link>
-                  <Link href="/squad" className="hover:text-accent-text">
+                  <Link href="/squad" className="transition hover:text-foreground">
                     Squad
                   </Link>
-                  <Link href="/scout/import" className="hover:text-accent-text">
+                  <Link href="/scout/import" className="transition hover:text-foreground">
                     Import
                   </Link>
-                  <span className="hidden text-muted sm:inline">
+                  <span className="hidden text-foreground sm:inline">
                     {profile.display_name}
                   </span>
                   <form action={signOut}>
-                    <button
-                      type="submit"
-                      className="text-muted hover:text-down"
-                    >
+                    <button type="submit" className="transition hover:text-down">
                       Sign out
                     </button>
                   </form>
                 </>
               ) : (
-                <Link href="/login" className="btn-primary">
+                <Link href="/login" className="transition hover:text-foreground">
                   Sign in
                 </Link>
               )}

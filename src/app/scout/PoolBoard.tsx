@@ -40,22 +40,32 @@ type Col = {
   // default sort direction when you first click the column
   asc: boolean;
   numeric?: boolean;
+  help: string;
   fmt?: (p: PoolPlayer) => string;
 };
 
 const COLS: Col[] = [
-  { key: "overall_rank", label: "#", asc: true, numeric: true, fmt: (p) => `${p.overall_rank}` },
-  { key: "fit_score", label: "Fit", asc: false, numeric: true, fmt: (p) => `${Math.round(p.fit_score)}` },
-  { key: "overall_index", label: "Overall", asc: false, numeric: true },
-  { key: "vor", label: "VOR", asc: false, numeric: true, fmt: (p) => `${p.vor >= 0 ? "+" : ""}${p.vor}` },
-  { key: "bat_index", label: "Bat", asc: false, numeric: true },
-  { key: "bowl_index", label: "Bowl", asc: false, numeric: true },
-  { key: "field_index", label: "Field", asc: false, numeric: true },
-  { key: "bat_avg", label: "Avg", asc: false, numeric: true },
-  { key: "bat_sr", label: "SR", asc: false, numeric: true },
-  { key: "boundary_pct", label: "Bnd%", asc: false, numeric: true },
-  { key: "wickets", label: "Wkts", asc: false, numeric: true },
-  { key: "economy", label: "Econ", asc: true, numeric: true },
+  { key: "overall_rank", label: "#", asc: true, numeric: true, fmt: (p) => `${p.overall_rank}`,
+    help: "Overall rank in the pool (1 = best), by the form-weighted overall index." },
+  { key: "fit_score", label: "Fit", asc: false, numeric: true, fmt: (p) => `${Math.round(p.fit_score)}`,
+    help: "Best fit for YOUR squad — the overall score boosted for roles you still need and dialled down for ones you've filled. Sort by this to see who to target next." },
+  { key: "overall_index", label: "Overall", asc: false, numeric: true,
+    help: "Overall player index, 0–100. A role-aware, form-weighted blend of the batting, bowling, fielding and keeping indices." },
+  { key: "vor", label: "VOR", asc: false, numeric: true, fmt: (p) => `${p.vor >= 0 ? "+" : ""}${p.vor}`,
+    help: "Value Over Replacement — points above a freely-available player in the same role. High VOR = scarce/premium; low or negative = plenty of similar options." },
+  { key: "bat_index", label: "Bat", asc: false, numeric: true,
+    help: "Batting index, 0–100 vs the pool: average, strike rate, boundary %, 50/100 conversion and finishing." },
+  { key: "bowl_index", label: "Bowl", asc: false, numeric: true,
+    help: "Bowling index, 0–100 vs the pool: economy, wickets per match, average, strike rate and dot balls." },
+  { key: "field_index", label: "Field", asc: false, numeric: true,
+    help: "Fielding index, 0–100: catches and run-outs per match." },
+  { key: "bat_avg", label: "Avg", asc: false, numeric: true, help: "Batting average." },
+  { key: "bat_sr", label: "SR", asc: false, numeric: true,
+    help: "Strike rate (runs per 100 balls); form-weighted where recent data exists." },
+  { key: "boundary_pct", label: "Bnd%", asc: false, numeric: true,
+    help: "Boundary % — share of runs scored in 4s and 6s. High = boundary-reliant." },
+  { key: "wickets", label: "Wkts", asc: false, numeric: true, help: "Career wickets." },
+  { key: "economy", label: "Econ", asc: true, numeric: true, help: "Runs conceded per over (lower is better)." },
 ];
 
 function roleGroup(role: string | null, isKeeper: boolean): string {
@@ -146,6 +156,20 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
         <span className="self-center text-xs text-muted">{filtered.length} shown</span>
       </div>
 
+      <details className="mb-3 text-sm">
+        <summary className="cursor-pointer text-accent-text">
+          What do the columns mean?
+        </summary>
+        <dl className="mt-2 grid gap-x-6 gap-y-1.5 rounded-[12px] bg-wash p-4 sm:grid-cols-2">
+          {COLS.filter((c) => c.key !== "overall_rank").map((c) => (
+            <div key={c.key as string} className="flex gap-2">
+              <dt className="shrink-0 font-medium">{c.label}</dt>
+              <dd className="text-muted">{c.help}</dd>
+            </div>
+          ))}
+        </dl>
+      </details>
+
       <div className="overflow-x-auto rounded-[16px] border border-border">
         <table className="w-full min-w-[820px] text-sm">
           <thead className="bg-wash text-left">
@@ -157,10 +181,10 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
                 <th
                   key={c.key as string}
                   onClick={() => toggleSort(c)}
-                  className={`cursor-pointer select-none whitespace-nowrap px-2 py-2 font-medium hover:text-accent-text ${
+                  className={`cursor-help select-none whitespace-nowrap px-2 py-2 font-medium hover:text-accent-text ${
                     c.numeric ? "text-right" : ""
                   } ${sortKey === c.key ? "text-accent-text" : ""}`}
-                  title={`Sort by ${c.label}`}
+                  title={`${c.help}\n\n(Click to sort)`}
                 >
                   {c.label}
                   {sortKey === c.key ? (sortAsc ? " ↑" : " ↓") : ""}

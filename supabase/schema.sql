@@ -315,3 +315,20 @@ alter publication supabase_realtime add table bids;
 -- Realtime UPDATE payloads only include the full "old" row (needed to tell
 -- whether current_player_id actually changed) when replica identity is FULL.
 alter table auction_state replica identity full;
+
+-- ============================================================
+-- Team builder (squad organization) — added 2026-07-23
+-- Idempotent: safe to re-run. If applying to an existing DB, run just this block.
+-- ============================================================
+
+alter table roster_entries add column if not exists is_captain boolean not null default false;
+alter table roster_entries add column if not exists is_vice_captain boolean not null default false;
+alter table roster_entries add column if not exists is_keeper boolean not null default false;
+alter table roster_entries add column if not exists batting_order int;
+
+-- Let a team's OWNER (not just admin) update their own roster rows, so owners can
+-- organize their squad (captain/VC/keeper/batting order). admin still covered by
+-- roster_entries_write above.
+drop policy if exists "roster_entries_owner_update" on roster_entries;
+create policy "roster_entries_owner_update" on roster_entries for update
+  using (owns_team(team_id)) with check (owns_team(team_id));

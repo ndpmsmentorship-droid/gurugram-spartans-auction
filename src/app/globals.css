@@ -1,62 +1,130 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------
+   SMIFE design system — warm neutrals + pastel orange, flat, rounded.
+   orange-primary = surfaces/CTAs; orange-deep = the only contrast-safe
+   orange for TEXT on light. Space Grotesk display + Inter body.
+------------------------------------------------------------------ */
+
 :root {
-  --background: #f7f7f5;
-  --foreground: #1a1523;
+  --background: #fffaf5;
+  --wash: #fff6ef;
   --surface: #ffffff;
-  --border: #e4e1e8;
-  --primary: #4c1d3d;
-  --primary-foreground: #ffffff;
-  --accent: #c9a227;
-  --muted: #6b6572;
-  --danger: #b3261e;
-  --success: #1e6b45;
+  --ink: #1a1a1a;
+  --foreground: #1a1a1a;
+  --muted: #6b6560;
+  --line: #f0ece8;
+  --border: #f0ece8;
+  --orange-primary: #ff9e5e;
+  --orange-deep: #e07a3e;
+  --accent: #ff9e5e;
+  --accent-text: #e07a3e;
+  --up: #1e6b45;
+  --down: #b3261e;
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-wash: var(--wash);
   --color-surface: var(--surface);
-  --color-border: var(--border);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-accent: var(--accent);
+  --color-ink: var(--ink);
+  --color-foreground: var(--foreground);
   --color-muted: var(--muted);
-  --color-danger: var(--danger);
-  --color-success: var(--success);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-line: var(--line);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
+  --color-up: var(--up);
+  --color-down: var(--down);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-space-grotesk);
+  --radius-pill: 999px;
+  --radius-card: 20px;
+  --radius-md: 16px;
+  --radius-chip: 12px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #131019;
-    --foreground: #f0eef2;
-    --surface: #1d1826;
-    --border: #322b3d;
-    --primary: #d9a4c4;
-    --primary-foreground: #1a1523;
-    --accent: #e0bc4a;
-    --muted: #a49dae;
-    --danger: #ff6b62;
-    --success: #4fd393;
+    --background: #16130f;
+    --wash: #1e1a15;
+    --surface: #201b16;
+    --ink: #f3efe9;
+    --foreground: #f3efe9;
+    --muted: #a8a099;
+    --line: #322b24;
+    --border: #322b24;
+    --orange-primary: #ff9e5e;
+    --orange-deep: #ffb27f;
+    --accent: #ff9e5e;
+    --accent-text: #ffb27f;
+    --up: #4fd393;
+    --down: #ff6b62;
   }
+}
+
+:root[data-theme="dark"] {
+  --background: #16130f;
+  --wash: #1e1a15;
+  --surface: #201b16;
+  --ink: #f3efe9;
+  --foreground: #f3efe9;
+  --muted: #a8a099;
+  --line: #322b24;
+  --border: #322b24;
+  --orange-deep: #ffb27f;
+  --accent-text: #ffb27f;
+  --up: #4fd393;
+  --down: #ff6b62;
+}
+
+:root[data-theme="light"] {
+  --background: #fffaf5;
+  --wash: #fff6ef;
+  --surface: #ffffff;
+  --ink: #1a1a1a;
+  --foreground: #1a1a1a;
+  --muted: #6b6560;
+  --line: #f0ece8;
+  --border: #f0ece8;
+  --orange-deep: #e07a3e;
+  --accent-text: #e07a3e;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+}
+
+.eyebrow {
+  font-family: var(--font-space-grotesk), monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 13px;
+  color: var(--muted);
 }
 
 .input {
-  @apply w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:border-primary;
+  @apply w-full rounded-[12px] border border-border bg-surface px-3 py-2 text-[0.9rem] text-foreground outline-none transition focus:border-accent;
 }
 
 .card {
-  @apply rounded-xl border border-border bg-surface p-6 shadow-sm;
+  @apply rounded-[20px] border border-border bg-surface p-5;
 }
 
 .badge {
-  @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+
+.btn-primary {
+  @apply rounded-full bg-accent px-5 py-2 text-[0.9rem] font-semibold text-ink transition hover:brightness-95 disabled:opacity-60;
+}
+
+.btn-ghost {
+  @apply rounded-full border border-border px-4 py-2 text-[0.9rem] font-medium transition hover:border-accent disabled:opacity-60;
 }

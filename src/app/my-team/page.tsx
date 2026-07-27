@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getActiveSeason, getCurrentProfile } from "@/lib/auth";
+import MyTeamRoster, { type RosterRow } from "./MyTeamRoster";
 
 export default async function MyTeamPage() {
   const season = await getActiveSeason();
@@ -29,9 +30,15 @@ export default async function MyTeamPage() {
 
   const { data: roster } = await supabase
     .from("roster_entries")
-    .select("sold_price, players(full_name, primary_role)")
+    .select(
+      "id, sold_price, is_captain, is_vice_captain, is_keeper, batting_order, " +
+        "players(full_name, primary_role)"
+    )
     .eq("season_id", season.id)
-    .eq("team_id", team.id);
+    .eq("team_id", team.id)
+    .order("batting_order", { ascending: true, nullsFirst: false });
+
+  const rows = (roster ?? []) as unknown as RosterRow[];
 
   return (
     <div className="mx-auto w-full max-w-3xl flex-1 p-6">
@@ -40,34 +47,12 @@ export default async function MyTeamPage() {
         Purse remaining: {team.purse_remaining.toLocaleString()} /{" "}
         {team.purse_total.toLocaleString()}
       </p>
+      <p className="mt-1 text-xs text-muted">
+        Set batting order and toggle captain (C), vice-captain (VC) and
+        wicketkeeper (WK). Changes show on the public team page.
+      </p>
 
-      <div className="mt-6 overflow-x-auto rounded-xl border border-border">
-        <table className="w-full text-sm">
-          <thead className="bg-background text-left text-xs uppercase text-muted">
-            <tr>
-              <th className="px-3 py-2">Player</th>
-              <th className="px-3 py-2">Role</th>
-              <th className="px-3 py-2">Sold price</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(roster ?? []).map((r, i) => (
-              <tr key={i} className="border-t border-border">
-                <td className="px-3 py-2 font-medium">
-                  {r.players?.full_name}
-                </td>
-                <td className="px-3 py-2 text-muted">
-                  {r.players?.primary_role ?? "—"}
-                </td>
-                <td className="px-3 py-2">{r.sold_price.toLocaleString()}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {(!roster || roster.length === 0) && (
-          <p className="p-4 text-center text-muted">No players won yet.</p>
-        )}
-      </div>
+      <MyTeamRoster rows={rows} />
     </div>
   );
 }

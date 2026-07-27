@@ -9,6 +9,79 @@ export type PlayerStatus =
 
 export type AuctionStatus = "not_started" | "live" | "paused" | "ended";
 
+// ---- Scout tool (auction-day pivot) ----------------------------------------
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- used via `typeof` below
+const SCOUT_NUMERIC = [
+  "age",
+  "bat_matches",
+  "bat_innings",
+  "not_out",
+  "runs",
+  "bat_avg",
+  "bat_sr",
+  "fifties",
+  "hundreds",
+  "fours",
+  "sixes",
+  "ducks",
+  "bowl_matches",
+  "bowl_innings",
+  "overs",
+  "maidens",
+  "wickets",
+  "bowl_runs",
+  "economy",
+  "bowl_avg",
+  "bowl_sr",
+  "three_w",
+  "five_w",
+  "dot_balls",
+  "wides",
+  "noballs",
+  "catches",
+  "run_outs",
+  "stumpings",
+  "keeping_catches",
+  "bat_index",
+  "bowl_index",
+  "field_index",
+  "keep_index",
+  "overall_index",
+  "bought_price",
+  "suggested_batting_order",
+] as const;
+
+type ScoutNumericCols = { [K in (typeof SCOUT_NUMERIC)[number]]: number | null };
+
+export type ScoutPlayerRow = ScoutNumericCols & {
+  id: string;
+  full_name: string;
+  primary_role: string | null;
+  photo_url: string | null;
+  cricheroes_link: string | null;
+  email: string | null;
+  phone: string | null;
+  highest_score: string | null;
+  is_keeper: boolean;
+  is_bought: boolean;
+  utility_tag: string | null;
+  created_at: string;
+};
+
+export type ScoutPlayerInsert = Partial<ScoutNumericCols> & {
+  full_name: string;
+  primary_role?: string | null;
+  photo_url?: string | null;
+  cricheroes_link?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  highest_score?: string | null;
+  is_keeper?: boolean;
+  is_bought?: boolean;
+  utility_tag?: string | null;
+};
+
 export interface Database {
   public: {
     Tables: {
@@ -203,6 +276,10 @@ export interface Database {
           player_id: string;
           team_id: string;
           sold_price: number;
+          is_captain: boolean;
+          is_vice_captain: boolean;
+          is_keeper: boolean;
+          batting_order: number | null;
           created_at: string;
         };
         Insert: {
@@ -210,8 +287,19 @@ export interface Database {
           player_id: string;
           team_id: string;
           sold_price: number;
+          is_captain?: boolean;
+          is_vice_captain?: boolean;
+          is_keeper?: boolean;
+          batting_order?: number | null;
         };
-        Update: Partial<{ team_id: string; sold_price: number }>;
+        Update: Partial<{
+          team_id: string;
+          sold_price: number;
+          is_captain: boolean;
+          is_vice_captain: boolean;
+          is_keeper: boolean;
+          batting_order: number | null;
+        }>;
         Relationships: [
           {
             foreignKeyName: "roster_entries_player_id_fkey";
@@ -262,6 +350,12 @@ export interface Database {
           amount: number;
         };
         Update: Partial<{ amount: number }>;
+        Relationships: [];
+      };
+      scout_players: {
+        Row: ScoutPlayerRow;
+        Insert: ScoutPlayerInsert;
+        Update: Partial<ScoutPlayerInsert>;
         Relationships: [];
       };
     };

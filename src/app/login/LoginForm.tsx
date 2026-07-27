@@ -19,11 +19,11 @@ export default function LoginForm({ next }: { next: string }) {
   const action = mode === "in" ? signInAction : signUpAction;
 
   return (
-    <div className="w-full max-w-sm rounded-xl border border-border bg-surface p-8 shadow-sm">
-      <h1 className="text-xl font-semibold text-foreground">
-        Gurugram Spartans
+    <div className="card w-full max-w-sm p-8">
+      <h1 className="font-display text-xl font-bold text-foreground">
+        Spartans Scout
       </h1>
-      <p className="mt-1 text-sm text-muted">Auction Command Center</p>
+      <p className="mt-1 text-sm text-muted">Auction-day command</p>
 
       <div className="mt-6 flex gap-1 rounded-lg bg-background p-1 text-sm">
         <button
@@ -79,13 +79,13 @@ export default function LoginForm({ next }: { next: string }) {
         </Field>
 
         {state?.error && (
-          <p className="text-sm text-danger">{state.error}</p>
+          <p className="text-sm text-down">{state.error}</p>
         )}
 
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-md bg-primary py-2 text-sm font-medium text-primary-foreground transition disabled:opacity-60"
+          className="btn-primary w-full"
         >
           {pending ? "Please wait…" : mode === "in" ? "Sign in" : "Create account"}
         </button>

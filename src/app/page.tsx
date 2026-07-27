@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getCurrentProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import SpartansStars from "./SpartansStars";
 
 export default async function Home() {
   const profile = await getCurrentProfile();
@@ -24,7 +25,9 @@ export default async function Home() {
     <main className="flex flex-1 flex-col">
       {/* hero */}
       <section className="mx-auto w-full max-w-3xl px-6 pt-24 pb-16 text-center">
-        <p className="eyebrow">Gurugram Spartans</p>
+        <p className="eyebrow inline-flex items-center gap-1.5">
+          Gurugram Spartans <SpartansStars />
+        </p>
         <h1 className="mt-3 text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
           Scout smarter.
           <br />

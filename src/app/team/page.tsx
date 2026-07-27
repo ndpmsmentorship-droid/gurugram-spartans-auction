@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { HONOURS, SPARTANS_TAGLINE } from "./honours";
+import SpartansStars from "../SpartansStars";
 
 const SPARTANS_TEAM_NAME = "Gurugram Spartans";
 
@@ -98,7 +99,9 @@ export default async function TeamPage() {
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 p-6">
       <section className="rounded-2xl border border-border bg-surface p-8 text-center">
-        <h1 className="text-3xl font-bold">Gurugram Spartans</h1>
+        <h1 className="inline-flex items-center gap-2 text-3xl font-bold">
+          Gurugram Spartans <SpartansStars />
+        </h1>
         <p className="mt-2 text-muted">{SPARTANS_TAGLINE}</p>
         <div className="mt-6 flex justify-center gap-8">
           {HONOURS.map((h) => (

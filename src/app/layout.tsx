@@ -3,6 +3,7 @@ import Link from "next/link";
 import "./globals.css";
 import { getCurrentProfile } from "@/lib/auth";
 import { signOut } from "@/app/login/actions";
+import SpartansStars from "./SpartansStars";
 
 export const metadata: Metadata = {
   title: "Spartans Scout",
@@ -21,8 +22,11 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <header className="sticky top-0 z-30 border-b border-border/70 bg-[color-mix(in_srgb,var(--background)_80%,transparent)] backdrop-blur-xl">
           <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-5">
-            <Link href="/" className="text-[0.95rem] font-semibold tracking-tight">
-              Spartans Scout
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 text-[0.95rem] font-semibold tracking-tight"
+            >
+              Spartans Scout <SpartansStars />
             </Link>
             <nav className="flex items-center gap-6 text-[0.8rem] text-muted">
               {profile ? (

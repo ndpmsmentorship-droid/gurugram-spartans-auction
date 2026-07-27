@@ -5,7 +5,6 @@ import { useMemo, useState, useTransition } from "react";
 import type { RankedPlayer } from "@/lib/scout/ranks";
 import type { RiskFlag } from "@/lib/scout/analytics";
 import { markBought, unmarkBought, setRejected } from "./actions";
-import IndexBars from "./IndexBars";
 
 export type PoolPlayer = RankedPlayer<{
   id: string;
@@ -30,30 +29,32 @@ export type PoolPlayer = RankedPlayer<{
   archetype: string;
   vor: number;
   topRisk: RiskFlag | null;
+  boundary_pct: number | null;
   fit_score: number;
 };
 
-type SortKey =
-  | "fit_score"
-  | "overall_rank"
-  | "vor"
-  | "bat_rank"
-  | "bowl_rank"
-  | "field_rank"
-  | "bat_sr"
-  | "wickets"
-  | "economy";
+type Col = {
+  key: keyof PoolPlayer;
+  label: string;
+  // default sort direction when you first click the column
+  asc: boolean;
+  numeric?: boolean;
+  fmt?: (p: PoolPlayer) => string;
+};
 
-const SORTS: { key: SortKey; label: string; asc: boolean }[] = [
-  { key: "fit_score", label: "Best fit for my squad", asc: false },
-  { key: "overall_rank", label: "Overall rank", asc: true },
-  { key: "vor", label: "Value over replacement", asc: false },
-  { key: "bat_rank", label: "Batting rank", asc: true },
-  { key: "bowl_rank", label: "Bowling rank", asc: true },
-  { key: "field_rank", label: "Fielding rank", asc: true },
-  { key: "bat_sr", label: "Strike rate", asc: false },
-  { key: "wickets", label: "Wickets", asc: false },
-  { key: "economy", label: "Economy", asc: true },
+const COLS: Col[] = [
+  { key: "overall_rank", label: "#", asc: true, numeric: true, fmt: (p) => `${p.overall_rank}` },
+  { key: "fit_score", label: "Fit", asc: false, numeric: true, fmt: (p) => `${Math.round(p.fit_score)}` },
+  { key: "overall_index", label: "Overall", asc: false, numeric: true },
+  { key: "vor", label: "VOR", asc: false, numeric: true, fmt: (p) => `${p.vor >= 0 ? "+" : ""}${p.vor}` },
+  { key: "bat_index", label: "Bat", asc: false, numeric: true },
+  { key: "bowl_index", label: "Bowl", asc: false, numeric: true },
+  { key: "field_index", label: "Field", asc: false, numeric: true },
+  { key: "bat_avg", label: "Avg", asc: false, numeric: true },
+  { key: "bat_sr", label: "SR", asc: false, numeric: true },
+  { key: "boundary_pct", label: "Bnd%", asc: false, numeric: true },
+  { key: "wickets", label: "Wkts", asc: false, numeric: true },
+  { key: "economy", label: "Econ", asc: true, numeric: true },
 ];
 
 function roleGroup(role: string | null, isKeeper: boolean): string {
@@ -68,16 +69,31 @@ function roleGroup(role: string | null, isKeeper: boolean): string {
 
 const ROLE_FILTERS = ["All", "Batter", "Bowler", "All-rounder", "Keeper"];
 
+const cell = (p: PoolPlayer, c: Col): string => {
+  if (c.fmt) return c.fmt(p);
+  const v = p[c.key];
+  if (v == null) return "—";
+  return c.numeric ? `${Math.round(Number(v) * 10) / 10}` : String(v);
+};
+
 export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
   const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<SortKey>("fit_score");
+  const [sortKey, setSortKey] = useState<keyof PoolPlayer>("fit_score");
+  const [sortAsc, setSortAsc] = useState(false);
   const [role, setRole] = useState("All");
-  const [avail, setAvail] = useState<
-    "available" | "bought" | "rejected" | "all"
-  >("available");
+  const [avail, setAvail] = useState<"available" | "bought" | "rejected" | "all">(
+    "available"
+  );
+
+  function toggleSort(c: Col) {
+    if (sortKey === c.key) setSortAsc((v) => !v);
+    else {
+      setSortKey(c.key);
+      setSortAsc(c.asc);
+    }
+  }
 
   const filtered = useMemo(() => {
-    const sortDef = SORTS.find((s) => s.key === sort)!;
     return players
       .filter((p) => {
         if (query && !p.full_name.toLowerCase().includes(query.toLowerCase()))
@@ -87,36 +103,24 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
         if (avail === "available" && (p.is_bought || p.is_rejected)) return false;
         if (avail === "bought" && !p.is_bought) return false;
         if (avail === "rejected" && !p.is_rejected) return false;
-        // "all" excludes nothing except keeping rejected visible
         return true;
       })
       .sort((a, b) => {
-        const av = (a[sort] ?? (sortDef.asc ? 1e9 : -1e9)) as number;
-        const bv = (b[sort] ?? (sortDef.asc ? 1e9 : -1e9)) as number;
-        return sortDef.asc ? av - bv : bv - av;
+        const av = (a[sortKey] ?? (sortAsc ? 1e9 : -1e9)) as number;
+        const bv = (b[sortKey] ?? (sortAsc ? 1e9 : -1e9)) as number;
+        return sortAsc ? av - bv : bv - av;
       });
-  }, [players, query, sort, role, avail]);
+  }, [players, query, sortKey, sortAsc, role, avail]);
 
   return (
     <div className="mt-5">
-      <div className="sticky top-[57px] z-10 -mx-5 mb-4 flex flex-wrap gap-2 border-b border-border bg-background/95 px-5 py-3 backdrop-blur">
+      <div className="mb-3 flex flex-wrap gap-2">
         <input
           className="input max-w-[12rem]"
           placeholder="Search player…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <select
-          className="input max-w-[15rem]"
-          value={sort}
-          onChange={(e) => setSort(e.target.value as SortKey)}
-        >
-          {SORTS.map((s) => (
-            <option key={s.key} value={s.key}>
-              {s.label}
-            </option>
-          ))}
-        </select>
         <select
           className="input max-w-[9rem]"
           value={role}
@@ -138,126 +142,118 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
           <option value="rejected">Rejected</option>
           <option value="all">All</option>
         </select>
+        <span className="self-center text-xs text-muted">{filtered.length} shown</span>
       </div>
 
-      <p className="mb-3 text-xs text-muted">{filtered.length} shown</p>
-
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((p) => (
-          <PlayerCard key={p.id} player={p} showFit={sort === "fit_score"} />
-        ))}
+      <div className="overflow-x-auto rounded-[16px] border border-border">
+        <table className="w-full min-w-[820px] text-sm">
+          <thead className="bg-wash text-left">
+            <tr>
+              <th className="sticky left-0 z-10 bg-wash px-3 py-2 font-medium">
+                Player
+              </th>
+              {COLS.map((c) => (
+                <th
+                  key={c.key as string}
+                  onClick={() => toggleSort(c)}
+                  className={`cursor-pointer select-none whitespace-nowrap px-2 py-2 font-medium hover:text-accent-text ${
+                    c.numeric ? "text-right" : ""
+                  } ${sortKey === c.key ? "text-accent-text" : ""}`}
+                  title={`Sort by ${c.label}`}
+                >
+                  {c.label}
+                  {sortKey === c.key ? (sortAsc ? " ↑" : " ↓") : ""}
+                </th>
+              ))}
+              <th className="px-2 py-2 text-right font-medium">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((p) => (
+              <Row key={p.id} p={p} />
+            ))}
+          </tbody>
+        </table>
+        {filtered.length === 0 && (
+          <p className="p-6 text-center text-muted">No players match.</p>
+        )}
       </div>
-      {filtered.length === 0 && (
-        <p className="mt-8 text-center text-muted">No players match.</p>
-      )}
     </div>
   );
 }
 
-function PlayerCard({ player, showFit }: { player: PoolPlayer; showFit: boolean }) {
+function Row({ p }: { p: PoolPlayer }) {
   const [buying, setBuying] = useState(false);
   const [price, setPrice] = useState("");
   const [pending, startTransition] = useTransition();
 
   function confirmBuy() {
-    const p = Number(price);
-    if (!Number.isFinite(p) || p <= 0) return;
+    const val = Number(price);
+    if (!Number.isFinite(val) || val <= 0) return;
     startTransition(async () => {
-      await markBought(player.id, p);
+      await markBought(p.id, val);
       setBuying(false);
       setPrice("");
     });
   }
 
+  const rowTint = p.is_bought
+    ? "bg-wash"
+    : p.is_rejected
+      ? "opacity-50"
+      : "";
+
   return (
-    <div
-      className={`card ${player.is_bought ? "border-accent/50 bg-wash" : ""} ${
-        player.is_rejected ? "opacity-60" : ""
-      }`}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <Link href={`/scout/${player.id}`} className="hover:text-accent-text">
-            <p className="truncate font-display font-semibold">{player.full_name}</p>
-          </Link>
-          <p className="flex items-center gap-2 text-xs text-muted">
-            <span>{player.archetype}</span>
-            {player.cricheroes_link && (
-              <a
-                href={player.cricheroes_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-accent-text hover:underline"
-              >
-                CricHeroes ↗
-              </a>
-            )}
-          </p>
-        </div>
-        <div className="shrink-0 text-right">
-          <span className="badge bg-ink text-[var(--surface)]">
-            #{player.overall_rank}
-          </span>
-          <p className="mt-0.5 font-mono text-[10px] text-muted">
-            {showFit
-              ? `fit ${Math.round(player.fit_score)}`
-              : `VOR ${player.vor >= 0 ? "+" : ""}${player.vor}`}
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-3">
-        <IndexBars
-          bat={player.bat_index}
-          bowl={player.bowl_index}
-          field={player.field_index}
-          keep={player.keep_index}
-        />
-      </div>
-
-      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted">
-        <span>Avg {player.bat_avg ?? "—"}</span>
-        <span>SR {player.bat_sr ?? "—"}</span>
-        <span>Wkts {player.wickets ?? "—"}</span>
-        <span>Econ {player.economy ?? "—"}</span>
-        {player.topRisk && (
-          <span
-            className={`badge ${
-              player.topRisk.level === "red"
-                ? "bg-down/15 text-down"
-                : "bg-accent/20 text-accent-text"
-            }`}
-          >
-            {player.topRisk.label}
-          </span>
-        )}
-      </div>
-
-      <div className="mt-4">
-        {player.is_rejected ? (
-          <div className="flex items-center justify-between">
-            <span className="badge bg-down/15 text-down">Disqualified</span>
-            <button
-              onClick={() =>
-                startTransition(async () => {
-                  await setRejected(player.id, false);
-                })
+    <tr className={`border-t border-border ${rowTint}`}>
+      <td className="sticky left-0 z-10 bg-[var(--surface)] px-3 py-2">
+        <Link href={`/scout/${p.id}`} className="font-medium hover:text-accent-text">
+          {p.full_name}
+        </Link>
+        <span className="block text-[11px] text-muted">
+          {p.archetype}
+          {p.topRisk && (
+            <span
+              className={
+                p.topRisk.level === "red" ? "ml-1 text-down" : "ml-1 text-accent-text"
               }
-              disabled={pending}
-              className="text-xs text-muted hover:text-accent-text"
             >
-              Restore
-            </button>
-          </div>
-        ) : player.is_bought ? (
-          <div className="flex items-center justify-between">
+              · {p.topRisk.label}
+            </span>
+          )}
+        </span>
+      </td>
+      {COLS.map((c) => (
+        <td
+          key={c.key as string}
+          className={`whitespace-nowrap px-2 py-2 tabular-nums ${
+            c.numeric ? "text-right" : ""
+          } ${c.key === "boundary_pct" ? "font-medium text-accent-text" : ""}`}
+        >
+          {cell(p, c)}
+        </td>
+      ))}
+      <td className="whitespace-nowrap px-2 py-2 text-right">
+        {p.is_rejected ? (
+          <button
+            onClick={() =>
+              startTransition(async () => {
+                await setRejected(p.id, false);
+              })
+            }
+            disabled={pending}
+            className="text-xs text-muted hover:text-accent-text"
+          >
+            Restore
+          </button>
+        ) : p.is_bought ? (
+          <span className="inline-flex items-center gap-2">
             <span className="badge bg-accent text-ink">
-              Bought · {player.bought_price?.toLocaleString()}
+              {p.bought_price?.toLocaleString()}
             </span>
             <button
               onClick={() =>
                 startTransition(async () => {
-                  await unmarkBought(player.id);
+                  await unmarkBought(p.id);
                 })
               }
               disabled={pending}
@@ -265,48 +261,47 @@ function PlayerCard({ player, showFit }: { player: PoolPlayer; showFit: boolean 
             >
               Undo
             </button>
-          </div>
+          </span>
         ) : buying ? (
-          <div className="flex gap-2">
+          <span className="inline-flex items-center gap-1">
             <input
               type="number"
               autoFocus
-              className="input w-24"
-              placeholder="Price"
+              className="input w-20 py-1"
+              placeholder="₹"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && confirmBuy()}
             />
-            <button onClick={confirmBuy} disabled={pending} className="btn-primary">
-              Buy
+            <button onClick={confirmBuy} disabled={pending} className="text-xs text-accent-text">
+              ✓
             </button>
-            <button onClick={() => setBuying(false)} className="btn-ghost">
+            <button onClick={() => setBuying(false)} className="text-xs text-muted">
               ✕
             </button>
-          </div>
+          </span>
         ) : (
-          <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-2">
             <button
               onClick={() => setBuying(true)}
-              className="btn-ghost flex-1"
+              className="text-xs font-medium text-accent-text hover:underline"
             >
-              Mark bought
+              Buy
             </button>
             <button
               onClick={() =>
                 startTransition(async () => {
-                  await setRejected(player.id, true);
+                  await setRejected(p.id, true);
                 })
               }
               disabled={pending}
-              title="Disqualify / remove from pool"
-              className="rounded-full border border-border px-3 py-2 text-sm text-muted hover:border-down hover:text-down"
+              className="text-xs text-muted hover:text-down"
             >
               Reject
             </button>
-          </div>
+          </span>
         )}
-      </div>
-    </div>
+      </td>
+    </tr>
   );
 }

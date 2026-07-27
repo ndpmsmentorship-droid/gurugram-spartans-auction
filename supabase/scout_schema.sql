@@ -64,9 +64,14 @@ create table if not exists scout_players (
 
   -- our auction-day data
   is_bought boolean not null default false,
+  is_rejected boolean not null default false,
   bought_price numeric,
   suggested_batting_order int,
   utility_tag text,
+
+  -- scouting notes / clips
+  scouting_clip_url text,
+  scouting_note text,
 
   created_at timestamptz not null default now()
 );

@@ -3,6 +3,77 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { utilityTag, type RawStats, type IndexScores } from "@/lib/scout/rankings";
+import { recomputeAllIndices } from "@/lib/scout/recompute";
+import type { ScoutPlayerInsert } from "@/lib/supabase/types";
+
+// Editable stat/identity fields for the manual + screenshot flows.
+export type StatPatch = Partial<
+  Pick<
+    ScoutPlayerInsert,
+    | "primary_role"
+    | "age"
+    | "is_keeper"
+    | "bat_matches"
+    | "bat_innings"
+    | "not_out"
+    | "runs"
+    | "bat_avg"
+    | "bat_sr"
+    | "fifties"
+    | "hundreds"
+    | "fours"
+    | "sixes"
+    | "ducks"
+    | "bowl_matches"
+    | "overs"
+    | "wickets"
+    | "economy"
+    | "bowl_avg"
+    | "bowl_sr"
+    | "dot_balls"
+    | "five_w"
+    | "catches"
+    | "run_outs"
+    | "stumpings"
+    | "keeping_catches"
+  >
+>;
+
+// Save edited stats for one player, then recompute pool-wide indices/ranks.
+export async function updatePlayerStats(playerId: string, patch: StatPatch) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("scout_players")
+    .update(patch)
+    .eq("id", playerId);
+  if (error) return { error: error.message };
+
+  try {
+    await recomputeAllIndices();
+  } catch (e) {
+    return { error: `Saved, but re-ranking failed: ${(e as Error).message}` };
+  }
+
+  revalidatePath("/scout");
+  revalidatePath(`/scout/${playerId}`);
+  revalidatePath("/squad");
+  return { error: null };
+}
+
+export async function setScoutingClip(
+  playerId: string,
+  clipUrl: string | null,
+  note: string | null
+) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("scout_players")
+    .update({ scouting_clip_url: clipUrl, scouting_note: note })
+    .eq("id", playerId);
+  if (error) return { error: error.message };
+  revalidatePath(`/scout/${playerId}`);
+  return { error: null };
+}
 
 // Mark a player bought at a price. Derives a utility tag and a suggested batting
 // order (bought batters ranked by bat_index -> 1..N) so the squad self-assembles.
@@ -78,6 +149,23 @@ async function recomputeBattingOrder() {
       .update({ suggested_batting_order: i + 1 })
       .eq("id", ordered[i].id);
   }
+}
+
+// Disqualify a player (removed from the board / never a bid target) or restore.
+export async function setRejected(playerId: string, rejected: boolean) {
+  const supabase = await createClient();
+  const update = rejected
+    ? { is_rejected: true, is_bought: false, bought_price: null }
+    : { is_rejected: false };
+  const { error } = await supabase
+    .from("scout_players")
+    .update(update)
+    .eq("id", playerId);
+  if (error) return { error: error.message };
+  revalidatePath("/scout");
+  revalidatePath("/squad");
+  revalidatePath("/");
+  return { error: null };
 }
 
 export async function setUtilityTag(playerId: string, tag: string) {

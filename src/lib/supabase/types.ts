@@ -65,11 +65,15 @@ export type ScoutPlayerRow = ScoutNumericCols & {
   highest_score: string | null;
   is_keeper: boolean;
   is_bought: boolean;
+  is_rejected: boolean;
   utility_tag: string | null;
+  scouting_clip_url: string | null;
+  scouting_note: string | null;
   created_at: string;
 };
 
 export type ScoutPlayerInsert = Partial<ScoutNumericCols> & {
+  id?: string;
   full_name: string;
   primary_role?: string | null;
   photo_url?: string | null;
@@ -79,7 +83,10 @@ export type ScoutPlayerInsert = Partial<ScoutNumericCols> & {
   highest_score?: string | null;
   is_keeper?: boolean;
   is_bought?: boolean;
+  is_rejected?: boolean;
   utility_tag?: string | null;
+  scouting_clip_url?: string | null;
+  scouting_note?: string | null;
 };
 
 export interface Database {

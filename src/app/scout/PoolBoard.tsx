@@ -4,15 +4,17 @@ import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import type { RankedPlayer } from "@/lib/scout/ranks";
 import type { RiskFlag } from "@/lib/scout/analytics";
-import { markBought, unmarkBought } from "./actions";
+import { markBought, unmarkBought, setRejected } from "./actions";
 import IndexBars from "./IndexBars";
 
 export type PoolPlayer = RankedPlayer<{
   id: string;
   full_name: string;
   primary_role: string | null;
+  cricheroes_link: string | null;
   is_keeper: boolean;
   is_bought: boolean;
+  is_rejected: boolean;
   bought_price: number | null;
   bat_index: number | null;
   bowl_index: number | null;
@@ -70,7 +72,9 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("fit_score");
   const [role, setRole] = useState("All");
-  const [avail, setAvail] = useState<"all" | "available" | "bought">("available");
+  const [avail, setAvail] = useState<
+    "available" | "bought" | "rejected" | "all"
+  >("available");
 
   const filtered = useMemo(() => {
     const sortDef = SORTS.find((s) => s.key === sort)!;
@@ -80,8 +84,10 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
           return false;
         if (role !== "All" && roleGroup(p.primary_role, p.is_keeper) !== role)
           return false;
-        if (avail === "available" && p.is_bought) return false;
+        if (avail === "available" && (p.is_bought || p.is_rejected)) return false;
         if (avail === "bought" && !p.is_bought) return false;
+        if (avail === "rejected" && !p.is_rejected) return false;
+        // "all" excludes nothing except keeping rejected visible
         return true;
       })
       .sort((a, b) => {
@@ -129,6 +135,7 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
         >
           <option value="available">Available</option>
           <option value="bought">Bought</option>
+          <option value="rejected">Rejected</option>
           <option value="all">All</option>
         </select>
       </div>
@@ -163,12 +170,30 @@ function PlayerCard({ player, showFit }: { player: PoolPlayer; showFit: boolean 
   }
 
   return (
-    <div className={`card ${player.is_bought ? "border-accent/50 bg-wash" : ""}`}>
+    <div
+      className={`card ${player.is_bought ? "border-accent/50 bg-wash" : ""} ${
+        player.is_rejected ? "opacity-60" : ""
+      }`}
+    >
       <div className="flex items-start justify-between gap-2">
-        <Link href={`/scout/${player.id}`} className="min-w-0 hover:text-accent-text">
-          <p className="truncate font-display font-semibold">{player.full_name}</p>
-          <p className="text-xs text-muted">{player.archetype}</p>
-        </Link>
+        <div className="min-w-0">
+          <Link href={`/scout/${player.id}`} className="hover:text-accent-text">
+            <p className="truncate font-display font-semibold">{player.full_name}</p>
+          </Link>
+          <p className="flex items-center gap-2 text-xs text-muted">
+            <span>{player.archetype}</span>
+            {player.cricheroes_link && (
+              <a
+                href={player.cricheroes_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent-text hover:underline"
+              >
+                CricHeroes ↗
+              </a>
+            )}
+          </p>
+        </div>
         <div className="shrink-0 text-right">
           <span className="badge bg-ink text-[var(--surface)]">
             #{player.overall_rank}
@@ -209,7 +234,22 @@ function PlayerCard({ player, showFit }: { player: PoolPlayer; showFit: boolean 
       </div>
 
       <div className="mt-4">
-        {player.is_bought ? (
+        {player.is_rejected ? (
+          <div className="flex items-center justify-between">
+            <span className="badge bg-down/15 text-down">Disqualified</span>
+            <button
+              onClick={() =>
+                startTransition(async () => {
+                  await setRejected(player.id, false);
+                })
+              }
+              disabled={pending}
+              className="text-xs text-muted hover:text-accent-text"
+            >
+              Restore
+            </button>
+          </div>
+        ) : player.is_bought ? (
           <div className="flex items-center justify-between">
             <span className="badge bg-accent text-ink">
               Bought · {player.bought_price?.toLocaleString()}
@@ -245,9 +285,26 @@ function PlayerCard({ player, showFit }: { player: PoolPlayer; showFit: boolean 
             </button>
           </div>
         ) : (
-          <button onClick={() => setBuying(true)} className="btn-ghost w-full">
-            Mark bought
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setBuying(true)}
+              className="btn-ghost flex-1"
+            >
+              Mark bought
+            </button>
+            <button
+              onClick={() =>
+                startTransition(async () => {
+                  await setRejected(player.id, true);
+                })
+              }
+              disabled={pending}
+              title="Disqualify / remove from pool"
+              className="rounded-full border border-border px-3 py-2 text-sm text-muted hover:border-down hover:text-down"
+            >
+              Reject
+            </button>
+          </div>
         )}
       </div>
     </div>

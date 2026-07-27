@@ -7,6 +7,7 @@ import { deriveMetrics, type RawStats } from "@/lib/scout/rankings";
 import type { ScoutPlayerRow } from "@/lib/supabase/types";
 import Radar from "../Radar";
 import BuyControl from "./BuyControl";
+import PlayerWorkshop from "./PlayerWorkshop";
 
 const ACCENT = "#e07a3e";
 
@@ -54,6 +55,16 @@ export default async function PlayerDetailPage({
           <h1 className="mt-1 font-display text-3xl font-bold">
             {player.full_name}
           </h1>
+          {player.cricheroes_link && (
+            <a
+              href={player.cricheroes_link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 inline-block text-sm text-accent-text hover:underline"
+            >
+              View CricHeroes profile ↗
+            </a>
+          )}
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className="badge bg-wash text-accent-text">{a.archetype}</span>
             {a.riskFlags.map((f) => (
@@ -139,9 +150,33 @@ export default async function PlayerDetailPage({
         <BuyControl
           playerId={player.id}
           isBought={player.is_bought}
+          isRejected={player.is_rejected}
           boughtPrice={player.bought_price}
         />
       </section>
+
+      {/* scouting clip / note (if set) */}
+      {(player.scouting_clip_url || player.scouting_note) && (
+        <section className="card mt-6">
+          <p className="eyebrow mb-2">Scouting note</p>
+          {player.scouting_note && (
+            <p className="text-sm">{player.scouting_note}</p>
+          )}
+          {player.scouting_clip_url && (
+            <a
+              href={player.scouting_clip_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-block text-sm text-accent-text hover:underline"
+            >
+              Watch clip ↗
+            </a>
+          )}
+        </section>
+      )}
+
+      {/* update data: screenshot / manual / clip */}
+      <PlayerWorkshop player={player} />
 
       {/* similar players */}
       <section className="mt-6">

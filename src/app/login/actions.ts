@@ -11,7 +11,7 @@ export async function signIn(
 ): Promise<AuthActionState> {
   const email = String(formData.get("email") || "");
   const password = String(formData.get("password") || "");
-  const next = String(formData.get("next") || "/players");
+  const next = String(formData.get("next") || "/scout");
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -36,7 +36,7 @@ export async function signUp(
   });
   if (error) return { error: error.message };
 
-  redirect("/players");
+  redirect("/scout");
 }
 
 export async function signOut() {

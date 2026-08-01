@@ -1,22 +1,15 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { signIn, signUp, type AuthActionState } from "./actions";
+import { useActionState } from "react";
+import { signIn, type AuthActionState } from "./actions";
 
+// Login-only. Accounts are created by an admin (no public sign-up), so a few
+// trusted people can get in and nobody else.
 export default function LoginForm({ next }: { next: string }) {
-  const [mode, setMode] = useState<"in" | "up">("in");
-  const [signInState, signInAction, signInPending] = useActionState<
-    AuthActionState,
-    FormData
-  >(signIn, null);
-  const [signUpState, signUpAction, signUpPending] = useActionState<
-    AuthActionState,
-    FormData
-  >(signUp, null);
-
-  const state = mode === "in" ? signInState : signUpState;
-  const pending = mode === "in" ? signInPending : signUpPending;
-  const action = mode === "in" ? signInAction : signUpAction;
+  const [state, action, pending] = useActionState<AuthActionState, FormData>(
+    signIn,
+    null
+  );
 
   return (
     <div className="card w-full max-w-sm p-8">
@@ -25,39 +18,8 @@ export default function LoginForm({ next }: { next: string }) {
       </h1>
       <p className="mt-1 text-sm text-muted">Auction-day command</p>
 
-      <div className="mt-6 flex gap-1 rounded-lg bg-background p-1 text-sm">
-        <button
-          type="button"
-          onClick={() => setMode("in")}
-          className={`flex-1 rounded-md py-1.5 transition ${
-            mode === "in" ? "bg-surface shadow-sm font-medium" : "text-muted"
-          }`}
-        >
-          Sign in
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode("up")}
-          className={`flex-1 rounded-md py-1.5 transition ${
-            mode === "up" ? "bg-surface shadow-sm font-medium" : "text-muted"
-          }`}
-        >
-          Create account
-        </button>
-      </div>
-
       <form action={action} className="mt-6 space-y-4">
         <input type="hidden" name="next" value={next} />
-        {mode === "up" && (
-          <Field label="Name">
-            <input
-              name="display_name"
-              required
-              className="input"
-              placeholder="Team owner name"
-            />
-          </Field>
-        )}
         <Field label="Email">
           <input
             type="email"
@@ -78,18 +40,16 @@ export default function LoginForm({ next }: { next: string }) {
           />
         </Field>
 
-        {state?.error && (
-          <p className="text-sm text-down">{state.error}</p>
-        )}
+        {state?.error && <p className="text-sm text-down">{state.error}</p>}
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="btn-primary w-full"
-        >
-          {pending ? "Please wait…" : mode === "in" ? "Sign in" : "Create account"}
+        <button type="submit" disabled={pending} className="btn-primary w-full">
+          {pending ? "Please wait…" : "Sign in"}
         </button>
       </form>
+
+      <p className="mt-4 text-xs text-muted">
+        Access is invite-only. Ask the admin to set you up.
+      </p>
     </div>
   );
 }

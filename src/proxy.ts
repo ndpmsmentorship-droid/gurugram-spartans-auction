@@ -43,7 +43,9 @@ export async function proxy(request: NextRequest) {
   );
 
   if (isProtected && !user) {
-    const loginUrl = new URL("/login", request.url);
+    // clone() keeps the deployment's basePath (/spartansscout) on the redirect
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/login";
     loginUrl.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
   }

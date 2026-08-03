@@ -1,5 +1,5 @@
 import SpartansStars from "@/app/SpartansStars";
-import SquadBuilder from "./SquadBuilder";
+import SquadBuilder, { type Signing } from "./SquadBuilder";
 import { RETAINED, SQUAD_RULES, type RetainedPlayer } from "./retained";
 
 const GOLD = "#E3A81B";
@@ -121,7 +121,11 @@ function PlayerCard({ p }: { p: RetainedPlayer }) {
             {p.isGold ? (
               <span
                 className="badge"
-                style={{ background: `linear-gradient(145deg, ${GOLD_HI}, ${GOLD})`, color: "#3a2a00" }}
+                style={{
+                  background: "linear-gradient(135deg, #FCE7A1 0%, #F6CB49 45%, #E3A81B 100%)",
+                  color: "#5a4106",
+                  boxShadow: "inset 0 0 0 1px rgba(180,130,15,0.35), 0 1px 2px rgba(0,0,0,0.12)",
+                }}
               >
                 ★ Gold
               </span>
@@ -172,7 +176,7 @@ function PlayerCard({ p }: { p: RetainedPlayer }) {
 
 /* ---------- main ---------- */
 
-export default function RetainedShowcase() {
+export default function RetainedShowcase({ signings = [] }: { signings?: Signing[] }) {
   const aUsed = RETAINED.filter((p) => p.tier === "A").length;
   const aNames = RETAINED.filter((p) => p.tier === "A").map((p) => p.name).join(", ");
   const retainedCount = RETAINED.length;
@@ -255,6 +259,7 @@ export default function RetainedShowcase() {
             isKeeper: p.isKeeper,
             isGold: p.isGold,
           }))}
+          signings={signings}
           defaultBudget={SQUAD_RULES.budget}
           squadSize={SQUAD_RULES.squadSize}
           maxSquad={SQUAD_RULES.maxSquad}

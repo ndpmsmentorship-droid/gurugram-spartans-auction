@@ -68,6 +68,7 @@ export const RETAINED: RetainedPlayer[] = [
     "name": "Kanishk Sheel",
     "tier": "Legend",
     "secondTier": "B",
+    "isGold": true,
     "role": "Off Break",
     "order": "No. 3",
     "slot": 3,

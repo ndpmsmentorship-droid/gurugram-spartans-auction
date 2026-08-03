@@ -37,9 +37,18 @@ export default async function SquadPage() {
           photo_url: p.photo_url,
         }));
 
+  const signings = players.map((p) => ({
+    id: p.id,
+    name: p.full_name,
+    role: p.primary_role,
+    isKeeper: p.is_keeper,
+    order: p.suggested_batting_order,
+    price: p.bought_price,
+  }));
+
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-8">
-      <RetainedShowcase />
+      <RetainedShowcase signings={signings} />
 
       <MarqueeCards players={marquee} />
 

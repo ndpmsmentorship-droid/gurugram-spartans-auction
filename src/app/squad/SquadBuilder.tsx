@@ -18,10 +18,22 @@ export type SquadPursePlayer = {
   isGold?: boolean;
 };
 
+// A player bought at the auction — fills the squad/bench positions the retained
+// core doesn't occupy, ordered by their suggested batting order.
+export type Signing = {
+  id: string;
+  name: string;
+  role: string | null;
+  isKeeper: boolean;
+  order: number | null;
+  price: number | null;
+};
+
 const inr = (n: number) => "₹" + Math.round(n).toLocaleString("en-IN");
 
 export default function SquadBuilder({
   players,
+  signings = [],
   defaultBudget,
   squadSize,
   maxSquad,
@@ -29,6 +41,7 @@ export default function SquadBuilder({
   children,
 }: {
   players: SquadPursePlayer[];
+  signings?: Signing[];
   defaultBudget: number;
   squadSize: number; // positions shown in the full list (rest are bench cards)
   maxSquad: number;
@@ -109,6 +122,20 @@ export default function SquadBuilder({
   // place each retained player at their (editable) batting-order position
   const byPosition = new Map<number, SquadPursePlayer>();
   for (const p of players) byPosition.set(orders[p.id] ?? p.order, p);
+
+  // fill the remaining slots (1..maxSquad) with auction signings, in order of
+  // their suggested batting order — so the squad + bench reflect who's bought.
+  const retainedIds = new Set(players.map((p) => p.id));
+  const signingByPosition = new Map<number, Signing>();
+  const sortedSignings = [...signings]
+    .filter((s) => !retainedIds.has(s.id))
+    .sort((a, b) => (a.order ?? 1e9) - (b.order ?? 1e9));
+  let si = 0;
+  for (let pos = 1; pos <= maxSquad && si < sortedSignings.length; pos++) {
+    if (byPosition.has(pos)) continue;
+    signingByPosition.set(pos, sortedSignings[si++]);
+  }
+
   const listPositions = Array.from({ length: squadSize }, (_, i) => i + 1);
   const benchPositions = Array.from(
     { length: Math.max(0, maxSquad - squadSize) },
@@ -171,18 +198,19 @@ export default function SquadBuilder({
           <ol className="flex flex-col">
             {listPositions.map((pos) => {
               const player = byPosition.get(pos) ?? null;
+              const signing = signingByPosition.get(pos) ?? null;
               const top = pos <= 6;
               return (
                 <li
                   key={pos}
                   className={`flex items-center gap-3 rounded-[12px] px-2 py-2 ${
-                    player ? "" : "opacity-70"
+                    player || signing ? "" : "opacity-70"
                   } ${pos % 2 === 0 ? "bg-wash/60" : ""}`}
                 >
                   <span
                     className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-display text-[0.85rem] font-bold tabular-nums"
                     style={
-                      player && top
+                      (player || signing) && top
                         ? { background: WARM, color: "#fff" }
                         : {
                             background: "var(--wash)",
@@ -234,6 +262,36 @@ export default function SquadBuilder({
                         {inr(costs[player.id] ?? 0)}
                       </span>
                     </>
+                  ) : signing ? (
+                    <>
+                      <div className="flex min-w-0 flex-1 flex-col">
+                        <div className="flex items-center gap-1.5">
+                          <span className="truncate font-semibold">{signing.name}</span>
+                          <span
+                            className="badge shrink-0"
+                            style={{ background: "var(--accent)", color: "var(--ink)" }}
+                          >
+                            bought
+                          </span>
+                          {signing.isKeeper ? (
+                            <span
+                              className="badge shrink-0"
+                              style={{ background: "var(--wash)", color: "var(--muted)" }}
+                            >
+                              WK
+                            </span>
+                          ) : null}
+                        </div>
+                        <span className="truncate text-[0.72rem] text-muted">
+                          {signing.role ?? "—"}
+                        </span>
+                      </div>
+                      {signing.price != null ? (
+                        <span className="shrink-0 rounded-full bg-wash px-2.5 py-1 text-[0.72rem] font-semibold tabular-nums text-muted">
+                          {inr(signing.price)}
+                        </span>
+                      ) : null}
+                    </>
                   ) : (
                     <span className="flex-1 text-[0.85rem] italic text-muted">
                       Open — target at auction
@@ -250,12 +308,15 @@ export default function SquadBuilder({
               <p className="eyebrow pb-2">
                 Bench · friends{" "}
                 <span className="font-normal normal-case tracking-normal text-muted">
-                  — buy, but won&rsquo;t make the {squadSize}
+                  — auction buys beyond the top {squadSize}
                 </span>
               </p>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {benchPositions.map((pos) => {
                   const player = byPosition.get(pos) ?? null;
+                  const signing = signingByPosition.get(pos) ?? null;
+                  const name = player?.name ?? signing?.name ?? null;
+                  const role = player?.role ?? signing?.role ?? null;
                   return (
                     <div
                       key={pos}
@@ -264,10 +325,10 @@ export default function SquadBuilder({
                       <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-muted">
                         Slot {pos}
                       </span>
-                      {player ? (
+                      {name ? (
                         <>
-                          <span className="truncate text-sm font-semibold">{player.name}</span>
-                          <span className="truncate text-[0.68rem] text-muted">{player.role}</span>
+                          <span className="truncate text-sm font-semibold">{name}</span>
+                          <span className="truncate text-[0.68rem] text-muted">{role ?? "—"}</span>
                         </>
                       ) : (
                         <span className="text-[0.8rem] italic text-muted">Open</span>

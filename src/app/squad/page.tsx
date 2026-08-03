@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { resolveCategory } from "@/lib/scout/category";
+import { rankPlayers } from "@/lib/scout/ranks";
 import type { ScoutPlayerRow } from "@/lib/supabase/types";
 import SquadList, { type SquadPlayer } from "./SquadList";
 import RetainedShowcase from "./RetainedShowcase";
@@ -19,24 +20,22 @@ export default async function SquadPage() {
   const players = error ? [] : ((data ?? []) as unknown as SquadPlayer[]);
   const totalSpent = players.reduce((sum, p) => sum + (p.bought_price ?? 0), 0);
 
-  // Marquee ("must buy") targets flagged from the pool. Guarded so the page
-  // still renders if the is_marquee column hasn't been added yet.
-  const { data: mData, error: mError } = await supabase
-    .from("scout_players")
-    .select("*")
-    .eq("is_marquee", true)
-    .order("overall_index", { ascending: false, nullsFirst: false });
-  const marquee: MarqueePlayer[] =
-    mError || !mData
-      ? []
-      : (mData as ScoutPlayerRow[]).map((p) => ({
-          id: p.id,
-          full_name: p.full_name,
-          category: resolveCategory(p).category,
-          primary_role: p.primary_role,
-          overall_index: p.overall_index,
-          photo_url: p.photo_url,
-        }));
+  // Rank the whole pool (ordinal, 1 = best) and surface marquee ("must buy")
+  // targets. Guarded so the page still renders if is_marquee isn't there yet.
+  const { data: poolData } = await supabase.from("scout_players").select("*");
+  const pool = (poolData ?? []) as ScoutPlayerRow[];
+  const rankMap = new Map(rankPlayers(pool).map((p) => [p.id, p.overall_rank]));
+  const marquee: MarqueePlayer[] = pool
+    .filter((p) => p.is_marquee)
+    .sort((a, b) => (b.overall_index ?? -1) - (a.overall_index ?? -1))
+    .map((p) => ({
+      id: p.id,
+      full_name: p.full_name,
+      category: resolveCategory(p).category,
+      primary_role: p.primary_role,
+      overall_rank: rankMap.get(p.id) ?? null,
+      photo_url: p.photo_url,
+    }));
 
   const signings = players.map((p) => ({
     id: p.id,

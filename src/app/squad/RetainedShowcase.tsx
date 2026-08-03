@@ -120,6 +120,14 @@ function PlayerCard({ p }: { p: RetainedPlayer }) {
             <span className="badge" style={{ background: tier.bg, color: tier.fg }}>
               {tier.label}
             </span>
+            {p.secondTier ? (
+              <span
+                className="badge"
+                style={{ background: TIER_STYLE[p.secondTier].bg, color: TIER_STYLE[p.secondTier].fg }}
+              >
+                {TIER_STYLE[p.secondTier].label}
+              </span>
+            ) : null}
             <span className="badge" style={{ background: "var(--wash)", color: "var(--muted)" }}>
               {p.order}
             </span>

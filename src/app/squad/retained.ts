@@ -7,6 +7,7 @@ export type RetainedPlayer = {
   id: string;
   name: string;
   tier: Tier;
+  secondTier?: Tier;
   role: string;
   order: string;
   slot: number;
@@ -56,6 +57,7 @@ export const RETAINED: RetainedPlayer[] = [
     "id": "13619012",
     "name": "Kanishk Sheel",
     "tier": "Legend",
+    "secondTier": "B",
     "role": "blank",
     "order": "No. 3",
     "slot": 3,

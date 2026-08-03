@@ -90,6 +90,7 @@ function rankTier(rank: number | null | undefined): RankTier | null {
 // which columns get the rank-tier colour code, and the rank they key off
 const TIER_COL: Partial<Record<keyof PoolPlayer, keyof PoolPlayer>> = {
   bat_index: "bat_rank",
+  bowl_index: "bowl_rank",
   field_index: "field_rank",
 };
 
@@ -196,7 +197,7 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
       </div>
 
       <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[0.72rem] text-muted">
-        <span className="font-medium">Bat &amp; Field rank:</span>
+        <span className="font-medium">Colour code — Bat, Bowl &amp; Field rank:</span>
         {(["elite", "strong", "rest"] as const).map((k) => (
           <span key={k} className="inline-flex items-center gap-1.5">
             <span

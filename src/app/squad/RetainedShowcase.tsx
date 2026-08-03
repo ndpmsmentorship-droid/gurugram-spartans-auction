@@ -1,5 +1,5 @@
 import SpartansStars from "@/app/SpartansStars";
-import SquadPurse from "./SquadPurse";
+import SquadBuilder from "./SquadBuilder";
 import { RETAINED, SQUAD_RULES, type RetainedPlayer } from "./retained";
 
 const GOLD = "#E3A81B";
@@ -234,9 +234,9 @@ export default function RetainedShowcase() {
         </div>
       </div>
 
-      {/* combined: probable batting order + editable purse / retention */}
-      <div className="mt-3">
-        <SquadPurse
+      {/* refined list (top) · player cards (middle) · data-entry form (bottom) */}
+      <div className="mt-5">
+        <SquadBuilder
           players={RETAINED.map((p) => ({
             id: p.id,
             name: p.name,
@@ -249,13 +249,13 @@ export default function RetainedShowcase() {
           defaultBudget={SQUAD_RULES.budget}
           maxSquad={SQUAD_RULES.maxSquad}
           retainedCount={RETAINED.length}
-        />
-      </div>
-
-      <div className="mt-6 grid gap-3 md:grid-cols-2">
-        {RETAINED.map((p) => (
-          <PlayerCard key={p.id} p={p} />
-        ))}
+        >
+          <div className="grid gap-3 md:grid-cols-2">
+            {RETAINED.map((p) => (
+              <PlayerCard key={p.id} p={p} />
+            ))}
+          </div>
+        </SquadBuilder>
       </div>
     </section>
   );

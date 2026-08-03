@@ -195,6 +195,20 @@ export async function setCategory(playerId: string, category: string | null) {
   return { error: null };
 }
 
+// Flag/unflag a player as a marquee ("must buy") target. Shown as a gold card
+// on the squad page. Requires the is_marquee column (supabase/scout_category.sql).
+export async function setMarquee(playerId: string, marquee: boolean) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("scout_players")
+    .update({ is_marquee: marquee })
+    .eq("id", playerId);
+  if (error) return { error: error.message };
+  revalidatePath("/scout");
+  revalidatePath("/squad");
+  return { error: null };
+}
+
 export async function setBattingOrder(playerId: string, order: number | null) {
   const supabase = await createClient();
   const { error } = await supabase

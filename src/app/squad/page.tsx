@@ -1,6 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
+import { resolveCategory } from "@/lib/scout/category";
+import type { ScoutPlayerRow } from "@/lib/supabase/types";
 import SquadList, { type SquadPlayer } from "./SquadList";
 import RetainedShowcase from "./RetainedShowcase";
+import MarqueeCards, { type MarqueePlayer } from "./MarqueeCards";
 
 export default async function SquadPage() {
   const supabase = await createClient();
@@ -16,9 +19,29 @@ export default async function SquadPage() {
   const players = error ? [] : ((data ?? []) as unknown as SquadPlayer[]);
   const totalSpent = players.reduce((sum, p) => sum + (p.bought_price ?? 0), 0);
 
+  // Marquee ("must buy") targets flagged from the pool. Guarded so the page
+  // still renders if the is_marquee column hasn't been added yet.
+  const { data: mData, error: mError } = await supabase
+    .from("scout_players")
+    .select("*")
+    .eq("is_marquee", true)
+    .order("overall_index", { ascending: false, nullsFirst: false });
+  const marquee: MarqueePlayer[] =
+    mError || !mData
+      ? []
+      : (mData as ScoutPlayerRow[]).map((p) => ({
+          id: p.id,
+          full_name: p.full_name,
+          category: resolveCategory(p).category,
+          overall_index: p.overall_index,
+          photo_url: p.photo_url,
+        }));
+
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-8">
       <RetainedShowcase />
+
+      <MarqueeCards players={marquee} />
 
       <section className="mt-10 border-t border-border pt-8">
         <div className="flex flex-wrap items-end justify-between gap-3">

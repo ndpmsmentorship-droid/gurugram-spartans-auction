@@ -5,7 +5,7 @@ import { useMemo, useState, useTransition } from "react";
 import type { RankedPlayer } from "@/lib/scout/ranks";
 import type { RiskFlag } from "@/lib/scout/analytics";
 import { CATEGORIES, CATEGORY_META, type Category } from "@/lib/scout/category";
-import { markBought, unmarkBought, setRejected } from "./actions";
+import { markBought, unmarkBought, setRejected, setMarquee } from "./actions";
 
 export type PoolPlayer = RankedPlayer<{
   id: string;
@@ -15,6 +15,7 @@ export type PoolPlayer = RankedPlayer<{
   is_keeper: boolean;
   is_bought: boolean;
   is_rejected: boolean;
+  is_marquee: boolean;
   bought_price: number | null;
   bat_index: number | null;
   bowl_index: number | null;
@@ -287,6 +288,15 @@ function Row({ p }: { p: PoolPlayer }) {
         <Link href={`/scout/${p.id}`} className="font-medium hover:text-accent-text">
           {p.full_name}
         </Link>
+        {p.is_marquee && (
+          <span
+            className="ml-1 align-middle text-[11px] font-semibold"
+            style={{ color: "#B4820F" }}
+            title="Marquee — must buy"
+          >
+            ★ Marquee
+          </span>
+        )}
         {p.hasRecentForm && (
           <span
             className="ml-1 align-middle text-[10px] font-semibold text-up"
@@ -349,7 +359,21 @@ function Row({ p }: { p: PoolPlayer }) {
         );
       })}
       <td className="whitespace-nowrap px-2 py-2 text-right">
-        {p.is_rejected ? (
+        <span className="inline-flex items-center justify-end gap-2">
+          <button
+            onClick={() =>
+              startTransition(async () => {
+                await setMarquee(p.id, !p.is_marquee);
+              })
+            }
+            disabled={pending}
+            title={p.is_marquee ? "Unmark marquee" : "Mark as marquee (must buy)"}
+            className="text-base leading-none transition-transform hover:scale-110"
+            style={{ color: p.is_marquee ? "#E3A81B" : "var(--muted)" }}
+          >
+            {p.is_marquee ? "★" : "☆"}
+          </button>
+          {p.is_rejected ? (
           <button
             onClick={() =>
               startTransition(async () => {
@@ -416,7 +440,8 @@ function Row({ p }: { p: PoolPlayer }) {
               Reject
             </button>
           </span>
-        )}
+          )}
+        </span>
       </td>
     </tr>
   );

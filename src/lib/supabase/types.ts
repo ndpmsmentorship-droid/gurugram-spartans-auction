@@ -78,6 +78,7 @@ export type ScoutPlayerRow = ScoutNumericCols & {
   is_keeper: boolean;
   is_bought: boolean;
   is_rejected: boolean;
+  is_marquee: boolean;
   utility_tag: string | null;
   scout_category: string | null;
   scouting_clip_url: string | null;
@@ -97,6 +98,7 @@ export type ScoutPlayerInsert = Partial<ScoutNumericCols> & {
   is_keeper?: boolean;
   is_bought?: boolean;
   is_rejected?: boolean;
+  is_marquee?: boolean;
   utility_tag?: string | null;
   scout_category?: string | null;
   scouting_clip_url?: string | null;

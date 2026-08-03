@@ -7,3 +7,8 @@
 -- 'Top Order', 'Middle Order', 'Fast Bowler', 'Off Break', 'Wicket-Keeper', …
 
 alter table scout_players add column if not exists scout_category text;
+
+-- Marquee / probable "must-buy" target, flagged manually from the pool page.
+alter table scout_players add column if not exists is_marquee boolean not null default false;
+
+create index if not exists scout_players_marquee_idx on scout_players (is_marquee);

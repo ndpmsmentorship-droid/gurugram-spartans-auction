@@ -15,6 +15,7 @@ export type SquadPursePlayer = {
   role: string;
   isCaptain: boolean;
   isKeeper: boolean;
+  isGold?: boolean;
 };
 
 const inr = (n: number) => "₹" + Math.round(n).toLocaleString("en-IN");
@@ -22,12 +23,14 @@ const inr = (n: number) => "₹" + Math.round(n).toLocaleString("en-IN");
 export default function SquadBuilder({
   players,
   defaultBudget,
+  squadSize,
   maxSquad,
   retainedCount,
   children,
 }: {
   players: SquadPursePlayer[];
   defaultBudget: number;
+  squadSize: number; // positions shown in the full list (rest are bench cards)
   maxSquad: number;
   retainedCount: number;
   children?: ReactNode; // player cards, rendered in the middle section
@@ -106,7 +109,11 @@ export default function SquadBuilder({
   // place each retained player at their (editable) batting-order position
   const byPosition = new Map<number, SquadPursePlayer>();
   for (const p of players) byPosition.set(orders[p.id] ?? p.order, p);
-  const positions = Array.from({ length: maxSquad }, (_, i) => i + 1);
+  const listPositions = Array.from({ length: squadSize }, (_, i) => i + 1);
+  const benchPositions = Array.from(
+    { length: Math.max(0, maxSquad - squadSize) },
+    (_, i) => squadSize + i + 1
+  );
 
   // players sorted by current batting order, for the data-entry form
   const orderedPlayers = [...players].sort(
@@ -162,7 +169,7 @@ export default function SquadBuilder({
         <div className="px-3 py-3">
           <p className="eyebrow px-2 pb-2">Probable batting order</p>
           <ol className="flex flex-col">
-            {positions.map((pos) => {
+            {listPositions.map((pos) => {
               const player = byPosition.get(pos) ?? null;
               const top = pos <= 6;
               return (
@@ -192,6 +199,15 @@ export default function SquadBuilder({
                       <div className="flex min-w-0 flex-1 flex-col">
                         <div className="flex items-center gap-1.5">
                           <span className="truncate font-semibold">{player.name}</span>
+                          {player.isGold ? (
+                            <span
+                              className="shrink-0 text-[0.8rem] leading-none"
+                              style={{ color: GOLD }}
+                              title="Gold"
+                            >
+                              ★
+                            </span>
+                          ) : null}
                           {player.isCaptain ? (
                             <span className="badge shrink-0" style={{ background: GOLD, color: "#1d1d1f" }}>
                               C
@@ -227,6 +243,41 @@ export default function SquadBuilder({
               );
             })}
           </ol>
+
+          {/* bench / friends — buy but won't make the squad */}
+          {benchPositions.length > 0 ? (
+            <div className="mt-3 border-t border-border px-2 pt-3">
+              <p className="eyebrow pb-2">
+                Bench · friends{" "}
+                <span className="font-normal normal-case tracking-normal text-muted">
+                  — buy, but won&rsquo;t make the {squadSize}
+                </span>
+              </p>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {benchPositions.map((pos) => {
+                  const player = byPosition.get(pos) ?? null;
+                  return (
+                    <div
+                      key={pos}
+                      className="flex flex-col gap-1 rounded-[12px] bg-wash px-3 py-2.5"
+                    >
+                      <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-muted">
+                        Slot {pos}
+                      </span>
+                      {player ? (
+                        <>
+                          <span className="truncate text-sm font-semibold">{player.name}</span>
+                          <span className="truncate text-[0.68rem] text-muted">{player.role}</span>
+                        </>
+                      ) : (
+                        <span className="text-[0.8rem] italic text-muted">Open</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
 

@@ -8,6 +8,7 @@ export type RetainedPlayer = {
   name: string;
   tier: Tier;
   secondTier?: Tier;
+  isGold?: boolean; // gold marker (e.g. working captain & chairman)
   role: string;
   order: string;
   slot: number;
@@ -22,7 +23,14 @@ export type RetainedPlayer = {
   field: { catches: number; stumpings: number };
 };
 
-export const SQUAD_RULES = { maxCategoryA: 6, minSquad: 16, maxSquad: 20, budget: 350000 } as const;
+export const SQUAD_RULES = {
+  maxCategoryA: 6,
+  minSquad: 16,
+  squadSize: 14, // main probable XI/squad shown as the full list
+  benchSize: 4, // friends we buy but who won't make the squad (small cards)
+  maxSquad: 18, // squadSize + benchSize
+  budget: 350000,
+} as const;
 
 export const RETAINED: RetainedPlayer[] = [
   {
@@ -120,12 +128,13 @@ export const RETAINED: RetainedPlayer[] = [
     "id": "752063",
     "name": "Nikhil Dhingra",
     "tier": "B",
+    "isGold": true,
     "role": "Wicketkeeper batsman",
     "order": "Middle order",
     "slot": 5,
     "isCaptain": false,
     "isKeeper": true,
-    "tagline": "Wicketkeeper · owner",
+    "tagline": "Working captain & chairman · wicketkeeper",
     "cost": 6000,
     "photo": null,
     "cricheroes": "https://cricheroes.com/player-profile/752063/nikhil-dhingra",

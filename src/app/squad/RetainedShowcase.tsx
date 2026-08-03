@@ -118,6 +118,14 @@ function PlayerCard({ p }: { p: RetainedPlayer }) {
           </div>
           <p className="mt-0.5 truncate text-[0.8rem] text-muted">{p.tagline}</p>
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            {p.isGold ? (
+              <span
+                className="badge"
+                style={{ background: `linear-gradient(145deg, ${GOLD_HI}, ${GOLD})`, color: "#3a2a00" }}
+              >
+                ★ Gold
+              </span>
+            ) : null}
             <span className="badge" style={{ background: tier.bg, color: tier.fg }}>
               {tier.label}
             </span>
@@ -245,8 +253,10 @@ export default function RetainedShowcase() {
             role: p.role,
             isCaptain: p.isCaptain,
             isKeeper: p.isKeeper,
+            isGold: p.isGold,
           }))}
           defaultBudget={SQUAD_RULES.budget}
+          squadSize={SQUAD_RULES.squadSize}
           maxSquad={SQUAD_RULES.maxSquad}
           retainedCount={RETAINED.length}
         >

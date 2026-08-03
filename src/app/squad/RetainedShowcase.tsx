@@ -228,6 +228,7 @@ export default function RetainedShowcase({
             isCaptain: p.isCaptain,
             isKeeper: p.isKeeper,
             isGold: p.isGold,
+            category: p.category,
           }))}
           signings={signings}
           defaultBudget={SQUAD_RULES.budget}

@@ -16,6 +16,7 @@ export type SquadPursePlayer = {
   isCaptain: boolean;
   isKeeper: boolean;
   isGold?: boolean;
+  category: string;
 };
 
 // A player bought at the auction — fills the squad/bench positions the retained
@@ -27,9 +28,18 @@ export type Signing = {
   isKeeper: boolean;
   order: number | null;
   price: number | null;
+  category: string | null;
 };
 
 const inr = (n: number) => "₹" + Math.round(n).toLocaleString("en-IN");
+
+// tinted pill for the SCCL category (A tiers warm, Legend gold, B/other neutral)
+const catStyle = (c: string): { background: string; color: string } =>
+  /legend/i.test(c)
+    ? { background: "color-mix(in srgb, #E3A81B 18%, transparent)", color: "#B4820F" }
+    : /a$/i.test(c)
+      ? { background: "color-mix(in srgb, #E0453A 14%, transparent)", color: "#C2371D" }
+      : { background: "var(--wash)", color: "var(--muted)" };
 
 export default function SquadBuilder({
   players,
@@ -247,6 +257,9 @@ export default function SquadBuilder({
                               WK
                             </span>
                           ) : null}
+                          <span className="badge shrink-0" style={catStyle(player.category)}>
+                            {player.category}
+                          </span>
                         </div>
                         <span className="truncate text-[0.72rem] text-muted">{player.role}</span>
                       </div>
@@ -277,6 +290,11 @@ export default function SquadBuilder({
                               style={{ background: "var(--wash)", color: "var(--muted)" }}
                             >
                               WK
+                            </span>
+                          ) : null}
+                          {signing.category ? (
+                            <span className="badge shrink-0" style={catStyle(signing.category)}>
+                              {signing.category}
                             </span>
                           ) : null}
                         </div>

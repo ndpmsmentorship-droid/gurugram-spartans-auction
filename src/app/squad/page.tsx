@@ -38,6 +38,7 @@ export default async function SquadPage() {
       photo_url: p.photo_url,
     }));
 
+  const categoryById = new Map(pool.map((p) => [p.id, resolveCategory(p).category]));
   const signings = players.map((p) => ({
     id: p.id,
     name: p.full_name,
@@ -45,6 +46,7 @@ export default async function SquadPage() {
     isKeeper: p.is_keeper,
     order: p.suggested_batting_order,
     price: p.bought_price,
+    category: categoryById.get(p.id) ?? null,
   }));
 
   return (

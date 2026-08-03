@@ -6,6 +6,7 @@ export type Tier = "A" | "B" | "Legend";
 export type RetainedPlayer = {
   id: string;
   name: string;
+  category: string; // fine SCCL category: U35A, 35+A, U35B, 35+B, Legend
   tier: Tier;
   secondTier?: Tier;
   isGold?: boolean; // gold marker (e.g. working captain & chairman)
@@ -36,6 +37,7 @@ export const RETAINED: RetainedPlayer[] = [
   {
     "id": "944570",
     "name": "Nitin Rao",
+    "category": "U35A",
     "tier": "A",
     "role": "Batting Allrounder",
     "order": "Top order",
@@ -66,6 +68,7 @@ export const RETAINED: RetainedPlayer[] = [
   {
     "id": "13619012",
     "name": "Kanishk Sheel",
+    "category": "Legend",
     "tier": "Legend",
     "secondTier": "B",
     "isGold": true,
@@ -98,6 +101,7 @@ export const RETAINED: RetainedPlayer[] = [
   {
     "id": "1299729",
     "name": "Vikas Grover",
+    "category": "35+A",
     "tier": "A",
     "role": "Batting Allrounder",
     "order": "Middle order",
@@ -128,6 +132,7 @@ export const RETAINED: RetainedPlayer[] = [
   {
     "id": "752063",
     "name": "Nikhil Dhingra",
+    "category": "35+B",
     "tier": "B",
     "isGold": true,
     "role": "Wicketkeeper batsman",
@@ -159,6 +164,7 @@ export const RETAINED: RetainedPlayer[] = [
   {
     "id": "5799951",
     "name": "Abhinav Jain",
+    "category": "U35B",
     "tier": "B",
     "role": "Batting Allrounder",
     "order": "Middle order",

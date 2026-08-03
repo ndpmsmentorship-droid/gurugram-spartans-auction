@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { resolveCategory } from "@/lib/scout/category";
-import { rankPlayers } from "@/lib/scout/ranks";
 import type { ScoutPlayerRow } from "@/lib/supabase/types";
 import SquadList, { type SquadPlayer } from "./SquadList";
 import RetainedShowcase from "./RetainedShowcase";
@@ -20,11 +19,10 @@ export default async function SquadPage() {
   const players = error ? [] : ((data ?? []) as unknown as SquadPlayer[]);
   const totalSpent = players.reduce((sum, p) => sum + (p.bought_price ?? 0), 0);
 
-  // Rank the whole pool (ordinal, 1 = best) and surface marquee ("must buy")
-  // targets. Guarded so the page still renders if is_marquee isn't there yet.
+  // Marquee ("must buy") targets, sorted by ND Index. Guarded so the page still
+  // renders if the is_marquee column hasn't been added yet.
   const { data: poolData } = await supabase.from("scout_players").select("*");
   const pool = (poolData ?? []) as ScoutPlayerRow[];
-  const rankMap = new Map(rankPlayers(pool).map((p) => [p.id, p.overall_rank]));
   const marquee: MarqueePlayer[] = pool
     .filter((p) => p.is_marquee)
     .sort((a, b) => (b.overall_index ?? -1) - (a.overall_index ?? -1))
@@ -33,7 +31,7 @@ export default async function SquadPage() {
       full_name: p.full_name,
       category: resolveCategory(p).category,
       primary_role: p.primary_role,
-      overall_rank: rankMap.get(p.id) ?? null,
+      overall_index: p.overall_index,
       photo_url: p.photo_url,
     }));
 

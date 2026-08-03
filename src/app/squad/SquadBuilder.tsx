@@ -51,7 +51,11 @@ export default function SquadBuilder({
   children?: ReactNode; // player cards, rendered in the middle section
 }) {
   const defaultCosts = Object.fromEntries(players.map((p) => [p.id, p.cost]));
-  const defaultOrders = Object.fromEntries(players.map((p) => [p.id, p.order]));
+  // batting-order defaults for retained AND mock buys (signings), both editable
+  const defaultOrders = Object.fromEntries([
+    ...players.map((p) => [p.id, p.order] as const),
+    ...signings.map((s, i) => [s.id, s.order ?? 100 + i] as const),
+  ]);
   const [budget, setBudget] = useState(defaultBudget);
   const [costs, setCosts] = useState<Record<string, number>>(defaultCosts);
   const [orders, setOrders] = useState<Record<string, number>>(defaultOrders);
@@ -129,9 +133,10 @@ export default function SquadBuilder({
   // their suggested batting order — so the squad + bench reflect who's bought.
   const retainedIds = new Set(players.map((p) => p.id));
   const signingByPosition = new Map<number, Signing>();
+  const signingOrder = (s: Signing) => orders[s.id] ?? s.order ?? 1e9;
   const sortedSignings = [...signings]
     .filter((s) => !retainedIds.has(s.id))
-    .sort((a, b) => (a.order ?? 1e9) - (b.order ?? 1e9));
+    .sort((a, b) => signingOrder(a) - signingOrder(b));
   let si = 0;
   for (let pos = 1; pos <= maxSquad && si < sortedSignings.length; pos++) {
     if (byPosition.has(pos)) continue;
@@ -413,9 +418,43 @@ export default function SquadBuilder({
           </div>
         </div>
 
+        {/* mock buys — editable batting order */}
+        {sortedSignings.length > 0 ? (
+          <div className="mt-4 border-t border-border pt-3">
+            <p className="eyebrow pb-1.5" style={{ color: WARM_INK }}>
+              Mock buys — batting order
+            </p>
+            <div className="flex flex-col gap-1.5">
+              {sortedSignings.map((s) => (
+                <div key={s.id} className="flex items-center gap-3 rounded-[12px] bg-wash px-3 py-2">
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium">{s.name}</span>
+                  {s.isKeeper ? (
+                    <span
+                      className="badge shrink-0"
+                      style={{ background: "var(--wash)", color: "var(--muted)" }}
+                    >
+                      WK
+                    </span>
+                  ) : null}
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    aria-label={`Batting order for ${s.name}`}
+                    value={orders[s.id] ?? s.order ?? ""}
+                    onChange={(e) => setOrder(s.id, Number(e.target.value) || 0)}
+                    className="w-16 shrink-0 rounded-md bg-surface px-2 py-1 text-center text-sm tabular-nums outline-none focus:ring-2"
+                    style={{ boxShadow: "inset 0 0 0 1px var(--border)" }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         <p className="mt-3 text-[0.68rem] text-muted">
-          Changing the order re-ranks the probable list above. Edits save in this browser; change the
-          defaults for everyone in <code>retained.ts</code>.
+          Changing the order re-ranks the probable list above (retained core sits at fixed slots; mock
+          buys fill the rest by the order you set). Edits save in this browser; change the defaults for
+          everyone in <code>retained.ts</code>.
         </p>
       </div>
     </div>

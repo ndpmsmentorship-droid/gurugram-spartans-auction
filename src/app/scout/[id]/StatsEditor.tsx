@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { updatePlayerStats, type StatPatch } from "@/app/scout/actions";
+import { updatePlayerStats, setCategory, type StatPatch } from "@/app/scout/actions";
+import { CATEGORIES, autoCategory } from "@/lib/scout/category";
 import type { ScoutPlayerRow } from "@/lib/supabase/types";
 
 type NumField = Exclude<keyof StatPatch, "primary_role" | "is_keeper">;
@@ -70,6 +71,20 @@ export default function StatsEditor({
   const [msg, setMsg] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
+  const autoCat = autoCategory(player);
+  const [category, setCategoryValue] = useState(player.scout_category ?? "");
+  const [catMsg, setCatMsg] = useState<string | null>(null);
+  const [catPending, startCatTransition] = useTransition();
+
+  function saveCategory(next: string) {
+    setCategoryValue(next);
+    setCatMsg(null);
+    startCatTransition(async () => {
+      const res = await setCategory(player.id, next || null);
+      setCatMsg(res.error ? res.error : "Saved");
+    });
+  }
+
   function save() {
     const patch: StatPatch = { primary_role: role || null, is_keeper: isKeeper };
     for (const g of GROUPS)
@@ -106,6 +121,28 @@ export default function StatsEditor({
           />
           Wicketkeeper
         </label>
+
+        <label className="block">
+          <span className="mb-1 block text-xs text-muted">Category</span>
+          <select
+            className="input w-56"
+            value={category}
+            disabled={catPending}
+            onChange={(e) => saveCategory(e.target.value)}
+          >
+            <option value="">Auto — {autoCat}</option>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </label>
+        {catMsg && (
+          <span className={`pb-2 text-sm ${catMsg === "Saved" ? "text-up" : "text-down"}`}>
+            {catMsg === "Saved" ? "✓ Saved" : catMsg}
+          </span>
+        )}
       </div>
 
       {GROUPS.map((g) => (

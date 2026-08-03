@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import type { RankedPlayer } from "@/lib/scout/ranks";
 import type { RiskFlag } from "@/lib/scout/analytics";
+import { CATEGORIES, CATEGORY_META, type Category } from "@/lib/scout/category";
 import { markBought, unmarkBought, setRejected } from "./actions";
 
 export type PoolPlayer = RankedPlayer<{
@@ -32,6 +33,8 @@ export type PoolPlayer = RankedPlayer<{
   hasRecentForm: boolean;
   boundary_pct: number | null;
   fit_score: number;
+  category: Category;
+  categoryIsOverride: boolean;
 };
 
 type Col = {
@@ -114,6 +117,7 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
   const [sortKey, setSortKey] = useState<keyof PoolPlayer>("fit_score");
   const [sortAsc, setSortAsc] = useState(false);
   const [role, setRole] = useState("All");
+  const [category, setCategory] = useState<"All" | Category>("All");
   const [avail, setAvail] = useState<"available" | "bought" | "rejected" | "all">(
     "available"
   );
@@ -133,6 +137,7 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
           return false;
         if (role !== "All" && roleGroup(p.primary_role, p.is_keeper) !== role)
           return false;
+        if (category !== "All" && p.category !== category) return false;
         if (avail === "available" && (p.is_bought || p.is_rejected)) return false;
         if (avail === "bought" && !p.is_bought) return false;
         if (avail === "rejected" && !p.is_rejected) return false;
@@ -143,7 +148,7 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
         const bv = (b[sortKey] ?? (sortAsc ? 1e9 : -1e9)) as number;
         return sortAsc ? av - bv : bv - av;
       });
-  }, [players, query, sortKey, sortAsc, role, avail]);
+  }, [players, query, sortKey, sortAsc, role, category, avail]);
 
   return (
     <div className="mt-5">
@@ -162,6 +167,18 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
           {ROLE_FILTERS.map((r) => (
             <option key={r} value={r}>
               {r}
+            </option>
+          ))}
+        </select>
+        <select
+          className="input max-w-[11rem]"
+          value={category}
+          onChange={(e) => setCategory(e.target.value as "All" | Category)}
+        >
+          <option value="All">All categories</option>
+          {CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {c}
             </option>
           ))}
         </select>
@@ -277,6 +294,22 @@ function Row({ p }: { p: PoolPlayer }) {
             ● Form
           </span>
         )}
+        <span className="mt-0.5 flex flex-wrap items-center gap-1.5">
+          <span
+            className="inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold"
+            style={{ background: CATEGORY_META[p.category].bg, color: CATEGORY_META[p.category].fg }}
+            title={
+              p.categoryIsOverride
+                ? "Category set manually"
+                : "Auto-derived category — open the player to override"
+            }
+          >
+            {p.category}
+          </span>
+          {!p.categoryIsOverride && (
+            <span className="text-[9px] uppercase tracking-wide text-muted">auto</span>
+          )}
+        </span>
         <span className="block text-[11px] text-muted">
           {p.archetype}
           {p.topRisk && (

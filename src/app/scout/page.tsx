@@ -8,6 +8,7 @@ import {
   type AnalyticsInput,
 } from "@/lib/scout/analytics";
 import { deriveMetrics, type RawStats } from "@/lib/scout/rankings";
+import { resolveCategory } from "@/lib/scout/category";
 import type { ScoutPlayerRow } from "@/lib/supabase/types";
 import PoolBoard, { type PoolPlayer } from "./PoolBoard";
 
@@ -45,6 +46,7 @@ export default async function ScoutPage() {
   const players: PoolPlayer[] = ranked.map((p) => {
     const a = analytics.get(p.id)!;
     const m = deriveMetrics(p as unknown as RawStats);
+    const cat = resolveCategory(p);
     return {
       ...p,
       archetype: a.archetype,
@@ -54,6 +56,8 @@ export default async function ScoutPage() {
       boundary_pct: m.boundaryPct == null ? null : Math.round(m.boundaryPct * 10) / 10,
       fit_score:
         Math.round(fitScore(p as unknown as AnalyticsInput, needs) * 10) / 10,
+      category: cat.category,
+      categoryIsOverride: cat.isOverride,
     };
   });
 

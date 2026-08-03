@@ -179,6 +179,22 @@ export async function setUtilityTag(playerId: string, tag: string) {
   return { error: null };
 }
 
+// Manually override a player's fine category (Top Order, Fast Bowler, …). Pass
+// null to clear the override and fall back to the auto-derived category.
+// Requires the scout_category column (supabase/scout_category.sql).
+export async function setCategory(playerId: string, category: string | null) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("scout_players")
+    .update({ scout_category: category })
+    .eq("id", playerId);
+  if (error) return { error: error.message };
+  revalidatePath("/scout");
+  revalidatePath(`/scout/${playerId}`);
+  revalidatePath("/squad");
+  return { error: null };
+}
+
 export async function setBattingOrder(playerId: string, order: number | null) {
   const supabase = await createClient();
   const { error } = await supabase

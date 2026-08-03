@@ -9,7 +9,7 @@ export type MarqueePlayer = {
   full_name: string;
   category: string;
   primary_role: string | null;
-  overall_index: number | null;
+  overall_rank: number | null;
   photo_url: string | null;
 };
 
@@ -50,13 +50,13 @@ export default function MarqueeCards({ players }: { players: MarqueePlayer[] }) 
                 {p.category}
               </p>
             </div>
-            {p.overall_index != null ? (
-              <div className="shrink-0 text-right" title="Overall ND Index (0–100)">
+            {p.overall_rank != null ? (
+              <div className="shrink-0 text-right" title="Overall rank in the pool (1 = best)">
                 <p className="font-display text-sm font-bold leading-none tabular-nums" style={{ color: GOLD_INK }}>
-                  {Math.round(p.overall_index)}
+                  #{p.overall_rank}
                 </p>
                 <p className="mt-0.5 text-[0.55rem] font-medium uppercase tracking-wide text-muted">
-                  ND Index
+                  Rank
                 </p>
               </div>
             ) : null}

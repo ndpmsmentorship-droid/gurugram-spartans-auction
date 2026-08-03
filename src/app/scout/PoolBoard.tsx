@@ -427,10 +427,23 @@ function Row({ p }: { p: PoolPlayer }) {
         ) : (
           <span className="inline-flex items-center gap-2">
             <button
+              onClick={() =>
+                startTransition(async () => {
+                  await markBought(p.id, 2000);
+                })
+              }
+              disabled={pending}
+              title="Dummy buy at base (₹2,000) — adds to the pseudo squad"
+              className="text-xs font-medium hover:underline"
+              style={{ color: "#D2451F" }}
+            >
+              ⚡ Buy
+            </button>
+            <button
               onClick={() => setBuying(true)}
               className="text-xs font-medium text-accent-text hover:underline"
             >
-              Buy
+              Buy ₹
             </button>
             <button
               onClick={() =>

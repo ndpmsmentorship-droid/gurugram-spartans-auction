@@ -131,6 +131,25 @@ export async function unmarkBought(playerId: string) {
   return { error: null };
 }
 
+// Wipe every mock buy — one-click reset for the pseudo squad.
+export async function clearAllBought() {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("scout_players")
+    .update({
+      is_bought: false,
+      bought_price: null,
+      suggested_batting_order: null,
+      utility_tag: null,
+    })
+    .eq("is_bought", true);
+  if (error) return { error: error.message };
+  revalidatePath("/scout");
+  revalidatePath("/squad");
+  revalidatePath("/");
+  return { error: null };
+}
+
 // Re-number suggested batting order across ALL bought players by bat_index.
 async function recomputeBattingOrder() {
   const supabase = await createClient();

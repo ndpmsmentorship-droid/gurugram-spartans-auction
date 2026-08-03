@@ -5,9 +5,26 @@ import { getCurrentProfile } from "@/lib/auth";
 import { signOut } from "@/app/login/actions";
 import SpartansStars from "./SpartansStars";
 
+const SITE_DESCRIPTION =
+  "Rank, analyze and buy players on auction day for The Gurugram Spartans.";
+
 export const metadata: Metadata = {
+  // shared as www.ndpms.in/spartansscout — makes the OG/icon URLs absolute
+  metadataBase: new URL("https://www.ndpms.in"),
   title: "Spartans Scout",
-  description: "Rank, analyze and buy players on auction day for The Gurugram Spartans",
+  description: SITE_DESCRIPTION,
+  applicationName: "Spartans Scout",
+  openGraph: {
+    title: "Spartans Scout — The Gurugram Spartans",
+    description: SITE_DESCRIPTION,
+    siteName: "Spartans Scout",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Spartans Scout — The Gurugram Spartans",
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default async function RootLayout({
@@ -35,14 +52,11 @@ export default async function RootLayout({
                     Pool
                   </Link>
                   <Link href="/squad" className="transition hover:text-foreground">
-                    Squad
+                    Season 6 Squad
                   </Link>
                   <Link href="/scout/import" className="transition hover:text-foreground">
                     Import
                   </Link>
-                  <span className="hidden text-foreground sm:inline">
-                    {profile.display_name}
-                  </span>
                   <form action={signOut}>
                     <button type="submit" className="transition hover:text-down">
                       Sign out

@@ -363,7 +363,11 @@ function Row({ p }: { p: PoolPlayer }) {
           <button
             onClick={() =>
               startTransition(async () => {
-                await setMarquee(p.id, !p.is_marquee);
+                const res = await setMarquee(p.id, !p.is_marquee);
+                if (res.error)
+                  alert(
+                    `Couldn't mark marquee: ${res.error}\n\nIf this mentions "is_marquee", run supabase/scout_category.sql in Supabase first.`
+                  );
               })
             }
             disabled={pending}

@@ -11,6 +11,7 @@ export type RetainedPlayer = {
   role: string;
   order: string;
   slot: number;
+  cost: number;
   isCaptain: boolean;
   isKeeper: boolean;
   tagline: string;
@@ -21,7 +22,7 @@ export type RetainedPlayer = {
   field: { catches: number; stumpings: number };
 };
 
-export const SQUAD_RULES = { maxCategoryA: 6, minSquad: 16 } as const;
+export const SQUAD_RULES = { maxCategoryA: 6, minSquad: 16, budget: 350000 } as const;
 
 export const RETAINED: RetainedPlayer[] = [
   {
@@ -34,6 +35,7 @@ export const RETAINED: RetainedPlayer[] = [
     "isCaptain": false,
     "isKeeper": false,
     "tagline": "Explosive top-order all-rounder",
+    "cost": 25000,
     "photo": "https://media.cricheroes.in/user_profile/1758192457753_Xi0ntF2LBPLw.jpeg?width=3840&quality=75&format=auto",
     "cricheroes": "https://cricheroes.in/player-profile/944570/Nitin",
     "bat": {
@@ -64,6 +66,7 @@ export const RETAINED: RetainedPlayer[] = [
     "isCaptain": true,
     "isKeeper": false,
     "tagline": "Captain · Legend signing",
+    "cost": 6000,
     "photo": "https://media.cricheroes.in/user_profile/1733024746211_bJO36vXv9sJH.jpg?width=3840&quality=75&format=auto",
     "cricheroes": "https://cricheroes.com/player-profile/13619012/kanishk-sheel",
     "bat": {
@@ -93,6 +96,7 @@ export const RETAINED: RetainedPlayer[] = [
     "isCaptain": false,
     "isKeeper": false,
     "tagline": "All-round engine of the side",
+    "cost": 15000,
     "photo": "https://media.cricheroes.in/user_profile/1669483279903_FCmbM0iTSY6f.jpg?width=3840&quality=75&format=auto",
     "cricheroes": "https://cricheroes.com/player-profile/1299729/Vikas-10",
     "bat": {
@@ -116,29 +120,30 @@ export const RETAINED: RetainedPlayer[] = [
     "id": "752063",
     "name": "Nikhil Dhingra",
     "tier": "B",
-    "role": "blank",
+    "role": "Wicketkeeper batsman",
     "order": "Middle order",
     "slot": 5,
     "isCaptain": false,
     "isKeeper": true,
     "tagline": "Wicketkeeper · owner",
+    "cost": 6000,
     "photo": null,
     "cricheroes": "https://cricheroes.com/player-profile/752063/nikhil-dhingra",
     "bat": {
-      "matches": 718,
-      "runs": 12669,
-      "avg": 26.84,
-      "sr": 122.57,
-      "fifties": 52,
-      "hundreds": 5
+      "matches": 809,
+      "runs": 15074,
+      "avg": 27.71,
+      "sr": 127.94,
+      "fifties": 65,
+      "hundreds": 8
     },
     "bowl": {
       "wickets": 79,
       "econ": 11.54
     },
     "field": {
-      "catches": 99,
-      "stumpings": 332
+      "catches": 106,
+      "stumpings": 364
     }
   },
   {
@@ -151,6 +156,7 @@ export const RETAINED: RetainedPlayer[] = [
     "isCaptain": false,
     "isKeeper": false,
     "tagline": "Middle-order all-rounder",
+    "cost": 6000,
     "photo": "https://media.cricheroes.in/user_profile/1743840594972_214rXLnZwfzX.jpeg?width=3840&quality=75&format=auto",
     "cricheroes": "https://cricheroes.in/player-profile/5799951/Abhinav-Jain",
     "bat": {

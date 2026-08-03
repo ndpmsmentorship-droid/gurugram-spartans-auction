@@ -1,4 +1,5 @@
 import SpartansStars from "@/app/SpartansStars";
+import BudgetPanel from "./BudgetPanel";
 import { RETAINED, SQUAD_RULES, type RetainedPlayer } from "./retained";
 
 const GOLD = "#E3A81B";
@@ -273,6 +274,16 @@ export default function RetainedShowcase() {
           </div>
           <p className="mt-2 text-[0.72rem] text-muted">Deep batting, all-round depth.</p>
         </div>
+      </div>
+
+      {/* editable purse / budget */}
+      <div className="mt-3">
+        <BudgetPanel
+          players={RETAINED.map((p) => ({ id: p.id, name: p.name, cost: p.cost }))}
+          defaultBudget={SQUAD_RULES.budget}
+          minSquad={SQUAD_RULES.minSquad}
+          retainedCount={RETAINED.length}
+        />
       </div>
 
       {/* lineup + players */}

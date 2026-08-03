@@ -48,9 +48,7 @@ export default async function SquadPage() {
 
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-8">
-      <RetainedShowcase signings={signings} />
-
-      <MarqueeCards players={marquee} />
+      <RetainedShowcase signings={signings} marquee={<MarqueeCards players={marquee} />} />
 
       <section className="mt-10 border-t border-border pt-8">
         <div className="flex flex-wrap items-end justify-between gap-3">

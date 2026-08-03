@@ -16,7 +16,7 @@ export default function MarqueeCards({ players }: { players: MarqueePlayer[] }) 
   if (players.length === 0) return null;
 
   return (
-    <section className="mt-10 border-t border-border pt-8">
+    <section className="card">
       <div className="flex flex-wrap items-center gap-2">
         <span style={{ color: GOLD }}>★</span>
         <p className="eyebrow" style={{ color: GOLD_INK }}>

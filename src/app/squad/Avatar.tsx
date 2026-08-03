@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const GOLD = "#E3A81B";
 const GOLD_HI = "#F6CB49";
@@ -27,6 +27,15 @@ export default function Avatar({
   size?: number;
 }) {
   const [failed, setFailed] = useState(false);
+  const ref = useRef<HTMLImageElement>(null);
+
+  // Server-rendered <img> can error before React attaches onError (the event is
+  // lost), so also check on mount whether the image already failed to load.
+  useEffect(() => {
+    const img = ref.current;
+    if (img && img.complete && img.naturalWidth === 0) setFailed(true);
+  }, [src]);
+
   const dim = { width: size, height: size };
 
   if (!src || failed) {
@@ -47,6 +56,7 @@ export default function Avatar({
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
+      ref={ref}
       src={src}
       alt=""
       onError={() => setFailed(true)}

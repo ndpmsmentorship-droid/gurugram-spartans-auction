@@ -38,6 +38,7 @@ export default function SquadBuilder({
   squadSize,
   maxSquad,
   retainedCount,
+  marquee,
   children,
 }: {
   players: SquadPursePlayer[];
@@ -46,6 +47,7 @@ export default function SquadBuilder({
   squadSize: number; // positions shown in the full list (rest are bench cards)
   maxSquad: number;
   retainedCount: number;
+  marquee?: ReactNode; // marquee "must buy" targets, rendered under the list
   children?: ReactNode; // player cards, rendered in the middle section
 }) {
   const defaultCosts = Object.fromEntries(players.map((p) => [p.id, p.cost]));
@@ -341,6 +343,9 @@ export default function SquadBuilder({
           ) : null}
         </div>
       </div>
+
+      {/* ============ marquee "must buy" targets ============ */}
+      {marquee}
 
       {/* ============ MIDDLE: player cards ============ */}
       {children}

@@ -152,7 +152,13 @@ function PlayerCard({ p }: { p: RetainedPlayer }) {
 
 /* ---------- main ---------- */
 
-export default function RetainedShowcase({ signings = [] }: { signings?: Signing[] }) {
+export default function RetainedShowcase({
+  signings = [],
+  marquee,
+}: {
+  signings?: Signing[];
+  marquee?: React.ReactNode;
+}) {
   const aUsed = RETAINED.filter((p) => p.tier === "A").length;
   const aNames = RETAINED.filter((p) => p.tier === "A").map((p) => p.name).join(", ");
   const retainedCount = RETAINED.length;
@@ -240,6 +246,7 @@ export default function RetainedShowcase({ signings = [] }: { signings?: Signing
           squadSize={SQUAD_RULES.squadSize}
           maxSquad={SQUAD_RULES.maxSquad}
           retainedCount={RETAINED.length}
+          marquee={marquee}
         >
           <div className="grid gap-3 md:grid-cols-2">
             {RETAINED.map((p) => (

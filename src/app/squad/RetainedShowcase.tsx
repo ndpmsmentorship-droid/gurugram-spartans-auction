@@ -1,9 +1,9 @@
 import SpartansStars from "@/app/SpartansStars";
+import Avatar from "./Avatar";
 import SquadBuilder, { type Signing } from "./SquadBuilder";
 import { RETAINED, SQUAD_RULES, type RetainedPlayer } from "./retained";
 
 const GOLD = "#E3A81B";
-const GOLD_HI = "#F6CB49";
 // warm Spartans accent — orange→red, replacing the app's blue on this page
 const WARM = "linear-gradient(135deg, #FF8A3D 0%, #E0453A 100%)";
 const WARM_INK = "#D2451F";
@@ -12,15 +12,6 @@ const fmt = (n: number | null | undefined) =>
   n == null ? "—" : n.toLocaleString("en-IN");
 const dec = (n: number | null | undefined) =>
   n == null ? "—" : n.toFixed(n >= 100 ? 0 : 1);
-
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase();
-}
 
 const TIER_STYLE: Record<RetainedPlayer["tier"], { label: string; bg: string; fg: string }> = {
   A: { label: "Category A", bg: "color-mix(in srgb, #E0453A 15%, transparent)", fg: "#C2371D" },
@@ -80,22 +71,7 @@ function PlayerCard({ p }: { p: RetainedPlayer }) {
     <div className="card flex flex-col gap-3.5">
       <div className="flex items-center gap-3">
         <div className="relative h-14 w-14 shrink-0">
-          {p.photo ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={p.photo}
-              alt={p.name}
-              className="h-14 w-14 rounded-full object-cover"
-              style={{ boxShadow: `0 0 0 2px ${GOLD}` }}
-            />
-          ) : (
-            <div
-              className="flex h-14 w-14 items-center justify-center rounded-full font-display text-lg font-bold text-white"
-              style={{ background: `linear-gradient(145deg, ${GOLD_HI}, ${GOLD})` }}
-            >
-              {initials(p.name)}
-            </div>
-          )}
+          <Avatar src={p.photo} name={p.name} size={56} />
           {p.isCaptain ? (
             <span
               className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 font-display text-[0.7rem] font-bold text-white"

@@ -33,6 +33,7 @@ export default async function SquadPage() {
           id: p.id,
           full_name: p.full_name,
           category: resolveCategory(p).category,
+          primary_role: p.primary_role,
           overall_index: p.overall_index,
           photo_url: p.photo_url,
         }));

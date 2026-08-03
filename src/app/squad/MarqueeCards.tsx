@@ -8,6 +8,7 @@ export type MarqueePlayer = {
   id: string;
   full_name: string;
   category: string;
+  primary_role: string | null;
   overall_index: number | null;
   photo_url: string | null;
 };
@@ -44,7 +45,10 @@ export default function MarqueeCards({ players }: { players: MarqueePlayer[] }) 
             <Avatar src={p.photo_url} name={p.full_name} size={44} />
             <div className="min-w-0 flex-1">
               <p className="truncate font-display text-[0.98rem] font-semibold">{p.full_name}</p>
-              <p className="truncate text-[0.75rem] text-muted">{p.category}</p>
+              <p className="truncate text-[0.75rem] text-muted">
+                {p.primary_role ? `${p.primary_role} · ` : ""}
+                {p.category}
+              </p>
             </div>
             {p.overall_index != null ? (
               <span className="shrink-0 font-display text-sm font-bold tabular-nums" style={{ color: GOLD_INK }}>

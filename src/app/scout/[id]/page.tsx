@@ -8,6 +8,7 @@ import type { ScoutPlayerRow } from "@/lib/supabase/types";
 import Radar from "../Radar";
 import BuyControl from "./BuyControl";
 import PlayerWorkshop from "./PlayerWorkshop";
+import MarqueeToggle from "./MarqueeToggle";
 
 const ACCENT = "#e07a3e";
 
@@ -82,6 +83,9 @@ export default async function PlayerDetailPage({
           </div>
         </div>
         <div className="text-right">
+          <div className="mb-2 flex justify-end">
+            <MarqueeToggle id={player.id} initial={player.is_marquee} />
+          </div>
           <span className="badge bg-ink text-[var(--surface)]">
             Overall #{rankedSelf.overall_rank}
           </span>

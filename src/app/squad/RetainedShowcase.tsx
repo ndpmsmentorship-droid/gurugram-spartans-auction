@@ -94,18 +94,6 @@ function PlayerCard({ p }: { p: RetainedPlayer }) {
           </div>
           <p className="mt-0.5 truncate text-[0.8rem] text-muted">{p.tagline}</p>
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-            {p.isGold ? (
-              <span
-                className="badge"
-                style={{
-                  background: "linear-gradient(135deg, #FCE7A1 0%, #F6CB49 45%, #E3A81B 100%)",
-                  color: "#5a4106",
-                  boxShadow: "inset 0 0 0 1px rgba(180,130,15,0.35), 0 1px 2px rgba(0,0,0,0.12)",
-                }}
-              >
-                ★ Gold
-              </span>
-            ) : null}
             <span className="badge" style={{ background: tier.bg, color: tier.fg }}>
               {tier.label}
             </span>

@@ -229,15 +229,6 @@ export default function SquadBuilder({
                       <div className="flex min-w-0 flex-1 flex-col">
                         <div className="flex items-center gap-1.5">
                           <span className="truncate font-semibold">{player.name}</span>
-                          {player.isGold ? (
-                            <span
-                              className="shrink-0 text-[0.8rem] leading-none"
-                              style={{ color: GOLD }}
-                              title="Gold"
-                            >
-                              ★
-                            </span>
-                          ) : null}
                           {player.isCaptain ? (
                             <span className="badge shrink-0" style={{ background: GOLD, color: "#1d1d1f" }}>
                               C

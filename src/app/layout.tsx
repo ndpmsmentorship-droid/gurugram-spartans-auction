@@ -46,6 +46,15 @@ export default async function RootLayout({
               Spartans Scout <SpartansStars />
             </Link>
             <nav className="flex items-center gap-6 text-[0.8rem] text-muted">
+              {/* cross-app link to the public Spartans ball library (root, not basePath) */}
+              <a
+                href="https://www.ndpms.in/spartans"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition hover:text-foreground"
+              >
+                Ball Library ↗
+              </a>
               {profile ? (
                 <>
                   <Link href="/scout" className="transition hover:text-foreground">

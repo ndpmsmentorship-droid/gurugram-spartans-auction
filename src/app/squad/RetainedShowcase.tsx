@@ -1,5 +1,5 @@
 import SpartansStars from "@/app/SpartansStars";
-import BudgetPanel from "./BudgetPanel";
+import SquadPurse from "./SquadPurse";
 import { RETAINED, SQUAD_RULES, type RetainedPlayer } from "./retained";
 
 const GOLD = "#E3A81B";
@@ -162,48 +162,6 @@ function PlayerCard({ p }: { p: RetainedPlayer }) {
   );
 }
 
-/* ---------- batting-order strip ---------- */
-
-function LineupStrip() {
-  const bySlot = new Map(RETAINED.map((p) => [p.slot, p]));
-  const rows = Array.from({ length: 6 }).map((_, i) => {
-    const pos = i + 1;
-    return { pos, player: bySlot.get(pos) ?? null };
-  });
-  return (
-    <div className="card">
-      <p className="eyebrow">Probable top order</p>
-      <div className="mt-3 flex flex-col gap-1.5">
-        {rows.map(({ pos, player }) => (
-          <div key={pos} className="flex items-center gap-3">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-wash font-display text-[0.8rem] font-bold tabular-nums text-muted">
-              {pos}
-            </span>
-            {player ? (
-              <div className="flex min-w-0 flex-1 items-center gap-2">
-                <span className="truncate font-medium">{player.name}</span>
-                {player.isCaptain ? (
-                  <span className="badge" style={{ background: GOLD, color: "#1d1d1f" }}>
-                    C
-                  </span>
-                ) : null}
-                {player.isKeeper ? (
-                  <span className="badge" style={{ background: "var(--wash)", color: "var(--muted)" }}>
-                    WK
-                  </span>
-                ) : null}
-                <span className="ml-auto shrink-0 text-[0.72rem] text-muted">{player.role}</span>
-              </div>
-            ) : (
-              <span className="flex-1 text-[0.85rem] italic text-muted">Open — target at auction</span>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 /* ---------- main ---------- */
 
 export default function RetainedShowcase() {
@@ -276,19 +234,22 @@ export default function RetainedShowcase() {
         </div>
       </div>
 
-      {/* editable purse / budget */}
+      {/* combined: probable batting order + editable purse / retention */}
       <div className="mt-3">
-        <BudgetPanel
-          players={RETAINED.map((p) => ({ id: p.id, name: p.name, cost: p.cost }))}
+        <SquadPurse
+          players={RETAINED.map((p) => ({
+            id: p.id,
+            name: p.name,
+            cost: p.cost,
+            order: p.slot,
+            role: p.role,
+            isCaptain: p.isCaptain,
+            isKeeper: p.isKeeper,
+          }))}
           defaultBudget={SQUAD_RULES.budget}
-          minSquad={SQUAD_RULES.minSquad}
+          maxSquad={SQUAD_RULES.maxSquad}
           retainedCount={RETAINED.length}
         />
-      </div>
-
-      {/* lineup + players */}
-      <div className="mt-3">
-        <LineupStrip />
       </div>
 
       <div className="mt-6 grid gap-3 md:grid-cols-2">

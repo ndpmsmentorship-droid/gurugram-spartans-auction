@@ -68,6 +68,28 @@ const COLS: Col[] = [
   { key: "economy", label: "Econ", asc: true, numeric: true, help: "Runs conceded per over (lower is better)." },
 ];
 
+// Rank-tier colour code: top 10 = red, next 20 (11–30) = orange, rest = yellow.
+// Solid pills so they read in both light and dark themes.
+type RankTier = { label: string; bg: string; fg: string };
+const RANK_TIERS: Record<"elite" | "strong" | "rest", RankTier> = {
+  elite: { label: "Top 10", bg: "#E0453A", fg: "#ffffff" },
+  strong: { label: "11–30", bg: "#F08A3D", fg: "#1d1d1f" },
+  rest: { label: "31+", bg: "#E9C230", fg: "#1d1d1f" },
+};
+
+function rankTier(rank: number | null | undefined): RankTier | null {
+  if (rank == null || rank >= 9999) return null;
+  if (rank <= 10) return RANK_TIERS.elite;
+  if (rank <= 30) return RANK_TIERS.strong;
+  return RANK_TIERS.rest;
+}
+
+// which columns get the rank-tier colour code, and the rank they key off
+const TIER_COL: Partial<Record<keyof PoolPlayer, keyof PoolPlayer>> = {
+  bat_index: "bat_rank",
+  field_index: "field_rank",
+};
+
 function roleGroup(role: string | null, isKeeper: boolean): string {
   if (isKeeper) return "Keeper";
   const r = (role ?? "").toLowerCase();
@@ -154,6 +176,19 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
           <option value="all">All</option>
         </select>
         <span className="self-center text-xs text-muted">{filtered.length} shown</span>
+      </div>
+
+      <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[0.72rem] text-muted">
+        <span className="font-medium">Bat &amp; Field rank:</span>
+        {(["elite", "strong", "rest"] as const).map((k) => (
+          <span key={k} className="inline-flex items-center gap-1.5">
+            <span
+              className="inline-block h-3 w-3 rounded-full"
+              style={{ background: RANK_TIERS[k].bg }}
+            />
+            {k === "elite" ? "Top 10" : k === "strong" ? "Next 20 (11–30)" : "Rest (31+)"}
+          </span>
+        ))}
       </div>
 
       <details className="mb-3 text-sm">
@@ -255,16 +290,30 @@ function Row({ p }: { p: PoolPlayer }) {
           )}
         </span>
       </td>
-      {COLS.map((c) => (
-        <td
-          key={c.key as string}
-          className={`whitespace-nowrap px-2 py-2 tabular-nums ${
-            c.numeric ? "text-right" : ""
-          } ${c.key === "boundary_pct" ? "font-medium text-accent-text" : ""}`}
-        >
-          {cell(p, c)}
-        </td>
-      ))}
+      {COLS.map((c) => {
+        const rankKey = TIER_COL[c.key];
+        const tier = rankKey ? rankTier(p[rankKey] as number | null) : null;
+        return (
+          <td
+            key={c.key as string}
+            className={`whitespace-nowrap px-2 py-2 tabular-nums ${
+              c.numeric ? "text-right" : ""
+            } ${c.key === "boundary_pct" ? "font-medium text-accent-text" : ""}`}
+          >
+            {tier ? (
+              <span
+                className="inline-block min-w-[2.1rem] rounded-full px-2 py-0.5 text-center text-[0.78rem] font-semibold"
+                style={{ background: tier.bg, color: tier.fg }}
+                title={`${c.label} rank tier: ${tier.label}`}
+              >
+                {cell(p, c)}
+              </span>
+            ) : (
+              cell(p, c)
+            )}
+          </td>
+        );
+      })}
       <td className="whitespace-nowrap px-2 py-2 text-right">
         {p.is_rejected ? (
           <button

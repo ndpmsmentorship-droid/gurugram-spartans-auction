@@ -22,7 +22,7 @@ export type RetainedPlayer = {
   field: { catches: number; stumpings: number };
 };
 
-export const SQUAD_RULES = { maxCategoryA: 6, minSquad: 16, budget: 350000 } as const;
+export const SQUAD_RULES = { maxCategoryA: 6, minSquad: 16, maxSquad: 20, budget: 350000 } as const;
 
 export const RETAINED: RetainedPlayer[] = [
   {
@@ -60,7 +60,7 @@ export const RETAINED: RetainedPlayer[] = [
     "name": "Kanishk Sheel",
     "tier": "Legend",
     "secondTier": "B",
-    "role": "blank",
+    "role": "Off Break",
     "order": "No. 3",
     "slot": 3,
     "isCaptain": true,

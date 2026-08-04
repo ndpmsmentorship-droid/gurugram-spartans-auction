@@ -13,7 +13,7 @@
 // Sheet: the players sheet is auto-detected (most rows / has a "fullName" col).
 
 import { writeFileSync } from "node:fs";
-import * as XLSX from "xlsx";
+import XLSX from "xlsx"; // CJS default export (has readFile/utils) under Node ESM
 import { createClient } from "@supabase/supabase-js";
 import { computeIndices } from "../src/lib/scout/rankings.ts";
 import { mapPlayer, toRaw } from "./sarda-map.mjs";
@@ -116,6 +116,17 @@ async function main() {
     `Existing pool: ${(existing || []).length} rows — preserving ${prevMarquee} marquee, ${prevCat} category, ${prevBought} bought.`
   );
 
+  // Learn the table's real columns from the snapshot (PostgREST returns every
+  // column, even when null) so we never send a key the schema lacks — a missing
+  // column would otherwise fail the insert AFTER the delete and empty the pool.
+  const tableCols = existing && existing.length ? new Set(Object.keys(existing[0])) : null;
+  const filterToCols = (row) => {
+    if (!tableCols) return row;
+    const out = {};
+    for (const k of Object.keys(row)) if (tableCols.has(k)) out[k] = row[k];
+    return out;
+  };
+
   // 2) map the file rows (mapPlayer reads the same column names the API used;
   // prefer the cleaner registration fields where the file has both)
   const rows = raw
@@ -175,12 +186,18 @@ async function main() {
     .neq("id", "00000000-0000-0000-0000-000000000000");
   if (delErr) throw delErr;
 
+  const payload = rows.map(filterToCols);
+  const dropped = tableCols
+    ? [...new Set(rows.flatMap((r) => Object.keys(r)))].filter((k) => !tableCols.has(k))
+    : [];
+  if (dropped.length) console.log(`Columns not in table (skipped): ${dropped.join(", ")}`);
+
   const CHUNK = 200;
-  for (let i = 0; i < rows.length; i += CHUNK) {
-    const { error } = await supabase.from("scout_players").insert(rows.slice(i, i + CHUNK));
+  for (let i = 0; i < payload.length; i += CHUNK) {
+    const { error } = await supabase.from("scout_players").insert(payload.slice(i, i + CHUNK));
     if (error) throw error;
   }
-  console.log(`Done. Loaded ${rows.length} players from the official file; curation preserved.`);
+  console.log(`Done. Loaded ${payload.length} players from the official file; curation preserved.`);
 }
 
 main().catch((e) => {

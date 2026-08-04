@@ -50,7 +50,7 @@ export default async function SquadPage() {
   }));
 
   return (
-    <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-8">
+    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-5">
       <RetainedShowcase signings={signings} marquee={<MarqueeCards players={marquee} />} />
 
       <section className="mt-10 border-t border-border pt-8">

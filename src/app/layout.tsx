@@ -38,14 +38,14 @@ export default async function RootLayout({
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <header className="sticky top-0 z-30 border-b border-border/70 bg-[color-mix(in_srgb,var(--background)_80%,transparent)] backdrop-blur-xl">
-          <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-5">
+          <div className="mx-auto flex h-12 max-w-6xl items-center justify-between gap-3 px-4 sm:px-5">
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 text-[0.95rem] font-semibold tracking-tight"
+              className="inline-flex shrink-0 items-center gap-1.5 text-[0.95rem] font-semibold tracking-tight"
             >
               Spartans Scout <SpartansStars />
             </Link>
-            <nav className="flex items-center gap-6 text-[0.8rem] text-muted">
+            <nav className="flex items-center gap-4 overflow-x-auto whitespace-nowrap text-[0.8rem] text-muted sm:gap-6 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {/* cross-app link to the public Spartans ball library (root, not basePath) */}
               <a
                 href="https://www.ndpms.in/spartans"
@@ -61,7 +61,8 @@ export default async function RootLayout({
                     Pool
                   </Link>
                   <Link href="/squad" className="transition hover:text-foreground">
-                    Season 6 Squad
+                    <span className="sm:hidden">Squad</span>
+                    <span className="hidden sm:inline">Season 6 Squad</span>
                   </Link>
                   <Link href="/scout/import" className="transition hover:text-foreground">
                     Import

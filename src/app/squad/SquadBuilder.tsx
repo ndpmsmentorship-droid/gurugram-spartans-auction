@@ -242,8 +242,8 @@ export default function SquadBuilder({
                   {player ? (
                     <>
                       <div className="flex min-w-0 flex-1 flex-col">
-                        <div className="flex items-center gap-1.5">
-                          <span className="truncate font-semibold">{player.name}</span>
+                        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                          <span className="font-semibold text-[0.95rem]">{player.name}</span>
                           {player.isCaptain ? (
                             <span className="badge shrink-0" style={{ background: GOLD, color: "#1d1d1f" }}>
                               C
@@ -261,7 +261,7 @@ export default function SquadBuilder({
                             {player.category}
                           </span>
                         </div>
-                        <span className="truncate text-[0.72rem] text-muted">{player.role}</span>
+                        <span className="mt-0.5 text-[0.82rem] text-muted">{player.role}</span>
                       </div>
                       <span
                         className="shrink-0 rounded-full px-2.5 py-1 text-[0.72rem] font-semibold tabular-nums"
@@ -276,8 +276,8 @@ export default function SquadBuilder({
                   ) : signing ? (
                     <>
                       <div className="flex min-w-0 flex-1 flex-col">
-                        <div className="flex items-center gap-1.5">
-                          <span className="truncate font-semibold">{signing.name}</span>
+                        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                          <span className="font-semibold text-[0.95rem]">{signing.name}</span>
                           <span
                             className="badge shrink-0"
                             style={{ background: "var(--accent)", color: "var(--ink)" }}
@@ -298,7 +298,7 @@ export default function SquadBuilder({
                             </span>
                           ) : null}
                         </div>
-                        <span className="truncate text-[0.72rem] text-muted">
+                        <span className="mt-0.5 text-[0.82rem] text-muted">
                           {signing.role ?? "—"}
                         </span>
                       </div>

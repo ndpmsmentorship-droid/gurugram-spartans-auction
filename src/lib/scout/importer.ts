@@ -42,6 +42,8 @@ export type CleanPlayer = {
   three_w: number | null;
   five_w: number | null;
   dot_balls: number | null;
+  bowl_fours: number | null;
+  bowl_sixes: number | null;
   wides: number | null;
   noballs: number | null;
   catches: number | null;
@@ -91,6 +93,8 @@ const FIELD_ALIASES: Record<keyof CleanPlayer, string[]> = {
   three_w: ["3_wickets", "3w", "three wickets", "3 wickets"],
   five_w: ["5_wickets", "5w", "five wickets", "5 wickets"],
   dot_balls: ["dot_balls", "dot balls", "dots"],
+  bowl_fours: ["bowling_4s", "bowling 4s", "bowl 4s", "bowling fours", "fours conceded"],
+  bowl_sixes: ["bowling_6s", "bowling 6s", "bowl 6s", "bowling sixes", "sixes conceded"],
   wides: ["wides", "wide"],
   noballs: ["noballs", "no balls", "nb"],
   catches: ["catches", "ct", "catch", "fielding catches"],
@@ -104,7 +108,7 @@ const NUMERIC_FIELDS = new Set<keyof CleanPlayer>([
   "age", "bat_matches", "bat_innings", "not_out", "runs", "bat_avg", "bat_sr",
   "fifties", "hundreds", "fours", "sixes", "ducks", "bowl_matches", "bowl_innings",
   "overs", "maidens", "wickets", "bowl_runs", "economy", "bowl_avg", "bowl_sr",
-  "three_w", "five_w", "dot_balls", "wides", "noballs", "catches", "run_outs",
+  "three_w", "five_w", "dot_balls", "bowl_fours", "bowl_sixes", "wides", "noballs", "catches", "run_outs",
   "stumpings", "keeping_catches",
 ]);
 

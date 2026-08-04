@@ -48,6 +48,8 @@ async function replacePool(
     bowl_avg: p.bowl_avg,
     bowl_sr: p.bowl_sr,
     dot_balls: p.dot_balls,
+    bowl_fours: p.bowl_fours,
+    bowl_sixes: p.bowl_sixes,
     five_w: p.five_w,
     catches: p.catches,
     run_outs: p.run_outs,

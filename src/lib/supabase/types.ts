@@ -37,6 +37,8 @@ const SCOUT_NUMERIC = [
   "three_w",
   "five_w",
   "dot_balls",
+  "bowl_fours",
+  "bowl_sixes",
   "wides",
   "noballs",
   "catches",

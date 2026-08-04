@@ -26,6 +26,8 @@ export type RawStats = {
   bowl_avg: number | null;
   bowl_sr: number | null;
   dot_balls: number | null;
+  bowl_fours: number | null; // boundaries conceded (4s)
+  bowl_sixes: number | null; // boundaries conceded (6s)
   five_w: number | null;
   // fielding
   catches: number | null;
@@ -102,7 +104,8 @@ export type IndexScores = {
 export type DerivedMetrics = {
   boundaryPct: number | null;
   ballsPerBoundary: number | null;
-  dotBallShare: number | null;
+  dotBallPct: number | null; // bowling: dot balls / balls bowled (higher better)
+  boundaryConcededPct: number | null; // bowling: (4s+6s conceded) / balls (lower better)
   finishingRate: number | null;
   wicketsPerMatch: number | null;
   catchesPerMatch: number | null;
@@ -112,6 +115,14 @@ export type DerivedMetrics = {
 
 const num = (v: number | null | undefined): number | null =>
   v == null || Number.isNaN(v) ? null : v;
+
+// cricket overs X.Y = X overs + Y balls (Y is 0-5) -> total legal balls bowled
+const oversToBalls = (o: number | null): number | null => {
+  if (o == null) return null;
+  const whole = Math.floor(o);
+  const b = Math.round((o - whole) * 10);
+  return b > 5 ? null : whole * 6 + b;
+};
 
 // ---- derived advanced metrics ----------------------------------------------
 
@@ -126,6 +137,10 @@ export function deriveMetrics(s: RawStats): DerivedMetrics {
   const catches = num(s.catches);
   const runOuts = num(s.run_outs);
   const stumpings = num(s.stumpings);
+  const balls = oversToBalls(num(s.overs));
+  const dots = num(s.dot_balls);
+  const bowlFours = num(s.bowl_fours);
+  const bowlSixes = num(s.bowl_sixes);
 
   const boundaryRuns =
     fours != null && sixes != null ? fours * 4 + sixes * 6 : null;
@@ -144,7 +159,12 @@ export function deriveMetrics(s: RawStats): DerivedMetrics {
       ballsFaced != null && boundaries != null && boundaries > 0
         ? ballsFaced / boundaries
         : null,
-    dotBallShare: num(s.dot_balls), // more dots = better bowler; used as-is percentile
+    dotBallPct:
+      balls != null && balls > 0 && dots != null ? (dots / balls) * 100 : null,
+    boundaryConcededPct:
+      balls != null && balls > 0 && bowlFours != null && bowlSixes != null
+        ? ((bowlFours + bowlSixes) / balls) * 100
+        : null,
     finishingRate:
       notOut != null && innings != null && innings > 0
         ? (notOut / innings) * 100
@@ -194,7 +214,7 @@ function percentileColumn(values: (number | null)[], invert = false): (number | 
 // ---- weights (documented, tunable) -----------------------------------------
 
 const BAT_W = { avg: 25, sr: 25, runs: 15, boundary: 15, conversion: 10, finishing: 10 };
-const BOWL_W = { economy: 25, wickets: 20, avg: 20, sr: 15, dots: 10, fiveW: 10 };
+const BOWL_W = { economy: 20, boundaryConc: 12, dots: 12, wickets: 18, avg: 16, sr: 14, fiveW: 8 };
 const FIELD_W = { catches: 60, runOuts: 40 };
 const KEEP_W = { stumpings: 55, catches: 45 };
 
@@ -279,7 +299,11 @@ export function computeIndices(players: RawStats[]): IndexScores[] {
     players.map((p) => blendRate(num(p.recent_bowl_sr ?? null), num(p.bowl_sr))),
     true
   );
-  const pDots = percentileColumn(players.map((p) => num(p.dot_balls)));
+  const pDots = percentileColumn(derived.map((d) => d.dotBallPct));
+  const pBoundaryConc = percentileColumn(
+    derived.map((d) => d.boundaryConcededPct),
+    true // lower % of balls hit for boundary = better
+  );
   const pFiveW = percentileColumn(players.map((p) => num(p.five_w)));
 
   // fielding & keeping
@@ -314,10 +338,11 @@ export function computeIndices(players: RawStats[]): IndexScores[] {
     const bowl =
       blend([
         { pct: pull(pEcon[i], bowlOk), w: BOWL_W.economy },
+        { pct: pull(pBoundaryConc[i], bowlOk), w: BOWL_W.boundaryConc },
+        { pct: pull(pDots[i], bowlOk), w: BOWL_W.dots },
         { pct: pWkts[i], w: BOWL_W.wickets },
         { pct: pull(pBowlAvg[i], bowlOk), w: BOWL_W.avg },
         { pct: pull(pBowlSr[i], bowlOk), w: BOWL_W.sr },
-        { pct: pDots[i], w: BOWL_W.dots },
         { pct: pFiveW[i], w: BOWL_W.fiveW },
       ]) ?? 0;
 

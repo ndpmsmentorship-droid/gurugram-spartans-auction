@@ -53,6 +53,8 @@ export function mapPlayer(p) {
     three_w: n(p["3_wickets"]),
     five_w: n(p["5_wickets"]),
     dot_balls: n(p.dot_balls),
+    bowl_fours: n(p.bowling_4s),
+    bowl_sixes: n(p.bowling_6s),
     wides: n(p.wides),
     noballs: n(p.noballs),
     catches: n(p.Catches),
@@ -69,7 +71,8 @@ export function toRaw(r) {
     hundreds: r.hundreds, fours: r.fours, sixes: r.sixes,
     bowl_matches: r.bowl_matches, overs: r.overs, wickets: r.wickets,
     economy: r.economy, bowl_avg: r.bowl_avg, bowl_sr: r.bowl_sr,
-    dot_balls: r.dot_balls, five_w: r.five_w, catches: r.catches,
+    dot_balls: r.dot_balls, bowl_fours: r.bowl_fours, bowl_sixes: r.bowl_sixes,
+    five_w: r.five_w, catches: r.catches,
     run_outs: r.run_outs, is_keeper: r.is_keeper, stumpings: r.stumpings,
     keeping_catches: r.keeping_catches, primary_role: r.primary_role,
   };

@@ -23,6 +23,8 @@ function toRawStats(r: ScoutPlayerRow): RawStats {
     bowl_avg: r.bowl_avg,
     bowl_sr: r.bowl_sr,
     dot_balls: r.dot_balls,
+    bowl_fours: r.bowl_fours,
+    bowl_sixes: r.bowl_sixes,
     five_w: r.five_w,
     catches: r.catches,
     run_outs: r.run_outs,

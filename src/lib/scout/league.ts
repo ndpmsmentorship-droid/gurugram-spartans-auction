@@ -102,6 +102,8 @@ function toCleanPlayer(p: LeagueRow): CleanPlayer {
     three_w: num(p["3_wickets"]),
     five_w: num(p["5_wickets"]),
     dot_balls: num(p["dot_balls"]),
+    bowl_fours: num(p["bowling_4s"]),
+    bowl_sixes: num(p["bowling_6s"]),
     wides: num(p["wides"]),
     noballs: num(p["noballs"]),
     catches: num(p["Catches"]),

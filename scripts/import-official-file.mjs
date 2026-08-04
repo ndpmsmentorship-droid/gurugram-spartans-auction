@@ -12,7 +12,7 @@
 // Env: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 // Sheet: the players sheet is auto-detected (most rows / has a "fullName" col).
 
-import { writeFileSync } from "node:fs";
+import { writeFileSync, readFileSync } from "node:fs";
 import XLSX from "xlsx"; // CJS default export (has readFile/utils) under Node ESM
 import { createClient } from "@supabase/supabase-js";
 import { computeIndices } from "../src/lib/scout/rankings.ts";
@@ -50,9 +50,14 @@ const croId = (link) => {
   const m = String(link).match(/player-profile\/(\d+)/);
   return m ? m[1] : null;
 };
-const identity = (row) =>
-  croId(row.cricheroes_link) ||
-  (row.full_name || "").trim().toLowerCase().replace(/\s+/g, " ");
+const nameKey = (name) => (name || "").trim().toLowerCase().replace(/\s+/g, " ");
+// Match on the CricHeroes id first (stable across name edits) but ALSO index by
+// name, so curation still lands when a player's CricHeroes id changes between
+// registration exports (which is what briefly dropped a marquee last refresh).
+const croKey = (row) => {
+  const id = croId(row.cricheroes_link);
+  return id ? `cro:${id}` : null;
+};
 
 // "Right-hand bat" → "RHB", "Left-hand bat" → "LHB"
 const battingHand = (v) => {
@@ -103,12 +108,19 @@ async function main() {
     writeFileSync(backupPath, JSON.stringify(existing, null, 2));
     console.log(`Backed up ${existing.length} rows to ${backupPath}`);
   }
+  // Index preserved curation by BOTH CricHeroes id and name, so a returning
+  // player is matched even if one of those changed in the new export.
   const preserve = new Map();
   for (const e of existing || []) {
     const kept = {};
     for (const f of PRESERVE_FIELDS) if (e[f] != null) kept[f] = e[f];
-    preserve.set(identity(e), kept);
+    if (!Object.keys(kept).length) continue;
+    const ck = croKey(e);
+    if (ck) preserve.set(ck, kept);
+    preserve.set(`name:${nameKey(e.full_name)}`, kept);
   }
+  const lookupPreserved = (r) =>
+    preserve.get(croKey(r)) || preserve.get(`name:${nameKey(r.full_name)}`) || null;
   const prevMarquee = (existing || []).filter((e) => e.is_marquee).length;
   const prevCat = (existing || []).filter((e) => e.scout_category).length;
   const prevBought = (existing || []).filter((e) => e.is_bought).length;
@@ -155,16 +167,55 @@ async function main() {
   const idx = computeIndices(rows.map(toRaw));
   rows.forEach((r, i) => Object.assign(r, idx[i]));
 
-  // 3) carry curation onto returning players
+  // 3) carry curation onto returning players (CricHeroes id, else name)
   let carried = 0;
   for (const r of rows) {
-    const kept = preserve.get(identity(r));
+    const kept = lookupPreserved(r);
     if (kept && Object.keys(kept).length) {
       Object.assign(r, kept);
       carried++;
     }
   }
   console.log(`Carried curation onto ${carried} returning players.`);
+
+  // 3b) overlay the committed lock manifest — marquee picks and mock buys the
+  // owner has locked in are re-applied on every refresh (matched by CricHeroes
+  // id, else name), so they can never be lost to a registration-list update.
+  try {
+    const lockUrl = new URL("./curation.lock.json", import.meta.url);
+    const lock = JSON.parse(readFileSync(lockUrl, "utf8"));
+    const byCro = new Map();
+    const byName = new Map();
+    for (const r of rows) {
+      const ck = croKey(r);
+      if (ck) byCro.set(ck, r);
+      byName.set(nameKey(r.full_name), r);
+    }
+    let applied = 0;
+    const missing = [];
+    for (const L of lock.players || []) {
+      const target = byCro.get(croKey(L)) || byName.get(nameKey(L.full_name));
+      if (!target) {
+        missing.push(L.full_name);
+        continue;
+      }
+      if (L.is_marquee) target.is_marquee = true;
+      if (L.is_bought) {
+        target.is_bought = true;
+        if (L.bought_price != null) target.bought_price = L.bought_price;
+        if (L.suggested_batting_order != null)
+          target.suggested_batting_order = L.suggested_batting_order;
+      }
+      if (L.scout_category != null) target.scout_category = L.scout_category;
+      applied++;
+    }
+    console.log(
+      `Lock: re-applied ${applied}/${(lock.players || []).length} locked players` +
+        (missing.length ? ` — not in this file: ${missing.join(", ")}` : "")
+    );
+  } catch (e) {
+    console.log(`Lock: skipped (${e.message})`);
+  }
 
   const lhb = rows.filter((r) => r.batting_style === "LHB").length;
   const withBowl = rows.filter((r) => r.bowling_style).length;

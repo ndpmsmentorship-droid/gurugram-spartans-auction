@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -57,6 +58,8 @@ export default async function PlayerDetailPage({
 
   const round1 = (v: number | null | undefined) =>
     v == null ? "—" : Math.round(v * 10) / 10;
+  const fmt = (v: number | null | undefined) =>
+    v == null ? "—" : Math.round(v).toLocaleString("en-IN");
 
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-8">
@@ -138,82 +141,105 @@ export default async function PlayerDetailPage({
           </div>
         </section>
 
-        {/* advanced stats */}
-        <section className="card">
-          <p className="eyebrow mb-2">Advanced metrics</p>
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-            <Stat label="Bat avg" value={round1(player.bat_avg)} />
-            <Stat label="Strike rate" value={round1(player.bat_sr)} />
-            <Stat label="Balls / boundary" value={round1(metrics.ballsPerBoundary)} />
-            <Stat label="Finishing %" value={round1(metrics.finishingRate)} />
-            <Stat label="Runs" value={round1(player.runs)} />
-            <Stat label="Wickets" value={round1(player.wickets)} />
-            <Stat label="Economy" value={round1(player.economy)} />
-            <Stat label="Bowl avg" value={round1(player.bowl_avg)} />
-            <Stat label="Wkts / match" value={round1(metrics.wicketsPerMatch)} />
-          </dl>
-        </section>
-      </div>
-
-      {/* infographic: boundary %, dot ball %, fielding — sized by where the
-          player sits in the pool for each metric (higher fill = better) */}
-      <div className="mt-6 grid gap-6 md:grid-cols-3">
-        <section className="card">
-          <p className="eyebrow mb-3">Batting shape</p>
+        {/* batting stat tiles + boundary % */}
+        <StatSection
+          title="Batting"
+          indexScore={player.bat_index}
+          rank={rankedSelf.bat_rank}
+          tiles={[
+            { label: "Matches", value: fmt(player.bat_matches) },
+            { label: "Innings", value: fmt(player.bat_innings) },
+            { label: "Runs", value: fmt(player.runs) },
+            { label: "Avg", value: round1(player.bat_avg) },
+            { label: "SR", value: round1(player.bat_sr) },
+            { label: "HS", value: player.highest_score || "—" },
+            { label: "50s", value: fmt(player.fifties) },
+            { label: "100s", value: fmt(player.hundreds) },
+            { label: "4s", value: fmt(player.fours) },
+            { label: "6s", value: fmt(player.sixes) },
+            { label: "Not out", value: fmt(player.not_out) },
+            { label: "Ducks", value: fmt(player.ducks) },
+          ]}
+        >
           <MetricBar
             label="Boundary %"
             hint="runs from 4s/6s"
             value={metrics.boundaryPct}
             percentile={pctBoundaryBat}
           />
-        </section>
+        </StatSection>
+      </div>
 
-        <section className="card">
-          <p className="eyebrow mb-3">Bowling control</p>
-          <div className="flex flex-col gap-3">
-            <MetricBar
-              label="Dot ball %"
-              hint="of balls bowled"
-              value={metrics.dotBallPct}
-              percentile={pctDotBall}
-            />
-            <MetricBar
-              label="Boundary % conceded"
-              hint="lower is better"
-              value={metrics.boundaryConcededPct}
-              percentile={pctBoundaryConceded}
-            />
-          </div>
-        </section>
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        {/* bowling stat tiles + control bars */}
+        <StatSection
+          title="Bowling"
+          indexScore={player.bowl_index}
+          rank={rankedSelf.bowl_rank}
+          tiles={[
+            { label: "Matches", value: fmt(player.bowl_matches) },
+            { label: "Overs", value: round1(player.overs) },
+            { label: "Wickets", value: fmt(player.wickets) },
+            { label: "Econ", value: round1(player.economy) },
+            { label: "Avg", value: round1(player.bowl_avg) },
+            { label: "SR", value: round1(player.bowl_sr) },
+            { label: "3W", value: fmt(player.three_w) },
+            { label: "5W", value: fmt(player.five_w) },
+            { label: "Maidens", value: fmt(player.maidens) },
+            { label: "Dots", value: fmt(player.dot_balls) },
+            { label: "Runs", value: fmt(player.bowl_runs) },
+          ]}
+        >
+          <MetricBar
+            label="Dot ball %"
+            hint="of balls bowled"
+            value={metrics.dotBallPct}
+            percentile={pctDotBall}
+          />
+          <MetricBar
+            label="Boundary % conceded"
+            hint="lower is better"
+            value={metrics.boundaryConcededPct}
+            percentile={pctBoundaryConceded}
+          />
+        </StatSection>
 
-        <section className="card">
-          <p className="eyebrow mb-3">Fielding</p>
-          <div className="flex flex-col gap-3">
+        {/* fielding stat tiles + per-match bars */}
+        <StatSection
+          title="Fielding"
+          indexScore={player.field_index}
+          rank={rankedSelf.field_rank}
+          tiles={[
+            { label: "Catches", value: fmt(player.catches) },
+            { label: "Run-outs", value: fmt(player.run_outs) },
+            { label: "Stumpings", value: fmt(player.stumpings) },
+            { label: "WK catches", value: fmt(player.keeping_catches) },
+          ]}
+        >
+          <MetricBar
+            label="Catches / match"
+            value={metrics.catchesPerMatch}
+            decimals={2}
+            unit=""
+            percentile={pctCatches}
+          />
+          <MetricBar
+            label="Run-outs / match"
+            value={metrics.runOutsPerMatch}
+            decimals={2}
+            unit=""
+            percentile={pctRunOuts}
+          />
+          {player.is_keeper || player.stumpings != null ? (
             <MetricBar
-              label="Catches / match"
-              value={metrics.catchesPerMatch}
+              label="Stumpings / match"
+              value={metrics.stumpingsPerMatch}
               decimals={2}
               unit=""
-              percentile={pctCatches}
+              percentile={pctStumpings}
             />
-            <MetricBar
-              label="Run-outs / match"
-              value={metrics.runOutsPerMatch}
-              decimals={2}
-              unit=""
-              percentile={pctRunOuts}
-            />
-            {player.is_keeper || player.stumpings != null ? (
-              <MetricBar
-                label="Stumpings / match"
-                value={metrics.stumpingsPerMatch}
-                decimals={2}
-                unit=""
-                percentile={pctStumpings}
-              />
-            ) : null}
-          </div>
-        </section>
+          ) : null}
+        </StatSection>
       </div>
 
       {/* buy */}
@@ -355,11 +381,57 @@ function MetricBar({
   );
 }
 
-function Stat({ label, value }: { label: string; value: string | number }) {
+// A single CricHeroes-style stat tile: bold number over a small label.
+function Tile({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="flex items-center justify-between border-b border-border pb-1">
-      <dt className="text-muted">{label}</dt>
-      <dd className="font-medium tabular-nums">{value}</dd>
+    <div className="rounded-[12px] bg-wash px-1.5 py-2.5 text-center">
+      <p className="font-display text-[1.3rem] font-bold leading-none tabular-nums">
+        {value === "" ? "—" : value}
+      </p>
+      <p className="mt-1 text-[0.58rem] font-medium uppercase leading-tight tracking-wide text-muted">
+        {label}
+      </p>
     </div>
+  );
+}
+
+// A titled section: sub-index chip, a grid of career stat tiles, then the
+// pool-relative percentile bars (passed as children).
+function StatSection({
+  title,
+  indexScore,
+  rank,
+  tiles,
+  children,
+}: {
+  title: string;
+  indexScore: number | null;
+  rank: number | null;
+  tiles: { label: string; value: string | number }[];
+  children?: ReactNode;
+}) {
+  return (
+    <section className="card">
+      <div className="flex items-center justify-between gap-2">
+        <p className="eyebrow">{title}</p>
+        {indexScore != null ? (
+          <span className="badge" style={{ background: "var(--wash)", color: ACCENT }}>
+            {Math.round(indexScore)}
+            <span className="text-muted">/100</span>
+            {rank != null && rank < 9999 ? (
+              <span className="ml-1 text-muted">· #{rank}</span>
+            ) : null}
+          </span>
+        ) : null}
+      </div>
+      <div className="mt-3 grid grid-cols-4 gap-1.5">
+        {tiles.map((t) => (
+          <Tile key={t.label} label={t.label} value={t.value} />
+        ))}
+      </div>
+      {children ? (
+        <div className="mt-3 flex flex-col gap-3 border-t border-border pt-3">{children}</div>
+      ) : null}
+    </section>
   );
 }

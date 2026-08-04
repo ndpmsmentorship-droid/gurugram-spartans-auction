@@ -192,7 +192,7 @@ export function deriveMetrics(s: RawStats): DerivedMetrics {
 
 // Percentile of each value within the set of non-null values (0-100).
 // `invert` flips it so that LOWER raw values score higher (economy, bowl avg).
-function percentileColumn(values: (number | null)[], invert = false): (number | null)[] {
+export function percentileColumn(values: (number | null)[], invert = false): (number | null)[] {
   const present = values.filter((v): v is number => v != null).sort((a, b) => a - b);
   if (present.length === 0) return values.map(() => null);
   if (present.length === 1) return values.map((v) => (v == null ? null : 50));

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { rankPlayers } from "@/lib/scout/ranks";
 import { computeAnalytics, type AnalyticsInput } from "@/lib/scout/analytics";
-import { deriveMetrics, type RawStats } from "@/lib/scout/rankings";
+import { deriveMetrics, percentileColumn, type RawStats } from "@/lib/scout/rankings";
 import type { ScoutPlayerRow } from "@/lib/supabase/types";
 import Radar from "../Radar";
 import BuyControl from "./BuyControl";
@@ -39,6 +39,21 @@ export default async function PlayerDetailPage({
   const a = analytics.get(id)!;
   const metrics = deriveMetrics(player as unknown as RawStats);
   const byId = new Map(pool.map((p) => [p.id, p]));
+
+  // Pool-wide percentiles for the "infographic" bars below — same normalization
+  // the index engine uses, so a bar's fill matches how the metric actually
+  // scores. `invert` = true where a LOWER raw value is better.
+  const poolDerived = pool.map((p) => deriveMetrics(p as unknown as RawStats));
+  const selfIdx = pool.findIndex((p) => p.id === id);
+  const pctAt = (col: (number | null)[]) => col[selfIdx];
+  const pctBoundaryBat = pctAt(percentileColumn(poolDerived.map((m) => m.boundaryPct)));
+  const pctDotBall = pctAt(percentileColumn(poolDerived.map((m) => m.dotBallPct)));
+  const pctBoundaryConceded = pctAt(
+    percentileColumn(poolDerived.map((m) => m.boundaryConcededPct), true)
+  );
+  const pctCatches = pctAt(percentileColumn(poolDerived.map((m) => m.catchesPerMatch)));
+  const pctRunOuts = pctAt(percentileColumn(poolDerived.map((m) => m.runOutsPerMatch)));
+  const pctStumpings = pctAt(percentileColumn(poolDerived.map((m) => m.stumpingsPerMatch)));
 
   const round1 = (v: number | null | undefined) =>
     v == null ? "—" : Math.round(v * 10) / 10;
@@ -129,7 +144,6 @@ export default async function PlayerDetailPage({
           <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
             <Stat label="Bat avg" value={round1(player.bat_avg)} />
             <Stat label="Strike rate" value={round1(player.bat_sr)} />
-            <Stat label="Boundary %" value={round1(metrics.boundaryPct)} />
             <Stat label="Balls / boundary" value={round1(metrics.ballsPerBoundary)} />
             <Stat label="Finishing %" value={round1(metrics.finishingRate)} />
             <Stat label="Runs" value={round1(player.runs)} />
@@ -137,9 +151,68 @@ export default async function PlayerDetailPage({
             <Stat label="Economy" value={round1(player.economy)} />
             <Stat label="Bowl avg" value={round1(player.bowl_avg)} />
             <Stat label="Wkts / match" value={round1(metrics.wicketsPerMatch)} />
-            <Stat label="Catches / match" value={round1(metrics.catchesPerMatch)} />
-            <Stat label="Stumpings / match" value={round1(metrics.stumpingsPerMatch)} />
           </dl>
+        </section>
+      </div>
+
+      {/* infographic: boundary %, dot ball %, fielding — sized by where the
+          player sits in the pool for each metric (higher fill = better) */}
+      <div className="mt-6 grid gap-6 md:grid-cols-3">
+        <section className="card">
+          <p className="eyebrow mb-3">Batting shape</p>
+          <MetricBar
+            label="Boundary %"
+            hint="runs from 4s/6s"
+            value={metrics.boundaryPct}
+            percentile={pctBoundaryBat}
+          />
+        </section>
+
+        <section className="card">
+          <p className="eyebrow mb-3">Bowling control</p>
+          <div className="flex flex-col gap-3">
+            <MetricBar
+              label="Dot ball %"
+              hint="of balls bowled"
+              value={metrics.dotBallPct}
+              percentile={pctDotBall}
+            />
+            <MetricBar
+              label="Boundary % conceded"
+              hint="lower is better"
+              value={metrics.boundaryConcededPct}
+              percentile={pctBoundaryConceded}
+            />
+          </div>
+        </section>
+
+        <section className="card">
+          <p className="eyebrow mb-3">Fielding</p>
+          <div className="flex flex-col gap-3">
+            <MetricBar
+              label="Catches / match"
+              value={metrics.catchesPerMatch}
+              decimals={2}
+              unit=""
+              percentile={pctCatches}
+            />
+            <MetricBar
+              label="Run-outs / match"
+              value={metrics.runOutsPerMatch}
+              decimals={2}
+              unit=""
+              percentile={pctRunOuts}
+            />
+            {player.is_keeper || player.stumpings != null ? (
+              <MetricBar
+                label="Stumpings / match"
+                value={metrics.stumpingsPerMatch}
+                decimals={2}
+                unit=""
+                percentile={pctStumpings}
+              />
+            ) : null}
+          </div>
         </section>
       </div>
 
@@ -224,6 +297,60 @@ function RankPill({
           <span className="ml-1 text-xs font-normal text-muted">#{rank}</span>
         )}
       </p>
+    </div>
+  );
+}
+
+// A labelled bar sized by the player's percentile within the pool for that
+// metric (0-100, already pre-inverted upstream so higher fill = better).
+function MetricBar({
+  label,
+  hint,
+  value,
+  percentile,
+  decimals = 1,
+  unit = "%",
+}: {
+  label: string;
+  hint?: string;
+  value: number | null;
+  percentile: number | null;
+  decimals?: number;
+  unit?: string;
+}) {
+  const fill = percentile == null ? 0 : Math.max(2, Math.min(100, percentile));
+  const color =
+    percentile == null
+      ? "var(--muted)"
+      : percentile >= 66
+        ? "var(--up)"
+        : percentile >= 33
+          ? ACCENT
+          : "var(--down)";
+  return (
+    <div>
+      <div className="flex items-baseline justify-between gap-2 text-sm">
+        <span className="text-muted">
+          {label}
+          {hint ? <span className="text-xs"> · {hint}</span> : null}
+        </span>
+        <span className="shrink-0 font-semibold tabular-nums">
+          {value == null ? "—" : `${value.toFixed(decimals)}${unit}`}
+        </span>
+      </div>
+      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-wash">
+        <div
+          className="h-full rounded-full transition-[width]"
+          style={{ width: `${fill}%`, background: color }}
+        />
+      </div>
+      {percentile != null ? (
+        <p className="mt-0.5 text-[0.65rem] text-muted">
+          Top {Math.max(1, Math.round(100 - percentile))}% of the pool
+        </p>
+      ) : (
+        <p className="mt-0.5 text-[0.65rem] text-muted">No data</p>
+      )}
     </div>
   );
 }

@@ -43,3 +43,6 @@ scripts/cleaned_players.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local pool backups written by refresh-sarda-preserve.mjs
+pool-backup-*.json

@@ -234,6 +234,8 @@ export default function RetainedShowcase({
           defaultBudget={SQUAD_RULES.budget}
           squadSize={SQUAD_RULES.squadSize}
           maxSquad={SQUAD_RULES.maxSquad}
+          maxA={SQUAD_RULES.maxCategoryA}
+          maxU35={SQUAD_RULES.maxU35}
           retainedCount={RETAINED.length}
           marquee={marquee}
         >

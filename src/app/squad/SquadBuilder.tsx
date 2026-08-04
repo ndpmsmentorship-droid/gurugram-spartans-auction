@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { isGradeA, isU35, tierStyle } from "@/lib/scout/tier";
 
 const WARM = "linear-gradient(135deg, #FF8A3D 0%, #E0453A 100%)";
 const WARM_INK = "#D2451F";
@@ -16,7 +17,7 @@ export type SquadPursePlayer = {
   isCaptain: boolean;
   isKeeper: boolean;
   isGold?: boolean;
-  category: string;
+  category: string; // SCCL auction tier (U35A / 35+A / U35B / 35+B / Legend)
 };
 
 // A player bought at the auction — fills the squad/bench positions the retained
@@ -28,10 +29,59 @@ export type Signing = {
   isKeeper: boolean;
   order: number | null;
   price: number | null;
-  category: string | null;
+  category: string | null; // playing-style category (Top Order, Off Break…)
+  tier: string | null; // SCCL auction tier (U35A / 35+A / U35B / 35+B)
 };
 
 const inr = (n: number) => "₹" + Math.round(n).toLocaleString("en-IN");
+
+// One SCCL composition cap (e.g. A-category 4/6) with pip dots that turn red
+// once the cap is breached.
+function CapMeter({
+  label,
+  hint,
+  used,
+  max,
+  over,
+}: {
+  label: string;
+  hint: string;
+  used: number;
+  max: number;
+  over: boolean;
+}) {
+  const total = Math.max(max, used);
+  return (
+    <div className="flex-1 rounded-[12px] bg-wash px-3 py-2.5">
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="text-[0.7rem] font-semibold uppercase tracking-wide text-muted">{label}</span>
+        <span
+          className="font-display text-sm font-bold tabular-nums"
+          style={{ color: over ? "var(--down)" : "var(--foreground)" }}
+        >
+          {used}/{max}
+        </span>
+      </div>
+      <div className="mt-2 flex gap-1">
+        {Array.from({ length: total }).map((_, i) => (
+          <span
+            key={i}
+            className="h-1.5 flex-1 rounded-full"
+            style={{
+              minWidth: 6,
+              background:
+                i < used ? (over ? "var(--down)" : "#E0453A") : "var(--surface)",
+              boxShadow: i < used ? "none" : "inset 0 0 0 1px var(--border)",
+            }}
+          />
+        ))}
+      </div>
+      <p className="mt-1.5 text-[0.66rem]" style={{ color: over ? "var(--down)" : "var(--muted)" }}>
+        {over ? `Over the cap — ${hint}` : hint}
+      </p>
+    </div>
+  );
+}
 
 // tinted pill for the SCCL category (A tiers warm, Legend gold, B/other neutral)
 const catStyle = (c: string): { background: string; color: string } =>
@@ -47,6 +97,8 @@ export default function SquadBuilder({
   defaultBudget,
   squadSize,
   maxSquad,
+  maxA,
+  maxU35,
   retainedCount,
   marquee,
   children,
@@ -56,6 +108,8 @@ export default function SquadBuilder({
   defaultBudget: number;
   squadSize: number; // positions shown in the full list (rest are bench cards)
   maxSquad: number;
+  maxA: number; // SCCL cap: A-category players in the Playing 13
+  maxU35: number; // SCCL cap: players aged 30–35 (U35) per squad
   retainedCount: number;
   marquee?: ReactNode; // marquee "must buy" targets, rendered under the list
   children?: ReactNode; // player cards, rendered in the middle section
@@ -136,6 +190,18 @@ export default function SquadBuilder({
     players.reduce((s, p) => s + (costs[p.id] ?? 0), 0) +
     signings.reduce((s, x) => s + (costs[x.id] ?? 0), 0);
   const remaining = budget - spent;
+
+  // SCCL composition caps: ≤ maxA 'A'-category (Playing 13) and ≤ maxU35 players
+  // aged 30–35 (U35), counted across the whole built squad (retained + buys).
+  const retainedIdSet = new Set(players.map((p) => p.id));
+  const squadTiers = [
+    ...players.map((p) => p.category),
+    ...signings.filter((s) => !retainedIdSet.has(s.id)).map((s) => s.tier),
+  ];
+  const aCount = squadTiers.filter(isGradeA).length;
+  const u35Count = squadTiers.filter(isU35).length;
+  const aOver = aCount > maxA;
+  const u35Over = u35Count > maxU35;
   const openSlots = Math.max(0, maxSquad - retainedCount);
   const perSlot = openSlots > 0 ? remaining / openSlots : 0;
   const pct = budget > 0 ? Math.min(100, Math.max(0, (spent / budget) * 100)) : 0;
@@ -216,6 +282,24 @@ export default function SquadBuilder({
               </p>
             ) : null}
           </div>
+        </div>
+
+        {/* SCCL composition caps */}
+        <div className="flex flex-wrap gap-2 border-b border-border px-3 py-3 sm:px-5">
+          <CapMeter
+            label="A category"
+            hint={`max ${maxA} in the Playing 13`}
+            used={aCount}
+            max={maxA}
+            over={aOver}
+          />
+          <CapMeter
+            label="U35 (30–35)"
+            hint={`max ${maxU35} per squad`}
+            used={u35Count}
+            max={maxU35}
+            over={u35Over}
+          />
         </div>
 
         {/* probable order list */}
@@ -301,6 +385,18 @@ export default function SquadBuilder({
                               WK
                             </span>
                           ) : null}
+                          {(() => {
+                            const ts = tierStyle(signing.tier);
+                            return ts ? (
+                              <span
+                                className="badge shrink-0"
+                                style={{ background: ts.bg, color: ts.fg }}
+                                title="Organizers' auction category"
+                              >
+                                {signing.tier}
+                              </span>
+                            ) : null;
+                          })()}
                           {signing.category ? (
                             <span className="badge shrink-0" style={catStyle(signing.category)}>
                               {signing.category}

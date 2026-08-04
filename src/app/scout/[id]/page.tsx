@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { rankPlayers } from "@/lib/scout/ranks";
 import { computeAnalytics, type AnalyticsInput } from "@/lib/scout/analytics";
 import { deriveMetrics, percentileColumn, type RawStats } from "@/lib/scout/rankings";
+import { tierStyle, handSkill } from "@/lib/scout/tier";
 import type { ScoutPlayerRow } from "@/lib/supabase/types";
 import Radar from "../Radar";
 import BuyControl from "./BuyControl";
@@ -85,7 +86,24 @@ export default async function PlayerDetailPage({
             </a>
           )}
           <div className="mt-2 flex flex-wrap items-center gap-2">
+            {(() => {
+              const ts = tierStyle(player.auction_category);
+              return ts ? (
+                <span
+                  className="badge font-bold uppercase tracking-wide"
+                  style={{ background: ts.bg, color: ts.fg }}
+                  title="Organizers' auction category"
+                >
+                  {player.auction_category}
+                </span>
+              ) : null;
+            })()}
             <span className="badge bg-wash text-accent-text">{a.archetype}</span>
+            {handSkill(player.batting_style, player.bowling_style) ? (
+              <span className="badge bg-wash text-muted">
+                {handSkill(player.batting_style, player.bowling_style)}
+              </span>
+            ) : null}
             {a.riskFlags.map((f) => (
               <span
                 key={f.label}

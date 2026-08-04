@@ -5,12 +5,16 @@ import { useMemo, useState, useTransition } from "react";
 import type { RankedPlayer } from "@/lib/scout/ranks";
 import type { RiskFlag } from "@/lib/scout/analytics";
 import { CATEGORIES, CATEGORY_META, type Category } from "@/lib/scout/category";
+import { tierStyle } from "@/lib/scout/tier";
 import { markBought, unmarkBought, setRejected, setMarquee } from "./actions";
 
 export type PoolPlayer = RankedPlayer<{
   id: string;
   full_name: string;
   primary_role: string | null;
+  auction_category: string | null;
+  batting_style: string | null;
+  bowling_style: string | null;
   cricheroes_link: string | null;
   is_keeper: boolean;
   is_bought: boolean;
@@ -306,6 +310,18 @@ function Row({ p }: { p: PoolPlayer }) {
           </span>
         )}
         <span className="mt-0.5 flex flex-wrap items-center gap-1.5">
+          {(() => {
+            const ts = tierStyle(p.auction_category);
+            return ts ? (
+              <span
+                className="inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+                style={{ background: ts.bg, color: ts.fg }}
+                title="Organizers' auction category"
+              >
+                {p.auction_category}
+              </span>
+            ) : null;
+          })()}
           <span
             className="inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold"
             style={{ background: CATEGORY_META[p.category].bg, color: CATEGORY_META[p.category].fg }}

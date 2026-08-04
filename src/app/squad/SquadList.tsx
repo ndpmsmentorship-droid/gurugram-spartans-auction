@@ -7,6 +7,7 @@ export type SquadPlayer = {
   id: string;
   full_name: string;
   primary_role: string | null;
+  auction_category: string | null;
   is_keeper: boolean;
   bought_price: number | null;
   utility_tag: string | null;

@@ -72,6 +72,9 @@ export type ScoutPlayerRow = ScoutNumericCols & {
   id: string;
   full_name: string;
   primary_role: string | null;
+  batting_style: string | null;
+  bowling_style: string | null;
+  auction_category: string | null;
   photo_url: string | null;
   cricheroes_link: string | null;
   email: string | null;
@@ -92,6 +95,9 @@ export type ScoutPlayerInsert = Partial<ScoutNumericCols> & {
   id?: string;
   full_name: string;
   primary_role?: string | null;
+  batting_style?: string | null;
+  bowling_style?: string | null;
+  auction_category?: string | null;
   photo_url?: string | null;
   cricheroes_link?: string | null;
   email?: string | null;

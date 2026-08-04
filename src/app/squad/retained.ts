@@ -24,12 +24,19 @@ export type RetainedPlayer = {
   field: { catches: number; stumpings: number };
 };
 
+// Caps come straight from the SCCL 6 Schedule & Regulations:
+//   • Playing 13: max 6 'A', 1 Legend, 6 'B'
+//   • Max 3 players aged 30–35 (U35) per squad  (buy up to 4, only 3 play/match)
+//   • Squad: min 16, max 20 (incl. owners, retained & legend); Playing XI = 13
+//   • Max bid 50,000/player; base price A 15K / B 5K
 export const SQUAD_RULES = {
-  maxCategoryA: 6,
+  maxCategoryA: 6, // A-category players allowed in the Playing 13
+  maxU35: 3, // players aged 30–35 (U35) allowed per squad
+  maxBid: 50000, // ceiling per player at auction
   minSquad: 16,
-  squadSize: 14, // main probable XI/squad shown as the full list
-  benchSize: 4, // friends we buy but who won't make the squad (small cards)
-  maxSquad: 18, // squadSize + benchSize
+  squadSize: 13, // Playing 13 — shown as the full probable list
+  benchSize: 7, // bought beyond the XIII (small cards)
+  maxSquad: 20, // squadSize + benchSize
   budget: 350000,
 } as const;
 

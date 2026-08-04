@@ -12,7 +12,7 @@ export default async function SquadPage() {
   const { data, error } = await supabase
     .from("scout_players")
     .select(
-      "id, full_name, primary_role, is_keeper, bought_price, utility_tag, " +
+      "id, full_name, primary_role, auction_category, is_keeper, bought_price, utility_tag, " +
         "suggested_batting_order, bat_index, bowl_index, field_index, keep_index"
     )
     .eq("is_bought", true)
@@ -34,6 +34,9 @@ export default async function SquadPage() {
       full_name: p.full_name,
       category: resolveCategory(p).category,
       primary_role: p.primary_role,
+      auction_category: p.auction_category,
+      batting_style: p.batting_style,
+      bowling_style: p.bowling_style,
       overall_rank: rankMap.get(p.id) ?? null,
       photo_url: p.photo_url,
     }));
@@ -47,6 +50,7 @@ export default async function SquadPage() {
     order: p.suggested_batting_order,
     price: p.bought_price,
     category: categoryById.get(p.id) ?? null,
+    tier: p.auction_category,
   }));
 
   return (

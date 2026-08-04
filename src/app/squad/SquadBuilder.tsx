@@ -35,21 +35,27 @@ export type Signing = {
 
 const inr = (n: number) => "₹" + Math.round(n).toLocaleString("en-IN");
 
-// One SCCL composition cap (e.g. A-category 4/6) with pip dots that turn red
-// once the cap is breached.
+// One SCCL composition cap (e.g. A-category 4/6). Pips are split by source:
+// locked-in retained core in red, mock buys in yellow, so you can see how much
+// headroom your buys are eating. The count turns red once the cap is breached.
+const PIP_RETAINED = "#E0453A"; // red — retained core
+const PIP_MOCK = "#E9C230"; // yellow — mock buys
 function CapMeter({
   label,
   hint,
-  used,
+  usedRetained,
+  usedMock,
   max,
   over,
 }: {
   label: string;
   hint: string;
-  used: number;
+  usedRetained: number;
+  usedMock: number;
   max: number;
   over: boolean;
 }) {
+  const used = usedRetained + usedMock;
   const total = Math.max(max, used);
   return (
     <div className="flex-1 rounded-[12px] bg-wash px-3 py-2.5">
@@ -63,21 +69,34 @@ function CapMeter({
         </span>
       </div>
       <div className="mt-2 flex gap-1">
-        {Array.from({ length: total }).map((_, i) => (
-          <span
-            key={i}
-            className="h-1.5 flex-1 rounded-full"
-            style={{
-              minWidth: 6,
-              background:
-                i < used ? (over ? "var(--down)" : "#E0453A") : "var(--surface)",
-              boxShadow: i < used ? "none" : "inset 0 0 0 1px var(--border)",
-            }}
-          />
-        ))}
+        {Array.from({ length: total }).map((_, i) => {
+          const filled = i < used;
+          const isMock = i >= usedRetained && i < used; // mock buys sit after retained
+          return (
+            <span
+              key={i}
+              className="h-1.5 flex-1 rounded-full"
+              style={{
+                minWidth: 6,
+                background: filled ? (isMock ? PIP_MOCK : PIP_RETAINED) : "var(--surface)",
+                boxShadow: filled
+                  ? over && i >= max
+                    ? "inset 0 0 0 1.5px var(--down)"
+                    : "none"
+                  : "inset 0 0 0 1px var(--border)",
+              }}
+            />
+          );
+        })}
       </div>
-      <p className="mt-1.5 text-[0.66rem]" style={{ color: over ? "var(--down)" : "var(--muted)" }}>
-        {over ? `Over the cap — ${hint}` : hint}
+      <p className="mt-1.5 flex flex-wrap items-center gap-x-2 text-[0.66rem]" style={{ color: over ? "var(--down)" : "var(--muted)" }}>
+        <span>{over ? `Over the cap — ${hint}` : hint}</span>
+        {usedMock > 0 ? (
+          <span className="inline-flex items-center gap-1 text-muted">
+            <span className="inline-block h-2 w-2 rounded-full" style={{ background: PIP_MOCK }} />
+            mock buys
+          </span>
+        ) : null}
       </p>
     </div>
   );
@@ -194,14 +213,14 @@ export default function SquadBuilder({
   // SCCL composition caps: ≤ maxA 'A'-category (Playing 13) and ≤ maxU35 players
   // aged 30–35 (U35), counted across the whole built squad (retained + buys).
   const retainedIdSet = new Set(players.map((p) => p.id));
-  const squadTiers = [
-    ...players.map((p) => p.category),
-    ...signings.filter((s) => !retainedIdSet.has(s.id)).map((s) => s.tier),
-  ];
-  const aCount = squadTiers.filter(isGradeA).length;
-  const u35Count = squadTiers.filter(isU35).length;
-  const aOver = aCount > maxA;
-  const u35Over = u35Count > maxU35;
+  const retainedTiers = players.map((p) => p.category);
+  const mockTiers = signings.filter((s) => !retainedIdSet.has(s.id)).map((s) => s.tier);
+  const aRetained = retainedTiers.filter(isGradeA).length;
+  const aMock = mockTiers.filter(isGradeA).length;
+  const u35Retained = retainedTiers.filter(isU35).length;
+  const u35Mock = mockTiers.filter(isU35).length;
+  const aOver = aRetained + aMock > maxA;
+  const u35Over = u35Retained + u35Mock > maxU35;
   const openSlots = Math.max(0, maxSquad - retainedCount);
   const perSlot = openSlots > 0 ? remaining / openSlots : 0;
   const pct = budget > 0 ? Math.min(100, Math.max(0, (spent / budget) * 100)) : 0;
@@ -289,14 +308,16 @@ export default function SquadBuilder({
           <CapMeter
             label="A category"
             hint={`max ${maxA} in the Playing 13`}
-            used={aCount}
+            usedRetained={aRetained}
+            usedMock={aMock}
             max={maxA}
             over={aOver}
           />
           <CapMeter
             label="U35 (30–35)"
             hint={`buy up to ${maxU35} in the squad · 3 play per match`}
-            used={u35Count}
+            usedRetained={u35Retained}
+            usedMock={u35Mock}
             max={maxU35}
             over={u35Over}
           />

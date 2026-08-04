@@ -60,7 +60,11 @@ export default function SquadBuilder({
   marquee?: ReactNode; // marquee "must buy" targets, rendered under the list
   children?: ReactNode; // player cards, rendered in the middle section
 }) {
-  const defaultCosts = Object.fromEntries(players.map((p) => [p.id, p.cost]));
+  // cost defaults for retained AND mock buys (signings), both editable + in purse
+  const defaultCosts = Object.fromEntries([
+    ...players.map((p) => [p.id, p.cost] as const),
+    ...signings.map((s) => [s.id, s.price ?? 0] as const),
+  ]);
   // batting-order defaults for retained AND mock buys (signings), both editable
   const defaultOrders = Object.fromEntries([
     ...players.map((p) => [p.id, p.order] as const),
@@ -128,7 +132,9 @@ export default function SquadBuilder({
     }
   };
 
-  const spent = players.reduce((s, p) => s + (costs[p.id] ?? 0), 0);
+  const spent =
+    players.reduce((s, p) => s + (costs[p.id] ?? 0), 0) +
+    signings.reduce((s, x) => s + (costs[x.id] ?? 0), 0);
   const remaining = budget - spent;
   const openSlots = Math.max(0, maxSquad - retainedCount);
   const perSlot = openSlots > 0 ? remaining / openSlots : 0;
@@ -178,7 +184,10 @@ export default function SquadBuilder({
               {inr(spent)}{" "}
               <span className="text-base font-semibold text-muted">/ {inr(budget)}</span>
             </p>
-            <p className="mt-1 text-[0.72rem] text-muted">Spent on {players.length} retained</p>
+            <p className="mt-1 text-[0.72rem] text-muted">
+              {players.length} retained
+              {signings.length > 0 ? ` + ${signings.length} mock ${signings.length === 1 ? "buy" : "buys"}` : ""}
+            </p>
           </div>
           <div className="text-right">
             <p
@@ -302,11 +311,9 @@ export default function SquadBuilder({
                           {signing.role ?? "—"}
                         </span>
                       </div>
-                      {signing.price != null ? (
-                        <span className="shrink-0 rounded-full bg-wash px-2.5 py-1 text-[0.72rem] font-semibold tabular-nums text-muted">
-                          {inr(signing.price)}
-                        </span>
-                      ) : null}
+                      <span className="shrink-0 rounded-full bg-wash px-2.5 py-1 text-[0.72rem] font-semibold tabular-nums text-muted">
+                        {inr(costs[signing.id] ?? signing.price ?? 0)}
+                      </span>
                     </>
                   ) : (
                     <span className="flex-1 text-[0.85rem] italic text-muted">
@@ -440,29 +447,48 @@ export default function SquadBuilder({
         {sortedSignings.length > 0 ? (
           <div className="mt-4 border-t border-border pt-3">
             <p className="eyebrow pb-1.5" style={{ color: WARM_INK }}>
-              Mock buys — batting order
+              Mock buys — order &amp; price
             </p>
+            <div className="flex items-center gap-3 px-1 pb-1.5 text-[0.62rem] font-medium uppercase tracking-wide text-muted">
+              <span className="flex-1">Player</span>
+              <span className="w-14 shrink-0 text-center">Order</span>
+              <span className="w-24 shrink-0 text-right">Price</span>
+            </div>
             <div className="flex flex-col gap-1.5">
               {sortedSignings.map((s) => (
                 <div key={s.id} className="flex items-center gap-3 rounded-[12px] bg-wash px-3 py-2">
-                  <span className="min-w-0 flex-1 truncate text-sm font-medium">{s.name}</span>
-                  {s.isKeeper ? (
-                    <span
-                      className="badge shrink-0"
-                      style={{ background: "var(--wash)", color: "var(--muted)" }}
-                    >
-                      WK
-                    </span>
-                  ) : null}
+                  <span className="flex min-w-0 flex-1 items-center gap-1.5">
+                    <span className="min-w-0 truncate text-sm font-medium">{s.name}</span>
+                    {s.isKeeper ? (
+                      <span
+                        className="badge shrink-0"
+                        style={{ background: "var(--wash)", color: "var(--muted)" }}
+                      >
+                        WK
+                      </span>
+                    ) : null}
+                  </span>
                   <input
                     type="number"
                     inputMode="numeric"
                     aria-label={`Batting order for ${s.name}`}
                     value={orders[s.id] ?? s.order ?? ""}
                     onChange={(e) => setOrder(s.id, Number(e.target.value) || 0)}
-                    className="w-16 shrink-0 rounded-md bg-surface px-2 py-1 text-center text-sm tabular-nums outline-none focus:ring-2"
+                    className="w-14 shrink-0 rounded-md bg-surface px-2 py-1 text-center text-sm tabular-nums outline-none focus:ring-2"
                     style={{ boxShadow: "inset 0 0 0 1px var(--border)" }}
                   />
+                  <span className="flex w-24 shrink-0 items-center justify-end gap-1">
+                    <span className="text-muted">₹</span>
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      aria-label={`Mock buy price for ${s.name}`}
+                      value={costs[s.id] ?? s.price ?? 0}
+                      onChange={(e) => setCost(s.id, Number(e.target.value) || 0)}
+                      className="w-full rounded-md bg-surface px-2 py-1 text-right text-sm tabular-nums outline-none focus:ring-2"
+                      style={{ boxShadow: "inset 0 0 0 1px var(--border)" }}
+                    />
+                  </span>
                 </div>
               ))}
             </div>

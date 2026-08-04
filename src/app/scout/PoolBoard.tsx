@@ -76,20 +76,20 @@ const COLS: Col[] = [
   { key: "economy", label: "Econ", asc: true, numeric: true, help: "Runs conceded per over (lower is better)." },
 ];
 
-// Rank-tier colour code: top 10 = red, next 20 (11–30) = orange, rest = yellow.
+// Rank-tier colour code: only the top 30 are coloured — top 10 = red, next 20
+// (11–30) = orange. Everyone 31+ shows a plain, uncoloured score.
 // Solid pills so they read in both light and dark themes.
 type RankTier = { label: string; bg: string; fg: string };
-const RANK_TIERS: Record<"elite" | "strong" | "rest", RankTier> = {
+const RANK_TIERS: Record<"elite" | "strong", RankTier> = {
   elite: { label: "Top 10", bg: "#E0453A", fg: "#ffffff" },
   strong: { label: "11–30", bg: "#F08A3D", fg: "#1d1d1f" },
-  rest: { label: "31+", bg: "#E9C230", fg: "#1d1d1f" },
 };
 
 function rankTier(rank: number | null | undefined): RankTier | null {
   if (rank == null || rank >= 9999) return null;
   if (rank <= 10) return RANK_TIERS.elite;
   if (rank <= 30) return RANK_TIERS.strong;
-  return RANK_TIERS.rest;
+  return null; // 31+ — no colour
 }
 
 // which columns get the rank-tier colour code, and the rank they key off
@@ -202,16 +202,20 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
       </div>
 
       <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[0.72rem] text-muted">
-        <span className="font-medium">Colour code — Bat, Bowl &amp; Field rank:</span>
-        {(["elite", "strong", "rest"] as const).map((k) => (
+        <span className="font-medium">Colour code — Bat, Bowl &amp; Field rank (top 30 only):</span>
+        {(["elite", "strong"] as const).map((k) => (
           <span key={k} className="inline-flex items-center gap-1.5">
             <span
               className="inline-block h-3 w-3 rounded-full"
               style={{ background: RANK_TIERS[k].bg }}
             />
-            {k === "elite" ? "Top 10" : k === "strong" ? "Next 20 (11–30)" : "Rest (31+)"}
+            {k === "elite" ? "Top 10" : "Next 20 (11–30)"}
           </span>
         ))}
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block h-3 w-3 rounded-full" style={{ boxShadow: "inset 0 0 0 1px var(--border)" }} />
+          31+ (no colour)
+        </span>
       </div>
 
       <details className="mb-3 text-sm">

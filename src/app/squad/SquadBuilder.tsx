@@ -295,7 +295,7 @@ export default function SquadBuilder({
           />
           <CapMeter
             label="U35 (30–35)"
-            hint={`max ${maxU35} per squad`}
+            hint={`buy up to ${maxU35} in the squad · 3 play per match`}
             used={u35Count}
             max={maxU35}
             over={u35Over}

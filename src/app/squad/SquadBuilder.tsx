@@ -6,6 +6,7 @@ import { isGradeA, isU35, tierStyle } from "@/lib/scout/tier";
 const WARM = "linear-gradient(135deg, #FF8A3D 0%, #E0453A 100%)";
 const WARM_INK = "#D2451F";
 const GOLD = "#E3A81B";
+const BLUE = "#2F6FED"; // marks actual auction (mock) buys, vs the retained core
 const STORE_KEY = "spartans-budget-v1";
 
 export type SquadPursePlayer = {
@@ -34,6 +35,20 @@ export type Signing = {
 };
 
 const inr = (n: number) => "₹" + Math.round(n).toLocaleString("en-IN");
+
+// Green→amber→red heat for a normalized value t (0 = cheapest/green, 1 =
+// dearest/red). Used to colour the squad price pills by spend.
+function heatColor(t: number): string {
+  const c = Math.max(0, Math.min(1, t));
+  const stops: [number, number, number][] = [
+    [46, 139, 87], // green  — lowest
+    [224, 160, 32], // amber — middle
+    [224, 69, 58], // red    — highest
+  ];
+  const [a, b, f] = c < 0.5 ? [stops[0], stops[1], c * 2] : [stops[1], stops[2], (c - 0.5) * 2];
+  const mix = a.map((v, i) => Math.round(v + (b[i] - v) * f));
+  return `rgb(${mix[0]}, ${mix[1]}, ${mix[2]})`;
+}
 
 // One SCCL composition cap (e.g. A-category 4/6). Pips are split by source:
 // locked-in retained core in red, mock buys in yellow, so you can see how much
@@ -210,6 +225,19 @@ export default function SquadBuilder({
     signings.reduce((s, x) => s + (costs[x.id] ?? 0), 0);
   const remaining = budget - spent;
 
+  // price heat scale: red = dearest, green = cheapest, across the whole squad
+  const priceValues = [
+    ...players.map((p) => costs[p.id] ?? 0),
+    ...signings.map((s) => costs[s.id] ?? s.price ?? 0),
+  ].filter((v) => v > 0);
+  const priceMin = priceValues.length ? Math.min(...priceValues) : 0;
+  const priceMax = priceValues.length ? Math.max(...priceValues) : 0;
+  const priceStyle = (v: number): { background: string; color: string } => {
+    const t = priceMax > priceMin ? (v - priceMin) / (priceMax - priceMin) : 0;
+    const c = heatColor(t);
+    return { background: `color-mix(in srgb, ${c} 16%, transparent)`, color: c };
+  };
+
   // SCCL composition caps: ≤ maxA 'A'-category (Playing 13) and ≤ maxU35 players
   // aged 30–35 (U35), counted across the whole built squad (retained + buys).
   const retainedIdSet = new Set(players.map((p) => p.id));
@@ -379,10 +407,7 @@ export default function SquadBuilder({
                       </div>
                       <span
                         className="shrink-0 rounded-full px-2.5 py-1 text-[0.72rem] font-semibold tabular-nums"
-                        style={{
-                          background: "color-mix(in srgb, #E0453A 12%, transparent)",
-                          color: WARM_INK,
-                        }}
+                        style={priceStyle(costs[player.id] ?? 0)}
                       >
                         {inr(costs[player.id] ?? 0)}
                       </span>
@@ -391,10 +416,12 @@ export default function SquadBuilder({
                     <>
                       <div className="flex min-w-0 flex-1 flex-col">
                         <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-                          <span className="font-semibold text-[0.95rem]">{signing.name}</span>
+                          <span className="text-[0.95rem] font-bold" style={{ color: BLUE }}>
+                            {signing.name}
+                          </span>
                           <span
-                            className="badge shrink-0"
-                            style={{ background: "var(--accent)", color: "var(--ink)" }}
+                            className="badge shrink-0 font-semibold"
+                            style={{ background: `color-mix(in srgb, ${BLUE} 16%, transparent)`, color: BLUE }}
                           >
                             bought
                           </span>
@@ -428,7 +455,10 @@ export default function SquadBuilder({
                           {signing.role ?? "—"}
                         </span>
                       </div>
-                      <span className="shrink-0 rounded-full bg-wash px-2.5 py-1 text-[0.72rem] font-semibold tabular-nums text-muted">
+                      <span
+                        className="shrink-0 rounded-full px-2.5 py-1 text-[0.72rem] font-bold tabular-nums"
+                        style={priceStyle(costs[signing.id] ?? signing.price ?? 0)}
+                      >
                         {inr(costs[signing.id] ?? signing.price ?? 0)}
                       </span>
                     </>

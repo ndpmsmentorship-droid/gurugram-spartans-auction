@@ -1,14 +1,41 @@
 {
   "note": "Locked curation for the Gurugram Spartans scout pool. Re-applied by import-official-file.mjs after every import so marquee picks and mock buys survive registration-list refreshes (matched by CricHeroes id, else name). Edit here to change what is locked.",
-  "updated": "2026-08-04",
+  "updated": "2026-08-05",
   "players": [
+    {
+      "full_name": "Amit Kumar",
+      "cricheroes_link": "https://cricheroes.com/player-profile/3383481/Amit-Yadav",
+      "is_marquee": true,
+      "is_bought": true,
+      "bought_price": 2000,
+      "suggested_batting_order": 10,
+      "scout_category": null
+    },
+    {
+      "full_name": "Amit Kumar",
+      "cricheroes_link": "https://chshare.link/player/pmoe2o",
+      "is_marquee": true,
+      "is_bought": true,
+      "bought_price": 2000,
+      "suggested_batting_order": 3,
+      "scout_category": null
+    },
     {
       "full_name": "Ayush Jagga",
       "cricheroes_link": "https://cricheroes.com/player-profile/2149662/Ayush-Jagga",
       "is_marquee": true,
       "is_bought": true,
       "bought_price": 2000,
-      "suggested_batting_order": 2,
+      "suggested_batting_order": 5,
+      "scout_category": null
+    },
+    {
+      "full_name": "Bharat Kumar",
+      "cricheroes_link": "https://cricheroes.com/player-profile/280984/Bharat-Kumar",
+      "is_marquee": true,
+      "is_bought": true,
+      "bought_price": 2000,
+      "suggested_batting_order": 11,
       "scout_category": null
     },
     {
@@ -17,7 +44,16 @@
       "is_marquee": true,
       "is_bought": true,
       "bought_price": 2000,
-      "suggested_batting_order": 3,
+      "suggested_batting_order": 6,
+      "scout_category": null
+    },
+    {
+      "full_name": "Hitesh Yadav",
+      "cricheroes_link": "https://cricheroes.com/player-profile/2191947/hitesh-yaduvanshi",
+      "is_marquee": true,
+      "is_bought": true,
+      "bought_price": 2000,
+      "suggested_batting_order": 1,
       "scout_category": null
     },
     {
@@ -26,7 +62,7 @@
       "is_marquee": true,
       "is_bought": true,
       "bought_price": 2000,
-      "suggested_batting_order": 5,
+      "suggested_batting_order": 8,
       "scout_category": null
     },
     {
@@ -35,7 +71,16 @@
       "is_marquee": true,
       "is_bought": true,
       "bought_price": 2000,
-      "suggested_batting_order": 4,
+      "suggested_batting_order": 7,
+      "scout_category": null
+    },
+    {
+      "full_name": "Parichit Yadav",
+      "cricheroes_link": "https://cricheroes.com/player-profile/1878249/Parichit-Yadav",
+      "is_marquee": true,
+      "is_bought": true,
+      "bought_price": 2000,
+      "suggested_batting_order": 2,
       "scout_category": null
     },
     {
@@ -44,30 +89,21 @@
       "is_marquee": true,
       "is_bought": true,
       "bought_price": 2000,
-      "suggested_batting_order": 1,
+      "suggested_batting_order": 4,
       "scout_category": null
     },
     {
-      "full_name": "Amit Kumar",
-      "cricheroes_link": "https://cricheroes.com/player-profile/3383481/Amit-Yadav",
-      "is_marquee": true,
-      "is_bought": false,
-      "bought_price": null,
-      "suggested_batting_order": null,
+      "full_name": "Pulkit Bharadwaj",
+      "cricheroes_link": "https://cricheroes.com/player-profile/660838/Pulkit-Bharadwaj",
+      "is_marquee": false,
+      "is_bought": true,
+      "bought_price": 2000,
+      "suggested_batting_order": 9,
       "scout_category": null
     },
     {
       "full_name": "Amit Nagar",
       "cricheroes_link": "https://cricheroes.com/player-profile/168004/amit-nagar",
-      "is_marquee": true,
-      "is_bought": false,
-      "bought_price": null,
-      "suggested_batting_order": null,
-      "scout_category": null
-    },
-    {
-      "full_name": "Hitesh Yadav",
-      "cricheroes_link": "https://cricheroes.com/player-profile/2191947/hitesh-yaduvanshi",
       "is_marquee": true,
       "is_bought": false,
       "bought_price": null,
@@ -130,7 +166,7 @@
     },
     {
       "full_name": "Rohit Tanwar",
-      "cricheroes_link": "https://cricheroes.com/player-profile/2959709/Rohit-Tanwar",
+      "cricheroes_link": "https://chshare.link/player/gZWaqH",
       "is_marquee": true,
       "is_bought": false,
       "bought_price": null,
@@ -165,8 +201,26 @@
       "scout_category": null
     },
     {
+      "full_name": "Siddharth Luthra",
+      "cricheroes_link": "https://cricheroes.com/player-profile/917887/SIDdharth-Luthra",
+      "is_marquee": true,
+      "is_bought": false,
+      "bought_price": null,
+      "suggested_batting_order": null,
+      "scout_category": null
+    },
+    {
       "full_name": "Sourabh Rautela",
       "cricheroes_link": "https://cricheroes.com/player-profile/1111062/Sourabh-Rautela",
+      "is_marquee": true,
+      "is_bought": false,
+      "bought_price": null,
+      "suggested_batting_order": null,
+      "scout_category": null
+    },
+    {
+      "full_name": "Sunil Singh Chauhan",
+      "cricheroes_link": "https://cricheroes.com/player-profile/179041/Sunil-Singh-Chauhan",
       "is_marquee": true,
       "is_bought": false,
       "bought_price": null,

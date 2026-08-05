@@ -65,20 +65,28 @@ export default async function ScoutPage() {
     const a = analytics.get(p.id)!;
     const m = deriveMetrics(p as unknown as RawStats);
     const cat = resolveCategory(p);
-    // Sortable advanced metrics. Gate each on a minimum sample so tiny-innings
-    // flukes don't top the sort or steal a colour tier.
-    const bowlOk = (p.overs ?? 0) >= 10;
+    // Sortable advanced metrics, each gated on a real career sample so the
+    // ranked/sorted top is always well-founded (median in this pool is ~216
+    // overs / ~273 innings, so these floors keep the bulk while cutting the
+    // thin-sample tail). Below the floor the value is blank, not just uncoloured.
+    const MIN_OVERS = 50; // ≈ 300 balls bowled
+    const MIN_INNINGS = 20; // batting innings
+    const MIN_MATCHES = 20; // matches played (fielding)
+    const bowlOk = (p.overs ?? 0) >= MIN_OVERS;
+    const batOk = (p.bat_innings ?? 0) >= MIN_INNINGS;
     const matches = Math.max(p.bat_matches ?? 0, p.bowl_matches ?? 0);
     const hasField = p.catches != null || p.run_outs != null;
     const field_ratio =
-      matches >= 3 && hasField ? r2(((p.catches ?? 0) + (p.run_outs ?? 0)) / matches) : null;
+      matches >= MIN_MATCHES && hasField
+        ? r2(((p.catches ?? 0) + (p.run_outs ?? 0)) / matches)
+        : null;
     return {
       ...p,
       archetype: a.archetype,
       vor: a.vor,
       topRisk: a.riskFlags[0] ?? null,
       hasRecentForm: a.hasRecentForm,
-      boundary_pct: r1(m.boundaryPct),
+      boundary_pct: batOk ? r1(m.boundaryPct) : null,
       dot_pct: bowlOk ? r1(m.dotBallPct) : null,
       bowl_boundary_pct: bowlOk ? r1(m.boundaryConcededPct) : null,
       field_ratio,
@@ -93,10 +101,10 @@ export default async function ScoutPage() {
     };
   });
 
-  // Per-metric ranks (1 = best) drive the top-10/11–30 colour code. Batting
-  // boundary% only ranks batters with 100+ runs; the bowling/fielding metrics
-  // are already sample-gated above.
-  const bndRank = rankMetric(players.filter((p) => (p.runs ?? 0) >= 100), (p) => (p as PoolPlayer).boundary_pct, "high");
+  // Per-metric ranks (1 = best) drive the top-10/11–30 colour code. Values are
+  // already sample-gated above, so ranking only the non-null keeps the top
+  // well-founded.
+  const bndRank = rankMetric(players, (p) => (p as PoolPlayer).boundary_pct, "high");
   const dotRank = rankMetric(players, (p) => (p as PoolPlayer).dot_pct, "high");
   const bowlBndRank = rankMetric(players, (p) => (p as PoolPlayer).bowl_boundary_pct, "low");
   const fieldRank = rankMetric(players, (p) => (p as PoolPlayer).field_ratio, "high");

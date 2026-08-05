@@ -5,7 +5,7 @@ import { useMemo, useState, useTransition } from "react";
 import type { RankedPlayer } from "@/lib/scout/ranks";
 import type { RiskFlag } from "@/lib/scout/analytics";
 import { CATEGORIES, CATEGORY_META, type Category } from "@/lib/scout/category";
-import { tierStyle } from "@/lib/scout/tier";
+import { tierStyle, parseTier, isGradeA } from "@/lib/scout/tier";
 import { markBought, unmarkBought, setRejected, setMarquee } from "./actions";
 
 export type PoolPlayer = RankedPlayer<{
@@ -106,6 +106,16 @@ function rankTier(rank: number | null | undefined): RankTier | null {
   return null; // 31+ — no colour
 }
 
+// Organizers' auction-tier filter: coarse A/B grade + the four exact tiers.
+type TierFilter = "All" | "A" | "B" | "U35A" | "35+A" | "U35B" | "35+B";
+const TIER_FILTERS: TierFilter[] = ["All", "A", "B", "U35A", "35+A", "U35B", "35+B"];
+function matchesTier(auctionCategory: string | null, f: TierFilter): boolean {
+  if (f === "All") return true;
+  if (f === "A") return isGradeA(auctionCategory);
+  if (f === "B") return parseTier(auctionCategory).grade === "B";
+  return (auctionCategory ?? "").toUpperCase().replace(/\s+/g, "") === f;
+}
+
 // which columns get the rank-tier colour code, and the rank they key off
 const TIER_COL: Partial<Record<keyof PoolPlayer, keyof PoolPlayer>> = {
   bat_index: "bat_rank",
@@ -142,6 +152,7 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
   const [sortAsc, setSortAsc] = useState(false);
   const [role, setRole] = useState("All");
   const [category, setCategory] = useState<"All" | Category>("All");
+  const [tier, setTier] = useState<TierFilter>("All");
   const [avail, setAvail] = useState<"available" | "bought" | "rejected" | "all">(
     "available"
   );
@@ -162,6 +173,7 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
         if (role !== "All" && roleGroup(p.primary_role, p.is_keeper) !== role)
           return false;
         if (category !== "All" && p.category !== category) return false;
+        if (!matchesTier(p.auction_category, tier)) return false;
         if (avail === "available" && (p.is_bought || p.is_rejected)) return false;
         if (avail === "bought" && !p.is_bought) return false;
         if (avail === "rejected" && !p.is_rejected) return false;
@@ -172,10 +184,60 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
         const bv = (b[sortKey] ?? (sortAsc ? 1e9 : -1e9)) as number;
         return sortAsc ? av - bv : bv - av;
       });
-  }, [players, query, sortKey, sortAsc, role, category, avail]);
+  }, [players, query, sortKey, sortAsc, role, category, tier, avail]);
+
+  const tierCounts = useMemo(() => {
+    const c: Record<string, number> = { A: 0, B: 0, U35A: 0, "35+A": 0, U35B: 0, "35+B": 0 };
+    for (const p of players) {
+      if (isGradeA(p.auction_category)) c.A++;
+      if (parseTier(p.auction_category).grade === "B") c.B++;
+      const key = (p.auction_category ?? "").toUpperCase().replace(/\s+/g, "");
+      if (key in c) c[key]++;
+    }
+    return c;
+  }, [players]);
 
   return (
     <div className="mt-5">
+      {/* Major filter — organizers' auction tier (analyse A vs B separately) */}
+      <div className="mb-3 flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-[0.72rem] font-semibold uppercase tracking-wide text-muted">
+          Auction tier
+        </span>
+        {TIER_FILTERS.map((t) => {
+          const active = tier === t;
+          const solid =
+            t === "All"
+              ? { bg: "var(--ink)", fg: "var(--surface)" }
+              : t === "A"
+                ? { bg: "#E0453A", fg: "#ffffff" }
+                : t === "B"
+                  ? { bg: "#5B6270", fg: "#ffffff" }
+                  : (tierStyle(t) ?? { bg: "var(--ink)", fg: "var(--surface)" });
+          return (
+            <button
+              key={t}
+              onClick={() => setTier(t)}
+              className="rounded-full px-3 py-1 text-[0.78rem] font-semibold transition-colors"
+              style={
+                active
+                  ? { background: solid.bg, color: solid.fg }
+                  : {
+                      background: "var(--wash)",
+                      color: "var(--muted)",
+                      boxShadow: "inset 0 0 0 1px var(--border)",
+                    }
+              }
+            >
+              {t === "All" ? "All tiers" : t}
+              {t !== "All" ? (
+                <span className="ml-1.5 tabular-nums opacity-70">{tierCounts[t]}</span>
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
+
       <div className="mb-3 flex flex-wrap gap-2">
         <input
           className="input max-w-[12rem]"

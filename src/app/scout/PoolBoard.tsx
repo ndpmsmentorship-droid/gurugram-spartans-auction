@@ -36,7 +36,15 @@ export type PoolPlayer = RankedPlayer<{
   vor: number;
   topRisk: RiskFlag | null;
   hasRecentForm: boolean;
-  boundary_pct: number | null;
+  boundary_pct: number | null; // batting: share of runs in 4s/6s
+  dot_pct: number | null; // bowling: dot balls / balls (higher better)
+  bowl_boundary_pct: number | null; // bowling: boundaries conceded / balls (lower better)
+  field_ratio: number | null; // fielding: catches + run-outs per match
+  // per-metric ranks (1 = best) for the top-10/11–30 colour code
+  bnd_rank: number;
+  dot_pct_rank: number;
+  bowl_bnd_rank: number;
+  field_ratio_rank: number;
   fit_score: number;
   category: Category;
   categoryIsOverride: boolean;
@@ -70,8 +78,14 @@ const COLS: Col[] = [
   { key: "bat_avg", label: "Avg", asc: false, numeric: true, help: "Batting average." },
   { key: "bat_sr", label: "SR", asc: false, numeric: true,
     help: "Strike rate (runs per 100 balls); form-weighted where recent data exists." },
-  { key: "boundary_pct", label: "Bnd%", asc: false, numeric: true,
-    help: "Boundary % — share of runs scored in 4s and 6s. High = boundary-reliant." },
+  { key: "boundary_pct", label: "Bat Bnd%", asc: false, numeric: true,
+    help: "Batting boundary % — share of runs scored in 4s and 6s. High = boundary-reliant. Colour ranks batters with 100+ career runs." },
+  { key: "dot_pct", label: "Dot%", asc: false, numeric: true,
+    help: "Bowling dot-ball % — dot balls as a share of balls bowled. Higher = more pressure. Colour ranks bowlers with 10+ overs." },
+  { key: "bowl_boundary_pct", label: "Conc%", asc: true, numeric: true,
+    help: "Boundary conceded % — 4s+6s hit off the bowler as a share of balls bowled. LOWER is better (sorts low-first). Needs the bowl_fours/bowl_sixes data — blank until that's loaded." },
+  { key: "field_ratio", label: "Fld/M", asc: false, numeric: true, fmt: (p) => p.field_ratio == null ? "—" : p.field_ratio.toFixed(2),
+    help: "Fielding per match — catches + run-outs divided by matches played. Colour ranks fielders with 3+ matches." },
   { key: "wickets", label: "Wkts", asc: false, numeric: true, help: "Career wickets." },
   { key: "economy", label: "Econ", asc: true, numeric: true, help: "Runs conceded per over (lower is better)." },
 ];
@@ -97,6 +111,10 @@ const TIER_COL: Partial<Record<keyof PoolPlayer, keyof PoolPlayer>> = {
   bat_index: "bat_rank",
   bowl_index: "bowl_rank",
   field_index: "field_rank",
+  boundary_pct: "bnd_rank",
+  dot_pct: "dot_pct_rank",
+  bowl_boundary_pct: "bowl_bnd_rank",
+  field_ratio: "field_ratio_rank",
 };
 
 function roleGroup(role: string | null, isKeeper: boolean): string {
@@ -362,7 +380,7 @@ function Row({ p }: { p: PoolPlayer }) {
             key={c.key as string}
             className={`whitespace-nowrap px-2 py-2 tabular-nums ${
               c.numeric ? "text-right" : ""
-            } ${c.key === "boundary_pct" ? "font-medium text-accent-text" : ""}`}
+            }`}
           >
             {tier ? (
               <span

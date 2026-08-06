@@ -12,7 +12,7 @@ import BuyControl from "./BuyControl";
 import PlayerWorkshop from "./PlayerWorkshop";
 import MarqueeToggle from "./MarqueeToggle";
 
-const ACCENT = "#e07a3e";
+const ACCENT = "#4a6bb5"; // pastel navy — matches the app accent
 
 export default async function PlayerDetailPage({
   params,

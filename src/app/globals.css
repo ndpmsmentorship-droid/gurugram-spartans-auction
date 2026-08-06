@@ -8,19 +8,19 @@
 
 :root {
   --background: #ffffff;
-  --wash: #f4f6fb; /* faint cool grey-blue */
+  --wash: #f2f6fd; /* airy pastel blue */
   --surface: #ffffff;
-  --ink: #10151f;
-  --foreground: #10151f;
-  --muted: #5b6472;
-  --line: #dce1ea;
-  --border: #dce1ea;
-  --accent: #1565ff; /* blue (primary buttons / structure) */
-  --accent-text: #1257e0; /* blue link */
-  --highlight: #f5811f; /* orange accent / CTA / emphasis */
-  --highlight-ink: #b85c0c; /* orange text on light */
-  --up: #1a7f37;
-  --down: #d70015;
+  --ink: #2a3a5c; /* soft navy ink (not pure black) */
+  --foreground: #2a3a5c;
+  --muted: #7683a0; /* muted slate-blue */
+  --line: #e7ecf6;
+  --border: #e7ecf6;
+  --accent: #4a6bb5; /* pastel navy — primary buttons / links / structure */
+  --accent-text: #3f5da6; /* navy link */
+  --highlight: #f4b869; /* pastel amber — accent / CTA / emphasis */
+  --highlight-ink: #b57621; /* amber text on light */
+  --up: #57ac7e; /* pastel green — verified / positive */
+  --down: #e07b74; /* pastel red — rejected / negative */
 }
 
 @theme inline {
@@ -51,55 +51,55 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0b1017;
-    --wash: #151b24;
-    --surface: #141a23;
-    --ink: #eef2f8;
-    --foreground: #eef2f8;
-    --muted: #8b95a5;
-    --line: #2a323d;
-    --border: #2a323d;
-    --accent: #4a90ff;
-    --accent-text: #6aa6ff;
-    --highlight: #ff9438;
-    --highlight-ink: #ffb066;
-    --up: #30d158;
-    --down: #ff453a;
+    --background: #0f1420;
+    --wash: #182031;
+    --surface: #151c2b;
+    --ink: #e9eef8;
+    --foreground: #e9eef8;
+    --muted: #94a2bd;
+    --line: #29324a;
+    --border: #29324a;
+    --accent: #7c9de6;
+    --accent-text: #9db8f0;
+    --highlight: #f4c07d;
+    --highlight-ink: #f4c07d;
+    --up: #5cc08a;
+    --down: #e98a83;
   }
 }
 
 :root[data-theme="dark"] {
-  --background: #0b1017;
-  --wash: #151b24;
-  --surface: #141a23;
-  --ink: #eef2f8;
-  --foreground: #eef2f8;
-  --muted: #8b95a5;
-  --line: #2a323d;
-  --border: #2a323d;
-  --accent: #4a90ff;
-  --accent-text: #6aa6ff;
-  --highlight: #ff9438;
-  --highlight-ink: #ffb066;
-  --up: #30d158;
-  --down: #ff453a;
+  --background: #0f1420;
+  --wash: #182031;
+  --surface: #151c2b;
+  --ink: #e9eef8;
+  --foreground: #e9eef8;
+  --muted: #94a2bd;
+  --line: #29324a;
+  --border: #29324a;
+  --accent: #7c9de6;
+  --accent-text: #9db8f0;
+  --highlight: #f4c07d;
+  --highlight-ink: #f4c07d;
+  --up: #5cc08a;
+  --down: #e98a83;
 }
 
 :root[data-theme="light"] {
   --background: #ffffff;
-  --wash: #f4f6fb;
+  --wash: #f2f6fd;
   --surface: #ffffff;
-  --ink: #10151f;
-  --foreground: #10151f;
-  --muted: #5b6472;
-  --line: #dce1ea;
-  --border: #dce1ea;
-  --accent: #1565ff;
-  --accent-text: #1257e0;
-  --highlight: #f5811f;
-  --highlight-ink: #b85c0c;
-  --up: #1a7f37;
-  --down: #d70015;
+  --ink: #2a3a5c;
+  --foreground: #2a3a5c;
+  --muted: #7683a0;
+  --line: #e7ecf6;
+  --border: #e7ecf6;
+  --accent: #4a6bb5;
+  --accent-text: #3f5da6;
+  --highlight: #f4b869;
+  --highlight-ink: #b57621;
+  --up: #57ac7e;
+  --down: #e07b74;
 }
 
 html {
@@ -165,8 +165,10 @@ h3,
   @apply rounded-full border border-border bg-surface px-4 py-2 text-[0.95rem] font-medium text-foreground transition hover:bg-wash disabled:opacity-50;
 }
 
-/* orange CTA — use sparingly for the single most important action on a view */
+/* amber CTA — use sparingly for the single most important action on a view.
+   Dark text: pastel amber doesn't carry white legibly. */
 .btn-accent {
-  @apply rounded-full px-5 py-2 text-[0.95rem] font-medium text-white transition hover:brightness-110 disabled:opacity-50;
+  @apply rounded-full px-5 py-2 text-[0.95rem] font-semibold transition hover:brightness-105 disabled:opacity-50;
   background: var(--highlight);
+  color: #4a2e05;
 }

@@ -214,6 +214,24 @@ export async function setCategory(playerId: string, category: string | null) {
   return { error: null };
 }
 
+// Set a player's auction-day registration status. Keeps the legacy is_rejected
+// boolean in sync so existing pool logic keeps working. Requires the reg_status
+// column (supabase/registration_status.sql).
+export type RegStatus = "registered" | "verified" | "rejected";
+
+export async function setRegStatus(playerId: string, status: RegStatus) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("scout_players")
+    .update({ reg_status: status, is_rejected: status === "rejected" })
+    .eq("id", playerId);
+  if (error) return { error: error.message };
+  revalidatePath("/scout");
+  revalidatePath(`/scout/${playerId}`);
+  revalidatePath("/squad");
+  return { error: null };
+}
+
 // Flag/unflag a player as a marquee ("must buy") target. Shown as a gold card
 // on the squad page. Requires the is_marquee column (supabase/scout_category.sql).
 export async function setMarquee(playerId: string, marquee: boolean) {

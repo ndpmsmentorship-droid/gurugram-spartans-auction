@@ -1,21 +1,24 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------
-   Apple-inspired look: crisp whites + cool greys, SF system type,
-   Apple blue accent, generous whitespace, subtle depth.
+   Spartans light look: white base, blue primary, orange accent.
+   Minimalist, generous whitespace, subtle depth. Blue = actions /
+   links / structure; orange (--highlight) = accents / CTAs / emphasis.
 ------------------------------------------------------------------ */
 
 :root {
   --background: #ffffff;
-  --wash: #f5f5f7; /* Apple's section grey */
+  --wash: #f4f6fb; /* faint cool grey-blue */
   --surface: #ffffff;
-  --ink: #1d1d1f;
-  --foreground: #1d1d1f;
-  --muted: #6e6e73;
-  --line: #d2d2d7;
-  --border: #d2d2d7;
-  --accent: #0071e3; /* Apple blue (buttons) */
-  --accent-text: #0066cc; /* Apple link blue */
+  --ink: #10151f;
+  --foreground: #10151f;
+  --muted: #5b6472;
+  --line: #dce1ea;
+  --border: #dce1ea;
+  --accent: #1565ff; /* blue (primary buttons / structure) */
+  --accent-text: #1257e0; /* blue link */
+  --highlight: #f5811f; /* orange accent / CTA / emphasis */
+  --highlight-ink: #b85c0c; /* orange text on light */
   --up: #1a7f37;
   --down: #d70015;
 }
@@ -31,6 +34,8 @@
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-text: var(--accent-text);
+  --color-highlight: var(--highlight);
+  --color-highlight-ink: var(--highlight-ink);
   --color-up: var(--up);
   --color-down: var(--down);
   --font-sans:
@@ -46,47 +51,53 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #000000;
-    --wash: #1d1d1f;
-    --surface: #1d1d1f;
-    --ink: #f5f5f7;
-    --foreground: #f5f5f7;
-    --muted: #86868b;
-    --line: #424245;
-    --border: #424245;
-    --accent: #0a84ff;
-    --accent-text: #2997ff;
+    --background: #0b1017;
+    --wash: #151b24;
+    --surface: #141a23;
+    --ink: #eef2f8;
+    --foreground: #eef2f8;
+    --muted: #8b95a5;
+    --line: #2a323d;
+    --border: #2a323d;
+    --accent: #4a90ff;
+    --accent-text: #6aa6ff;
+    --highlight: #ff9438;
+    --highlight-ink: #ffb066;
     --up: #30d158;
     --down: #ff453a;
   }
 }
 
 :root[data-theme="dark"] {
-  --background: #000000;
-  --wash: #1d1d1f;
-  --surface: #1d1d1f;
-  --ink: #f5f5f7;
-  --foreground: #f5f5f7;
-  --muted: #86868b;
-  --line: #424245;
-  --border: #424245;
-  --accent: #0a84ff;
-  --accent-text: #2997ff;
+  --background: #0b1017;
+  --wash: #151b24;
+  --surface: #141a23;
+  --ink: #eef2f8;
+  --foreground: #eef2f8;
+  --muted: #8b95a5;
+  --line: #2a323d;
+  --border: #2a323d;
+  --accent: #4a90ff;
+  --accent-text: #6aa6ff;
+  --highlight: #ff9438;
+  --highlight-ink: #ffb066;
   --up: #30d158;
   --down: #ff453a;
 }
 
 :root[data-theme="light"] {
   --background: #ffffff;
-  --wash: #f5f5f7;
+  --wash: #f4f6fb;
   --surface: #ffffff;
-  --ink: #1d1d1f;
-  --foreground: #1d1d1f;
-  --muted: #6e6e73;
-  --line: #d2d2d7;
-  --border: #d2d2d7;
-  --accent: #0071e3;
-  --accent-text: #0066cc;
+  --ink: #10151f;
+  --foreground: #10151f;
+  --muted: #5b6472;
+  --line: #dce1ea;
+  --border: #dce1ea;
+  --accent: #1565ff;
+  --accent-text: #1257e0;
+  --highlight: #f5811f;
+  --highlight-ink: #b85c0c;
   --up: #1a7f37;
   --down: #d70015;
 }
@@ -152,4 +163,10 @@ h3,
 
 .btn-ghost {
   @apply rounded-full border border-border bg-surface px-4 py-2 text-[0.95rem] font-medium text-foreground transition hover:bg-wash disabled:opacity-50;
+}
+
+/* orange CTA — use sparingly for the single most important action on a view */
+.btn-accent {
+  @apply rounded-full px-5 py-2 text-[0.95rem] font-medium text-white transition hover:brightness-110 disabled:opacity-50;
+  background: var(--highlight);
 }

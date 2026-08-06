@@ -98,6 +98,24 @@ export default async function PlayerDetailPage({
                 </span>
               ) : null;
             })()}
+            {(() => {
+              const rs = player.reg_status ?? "registered";
+              const st =
+                rs === "verified"
+                  ? { bg: "var(--up)", fg: "#ffffff" }
+                  : rs === "rejected"
+                    ? { bg: "var(--down)", fg: "#ffffff" }
+                    : { bg: "var(--accent)", fg: "#ffffff" };
+              return (
+                <span
+                  className="badge font-semibold capitalize"
+                  style={{ background: st.bg, color: st.fg }}
+                  title="Registration status"
+                >
+                  {rs}
+                </span>
+              );
+            })()}
             <span className="badge bg-wash text-accent-text">{a.archetype}</span>
             {handSkill(player.batting_style, player.bowling_style) ? (
               <span className="badge bg-wash text-muted">

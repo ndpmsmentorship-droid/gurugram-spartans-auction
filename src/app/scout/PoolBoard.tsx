@@ -6,7 +6,13 @@ import type { RankedPlayer } from "@/lib/scout/ranks";
 import type { RiskFlag } from "@/lib/scout/analytics";
 import { CATEGORIES, CATEGORY_META, type Category } from "@/lib/scout/category";
 import { tierStyle, parseTier, isGradeA } from "@/lib/scout/tier";
-import { markBought, unmarkBought, setRejected, setMarquee } from "./actions";
+import {
+  markBought,
+  unmarkBought,
+  setMarquee,
+  setRegStatus,
+  type RegStatus,
+} from "./actions";
 
 export type PoolPlayer = RankedPlayer<{
   id: string;
@@ -20,6 +26,7 @@ export type PoolPlayer = RankedPlayer<{
   is_bought: boolean;
   is_rejected: boolean;
   is_marquee: boolean;
+  reg_status: string; // 'registered' | 'verified' | 'rejected'
   bought_price: number | null;
   bat_index: number | null;
   bowl_index: number | null;
@@ -153,6 +160,7 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
   const [role, setRole] = useState("All");
   const [category, setCategory] = useState<"All" | Category>("All");
   const [tier, setTier] = useState<TierFilter>("All");
+  const [status, setStatus] = useState<"All" | RegStatus>("All");
   const [avail, setAvail] = useState<"available" | "bought" | "rejected" | "all">(
     "available"
   );
@@ -174,6 +182,7 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
           return false;
         if (category !== "All" && p.category !== category) return false;
         if (!matchesTier(p.auction_category, tier)) return false;
+        if (status !== "All" && (p.reg_status ?? "registered") !== status) return false;
         if (avail === "available" && (p.is_bought || p.is_rejected)) return false;
         if (avail === "bought" && !p.is_bought) return false;
         if (avail === "rejected" && !p.is_rejected) return false;
@@ -184,7 +193,16 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
         const bv = (b[sortKey] ?? (sortAsc ? 1e9 : -1e9)) as number;
         return sortAsc ? av - bv : bv - av;
       });
-  }, [players, query, sortKey, sortAsc, role, category, tier, avail]);
+  }, [players, query, sortKey, sortAsc, role, category, tier, status, avail]);
+
+  const statusCounts = useMemo(() => {
+    const c = { registered: 0, verified: 0, rejected: 0 } as Record<RegStatus, number>;
+    for (const p of players) {
+      const s = (p.reg_status ?? "registered") as RegStatus;
+      if (s in c) c[s]++;
+    }
+    return c;
+  }, [players]);
 
   const tierCounts = useMemo(() => {
     const c: Record<string, number> = { A: 0, B: 0, U35A: 0, "35+A": 0, U35B: 0, "35+B": 0 };
@@ -232,6 +250,45 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
               {t === "All" ? "All tiers" : t}
               {t !== "All" ? (
                 <span className="ml-1.5 tabular-nums opacity-70">{tierCounts[t]}</span>
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Registration status — the auction-day showcase axis */}
+      <div className="mb-3 flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-[0.72rem] font-semibold uppercase tracking-wide text-muted">
+          Status
+        </span>
+        {(["All", "registered", "verified", "rejected"] as const).map((s) => {
+          const active = status === s;
+          const solid =
+            s === "All"
+              ? { bg: "var(--ink)", fg: "var(--surface)" }
+              : s === "registered"
+                ? { bg: "var(--accent)", fg: "#ffffff" }
+                : s === "verified"
+                  ? { bg: "var(--up)", fg: "#ffffff" }
+                  : { bg: "var(--down)", fg: "#ffffff" };
+          return (
+            <button
+              key={s}
+              onClick={() => setStatus(s)}
+              className="rounded-full px-3 py-1 text-[0.78rem] font-semibold capitalize transition-colors"
+              style={
+                active
+                  ? { background: solid.bg, color: solid.fg }
+                  : {
+                      background: "var(--wash)",
+                      color: "var(--muted)",
+                      boxShadow: "inset 0 0 0 1px var(--border)",
+                    }
+              }
+            >
+              {s === "All" ? "All" : s}
+              {s !== "All" ? (
+                <span className="ml-1.5 tabular-nums opacity-70">{statusCounts[s]}</span>
               ) : null}
             </button>
           );
@@ -477,11 +534,30 @@ function Row({ p }: { p: PoolPlayer }) {
           >
             {p.is_marquee ? "★" : "☆"}
           </button>
+          <button
+            onClick={() =>
+              startTransition(async () => {
+                const cur = (p.reg_status ?? "registered") as RegStatus;
+                const next: RegStatus = cur === "verified" ? "registered" : "verified";
+                const res = await setRegStatus(p.id, next);
+                if (res.error)
+                  alert(
+                    `Couldn't set status: ${res.error}\n\nIf this mentions "reg_status", run supabase/registration_status.sql in Supabase first.`
+                  );
+              })
+            }
+            disabled={pending}
+            title={(p.reg_status ?? "registered") === "verified" ? "Verified — click to unverify" : "Mark verified"}
+            className="text-sm leading-none transition-transform hover:scale-110"
+            style={{ color: (p.reg_status ?? "registered") === "verified" ? "var(--up)" : "var(--muted)" }}
+          >
+            {(p.reg_status ?? "registered") === "verified" ? "☑" : "☐"}
+          </button>
           {p.is_rejected ? (
           <button
             onClick={() =>
               startTransition(async () => {
-                await setRejected(p.id, false);
+                await setRegStatus(p.id, "registered");
               })
             }
             disabled={pending}
@@ -548,7 +624,7 @@ function Row({ p }: { p: PoolPlayer }) {
             <button
               onClick={() =>
                 startTransition(async () => {
-                  await setRejected(p.id, true);
+                  await setRegStatus(p.id, "rejected");
                 })
               }
               disabled={pending}

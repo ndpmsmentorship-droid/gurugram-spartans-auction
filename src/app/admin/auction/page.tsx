@@ -1,46 +1,35 @@
-import { createClient } from "@/lib/supabase/server";
 import { getActiveSeason } from "@/lib/auth";
-import AuctionConsole from "./AuctionConsole";
+import { createClient } from "@/lib/supabase/server";
+import AuctionConsole, { type ConsolePlayer, type ConsoleTeam } from "./AuctionConsole";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminAuctionPage() {
   const season = await getActiveSeason();
   if (!season) {
-    return <p className="text-muted">No active season yet. Run the seed script first.</p>;
+    return <p className="text-muted">No active season yet.</p>;
   }
 
   const supabase = await createClient();
+  // scout_players' new columns aren't in the generated types yet — loose read.
+  const sb = supabase as unknown as { from: (t: string) => any }; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-  const [{ data: auctionState }, { data: pool }, { data: teams }] = await Promise.all([
-    supabase.from("auction_state").select("*").eq("season_id", season.id).single(),
-    supabase
-      .from("player_season_stats")
-      .select("id, player_id, category, base_price, status, players(full_name)")
-      .eq("season_id", season.id)
-      .eq("status", "in_pool")
-      .order("category"),
-    supabase
+  const [{ data: teams }, { data: players }] = await Promise.all([
+    sb
       .from("teams")
-      .select("id, name, is_mock, purse_total, purse_remaining")
+      .select("id, name, division, purse_total, purse_max")
       .eq("season_id", season.id)
       .order("name"),
+    sb
+      .from("scout_players")
+      .select("id, full_name, auction_category, primary_role, is_keeper, team_id, sold_price, acquired")
+      .order("full_name"),
   ]);
-
-  const { data: currentPlayer } = auctionState?.current_player_id
-    ? await supabase
-        .from("player_season_stats")
-        .select("*, players(*)")
-        .eq("season_id", season.id)
-        .eq("player_id", auctionState.current_player_id)
-        .single()
-    : { data: null };
 
   return (
     <AuctionConsole
-      seasonId={season.id}
-      auctionState={auctionState!}
-      pool={pool ?? []}
-      teams={teams ?? []}
-      currentPlayer={currentPlayer ?? null}
+      teams={(teams ?? []) as ConsoleTeam[]}
+      players={(players ?? []) as ConsolePlayer[]}
     />
   );
 }

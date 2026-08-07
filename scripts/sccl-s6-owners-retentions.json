@@ -1,0 +1,38 @@
+{
+  "league": "SARDA Corporate Cricket League",
+  "abbr": "SCCL",
+  "season": 6,
+  "source": "SCCL_Ownership_Retentions.pptx (Downloads, 2026-08-06)",
+  "note": "grades: A / B / Legend / NP. NP seen only on some owners (likely non-playing owner — confirm).",
+  "groups": {
+    "Elite": ["ACCI", "Bengal Tigers", "Goa Monks", "Gurugram Spartans", "Jaipur Royals", "Japani Tsunami", "Punjab Royals", "UP Warriors"],
+    "Challengers": ["Bangalore KS Blasters", "Bharat Hunters", "Chennai Thalaiva", "Delhi Knights", "London Legends", "NCR Turbo Chargers", "Patna Panthers", "Uttarakhand Yoddhas"],
+    "Fighters": ["TDI Phoenix Giants", "Chandigarh Lions", "Haryana Titans", "JNK Homelenders", "KEI India Warriors", "Mumbai Titans", "Srinagar Sultan", "Texas Holdem"]
+  },
+  "teams": [
+    { "name": "Patna Panthers", "group": "Challengers", "owners": [{"name":"Gaurav Sethi","grade":"B"},{"name":"Sajal Sharma","grade":"B"},{"name":"Anubhav “Manik”","grade":"A"}], "retained": [{"name":"Tarun Singh Chhonkkar","grade":"A"},{"name":"Prateek Bhalla","grade":"B"}] },
+    { "name": "Goa Monks", "group": "Elite", "owners": [{"name":"Sameer Bhalla","grade":"B"},{"name":"Aditya Sharma","grade":"B"},{"name":"Rahul Batra","grade":"B"}], "retained": [{"name":"Wasim","grade":"A"},{"name":"Harchit Sanan","grade":"A"}] },
+    { "name": "Bengal Tigers", "group": "Elite", "owners": [{"name":"Dipak K Singh","grade":"B"},{"name":"K Raj B","grade":"B"},{"name":"Peeyush Sharma","grade":"Legend"}], "retained": [{"name":"Sherry","grade":"B"},{"name":"Piyush Arora","grade":"A"}] },
+    { "name": "Chennai Thalaiva", "group": "Challengers", "owners": [{"name":"Vasanth","grade":"Legend"},{"name":"M. Sathya Ram","grade":"B"},{"name":"Adil","grade":"A"}], "retained": [{"name":"Ankush Bhargava","grade":"B"},{"name":"Rajiv Bose","grade":"A"}] },
+    { "name": "NCR Turbo Chargers", "group": "Challengers", "owners": [{"name":"Sanjeev Ananthakrishnan","grade":"B"},{"name":"Nitin Ruhela","grade":"B"},{"name":"Arvind Kumar","grade":"NP"}], "retained": [{"name":"Vikrant Kataria","grade":"A"},{"name":"Vikash Tiwari","grade":"A"},{"name":"Avinash Jangra","grade":"B"}] },
+    { "name": "UP Warriors", "group": "Elite", "owners": [{"name":"Sandeep Kumar","grade":"B"},{"name":"Bharat Sharma","grade":"B"},{"name":"Mandeep Sangwan","grade":"A"}], "retained": [{"name":"JD","grade":"A"},{"name":"Rajesh Rajput","grade":"Legend"}] },
+    { "name": "Japani Tsunami", "group": "Elite", "owners": [{"name":"Shashank Verma","grade":"B"},{"name":"Naitik Gupta","grade":"B"},{"name":"Sanchit Tanwar","grade":"B"}], "retained": [{"name":"Sandeep Koul","grade":"A"},{"name":"Abhilash Nair","grade":"A"}] },
+    { "name": "Uttarakhand Yoddhas", "group": "Challengers", "owners": [{"name":"Anil Khatri","grade":"B"},{"name":"Rajeev Dagar","grade":"B"},{"name":"Dheeraj Pathak","grade":"A"}], "retained": [{"name":"Karan Kalra","grade":"A"},{"name":"Sumit Chabra","grade":"B"}] },
+    { "name": "Gurugram Spartans", "group": "Elite", "owners": [{"name":"Kanishk Sheel","grade":"Legend"},{"name":"Nikhil Dhingra","grade":"B"},{"name":"Vikas Grover","grade":"A"}], "retained": [{"name":"Nitin Rao","grade":"A"},{"name":"Abhinav Jain","grade":"B"}] },
+    { "name": "ACCI", "group": "Elite", "owners": [{"name":"Russell Stamets","grade":"Legend"},{"name":"Vishal Salgotra","grade":"B"},{"name":"Pradeep Mahlawat","grade":"A"}], "retained": [{"name":"Karamveer Lal","grade":"A"},{"name":"Amrinder Singh","grade":"B"}] },
+    { "name": "Delhi Knights", "group": "Challengers", "owners": [{"name":"Rajan Sharma","grade":"B"},{"name":"Ankit B.","grade":"B"},{"name":"Nitesh Lohchab","grade":"A"}], "retained": [{"name":"Deepak Rao","grade":"Legend"},{"name":"Inder Yadav","grade":"A"}] },
+    { "name": "Jaipur Royals", "group": "Elite", "owners": [{"name":"Dharmendra Shekhawat","grade":"Legend"},{"name":"Saurav Suneja","grade":"Legend"},{"name":"Hemant Kumar","grade":"B"}], "retained": [{"name":"Nikhil Raina","grade":"A"},{"name":"Siddharth Juneja","grade":"A"}] },
+    { "name": "TDI Phoenix Giants", "group": "Fighters", "owners": [{"name":"Jaspreet Singh Kapur","grade":"B"},{"name":"Karan Minocha","grade":"A"},{"name":"Jaikush Singh Hoon","grade":"B"}], "retained": [{"name":"Anurag Malik","grade":"A"},{"name":"Aditya Mahajan","grade":"A"}] },
+    { "name": "Bangalore KS Blasters", "group": "Challengers", "owners": [{"name":"Anubhav Malhotra","grade":"B"},{"name":"Ishneet Singh","grade":"B"}], "retained": [{"name":"Kanav Anand","grade":"B"},{"name":"Manish Toor","grade":"A"},{"name":"Lalit Gautam","grade":"A"}] },
+    { "name": "London Legends", "group": "Challengers", "owners": [{"name":"Vished","grade":"A"},{"name":"Aman Sahni","grade":"B"},{"name":"Devashish","grade":"B"}], "retained": [{"name":"Rajneesh","grade":"B"},{"name":"Dharmender Ghodarop","grade":"A"}] },
+    { "name": "Mumbai Titans", "group": "Fighters", "owners": [{"name":"Ayush Soni","grade":"B"},{"name":"Aneesh Gautam","grade":"Legend"},{"name":"Aman Raj","grade":"A"}], "retained": [{"name":"Sagar Sehrawat","grade":"A"},{"name":"Anil Dayma","grade":"B"}] },
+    { "name": "Chandigarh Lions", "group": "Fighters", "owners": [{"name":"Asheet Taneja","grade":"B"},{"name":"Gaganpreet Singh","grade":"B"},{"name":"Gurmeet Singh","grade":"A"}], "retained": [{"name":"Amit Nagar","grade":"A"},{"name":"Yogesh Rana","grade":"B"}] },
+    { "name": "Haryana Titans", "group": "Fighters", "owners": [{"name":"Rahul Choudhary","grade":"Legend"},{"name":"Somnath Bhattacharyya","grade":"B"},{"name":"Atinderpal Singh","grade":"B"}], "retained": [{"name":"Sumit Shah","grade":"A"},{"name":"Rohit Rathi","grade":"A"}] },
+    { "name": "JNK Homelenders", "group": "Fighters", "owners": [{"name":"Nitin Bakshi","grade":"B"},{"name":"Saleem Khan","grade":"B"}], "retained": [{"name":"Abhishek Kamboj","grade":"A"},{"name":"Manan","grade":"A"},{"name":"Vasim","grade":"B"}] },
+    { "name": "Srinagar Sultan", "group": "Fighters", "owners": [{"name":"Parakh Kapoor","grade":"B"},{"name":"Nirav Sachdeva","grade":"A"},{"name":"Chetan Sharma","grade":"A"}], "retained": [{"name":"Devender Maan","grade":"B"},{"name":"Nasib Singh","grade":"B"}] },
+    { "name": "Punjab Royals", "group": "Elite", "owners": [{"name":"Tarun","grade":"Legend"},{"name":"Sunil Bansal","grade":"B"},{"name":"Ravinder Nandal","grade":"B"},{"name":"Anand Pathak","grade":"NP"}], "retained": [{"name":"Lokesh Dahiya","grade":"A"},{"name":"Nitish","grade":"A"}] },
+    { "name": "Bharat Hunters", "group": "Challengers", "owners": [{"name":"Manish Batra","grade":"Legend"},{"name":"Gaurav Tamta","grade":"Legend"},{"name":"Nitin Gandhi","grade":"NP"},{"name":"Deepanshu Rustagi","grade":"NP"}], "retained": [{"name":"Sumit Nain","grade":"A"},{"name":"Himanshu Chaudhary","grade":"B"},{"name":"Arun Dabas","grade":"A"}] },
+    { "name": "Texas Holdem", "group": "Fighters", "owners": [{"name":"Paras Gupta","grade":"B"},{"name":"Himanshu Saxena","grade":"B"},{"name":"Kumar Gaurav","grade":"B"},{"name":"Harsh Gill","grade":"NP"}], "retained": [{"name":"Tarun Yadav","grade":"A"},{"name":"Gurdeep Singh","grade":"A"}] },
+    { "name": "KEI India Warriors", "group": "Fighters", "owners": [{"name":"Akshit Diviaj Gupta","grade":"Legend"}], "retained": [{"name":"Abhishek Kohli","grade":"A"},{"name":"Rajesh Varma","grade":"A"},{"name":"Kanishk Maini","grade":"B"},{"name":"Mayank Jain","grade":"B"}] }
+  ]
+}

@@ -1,5 +1,5 @@
 import { getActiveSeason } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import AuctionConsole, { type ConsolePlayer, type ConsoleTeam } from "./AuctionConsole";
 
 export const dynamic = "force-dynamic";
@@ -10,8 +10,9 @@ export default async function AdminAuctionPage() {
     return <p className="text-muted">No active season yet.</p>;
   }
 
-  const supabase = await createClient();
-  // scout_players' new columns aren't in the generated types yet — loose read.
+  // /admin is gated to admins (admin/layout). Use the service-role client so the
+  // console isn't blocked by RLS. scout_players' new columns aren't typed yet.
+  const supabase = createAdminClient();
   const sb = supabase as unknown as { from: (t: string) => any }; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   const [{ data: teams }, { data: players }] = await Promise.all([

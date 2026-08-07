@@ -13,7 +13,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl flex-1 p-6">
+    <div className="mx-auto w-full max-w-5xl flex-1 p-4 sm:p-6">
       <nav className="mb-6 flex gap-4 border-b border-border pb-3 text-sm">
         <Link href="/admin/auction" className="font-medium hover:text-primary">
           Auction Console

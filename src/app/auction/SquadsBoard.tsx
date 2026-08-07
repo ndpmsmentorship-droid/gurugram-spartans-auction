@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 
 export type BoardTeam = {
   id: string;
@@ -25,16 +24,10 @@ const DIVISIONS = ["Elite", "Challengers", "Fighters"];
 export default function SquadsBoard({ teams, players }: { teams: BoardTeam[]; players: BoardPlayer[] }) {
   const router = useRouter();
 
-  // Live: refresh the board whenever the pool changes (admin assigns / undoes).
+  // Live: re-pull the board every few seconds so spectators see sales roll in.
   useEffect(() => {
-    const supabase = createClient();
-    const ch = supabase
-      .channel("squads-board")
-      .on("postgres_changes", { event: "*", schema: "public", table: "scout_players" }, () => router.refresh())
-      .subscribe();
-    return () => {
-      supabase.removeChannel(ch);
-    };
+    const id = setInterval(() => router.refresh(), 8000);
+    return () => clearInterval(id);
   }, [router]);
 
   const rosterOf = (teamId: string) =>
@@ -63,7 +56,7 @@ export default function SquadsBoard({ teams, players }: { teams: BoardTeam[]; pl
         return (
           <section key={div}>
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-highlight-ink">{div}</h2>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {divTeams.map((t) => {
                 const roster = rosterOf(t.id);
                 const spent = roster.reduce((s, p) => s + (Number(p.sold_price) || 0), 0);

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentProfile } from "@/lib/auth";
 
 // The auction is admin-run: the admin records each purchase (player -> team @ price)
@@ -44,7 +44,7 @@ export async function assignPlayer(playerId: string, teamId: string, price: numb
   const amount = Math.round(Number(price));
   if (!Number.isFinite(amount) || amount < 0) return { error: "Enter a valid price." };
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const sb = supabase as unknown as LooseClient;
 
   const { data: team } = await supabase.from("teams").select("name, purse_total").eq("id", teamId).single();
@@ -71,7 +71,7 @@ export async function assignPlayer(playerId: string, teamId: string, price: numb
 export async function unassignPlayer(playerId: string): Promise<Result> {
   const denied = await ensureAdmin();
   if (denied) return denied;
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const sb = supabase as unknown as LooseClient;
   const { error } = await sb
     .from("scout_players")
@@ -87,7 +87,7 @@ export async function setPurse(teamId: string, newTotal: number): Promise<Result
   const denied = await ensureAdmin();
   if (denied) return denied;
   const amount = Math.round(Number(newTotal));
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const sb = supabase as unknown as LooseClient;
 
   const { data: team } = await sb.from("teams").select("purse_max").eq("id", teamId).single();

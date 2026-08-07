@@ -37,19 +37,30 @@ export default async function Home() {
           Upload the auction pool, rank every player on form-weighted batting,
           bowling, fielding and keeping — and buy with conviction.
         </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-4">
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Link href="/auction" className="btn-primary">
+            Live auction board
+          </Link>
           {profile ? (
             <>
-              <Link href="/scout" className="btn-primary">
-                Open the pool
+              <Link href="/scout" className="btn-ghost">
+                Scout pool
               </Link>
+              <Link href="/squad" className="btn-ghost">
+                Squad
+              </Link>
+              {profile.role === "admin" && (
+                <Link href="/admin/auction" className="btn-ghost">
+                  Admin console
+                </Link>
+              )}
               <Link href="/scout/import" className="btn-ghost">
                 Import players
               </Link>
             </>
           ) : (
-            <Link href="/login" className="btn-primary">
-              Sign in to start
+            <Link href="/login" className="btn-ghost">
+              Sign in
             </Link>
           )}
         </div>

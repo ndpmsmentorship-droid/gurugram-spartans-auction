@@ -1,9 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+// /auction is the PUBLIC live squads board (read-only, admin-client data) — not gated.
 const PROTECTED_PREFIXES = [
   "/admin",
-  "/auction",
   "/my-team",
   "/players",
   "/scout",

@@ -3,8 +3,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentProfile, getActiveSeason } from "@/lib/auth";
-import LiveAuctionControl, { type LiveTeam, type LiveStatus } from "./LiveAuctionControl";
 import PlayerSearch from "./PlayerSearch";
 import { rankPlayers } from "@/lib/scout/ranks";
 import { computeAnalytics, type AnalyticsInput } from "@/lib/scout/analytics";
@@ -12,7 +10,6 @@ import { deriveMetrics, percentileColumn, type RawStats } from "@/lib/scout/rank
 import { tierStyle, handSkill } from "@/lib/scout/tier";
 import type { ScoutPlayerRow } from "@/lib/supabase/types";
 import Radar from "../Radar";
-import BuyControl from "./BuyControl";
 import PlayerWorkshop from "./PlayerWorkshop";
 import MarqueeToggle from "./MarqueeToggle";
 
@@ -38,24 +35,6 @@ export default async function PlayerDetailPage({
   const pool = (data ?? []) as ScoutPlayerRow[];
   const player = pool.find((p) => p.id === id);
   if (!player) notFound();
-
-  // Live-auction context: is the viewer an admin, the team list, and this
-  // player's current live status (retained / owner / sold).
-  const [profile, season] = await Promise.all([getCurrentProfile(), getActiveSeason()]);
-  const isAdmin = profile?.role === "admin";
-  const { data: teamRows } = season
-    ? await supabase.from("teams").select("id, name, division").eq("season_id", season.id).order("name")
-    : { data: [] as LiveTeam[] };
-  const teams = (teamRows ?? []) as LiveTeam[];
-  const pl = player as unknown as { team_id: string | null; sold_price: number | null; acquired: string | null };
-  const liveStatus: LiveStatus | null = pl.team_id
-    ? {
-        teamId: pl.team_id,
-        teamName: teams.find((t) => t.id === pl.team_id)?.name ?? "—",
-        price: pl.sold_price,
-        acquired: pl.acquired,
-      }
-    : null;
 
   const ranked = rankPlayers(pool);
   const rankedSelf = ranked.find((p) => p.id === id)!;
@@ -184,15 +163,6 @@ export default async function PlayerDetailPage({
         </section>
       </div>
 
-      <div className="mt-6">
-        <LiveAuctionControl
-          playerId={player.id}
-          category={player.auction_category}
-          teams={teams}
-          status={liveStatus}
-          isAdmin={!!isAdmin}
-        />
-      </div>
 
       <div className="mt-6 grid gap-6 md:grid-cols-2">
 
@@ -297,21 +267,6 @@ export default async function PlayerDetailPage({
         </StatSection>
       </div>
 
-      {/* buy */}
-      <section className="card mt-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="font-display font-semibold">Auction action</p>
-          <p className="text-sm text-muted">
-            Mark this player bought at the price you won them for.
-          </p>
-        </div>
-        <BuyControl
-          playerId={player.id}
-          isBought={player.is_bought}
-          isRejected={player.is_rejected}
-          boughtPrice={player.bought_price}
-        />
-      </section>
 
       {/* scouting clip / note (if set) */}
       {(player.scouting_clip_url || player.scouting_note) && (

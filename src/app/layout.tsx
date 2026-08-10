@@ -85,9 +85,6 @@ export default async function RootLayout({
                       Admin
                     </Link>
                   )}
-                  <Link href="/scout/import" className="transition hover:text-foreground">
-                    Import
-                  </Link>
                   <form action={signOut}>
                     <button type="submit" className="transition hover:text-down">
                       Sign out

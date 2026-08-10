@@ -1,4 +1,3 @@
-import { getActiveSeason } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import JerseyForm, { type JerseyPlayer } from "./JerseyForm";
 
@@ -6,10 +5,10 @@ export const dynamic = "force-dynamic";
 
 // Public kit-size collection form (not linked in nav — shared directly with players).
 export default async function JerseyPage() {
-  const season = await getActiveSeason();
   const admin = createAdminClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = admin as unknown as { from: (t: string) => any };
+  const { data: season } = await sb.from("seasons").select("id").eq("is_active", true).maybeSingle();
 
   let players: JerseyPlayer[] = [];
   if (season) {

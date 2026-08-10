@@ -16,13 +16,19 @@ export type SquadCard = {
 };
 
 const inr = (n: number) => "₹" + Math.round(n || 0).toLocaleString("en-IN");
+const inrK = (n: number) => "₹" + Math.round((n || 0) / 1000) + "K";
 
-// Category badge — handles Legend (gold), which tierStyle doesn't colour.
+const ROLE_COLORS: Record<string, string> = {
+  Batter: "#E3A81B",
+  "All-rounder": "#57ac7e",
+  Bowler: "#4a6bb5",
+  Keeper: "#9AA0A6",
+  Other: "#c9ced3",
+};
+
 function catBadge(cat: string | null): { bg: string; fg: string; label: string } | null {
   if (!cat) return null;
-  if (/legend/i.test(cat)) {
-    return { bg: "color-mix(in srgb, #E3A81B 20%, transparent)", fg: "#B4820F", label: cat };
-  }
+  if (/legend/i.test(cat)) return { bg: "color-mix(in srgb, #E3A81B 20%, transparent)", fg: "#B4820F", label: cat };
   const ts = tierStyle(cat);
   return ts ? { bg: ts.bg, fg: ts.fg, label: cat } : { bg: "var(--wash)", fg: "var(--muted)", label: cat };
 }
@@ -38,15 +44,19 @@ export default function SquadDisplay({
   team,
   squad,
   jerseyByPlayer = {},
+  rankByPlayer = {},
 }: {
   team: { name: string; purse_total: number } | null;
   squad: SquadCard[];
   jerseyByPlayer?: Record<string, string | number | null>;
+  rankByPlayer?: Record<string, number>;
 }) {
   const jersey = (id: string) => {
     const v = jerseyByPlayer[id];
     return v === null || v === undefined || v === "" ? null : String(v);
   };
+  const roleOf = (p: SquadCard) => (p.is_keeper ? "Keeper" : roleGroup(p.primary_role, !!p.is_keeper));
+
   const sorted = [...squad].sort((a, b) => {
     const ja = jersey(a.id);
     const jb = jersey(b.id);
@@ -55,14 +65,19 @@ export default function SquadDisplay({
     if (jb) return 1;
     return (Number(b.sold_price) || 0) - (Number(a.sold_price) || 0);
   });
+
   const spent = squad.reduce((s, p) => s + (Number(p.sold_price) || 0), 0);
   const budget = team?.purse_total ?? 400000;
   const remaining = budget - spent;
 
   const cc = (c: string | null) => (c ?? "").toUpperCase().replace(/\s+/g, "");
-  const aCount = squad.filter((p) => /A$/.test(cc(p.auction_category))).length; // U35A + 35+A
+  const aCount = squad.filter((p) => /A$/.test(cc(p.auction_category))).length;
   const u35Count = squad.filter((p) => cc(p.auction_category).startsWith("U35")).length;
   const legendCount = squad.filter((p) => /LEGEND/.test(cc(p.auction_category))).length;
+
+  // role composition
+  const roleOrder = ["Batter", "All-rounder", "Bowler", "Keeper"];
+  const roleCounts = roleOrder.map((r) => ({ role: r, n: squad.filter((p) => roleOf(p) === r).length }));
 
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6">
@@ -71,26 +86,43 @@ export default function SquadDisplay({
         <h1 className="mt-1 flex flex-wrap items-center gap-2 font-display text-3xl font-bold tracking-tight sm:text-4xl">
           The {team?.name ?? "Gurugram Spartans"} <SpartansStars />
         </h1>
-        <p className="mt-1 text-muted">Final squad · {squad.length} players</p>
+        <p className="mt-1 text-sm text-muted tabular-nums">
+          {squad.length} players · {inr(spent)} spent · {inr(remaining)} of {inr(budget)} left
+        </p>
 
-        <div className="mt-4 grid grid-cols-3 gap-3">
-          <Stat label="Players" value={String(squad.length)} />
-          <Stat label="Spent" value={inr(spent)} />
-          <Stat label="Purse left" value={inr(remaining)} tone={remaining < 0 ? "down" : "up"} />
+        {/* gauges */}
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Ring value={aCount} total={8} center={`${aCount}`} label="Category A" sub="max 8 · 6 in XI" color="#E0453A" />
+          <Ring value={u35Count} total={5} center={`${u35Count}`} label="Under-35" sub="max 5 · 3 in XI" color="#4a6bb5" />
+          <Ring value={legendCount} total={Math.max(1, legendCount)} center={`${legendCount}`} label="Legends" sub="min 1 in XI" color="#E3A81B" />
+          <Ring value={spent} total={budget} center={`${Math.round((spent / budget) * 100)}%`} label="Purse used" sub={`${inrK(spent)} / ${inrK(budget)}`} color="#57ac7e" />
         </div>
 
-        <div className="mt-3 grid gap-3 sm:grid-cols-3">
-          <Bar label={`Category A · ${aCount}`} value={aCount} total={squad.length} color="#E0453A" />
-          <Bar label={`Under-35 · ${u35Count}`} value={u35Count} total={squad.length} color="#4a6bb5" />
-          <Bar label="Spend" value={spent} total={budget} color="#E3A81B" display={`${inr(spent)} / ${inr(budget)}`} />
+        {/* role composition */}
+        <div className="mt-4">
+          <div className="flex h-3 overflow-hidden rounded-full">
+            {roleCounts.map((r) =>
+              r.n > 0 ? (
+                <div
+                  key={r.role}
+                  style={{ width: `${(r.n / squad.length) * 100}%`, background: ROLE_COLORS[r.role] }}
+                  title={`${r.role}: ${r.n}`}
+                />
+              ) : null,
+            )}
+          </div>
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+            {roleCounts.map((r) => (
+              <span key={r.role} className="inline-flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: ROLE_COLORS[r.role] }} />
+                {r.role} <b className="text-foreground">{r.n}</b>
+              </span>
+            ))}
+          </div>
         </div>
-        {legendCount > 0 && (
-          <p className="mt-2 text-xs text-muted">
-            {legendCount} Legend{legendCount > 1 ? "s" : ""} · A-category {aCount} · Under-35 {u35Count}
-          </p>
-        )}
       </header>
 
+      {/* squad table */}
       <div className="mt-5 overflow-x-auto rounded-2xl border border-border">
         <table className="w-full min-w-[640px] text-sm">
           <thead className="bg-wash text-left text-muted">
@@ -99,7 +131,7 @@ export default function SquadDisplay({
               <th className="px-3 py-3 font-medium">Player</th>
               <th className="px-3 py-3 font-medium">Category</th>
               <th className="px-3 py-3 font-medium">Role</th>
-              <th className="px-3 py-3 text-right font-medium">Overall</th>
+              <th className="px-3 py-3 text-right font-medium">Pool rank</th>
               <th className="px-3 py-3 text-right font-medium">Price</th>
             </tr>
           </thead>
@@ -108,7 +140,7 @@ export default function SquadDisplay({
               const cb = catBadge(p.auction_category);
               const jn = jersey(p.id);
               const tag = acqTag(p.acquired);
-              const role = p.is_keeper ? "Keeper" : roleGroup(p.primary_role, !!p.is_keeper);
+              const rank = rankByPlayer[p.id];
               return (
                 <tr key={p.id} className="border-t border-border hover:bg-wash/40">
                   <td className="px-3 py-2.5 text-center font-display text-lg font-bold tabular-nums text-accent-text">
@@ -134,9 +166,9 @@ export default function SquadDisplay({
                       "—"
                     )}
                   </td>
-                  <td className="px-3 py-2.5 text-muted">{role}</td>
+                  <td className="px-3 py-2.5 text-muted">{roleOf(p)}</td>
                   <td className="px-3 py-2.5 text-right font-semibold tabular-nums">
-                    {p.overall_index == null ? "—" : Math.round(p.overall_index)}
+                    {rank ? `#${rank}` : "—"}
                   </td>
                   <td className="px-3 py-2.5 text-right tabular-nums">{inr(Number(p.sold_price) || 0)}</td>
                 </tr>
@@ -151,44 +183,47 @@ export default function SquadDisplay({
   );
 }
 
-function Bar({
-  label,
+// SVG ring gauge
+function Ring({
   value,
   total,
+  center,
+  label,
+  sub,
   color,
-  display,
 }: {
-  label: string;
   value: number;
   total: number;
+  center: string;
+  label: string;
+  sub: string;
   color: string;
-  display?: string;
 }) {
-  const pct = total > 0 ? Math.min(100, (value / total) * 100) : 0;
+  const r = 30;
+  const c = 2 * Math.PI * r;
+  const pct = total > 0 ? Math.min(1, value / total) : 0;
   return (
-    <div className="rounded-xl border border-border bg-surface p-3">
-      <div className="flex items-baseline justify-between gap-2">
-        <span className="text-[0.7rem] font-medium uppercase tracking-wide text-muted">{label}</span>
-        <span className="font-display text-xs font-bold tabular-nums">{display ?? `${value}/${total}`}</span>
-      </div>
-      <div className="mt-2 h-2 overflow-hidden rounded-full bg-wash">
-        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: color }} />
-      </div>
-    </div>
-  );
-}
-
-function Stat({ label, value, tone }: { label: string; value: string; tone?: "down" | "up" }) {
-  return (
-    <div className="rounded-xl bg-wash px-4 py-2">
-      <p
-        className={`font-display text-lg font-bold tabular-nums ${
-          tone === "down" ? "text-down" : tone === "up" ? "text-up" : ""
-        }`}
-      >
-        {value}
-      </p>
-      <p className="text-[0.62rem] font-medium uppercase tracking-wide text-muted">{label}</p>
+    <div className="flex flex-col items-center rounded-xl border border-border bg-surface p-3">
+      <svg width="76" height="76" viewBox="0 0 76 76">
+        <circle cx="38" cy="38" r={r} fill="none" stroke="var(--wash)" strokeWidth="7" />
+        <circle
+          cx="38"
+          cy="38"
+          r={r}
+          fill="none"
+          stroke={color}
+          strokeWidth="7"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={c * (1 - pct)}
+          transform="rotate(-90 38 38)"
+        />
+        <text x="38" y="39" textAnchor="middle" dominantBaseline="central" fontSize="18" fontWeight="700" fill="var(--foreground)">
+          {center}
+        </text>
+      </svg>
+      <p className="mt-1.5 text-xs font-semibold">{label}</p>
+      <p className="text-[0.62rem] text-muted">{sub}</p>
     </div>
   );
 }

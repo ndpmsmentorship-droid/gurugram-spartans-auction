@@ -7,7 +7,6 @@ import type { RiskFlag } from "@/lib/scout/analytics";
 import { CATEGORIES, type Category } from "@/lib/scout/category";
 import { tierStyle, parseTier, isGradeA } from "@/lib/scout/tier";
 import {
-  unmarkBought,
   setMarquee,
   setRegStatus,
   type RegStatus,
@@ -24,6 +23,7 @@ export type PoolPlayer = RankedPlayer<{
   is_keeper: boolean;
   is_bought: boolean;
   is_rejected: boolean;
+  sold: boolean;
   is_marquee: boolean;
   reg_status: string; // 'registered' | 'verified' | 'rejected'
   bought_price: number | null;
@@ -160,9 +160,7 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
   const [category, setCategory] = useState<"All" | Category>("All");
   const [tier, setTier] = useState<TierFilter>("All");
   const [status, setStatus] = useState<"All" | RegStatus>("All");
-  const [avail, setAvail] = useState<"available" | "bought" | "rejected" | "all">(
-    "all"
-  );
+  const [avail, setAvail] = useState<"all" | "sold" | "unsold">("all");
 
   function toggleSort(c: Col) {
     if (sortKey === c.key) setSortAsc((v) => !v);
@@ -182,9 +180,8 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
         if (category !== "All" && p.category !== category) return false;
         if (!matchesTier(p.auction_category, tier)) return false;
         if (status !== "All" && (p.reg_status ?? "registered") !== status) return false;
-        if (avail === "available" && (p.is_bought || p.is_rejected)) return false;
-        if (avail === "bought" && !p.is_bought) return false;
-        if (avail === "rejected" && !p.is_rejected) return false;
+        if (avail === "sold" && !p.sold) return false;
+        if (avail === "unsold" && p.sold) return false;
         return true;
       })
       .sort((a, b) => {
@@ -329,10 +326,9 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
           value={avail}
           onChange={(e) => setAvail(e.target.value as typeof avail)}
         >
-          <option value="available">Available</option>
-          <option value="bought">Bought</option>
-          <option value="rejected">Rejected</option>
           <option value="all">All</option>
+          <option value="unsold">Unsold</option>
+          <option value="sold">Sold</option>
         </select>
         <span className="self-center text-xs text-muted">{filtered.length} shown</span>
       </div>
@@ -408,8 +404,8 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
 function Row({ p }: { p: PoolPlayer }) {
   const [pending, startTransition] = useTransition();
 
-  const rowTint = p.is_bought
-    ? "bg-wash"
+  const rowTint = p.sold
+    ? "bg-wash text-muted"
     : p.is_rejected
       ? "opacity-50"
       : "";
@@ -518,23 +514,8 @@ function Row({ p }: { p: PoolPlayer }) {
           >
             Restore
           </button>
-        ) : p.is_bought ? (
-          <span className="inline-flex items-center gap-2">
-            <span className="badge bg-accent text-ink">
-              {p.bought_price?.toLocaleString()}
-            </span>
-            <button
-              onClick={() =>
-                startTransition(async () => {
-                  await unmarkBought(p.id);
-                })
-              }
-              disabled={pending}
-              className="text-xs text-muted hover:text-down"
-            >
-              Undo
-            </button>
-          </span>
+        ) : p.sold ? (
+          <span className="badge bg-wash text-muted">Sold</span>
         ) : (
           <button
             onClick={() =>

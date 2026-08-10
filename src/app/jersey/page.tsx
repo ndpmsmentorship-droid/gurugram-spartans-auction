@@ -25,7 +25,7 @@ export default async function JerseyPage() {
         .eq("team_id", t.id)
         .order("full_name");
       // existing submissions (table may not exist yet → ignore error)
-      const { data: js } = await sb.from("jersey_sizes").select("player_id, jersey_number, tshirt_size, lower_size");
+      const { data: js } = await sb.from("jersey_sizes").select("player_id, display_name, jersey_number, tshirt_size, lower_size");
       const jmap = new Map((js ?? []).map((r: { player_id: string }) => [r.player_id, r]));
       players = (squad ?? []).map((p: { id: string; full_name: string }) => ({
         id: p.id,

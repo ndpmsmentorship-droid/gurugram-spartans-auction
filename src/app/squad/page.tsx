@@ -31,14 +31,24 @@ export default async function SquadPage() {
     }
   }
 
-  // jersey number + kit sizes from the form (table may not exist yet → blank)
+  // jersey number, display name + kit sizes from the form (table may not exist yet → blank)
   const jerseyByPlayer: Record<string, string | null> = {};
+  const displayByPlayer: Record<string, string | null> = {};
   const sizesByPlayer: Record<string, { tshirt: string | null; lower: string | null }> = {};
-  const { data: js } = await sb.from("jersey_sizes").select("player_id, jersey_number, tshirt_size, lower_size");
+  const { data: js } = await sb.from("jersey_sizes").select("player_id, display_name, jersey_number, tshirt_size, lower_size");
   for (const r of js ?? []) {
     jerseyByPlayer[r.player_id] = r.jersey_number;
+    displayByPlayer[r.player_id] = r.display_name;
     sizesByPlayer[r.player_id] = { tshirt: r.tshirt_size, lower: r.lower_size };
   }
 
-  return <SquadDisplay team={team} squad={squad} jerseyByPlayer={jerseyByPlayer} sizesByPlayer={sizesByPlayer} />;
+  return (
+    <SquadDisplay
+      team={team}
+      squad={squad}
+      jerseyByPlayer={jerseyByPlayer}
+      displayByPlayer={displayByPlayer}
+      sizesByPlayer={sizesByPlayer}
+    />
+  );
 }

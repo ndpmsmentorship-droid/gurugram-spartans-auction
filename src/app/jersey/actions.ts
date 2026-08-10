@@ -8,6 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export async function saveJersey(input: {
   player_id: string;
   full_name: string;
+  display_name: string;
   jersey_number: string;
   tshirt_size: string;
   lower_size: string;
@@ -20,6 +21,7 @@ export async function saveJersey(input: {
     {
       player_id: input.player_id,
       full_name: input.full_name,
+      display_name: input.display_name?.trim() || null,
       jersey_number: input.jersey_number?.trim() || null,
       tshirt_size: input.tshirt_size?.trim() || null,
       lower_size: input.lower_size?.trim() || null,

@@ -44,11 +44,13 @@ export default function SquadDisplay({
   team,
   squad,
   jerseyByPlayer = {},
+  displayByPlayer = {},
   sizesByPlayer = {},
 }: {
   team: { name: string; purse_total: number } | null;
   squad: SquadCard[];
   jerseyByPlayer?: Record<string, string | number | null>;
+  displayByPlayer?: Record<string, string | null>;
   sizesByPlayer?: Record<string, { tshirt: string | null; lower: string | null }>;
 }) {
   const jersey = (id: string) => {
@@ -123,14 +125,63 @@ export default function SquadDisplay({
       </header>
 
       {/* squad table */}
-      <div className="mt-5 overflow-x-auto rounded-2xl border border-border">
-        <table className="w-full min-w-[640px] text-sm">
+      {/* mobile: cards */}
+      <div className="mt-5 space-y-2 sm:hidden">
+        {sorted.map((p) => {
+          const cb = catBadge(p.auction_category);
+          const jn = jersey(p.id);
+          const tag = acqTag(p.acquired);
+          const sizes = sizesByPlayer[p.id];
+          const dn = displayByPlayer[p.id];
+          return (
+            <div key={p.id} className="rounded-xl border border-border bg-surface p-3">
+              <div className="flex items-start gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-wash font-display text-base font-bold text-accent-text">
+                  {jn ?? "—"}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <Link href={`/scout/${p.id}`} className="font-semibold hover:text-accent-text">
+                      {p.full_name}
+                    </Link>
+                    {cb && (
+                      <span
+                        className="rounded-full px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+                        style={{ background: cb.bg, color: cb.fg }}
+                      >
+                        {cb.label}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted">
+                    {roleOf(p)} · {tag.label}
+                    {dn ? ` · “${dn}”` : ""}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-2 flex gap-5 border-t border-border/70 pt-2 text-xs">
+                <span className="text-muted">
+                  T-shirt <b className="text-foreground tabular-nums">{sizes?.tshirt || "—"}</b>
+                </span>
+                <span className="text-muted">
+                  Lower <b className="text-foreground tabular-nums">{sizes?.lower || "—"}</b>
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* desktop: table */}
+      <div className="mt-5 hidden overflow-x-auto rounded-2xl border border-border sm:block">
+        <table className="w-full min-w-[720px] text-sm">
           <thead className="bg-wash text-left text-muted">
             <tr>
               <th className="w-20 px-3 py-3 text-center font-medium">Jersey #</th>
               <th className="px-3 py-3 font-medium">Player</th>
               <th className="px-3 py-3 font-medium">Category</th>
               <th className="px-3 py-3 font-medium">Role</th>
+              <th className="px-3 py-3 font-medium">On jersey</th>
               <th className="px-3 py-3 text-center font-medium">T-shirt</th>
               <th className="px-3 py-3 text-center font-medium">Lower</th>
             </tr>
@@ -141,6 +192,7 @@ export default function SquadDisplay({
               const jn = jersey(p.id);
               const tag = acqTag(p.acquired);
               const sizes = sizesByPlayer[p.id];
+              const dn = displayByPlayer[p.id];
               return (
                 <tr key={p.id} className="border-t border-border hover:bg-wash/40">
                   <td className="px-3 py-2.5 text-center font-display text-lg font-bold tabular-nums text-accent-text">
@@ -167,6 +219,7 @@ export default function SquadDisplay({
                     )}
                   </td>
                   <td className="px-3 py-2.5 text-muted">{roleOf(p)}</td>
+                  <td className="px-3 py-2.5 font-medium">{dn || "—"}</td>
                   <td className="px-3 py-2.5 text-center font-semibold tabular-nums">{sizes?.tshirt || "—"}</td>
                   <td className="px-3 py-2.5 text-center font-semibold tabular-nums">{sizes?.lower || "—"}</td>
                 </tr>

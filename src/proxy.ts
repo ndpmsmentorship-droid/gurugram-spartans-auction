@@ -38,9 +38,11 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isProtected = PROTECTED_PREFIXES.some((prefix) =>
-    request.nextUrl.pathname.startsWith(prefix)
-  );
+  const pathname = request.nextUrl.pathname;
+  // Player profile pages (/scout/<uuid>) are public — the pool board and tools stay gated.
+  const isPublicProfile = /^\/scout\/[0-9a-f-]{36}$/.test(pathname);
+  const isProtected =
+    !isPublicProfile && PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
   if (isProtected && !user) {
     // clone() keeps the deployment's basePath (/spartansscout) on the redirect

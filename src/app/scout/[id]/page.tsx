@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentProfile } from "@/lib/auth";
 import PlayerSearch from "./PlayerSearch";
 import { rankPlayers } from "@/lib/scout/ranks";
 import { computeAnalytics, type AnalyticsInput } from "@/lib/scout/analytics";
@@ -21,7 +22,11 @@ export default async function PlayerDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
+  // Admin client so the public (no login) can view profiles; edit controls are
+  // gated to admins below.
+  const supabase = createAdminClient();
+  const profile = await getCurrentProfile();
+  const isAdmin = profile?.role === "admin";
 
   const { data, error } = await supabase.from("scout_players").select("*");
   if (error) {
@@ -119,9 +124,11 @@ export default async function PlayerDetailPage({
           </div>
         </div>
         <div className="text-right">
-          <div className="mb-2 flex justify-end">
-            <MarqueeToggle id={player.id} initial={player.is_marquee} />
-          </div>
+          {isAdmin && (
+            <div className="mb-2 flex justify-end">
+              <MarqueeToggle id={player.id} initial={player.is_marquee} />
+            </div>
+          )}
           <span className="badge bg-ink text-[var(--surface)]">
             Overall #{rankedSelf.overall_rank}
           </span>
@@ -288,8 +295,8 @@ export default async function PlayerDetailPage({
         </section>
       )}
 
-      {/* update data: screenshot / manual / clip */}
-      <PlayerWorkshop player={player} />
+      {/* update data: screenshot / manual / clip (admins only) */}
+      {isAdmin && <PlayerWorkshop player={player} />}
 
       {/* similar players */}
       <section className="mt-6">

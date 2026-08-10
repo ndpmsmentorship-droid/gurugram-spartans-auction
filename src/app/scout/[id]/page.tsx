@@ -71,8 +71,8 @@ export default async function PlayerDetailPage({
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link href="/scout" className="text-sm text-muted hover:text-accent-text">
-          ← Back to pool
+        <Link href="/squad" className="text-sm text-muted hover:text-accent-text">
+          ← Back to squad
         </Link>
         <PlayerSearch players={pool.map((p) => ({ id: p.id, full_name: p.full_name }))} />
       </div>

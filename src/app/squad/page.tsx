@@ -31,20 +31,14 @@ export default async function SquadPage() {
     }
   }
 
-  // jersey numbers (table may not exist yet → fall back to blank)
+  // jersey number + kit sizes from the form (table may not exist yet → blank)
   const jerseyByPlayer: Record<string, string | null> = {};
-  const { data: js } = await sb.from("jersey_sizes").select("player_id, jersey_number");
-  for (const r of js ?? []) jerseyByPlayer[r.player_id] = r.jersey_number;
+  const sizesByPlayer: Record<string, { tshirt: string | null; lower: string | null }> = {};
+  const { data: js } = await sb.from("jersey_sizes").select("player_id, jersey_number, tshirt_size, lower_size");
+  for (const r of js ?? []) {
+    jerseyByPlayer[r.player_id] = r.jersey_number;
+    sizesByPlayer[r.player_id] = { tshirt: r.tshirt_size, lower: r.lower_size };
+  }
 
-  // overall rank in the whole pool, by our ranking system (higher index = better)
-  const rankByPlayer: Record<string, number> = {};
-  const { data: ranked } = await sb.from("scout_players").select("id, overall_index").not("overall_index", "is", null);
-  (ranked ?? [])
-    .slice()
-    .sort((x: { overall_index: number }, y: { overall_index: number }) => y.overall_index - x.overall_index)
-    .forEach((r: { id: string }, i: number) => {
-      rankByPlayer[r.id] = i + 1;
-    });
-
-  return <SquadDisplay team={team} squad={squad} jerseyByPlayer={jerseyByPlayer} rankByPlayer={rankByPlayer} />;
+  return <SquadDisplay team={team} squad={squad} jerseyByPlayer={jerseyByPlayer} sizesByPlayer={sizesByPlayer} />;
 }

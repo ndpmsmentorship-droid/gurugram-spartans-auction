@@ -44,12 +44,12 @@ export default function SquadDisplay({
   team,
   squad,
   jerseyByPlayer = {},
-  rankByPlayer = {},
+  sizesByPlayer = {},
 }: {
   team: { name: string; purse_total: number } | null;
   squad: SquadCard[];
   jerseyByPlayer?: Record<string, string | number | null>;
-  rankByPlayer?: Record<string, number>;
+  sizesByPlayer?: Record<string, { tshirt: string | null; lower: string | null }>;
 }) {
   const jersey = (id: string) => {
     const v = jerseyByPlayer[id];
@@ -131,8 +131,8 @@ export default function SquadDisplay({
               <th className="px-3 py-3 font-medium">Player</th>
               <th className="px-3 py-3 font-medium">Category</th>
               <th className="px-3 py-3 font-medium">Role</th>
-              <th className="px-3 py-3 text-right font-medium">Pool rank</th>
-              <th className="px-3 py-3 text-right font-medium">Price</th>
+              <th className="px-3 py-3 text-center font-medium">T-shirt</th>
+              <th className="px-3 py-3 text-center font-medium">Lower</th>
             </tr>
           </thead>
           <tbody>
@@ -140,7 +140,7 @@ export default function SquadDisplay({
               const cb = catBadge(p.auction_category);
               const jn = jersey(p.id);
               const tag = acqTag(p.acquired);
-              const rank = rankByPlayer[p.id];
+              const sizes = sizesByPlayer[p.id];
               return (
                 <tr key={p.id} className="border-t border-border hover:bg-wash/40">
                   <td className="px-3 py-2.5 text-center font-display text-lg font-bold tabular-nums text-accent-text">
@@ -167,10 +167,8 @@ export default function SquadDisplay({
                     )}
                   </td>
                   <td className="px-3 py-2.5 text-muted">{roleOf(p)}</td>
-                  <td className="px-3 py-2.5 text-right font-semibold tabular-nums">
-                    {rank ? `#${rank}` : "—"}
-                  </td>
-                  <td className="px-3 py-2.5 text-right tabular-nums">{inr(Number(p.sold_price) || 0)}</td>
+                  <td className="px-3 py-2.5 text-center font-semibold tabular-nums">{sizes?.tshirt || "—"}</td>
+                  <td className="px-3 py-2.5 text-center font-semibold tabular-nums">{sizes?.lower || "—"}</td>
                 </tr>
               );
             })}

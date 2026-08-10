@@ -1,48 +1,52 @@
-// The Gurugram Spartans honours mark: four stars — two gold (champions),
-// two silver (runners-up). Reused wherever the club is named.
+// The Gurugram Spartans honours mark — metallic stars + a red dot.
+// Pattern: gold · silver · red dot · silver · gold.
 
-const GOLD = "#E3A81B";
-const GOLD_HI = "#F6CB49";
-const SILVER = "#9AA0A6";
-const SILVER_HI = "#C9CED3";
-
-function Star({ fill, stroke }: { fill: string; stroke: string }) {
+function Star({ id, from, to, stroke }: { id: string; from: string; to: string; stroke: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-[0.9em] w-[0.9em]">
+    <svg viewBox="0 0 24 24" className="h-[0.95em] w-[0.95em]">
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={from} />
+          <stop offset="1" stopColor={to} />
+        </linearGradient>
+      </defs>
       <path
         d="M12 2.5l2.7 5.9 6.4.7-4.8 4.3 1.3 6.3L12 16.9 6.4 19.7l1.3-6.3L2.9 9.1l6.4-.7L12 2.5z"
-        fill={fill}
+        fill={`url(#${id})`}
         stroke={stroke}
-        strokeWidth="0.8"
+        strokeWidth="0.7"
         strokeLinejoin="round"
       />
     </svg>
   );
 }
 
-const RED = "#E0453A";
-const RED_HI = "#B4291F";
-
-function Dot({ fill, stroke }: { fill: string; stroke: string }) {
+function Dot() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-[0.7em] w-[0.7em]">
-      <circle cx="12" cy="12" r="5.5" fill={fill} stroke={stroke} strokeWidth="1" />
+    <svg viewBox="0 0 24 24" className="h-[0.72em] w-[0.72em]">
+      <defs>
+        <radialGradient id="ss-red" cx="0.35" cy="0.3" r="0.8">
+          <stop offset="0" stopColor="#F26D62" />
+          <stop offset="1" stopColor="#D0342A" />
+        </radialGradient>
+      </defs>
+      <circle cx="12" cy="12" r="6" fill="url(#ss-red)" stroke="#A81E15" strokeWidth="0.8" />
     </svg>
   );
 }
 
-// Honours mark: gold star (1st), silver stars (2nd & 4th) and a red dot (3rd).
 export default function SpartansStars({ className = "" }: { className?: string }) {
   return (
     <span
       className={`inline-flex items-center gap-[2px] align-middle ${className}`}
-      aria-label="Honours: champions, two runners-up, and a third-place finish"
-      title="Honours across seasons"
+      aria-label="Honours mark"
+      title="Gurugram Spartans honours"
     >
-      <Star fill={GOLD} stroke={GOLD_HI} />
-      <Star fill={SILVER} stroke={SILVER_HI} />
-      <Dot fill={RED} stroke={RED_HI} />
-      <Star fill={SILVER} stroke={SILVER_HI} />
+      <Star id="ss-gold-a" from="#FBD75B" to="#D2911F" stroke="#B4820F" />
+      <Star id="ss-silver-a" from="#FBFCFD" to="#AEB6BF" stroke="#8A929B" />
+      <Dot />
+      <Star id="ss-silver-b" from="#FBFCFD" to="#AEB6BF" stroke="#8A929B" />
+      <Star id="ss-gold-b" from="#FBD75B" to="#D2911F" stroke="#B4820F" />
     </span>
   );
 }

@@ -1,7 +1,11 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile, getActiveSeason } from "@/lib/auth";
+import LiveAuctionControl, { type LiveTeam, type LiveStatus } from "./LiveAuctionControl";
+import PlayerSearch from "./PlayerSearch";
 import { rankPlayers } from "@/lib/scout/ranks";
 import { computeAnalytics, type AnalyticsInput } from "@/lib/scout/analytics";
 import { deriveMetrics, percentileColumn, type RawStats } from "@/lib/scout/rankings";
@@ -35,6 +39,24 @@ export default async function PlayerDetailPage({
   const player = pool.find((p) => p.id === id);
   if (!player) notFound();
 
+  // Live-auction context: is the viewer an admin, the team list, and this
+  // player's current live status (retained / owner / sold).
+  const [profile, season] = await Promise.all([getCurrentProfile(), getActiveSeason()]);
+  const isAdmin = profile?.role === "admin";
+  const { data: teamRows } = season
+    ? await supabase.from("teams").select("id, name, division").eq("season_id", season.id).order("name")
+    : { data: [] as LiveTeam[] };
+  const teams = (teamRows ?? []) as LiveTeam[];
+  const pl = player as unknown as { team_id: string | null; sold_price: number | null; acquired: string | null };
+  const liveStatus: LiveStatus | null = pl.team_id
+    ? {
+        teamId: pl.team_id,
+        teamName: teams.find((t) => t.id === pl.team_id)?.name ?? "—",
+        price: pl.sold_price,
+        acquired: pl.acquired,
+      }
+    : null;
+
   const ranked = rankPlayers(pool);
   const rankedSelf = ranked.find((p) => p.id === id)!;
   const analytics = computeAnalytics(pool as unknown as AnalyticsInput[]);
@@ -64,17 +86,18 @@ export default async function PlayerDetailPage({
 
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-8">
-      <Link href="/scout" className="text-sm text-muted hover:text-accent-text">
-        ← Back to pool
-      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link href="/scout" className="text-sm text-muted hover:text-accent-text">
+          ← Back to pool
+        </Link>
+        <PlayerSearch players={pool.map((p) => ({ id: p.id, full_name: p.full_name }))} />
+      </div>
 
-      {/* header */}
+      {/* identity bar */}
       <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="eyebrow">{a.roleGroup}</p>
-          <h1 className="mt-1 font-display text-3xl font-bold">
-            {player.full_name}
-          </h1>
+          <h1 className="mt-1 font-display text-3xl font-bold">{player.full_name}</h1>
           {player.cricheroes_link && (
             <a
               href={player.cricheroes_link}
@@ -98,24 +121,6 @@ export default async function PlayerDetailPage({
                 </span>
               ) : null;
             })()}
-            {(() => {
-              const rs = player.reg_status ?? "registered";
-              const st =
-                rs === "verified"
-                  ? { bg: "var(--up)", fg: "#ffffff" }
-                  : rs === "rejected"
-                    ? { bg: "var(--down)", fg: "#ffffff" }
-                    : { bg: "var(--accent)", fg: "#ffffff" };
-              return (
-                <span
-                  className="badge font-semibold capitalize"
-                  style={{ background: st.bg, color: st.fg }}
-                  title="Registration status"
-                >
-                  {rs}
-                </span>
-              );
-            })()}
             <span className="badge bg-wash text-accent-text">{a.archetype}</span>
             {handSkill(player.batting_style, player.bowling_style) ? (
               <span className="badge bg-wash text-muted">
@@ -126,9 +131,7 @@ export default async function PlayerDetailPage({
               <span
                 key={f.label}
                 className={`badge ${
-                  f.level === "red"
-                    ? "bg-down/15 text-down"
-                    : "bg-accent/20 text-accent-text"
+                  f.level === "red" ? "bg-down/15 text-down" : "bg-accent/20 text-accent-text"
                 }`}
               >
                 {f.label}
@@ -151,8 +154,11 @@ export default async function PlayerDetailPage({
         </div>
       </div>
 
-      <div className="mt-6 grid gap-6 md:grid-cols-2">
-        {/* radar + ranks */}
+      {/* big headshot + index profile side by side */}
+      <div className="mt-6 grid items-start gap-6 lg:grid-cols-2">
+        <div className="flex justify-center lg:justify-start">
+          <Headshot name={player.full_name} url={player.photo_url} />
+        </div>
         <section className="card">
           <p className="eyebrow mb-2">Index profile</p>
           <Radar
@@ -176,6 +182,19 @@ export default async function PlayerDetailPage({
             <RankPill label="Keeping" score={player.keep_index} rank={rankedSelf.keep_rank} />
           </div>
         </section>
+      </div>
+
+      <div className="mt-6">
+        <LiveAuctionControl
+          playerId={player.id}
+          category={player.auction_category}
+          teams={teams}
+          status={liveStatus}
+          isAdmin={!!isAdmin}
+        />
+      </div>
+
+      <div className="mt-6 grid gap-6 md:grid-cols-2">
 
         {/* batting stat tiles + boundary % */}
         <StatSection
@@ -338,6 +357,36 @@ export default async function PlayerDetailPage({
         </div>
       </section>
     </main>
+  );
+}
+
+// Player headshot: the uploaded photo when we have one, otherwise a clean
+// initials avatar (the current auction data has no photo URLs).
+function Headshot({ name, url }: { name: string; url: string | null }) {
+  const initials = name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+  if (url) {
+    return (
+      <Image
+        src={url}
+        alt={name}
+        width={448}
+        height={448}
+        unoptimized={false}
+        className="aspect-square w-full max-w-md rounded-2xl object-cover object-center shadow-sm ring-1 ring-border"
+      />
+    );
+  }
+  return (
+    <div
+      className="flex aspect-square w-full max-w-md items-center justify-center rounded-2xl bg-wash text-8xl font-bold text-accent-text ring-1 ring-border"
+      aria-hidden
+    >
+      {initials || "?"}
+    </div>
   );
 }
 

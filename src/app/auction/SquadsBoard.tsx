@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export type BoardTeam = {
@@ -16,6 +16,7 @@ export type BoardPlayer = {
   team_id: string | null;
   sold_price: number | null;
   acquired: string | null;
+  overall_rank?: number | null;
 };
 
 const inr = (n: number) => "₹" + Math.round(n || 0).toLocaleString("en-IN");
@@ -23,12 +24,33 @@ const DIVISIONS = ["Elite", "Challengers", "Fighters"];
 
 export default function SquadsBoard({ teams, players }: { teams: BoardTeam[]; players: BoardPlayer[] }) {
   const router = useRouter();
+  const [syncing, setSyncing] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
 
   // Live: re-pull the board every few seconds so spectators see sales roll in.
   useEffect(() => {
     const id = setInterval(() => router.refresh(), 8000);
     return () => clearInterval(id);
   }, [router]);
+
+  // Manual pull of the latest buys/prices from the SCCL dashboard, on demand.
+  async function syncNow() {
+    setSyncing(true);
+    setMsg(null);
+    try {
+      const res = await fetch("/spartansscout/api/sync-auction", { cache: "no-store" });
+      const j = await res.json().catch(() => null);
+      if (j?.ok) setMsg(j.updated || j.cleared ? `Synced — ${(j.updated ?? 0) + (j.cleared ?? 0)} change(s)` : "Up to date");
+      else if (j?.skipped) setMsg("Just synced — up to date");
+      else setMsg("Sync failed — try again");
+      router.refresh();
+    } catch {
+      setMsg("Sync failed — try again");
+    } finally {
+      setSyncing(false);
+      setTimeout(() => setMsg(null), 4000);
+    }
+  }
 
   const rosterOf = (teamId: string) =>
     players
@@ -40,14 +62,27 @@ export default function SquadsBoard({ teams, players }: { teams: BoardTeam[]; pl
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Live Squads</h1>
-          <p className="text-sm text-muted">Updates live as players are sold.</p>
+          <p className="text-sm text-muted">
+            Updates live as players are sold. <span className="text-highlight-ink">R</span> = retained ·{" "}
+            <span className="text-accent-text">O</span> = owner · #n = our overall rank
+          </p>
         </div>
-        <p className="text-sm text-muted tabular-nums">
-          {totalSold} players sold · {inr(totalSpend)} spent
-        </p>
+        <div className="flex flex-col gap-1.5 sm:items-end">
+          <button
+            onClick={syncNow}
+            disabled={syncing}
+            className="w-full rounded-lg bg-accent px-3 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60 sm:w-auto sm:py-1.5"
+            title="Pull the latest buys & prices from the live auction"
+          >
+            {syncing ? "Syncing…" : "↻ Sync now"}
+          </button>
+          <p className="text-sm text-muted tabular-nums">
+            {totalSold} sold · {inr(totalSpend)} spent{msg ? ` · ${msg}` : ""}
+          </p>
+        </div>
       </div>
 
       {DIVISIONS.map((div) => {
@@ -87,11 +122,24 @@ export default function SquadsBoard({ teams, players }: { teams: BoardTeam[]; pl
                       ) : (
                         roster.map((p) => (
                           <li key={p.id} className="flex items-center justify-between gap-2">
-                            <span className="truncate">
-                              {p.full_name}
-                              {p.acquired === "retained" && (
-                                <span className="ml-1.5 text-[10px] uppercase text-highlight-ink">R</span>
+                            <span className="flex min-w-0 items-center gap-1.5">
+                              {p.overall_rank != null && (
+                                <span
+                                  className="shrink-0 tabular-nums text-[11px] font-semibold text-accent-text"
+                                  title="Our Rank — position in the overall auction pool (1 = best)"
+                                >
+                                  #{p.overall_rank}
+                                </span>
                               )}
+                              <span className="truncate">
+                                {p.full_name}
+                                {p.acquired === "retained" && (
+                                  <span className="ml-1.5 text-[10px] uppercase text-highlight-ink" title="Retained">R</span>
+                                )}
+                                {p.acquired === "owner" && (
+                                  <span className="ml-1.5 text-[10px] uppercase text-accent-text" title="Owner">O</span>
+                                )}
+                              </span>
                             </span>
                             <span className="shrink-0 tabular-nums text-muted">{inr(Number(p.sold_price) || 0)}</span>
                           </li>

@@ -43,6 +43,8 @@ export async function assignPlayer(playerId: string, teamId: string, price: numb
   if (!playerId || !teamId) return { error: "Pick a player and a team." };
   const amount = Math.round(Number(price));
   if (!Number.isFinite(amount) || amount < 0) return { error: "Enter a valid price." };
+  // Rules: max bid ₹65,000; a tie-breaker sealed tender may go up to ₹1,00,000.
+  if (amount > 100000) return { error: "Max bid is ₹1,00,000 (sealed-tender ceiling)." };
 
   const supabase = createAdminClient();
   const sb = supabase as unknown as LooseClient;

@@ -74,6 +74,7 @@ function toCleanPlayer(p: LeagueRow): CleanPlayer {
     full_name: String(p["Name"] ?? "").trim(),
     age: num(p["age"]) != null ? Math.round(num(p["age"])!) : null,
     primary_role: role,
+    auction_category: str(p["category"]) ?? str(p["Category"]) ?? null,
     photo_url: absUrl(p["Player Image"]),
     cricheroes_link: str(p["Cric Heroes Profile"]),
     email: null,

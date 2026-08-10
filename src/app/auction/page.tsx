@@ -14,17 +14,31 @@ export default async function AuctionPage() {
     return <p className="p-6 text-muted">No active season yet.</p>;
   }
 
-  const [{ data: teams }, { data: players }] = await Promise.all([
+  const [{ data: teams }, { data: players }, { data: ranked }] = await Promise.all([
     sb.from("teams").select("id, name, division, purse_total").eq("season_id", season.id).order("name"),
     sb
       .from("scout_players")
       .select("id, full_name, auction_category, team_id, sold_price, acquired")
       .not("team_id", "is", null),
+    // whole pool by index, to derive each player's "Our Rank" (1 = best)
+    sb.from("scout_players").select("id, overall_index").not("overall_index", "is", null),
   ]);
+
+  // rank the entire pool by overall index; retained rows without stats stay unranked
+  const rankMap = new Map<string, number>();
+  (ranked ?? [])
+    .slice()
+    .sort((a: { overall_index: number }, b: { overall_index: number }) => b.overall_index - a.overall_index)
+    .forEach((r: { id: string }, i: number) => rankMap.set(r.id, i + 1));
+
+  const withRank = ((players ?? []) as BoardPlayer[]).map((p) => ({
+    ...p,
+    overall_rank: rankMap.get(p.id) ?? null,
+  }));
 
   return (
     <div className="mx-auto w-full max-w-6xl flex-1 p-4 sm:p-6">
-      <SquadsBoard teams={(teams ?? []) as BoardTeam[]} players={(players ?? []) as BoardPlayer[]} />
+      <SquadsBoard teams={(teams ?? []) as BoardTeam[]} players={withRank} />
     </div>
   );
 }

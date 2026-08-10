@@ -1,0 +1,842 @@
+[
+ {
+  "team": "ACCI",
+  "name": "Russell Stamets",
+  "kind": "owner",
+  "category": "Legend",
+  "cost": 6000
+ },
+ {
+  "team": "ACCI",
+  "name": "Vishal Salgotra",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "ACCI",
+  "name": "Pradeep Mahlawat",
+  "kind": "owner",
+  "category": "A",
+  "cost": 15000
+ },
+ {
+  "team": "ACCI",
+  "name": "Karamveer Lal",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "ACCI",
+  "name": "Amrinder Singh",
+  "kind": "retained",
+  "category": "B",
+  "cost": 10000
+ },
+ {
+  "team": "Bengal Tigers",
+  "name": "Dipak K Singh",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Bengal Tigers",
+  "name": "K Raj B",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Bengal Tigers",
+  "name": "Peeyush Sharma",
+  "kind": "owner",
+  "category": "Legend",
+  "cost": 6000
+ },
+ {
+  "team": "Bengal Tigers",
+  "name": "Sherry",
+  "kind": "retained",
+  "category": "B",
+  "cost": 10000
+ },
+ {
+  "team": "Bengal Tigers",
+  "name": "Piyush Arora",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Goa Monks",
+  "name": "Sameer Bhalla",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Goa Monks",
+  "name": "Aditya Sharma",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Goa Monks",
+  "name": "Rahul Batra",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Goa Monks",
+  "name": "Wasim",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Goa Monks",
+  "name": "Harchit Sanan",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Gurugram Spartans",
+  "name": "Kanishk Sheel",
+  "kind": "owner",
+  "category": "Legend",
+  "cost": 6000
+ },
+ {
+  "team": "Gurugram Spartans",
+  "name": "Nikhil Dhingra",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Gurugram Spartans",
+  "name": "Vikas Grover",
+  "kind": "owner",
+  "category": "A",
+  "cost": 15000
+ },
+ {
+  "team": "Gurugram Spartans",
+  "name": "Nitin Rao",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Gurugram Spartans",
+  "name": "Abhinav Jain",
+  "kind": "retained",
+  "category": "B",
+  "cost": 10000
+ },
+ {
+  "team": "Jaipur Royals",
+  "name": "Dharmendra Shekhawat",
+  "kind": "owner",
+  "category": "Legend",
+  "cost": 6000
+ },
+ {
+  "team": "Jaipur Royals",
+  "name": "Saurav Suneja",
+  "kind": "owner",
+  "category": "Legend",
+  "cost": 6000
+ },
+ {
+  "team": "Jaipur Royals",
+  "name": "Hemant Kumar",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Jaipur Royals",
+  "name": "Nikhil Raina",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Jaipur Royals",
+  "name": "Siddharth Juneja",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Japani Tsunami",
+  "name": "Shashank Verma",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Japani Tsunami",
+  "name": "Naitik Gupta",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Japani Tsunami",
+  "name": "Sanchit Tanwar",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Japani Tsunami",
+  "name": "Sandeep Koul",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Japani Tsunami",
+  "name": "Abhilash Nair",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Punjab Royals",
+  "name": "Tarun",
+  "kind": "owner",
+  "category": "Legend",
+  "cost": 6000
+ },
+ {
+  "team": "Punjab Royals",
+  "name": "Sunil Bansal",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Punjab Royals",
+  "name": "Ravinder Nandal",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Punjab Royals",
+  "name": "Lokesh Dahiya",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Punjab Royals",
+  "name": "Nitish",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "UP Warriors",
+  "name": "Sandeep Kumar",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "UP Warriors",
+  "name": "Bharat Sharma",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "UP Warriors",
+  "name": "Mandeep Sangwan",
+  "kind": "owner",
+  "category": "A",
+  "cost": 15000
+ },
+ {
+  "team": "UP Warriors",
+  "name": "JD",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "UP Warriors",
+  "name": "Rajesh Rajput",
+  "kind": "retained",
+  "category": "Legend",
+  "cost": 10000
+ },
+ {
+  "team": "Bangalore KS Blasters",
+  "name": "Anubhav Malhotra",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Bangalore KS Blasters",
+  "name": "Ishneet Singh",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Bangalore KS Blasters",
+  "name": "Kanav Anand",
+  "kind": "retained",
+  "category": "B",
+  "cost": 10000
+ },
+ {
+  "team": "Bangalore KS Blasters",
+  "name": "Manish Toor",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Bangalore KS Blasters",
+  "name": "Lalit Gautam",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Bharat Hunters",
+  "name": "Manish Batra",
+  "kind": "owner",
+  "category": "Legend",
+  "cost": 6000
+ },
+ {
+  "team": "Bharat Hunters",
+  "name": "Gaurav Tamta",
+  "kind": "owner",
+  "category": "Legend",
+  "cost": 6000
+ },
+ {
+  "team": "Bharat Hunters",
+  "name": "Sumit Nain",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Bharat Hunters",
+  "name": "Himanshu Chaudhary",
+  "kind": "retained",
+  "category": "B",
+  "cost": 10000
+ },
+ {
+  "team": "Bharat Hunters",
+  "name": "Arun Dabas",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Chennai Thalaivas",
+  "name": "Vasanth",
+  "kind": "owner",
+  "category": "Legend",
+  "cost": 6000
+ },
+ {
+  "team": "Chennai Thalaivas",
+  "name": "M. Sathya Ram",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Chennai Thalaivas",
+  "name": "Adil",
+  "kind": "owner",
+  "category": "A",
+  "cost": 15000
+ },
+ {
+  "team": "Chennai Thalaivas",
+  "name": "Ankush Bhargava",
+  "kind": "retained",
+  "category": "B",
+  "cost": 10000
+ },
+ {
+  "team": "Chennai Thalaivas",
+  "name": "Rajiv Bose",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Delhi Knights",
+  "name": "Rajan Sharma",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Delhi Knights",
+  "name": "Ankit B.",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Delhi Knights",
+  "name": "Nitesh Lohchab",
+  "kind": "owner",
+  "category": "A",
+  "cost": 15000
+ },
+ {
+  "team": "Delhi Knights",
+  "name": "Deepak Rao",
+  "kind": "retained",
+  "category": "Legend",
+  "cost": 10000
+ },
+ {
+  "team": "Delhi Knights",
+  "name": "Inder Yadav",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "London Legends",
+  "name": "Vished",
+  "kind": "owner",
+  "category": "A",
+  "cost": 15000
+ },
+ {
+  "team": "London Legends",
+  "name": "Aman Sahni",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "London Legends",
+  "name": "Devashish",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "London Legends",
+  "name": "Rajneesh",
+  "kind": "retained",
+  "category": "B",
+  "cost": 10000
+ },
+ {
+  "team": "London Legends",
+  "name": "Dharmender Ghodarop",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "NCR Turbo Chargers",
+  "name": "Sanjeev Ananthakrishnan",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "NCR Turbo Chargers",
+  "name": "Nitin Ruhela",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "NCR Turbo Chargers",
+  "name": "Vikrant Kataria",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "NCR Turbo Chargers",
+  "name": "Vikash Tiwari",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "NCR Turbo Chargers",
+  "name": "Avinash Jangra",
+  "kind": "retained",
+  "category": "B",
+  "cost": 10000
+ },
+ {
+  "team": "Patna Panthers",
+  "name": "Gaurav Sethi",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Patna Panthers",
+  "name": "Sajal Sharma",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Patna Panthers",
+  "name": "Anubhav (Manik)",
+  "kind": "owner",
+  "category": "A",
+  "cost": 15000
+ },
+ {
+  "team": "Patna Panthers",
+  "name": "Tarun Singh Chhonkkar",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Patna Panthers",
+  "name": "Prateek Bhalla",
+  "kind": "retained",
+  "category": "B",
+  "cost": 10000
+ },
+ {
+  "team": "Uttarakhand Yoddhas",
+  "name": "Anil Khatri",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Uttarakhand Yoddhas",
+  "name": "Rajeev Dagar",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Uttarakhand Yoddhas",
+  "name": "Dheeraj Pathak",
+  "kind": "owner",
+  "category": "A",
+  "cost": 15000
+ },
+ {
+  "team": "Uttarakhand Yoddhas",
+  "name": "Karan Kalra",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Uttarakhand Yoddhas",
+  "name": "Sumit Chabra",
+  "kind": "retained",
+  "category": "B",
+  "cost": 10000
+ },
+ {
+  "team": "TDI Phoenix Giants",
+  "name": "Jaspreet Singh Kapur",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "TDI Phoenix Giants",
+  "name": "Karan Minocha",
+  "kind": "owner",
+  "category": "A",
+  "cost": 15000
+ },
+ {
+  "team": "TDI Phoenix Giants",
+  "name": "Jaikush Singh Hoon",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "TDI Phoenix Giants",
+  "name": "Anurag Malik",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "TDI Phoenix Giants",
+  "name": "Aditya Mahajan",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Chandigarh Lions",
+  "name": "Asheet Taneja",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Chandigarh Lions",
+  "name": "Gaganpreet Singh",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Chandigarh Lions",
+  "name": "Gurmeet Singh",
+  "kind": "owner",
+  "category": "A",
+  "cost": 15000
+ },
+ {
+  "team": "Chandigarh Lions",
+  "name": "Amit Nagar",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Chandigarh Lions",
+  "name": "Yogesh Rana",
+  "kind": "retained",
+  "category": "B",
+  "cost": 10000
+ },
+ {
+  "team": "Haryana Titans",
+  "name": "Rahul Choudhary",
+  "kind": "owner",
+  "category": "Legend",
+  "cost": 6000
+ },
+ {
+  "team": "Haryana Titans",
+  "name": "Somnath Bhattacharyya",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Haryana Titans",
+  "name": "Atinderpal Singh",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Haryana Titans",
+  "name": "Sumit Shah",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Haryana Titans",
+  "name": "Rohit Rathi",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "JNK Homelanders",
+  "name": "Nitin bakshi",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "JNK Homelanders",
+  "name": "Saleem Khan",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "JNK Homelanders",
+  "name": "Abhishek Kamboj",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "JNK Homelanders",
+  "name": "Manan",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "JNK Homelanders",
+  "name": "Vasim",
+  "kind": "retained",
+  "category": "B",
+  "cost": 10000
+ },
+ {
+  "team": "KEI India Warriors",
+  "name": "Akshit Diviaj Gupta",
+  "kind": "owner",
+  "category": "Legend",
+  "cost": 6000
+ },
+ {
+  "team": "KEI India Warriors",
+  "name": "Abhishek Kohli",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "KEI India Warriors",
+  "name": "Rajesh Varma",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "KEI India Warriors",
+  "name": "Kanishk Maini",
+  "kind": "retained",
+  "category": "B",
+  "cost": 10000
+ },
+ {
+  "team": "KEI India Warriors",
+  "name": "Mayank Jain",
+  "kind": "retained",
+  "category": "B",
+  "cost": 10000
+ },
+ {
+  "team": "Mumbai Titans",
+  "name": "Ayush Soni",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Mumbai Titans",
+  "name": "Aneesh Gautam",
+  "kind": "owner",
+  "category": "Legend",
+  "cost": 6000
+ },
+ {
+  "team": "Mumbai Titans",
+  "name": "Aman Raj",
+  "kind": "owner",
+  "category": "A",
+  "cost": 15000
+ },
+ {
+  "team": "Mumbai Titans",
+  "name": "Sagar Sehrawat",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Mumbai Titans",
+  "name": "Anil Dayma",
+  "kind": "retained",
+  "category": "B",
+  "cost": 10000
+ },
+ {
+  "team": "Srinagar Sultans",
+  "name": "Parakh Kapoor",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Srinagar Sultans",
+  "name": "Nirav Sachdeva",
+  "kind": "owner",
+  "category": "A",
+  "cost": 15000
+ },
+ {
+  "team": "Srinagar Sultans",
+  "name": "Chetan Sharma",
+  "kind": "owner",
+  "category": "A",
+  "cost": 15000
+ },
+ {
+  "team": "Srinagar Sultans",
+  "name": "Devender Maan",
+  "kind": "retained",
+  "category": "B",
+  "cost": 10000
+ },
+ {
+  "team": "Srinagar Sultans",
+  "name": "Nasib Singh",
+  "kind": "retained",
+  "category": "B",
+  "cost": 10000
+ },
+ {
+  "team": "Texas Hold'em",
+  "name": "Paras Gupta",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Texas Hold'em",
+  "name": "Himanshu Saxena",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Texas Hold'em",
+  "name": "Kumar Gaurav",
+  "kind": "owner",
+  "category": "B",
+  "cost": 6000
+ },
+ {
+  "team": "Texas Hold'em",
+  "name": "Tarun Yadav",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ },
+ {
+  "team": "Texas Hold'em",
+  "name": "Gurdeep Singh",
+  "kind": "retained",
+  "category": "A",
+  "cost": 20000
+ }
+]

@@ -14,6 +14,7 @@ export type CleanPlayer = {
   full_name: string;
   age: number | null;
   primary_role: string | null;
+  auction_category: string | null;
   photo_url: string | null;
   cricheroes_link: string | null;
   email: string | null;
@@ -62,9 +63,10 @@ export type ImportResult = {
 
 // canonical field -> accepted header aliases (all matched case/space/punct-insensitively)
 const FIELD_ALIASES: Record<keyof CleanPlayer, string[]> = {
-  full_name: ["full name", "name", "player name", "player"],
+  full_name: ["full name", "fullname", "name", "player name", "player"],
   age: ["age"],
-  primary_role: ["cricketing skills", "skills", "role", "player type", "please state your cricketing skills"],
+  primary_role: ["playingas", "playing as", "cricketing skills", "skills", "skill", "role", "player type", "please state your cricketing skills"],
+  auction_category: ["category", "auction category", "auction tier", "tier"],
   photo_url: ["player image", "photo", "profile photo", "passport size photograph"],
   cricheroes_link: ["cric heros profile", "cricheroes profile", "cricheroes", "cricheroes link"],
   email: ["e mail id", "email", "e-mail", "email id"],
@@ -207,6 +209,7 @@ export function parseWorkbook(buffer: ArrayBuffer): ImportResult {
     const player = {} as CleanPlayer;
     player.full_name = String(name).trim();
     player.primary_role = strOrNull(get(row, "primary_role"));
+    player.auction_category = strOrNull(get(row, "auction_category"));
     player.photo_url = strOrNull(get(row, "photo_url"));
     player.cricheroes_link = strOrNull(get(row, "cricheroes_link"));
     player.highest_score = strOrNull(get(row, "highest_score"));
@@ -222,6 +225,17 @@ export function parseWorkbook(buffer: ArrayBuffer): ImportResult {
       (player[field] as number | null) = cleanNumber(get(row, field));
     }
     player.age = player.age != null ? Math.round(player.age) : null;
+
+    // Some exports corrupt/truncate the `overs` column (e.g. show 1 for a bowler
+    // with thousands of runs conceded). runs ÷ economy is internally consistent,
+    // so reconstruct overs when the sheet value looks implausibly small.
+    if (
+      player.economy != null && player.economy > 0 &&
+      player.bowl_runs != null && player.bowl_runs > 0
+    ) {
+      const est = Math.round((player.bowl_runs / player.economy) * 10) / 10;
+      if (player.overs == null || est > player.overs * 1.5) player.overs = est;
+    }
 
     // fat-finger guard: wickets can't exceed balls bowled
     const balls = oversToBalls(player.overs);

@@ -23,7 +23,7 @@ export default async function AdminAuctionPage() {
       .order("name"),
     sb
       .from("scout_players")
-      .select("id, full_name, auction_category, primary_role, is_keeper, team_id, sold_price, acquired")
+      .select("id, full_name, auction_category, primary_role, is_keeper, age, team_id, sold_price, acquired")
       .order("full_name"),
   ]);
 

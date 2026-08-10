@@ -55,13 +55,20 @@ export default async function ScoutPage() {
   }
 
   const pool = data as ScoutPlayerRow[];
+  // Retained / owner / live-auctioned players are no longer in the auction pool.
+  // Rank the whole pool (so rank numbers stay stable) but hide the assigned ones.
+  const assignedIds = new Set(
+    (data as unknown as { id: string; team_id: string | null }[])
+      .filter((p) => p.team_id != null)
+      .map((p) => p.id),
+  );
   const ranked = rankPlayers(pool);
   const analytics = computeAnalytics(pool as unknown as AnalyticsInput[]);
   const needs = squadNeeds(
     (pool as unknown as AnalyticsInput[]).filter((p) => p.is_bought)
   );
 
-  const players: PoolPlayer[] = ranked.map((p) => {
+  const players: PoolPlayer[] = ranked.filter((p) => !assignedIds.has(p.id)).map((p) => {
     const a = analytics.get(p.id)!;
     const m = deriveMetrics(p as unknown as RawStats);
     const cat = resolveCategory(p);

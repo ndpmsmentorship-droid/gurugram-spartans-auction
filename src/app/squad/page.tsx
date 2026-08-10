@@ -1,14 +1,51 @@
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile, getActiveSeason } from "@/lib/auth";
 import { resolveCategory } from "@/lib/scout/category";
 import { rankPlayers } from "@/lib/scout/ranks";
 import type { ScoutPlayerRow } from "@/lib/supabase/types";
-import SquadList, { type SquadPlayer } from "./SquadList";
+import { type SquadPlayer } from "./SquadList";
 import RetainedShowcase from "./RetainedShowcase";
 import MarqueeCards, { type MarqueePlayer } from "./MarqueeCards";
-import ClearPicksButton from "./ClearPicksButton";
+import PositionTargets, { type SquadSlotPlayer } from "./PositionTargets";
 
 export default async function SquadPage() {
   const supabase = await createClient();
+
+  // Real Gurugram Spartans auction squad (team_id) + position-slot tags.
+  const [profile, season] = await Promise.all([getCurrentProfile(), getActiveSeason()]);
+  const isAdmin = profile?.role === "admin";
+  let squad: SquadSlotPlayer[] = [];
+  if (season) {
+    // team_id / squad_slot aren't in the generated types — use a loose client.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = supabase as unknown as { from: (t: string) => any };
+    const { data: sp } = await sb
+      .from("teams")
+      .select("id")
+      .eq("season_id", season.id)
+      .eq("name", "Gurugram Spartans")
+      .maybeSingle();
+    if (sp) {
+      const cols = "id, full_name, primary_role, is_keeper, auction_category, acquired, sold_price";
+      // squad_slot may not exist yet (pre-migration) — fall back gracefully.
+      let res = await sb
+        .from("scout_players")
+        .select(`${cols}, squad_slot`)
+        .eq("team_id", sp.id)
+        .order("sold_price", { ascending: false, nullsFirst: false });
+      if (res.error) {
+        res = await sb
+          .from("scout_players")
+          .select(cols)
+          .eq("team_id", sp.id)
+          .order("sold_price", { ascending: false, nullsFirst: false });
+      }
+      squad = ((res.data ?? []) as SquadSlotPlayer[]).map((r) => ({
+        ...r,
+        squad_slot: r.squad_slot ?? null,
+      }));
+    }
+  }
   const { data, error } = await supabase
     .from("scout_players")
     .select(
@@ -19,7 +56,6 @@ export default async function SquadPage() {
     .order("suggested_batting_order", { ascending: true, nullsFirst: false });
 
   const players = error ? [] : ((data ?? []) as unknown as SquadPlayer[]);
-  const totalSpent = players.reduce((sum, p) => sum + (p.bought_price ?? 0), 0);
 
   // Marquee ("must buy") targets, ranked against the whole pool (1 = best).
   // Guarded so the page still renders if the is_marquee column isn't there yet.
@@ -55,44 +91,11 @@ export default async function SquadPage() {
 
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-5">
-      <RetainedShowcase signings={signings} marquee={<MarqueeCards players={marquee} />} />
+      <PositionTargets players={squad} isAdmin={isAdmin} />
 
-      <section className="mt-10 border-t border-border pt-8">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <p className="eyebrow">Pseudo squad · mock buys</p>
-            <h2 className="mt-1 font-display text-2xl font-bold">{players.length} bought</h2>
-          </div>
-          {players.length > 0 ? (
-            <div className="flex items-center gap-4">
-              <ClearPicksButton />
-              <div className="text-right">
-                <p className="eyebrow">Total spent</p>
-                <p className="font-display text-2xl font-bold" style={{ color: "#D2451F" }}>
-                  {totalSpent.toLocaleString("en-IN")}
-                </p>
-              </div>
-            </div>
-          ) : null}
-        </div>
-
-        {players.length === 0 ? (
-          <p className="mt-4 text-[0.9rem] text-muted">
-            No mock buys yet. Go to the <strong>Pool</strong> and use <strong>⚡ Buy</strong> (or type a
-            price) to dummy-buy players — they land here beside the retained core so you can see the
-            squad take shape. Nothing here touches the live SCCL auction; hit <em>Clear all picks</em>{" "}
-            to reset.
-          </p>
-        ) : (
-          <>
-            <p className="mt-1 text-[0.8rem] text-muted">
-              Mock buys from the pool — a plan, not the live auction. Adjust prices with the typed Buy,
-              or reset with Clear all picks.
-            </p>
-            <SquadList players={players} />
-          </>
-        )}
-      </section>
+      <div className="mt-10 border-t border-border pt-8">
+        <RetainedShowcase signings={signings} marquee={<MarqueeCards players={marquee} />} />
+      </div>
     </main>
   );
 }

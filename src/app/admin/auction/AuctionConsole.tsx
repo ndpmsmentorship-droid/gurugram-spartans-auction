@@ -17,12 +17,24 @@ export type ConsolePlayer = {
   auction_category: string | null;
   primary_role: string | null;
   is_keeper: boolean | null;
+  age: number | null;
   team_id: string | null;
   sold_price: number | null;
   acquired: string | null;
 };
 
 const inr = (n: number) => "₹" + Math.round(n || 0).toLocaleString("en-IN");
+
+// ---- SCCL 6 rules helpers ----
+const catCode = (c: string | null) => (c ?? "").toUpperCase().replace(/\s+/g, "");
+const isLegend = (c: string | null) => catCode(c).includes("LEGEND");
+// 'A' = U35A / 35+A. Legend is its own compulsory slot, priced as B — not an 'A'.
+const isGradeA = (c: string | null) => !isLegend(c) && catCode(c).endsWith("A");
+// Auction base price: 'A' ₹15K, everything else (B / Legend) ₹5K.
+const basePrice = (c: string | null) => (isGradeA(c) ? 15000 : 5000);
+const MAX_BID = 65000;
+const SQUAD_MIN = 16;
+const SQUAD_MAX = 20;
 
 export default function AuctionConsole({
   teams,
@@ -70,11 +82,19 @@ export default function AuctionConsole({
     });
   }
 
+  // picking a player prefills the category base price (A ₹15K / B ₹5K)
+  function pick(p: ConsolePlayer) {
+    setPicked(p);
+    setQuery("");
+    setPrice(String(basePrice(p.auction_category)));
+  }
+
   function doAssign() {
     if (!picked) return setMsg({ text: "Pick a player first.", bad: true });
     if (!teamId) return setMsg({ text: "Pick a team.", bad: true });
     const amt = Number(price);
     if (!Number.isFinite(amt) || amt < 0) return setMsg({ text: "Enter a valid price.", bad: true });
+    if (amt > 100000) return setMsg({ text: "Max bid is ₹1,00,000 (sealed-tender ceiling).", bad: true });
     run(() => assignPlayer(picked.id, teamId, amt), `${picked.full_name} → ${selectedTeam?.name} at ${inr(amt)}`);
     setPicked(null);
     setQuery("");
@@ -92,6 +112,10 @@ export default function AuctionConsole({
           {soldCount} sold · {available.length} available · {teams.length} teams
         </p>
       </div>
+      <p className="rounded-lg border border-border bg-wash px-3 py-2 text-xs leading-relaxed text-muted">
+        Squad {SQUAD_MIN}–{SQUAD_MAX} (incl. owners, retained &amp; legend) · max 4 aged 30–35 · ≥1 legend ·
+        base ₹15K (A) / ₹5K (B) · max bid {inr(MAX_BID)} (₹1L in tie-breaker)
+      </p>
 
       {/* Assign */}
       <div className="rounded-xl border border-border bg-surface p-5">
@@ -122,7 +146,7 @@ export default function AuctionConsole({
                       <li key={p.id}>
                         <button
                           type="button"
-                          onClick={() => { setPicked(p); setQuery(""); }}
+                          onClick={() => pick(p)}
                           className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-wash"
                         >
                           <span>{p.full_name}</span>
@@ -176,7 +200,13 @@ export default function AuctionConsole({
             {pending ? "Saving…" : "Assign"}
           </button>
         </div>
-        <div className="mt-2 flex items-center gap-3 text-xs">
+        <div className="mt-2 flex flex-wrap items-center gap-3 text-xs">
+          {picked && (
+            <span className="text-muted tabular-nums">
+              Base {inr(basePrice(picked.auction_category))} · max {inr(MAX_BID)}
+              {Number(price) > MAX_BID ? <span className="ml-1 text-highlight-ink">(tie-breaker)</span> : null}
+            </span>
+          )}
           {selectedTeam && (
             <span className="text-muted tabular-nums">
               {selectedTeam.name} has <b className={teamRemaining < 0 ? "text-down" : "text-ink"}>{inr(teamRemaining)}</b> left
@@ -196,6 +226,9 @@ export default function AuctionConsole({
           const remaining = t.purse_total - spent;
           const pct = Math.min(100, (spent / t.purse_total) * 100);
           const canExtend = t.purse_max != null && t.purse_total < t.purse_max;
+          const aCount = roster.filter((p) => isGradeA(p.auction_category)).length;
+          const hasLegend = roster.some((p) => isLegend(p.auction_category));
+          const age3035 = roster.filter((p) => p.age != null && p.age >= 30 && p.age <= 35).length;
           return (
             <div key={t.id} className="rounded-xl border border-border bg-surface p-4">
               <div className="flex items-center justify-between gap-2">
@@ -210,6 +243,12 @@ export default function AuctionConsole({
               </div>
               <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-wash">
                 <div className="h-full rounded-full bg-accent" style={{ width: `${pct}%` }} />
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1.5 text-[11px]">
+                <Chip label={`Squad ${roster.length}/${SQUAD_MAX}`} warn={roster.length > SQUAD_MAX} />
+                <Chip label={`30–35: ${age3035}/4`} warn={age3035 > 4} />
+                <Chip label={`A: ${aCount}`} />
+                <Chip label={hasLegend ? "Legend ✓" : "Legend ✗"} warn={!hasLegend} />
               </div>
               {canExtend && (
                 <button
@@ -228,6 +267,7 @@ export default function AuctionConsole({
                       <span className="truncate">
                         {p.full_name}
                         {p.acquired === "retained" && <span className="ml-2 text-[10px] uppercase text-highlight">retained</span>}
+                        {p.acquired === "owner" && <span className="ml-2 text-[10px] uppercase text-accent-text">owner</span>}
                       </span>
                       <span className="flex shrink-0 items-center gap-2">
                         <span className="tabular-nums text-muted">{inr(Number(p.sold_price) || 0)}</span>
@@ -248,5 +288,17 @@ export default function AuctionConsole({
         })}
       </div>
     </div>
+  );
+}
+
+function Chip({ label, warn }: { label: string; warn?: boolean }) {
+  return (
+    <span
+      className={`rounded-full bg-wash px-2 py-0.5 tabular-nums ${
+        warn ? "font-semibold text-down" : "text-muted"
+      }`}
+    >
+      {label}
+    </span>
   );
 }

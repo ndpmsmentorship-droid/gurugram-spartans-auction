@@ -4,10 +4,9 @@ import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import type { RankedPlayer } from "@/lib/scout/ranks";
 import type { RiskFlag } from "@/lib/scout/analytics";
-import { CATEGORIES, CATEGORY_META, type Category } from "@/lib/scout/category";
+import { CATEGORIES, type Category } from "@/lib/scout/category";
 import { tierStyle, parseTier, isGradeA } from "@/lib/scout/tier";
 import {
-  markBought,
   unmarkBought,
   setMarquee,
   setRegStatus,
@@ -162,7 +161,7 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
   const [tier, setTier] = useState<TierFilter>("All");
   const [status, setStatus] = useState<"All" | RegStatus>("All");
   const [avail, setAvail] = useState<"available" | "bought" | "rejected" | "all">(
-    "available"
+    "all"
   );
 
   function toggleSort(c: Col) {
@@ -380,7 +379,7 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
                 <th
                   key={c.key as string}
                   onClick={() => toggleSort(c)}
-                  className={`cursor-help select-none whitespace-nowrap px-2 py-2 font-medium hover:text-accent-text ${
+                  className={`cursor-help select-none whitespace-nowrap px-3 py-2 font-medium hover:text-accent-text ${
                     c.numeric ? "text-right" : ""
                   } ${sortKey === c.key ? "text-accent-text" : ""}`}
                   title={`${c.help}\n\n(Click to sort)`}
@@ -389,7 +388,7 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
                   {sortKey === c.key ? (sortAsc ? " ↑" : " ↓") : ""}
                 </th>
               ))}
-              <th className="px-2 py-2 text-right font-medium">Action</th>
+              <th className="px-3 py-2 text-right font-medium">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -407,19 +406,7 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
 }
 
 function Row({ p }: { p: PoolPlayer }) {
-  const [buying, setBuying] = useState(false);
-  const [price, setPrice] = useState("");
   const [pending, startTransition] = useTransition();
-
-  function confirmBuy() {
-    const val = Number(price);
-    if (!Number.isFinite(val) || val <= 0) return;
-    startTransition(async () => {
-      await markBought(p.id, val);
-      setBuying(false);
-      setPrice("");
-    });
-  }
 
   const rowTint = p.is_bought
     ? "bg-wash"
@@ -429,33 +416,13 @@ function Row({ p }: { p: PoolPlayer }) {
 
   return (
     <tr className={`border-t border-border ${rowTint}`}>
-      <td className="sticky left-0 z-10 bg-[var(--surface)] px-3 py-2">
-        <Link href={`/scout/${p.id}`} className="font-medium hover:text-accent-text">
-          {p.full_name}
-        </Link>
-        {p.is_marquee && (
-          <span
-            className="ml-1 align-middle text-[11px] font-semibold"
-            style={{ color: "#B4820F" }}
-            title="Marquee — must buy"
-          >
-            ★ Marquee
-          </span>
-        )}
-        {p.hasRecentForm && (
-          <span
-            className="ml-1 align-middle text-[10px] font-semibold text-up"
-            title="Score is form-adjusted (recent 2-year data captured)"
-          >
-            ● Form
-          </span>
-        )}
-        <span className="mt-0.5 flex flex-wrap items-center gap-1.5">
+      <td className="sticky left-0 z-10 max-w-[230px] bg-[var(--surface)] px-3 py-1.5 align-middle">
+        <div className="flex items-center gap-1.5 leading-tight">
           {(() => {
             const ts = tierStyle(p.auction_category);
             return ts ? (
               <span
-                className="inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+                className="shrink-0 rounded px-1 py-px text-[9px] font-bold uppercase tracking-wide"
                 style={{ background: ts.bg, color: ts.fg }}
                 title="Organizers' auction category"
               >
@@ -463,33 +430,38 @@ function Row({ p }: { p: PoolPlayer }) {
               </span>
             ) : null;
           })()}
-          <span
-            className="inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold"
-            style={{ background: CATEGORY_META[p.category].bg, color: CATEGORY_META[p.category].fg }}
-            title={
-              p.categoryIsOverride
-                ? "Category set manually"
-                : "Auto-derived category — open the player to override"
-            }
+          <Link
+            href={`/scout/${p.id}`}
+            className="min-w-0 truncate font-medium hover:text-accent-text"
           >
-            {p.category}
-          </span>
-          {!p.categoryIsOverride && (
-            <span className="text-[9px] uppercase tracking-wide text-muted">auto</span>
+            {p.full_name}
+          </Link>
+          {p.is_marquee && (
+            <span
+              className="shrink-0 text-xs leading-none"
+              style={{ color: "#E3A81B" }}
+              title="Marquee — must buy"
+            >
+              ★
+            </span>
           )}
-        </span>
-        <span className="block text-[11px] text-muted">
+          {p.hasRecentForm && (
+            <span
+              className="shrink-0 text-[10px] leading-none text-up"
+              title="Score is form-adjusted (recent 2-year data captured)"
+            >
+              ●
+            </span>
+          )}
+        </div>
+        <div className="mt-0.5 truncate text-[11px] leading-tight text-muted">
           {p.archetype}
           {p.topRisk && (
-            <span
-              className={
-                p.topRisk.level === "red" ? "ml-1 text-down" : "ml-1 text-accent-text"
-              }
-            >
+            <span className={p.topRisk.level === "red" ? "ml-1 text-down" : "ml-1 text-accent-text"}>
               · {p.topRisk.label}
             </span>
           )}
-        </span>
+        </div>
       </td>
       {COLS.map((c) => {
         const rankKey = TIER_COL[c.key];
@@ -497,14 +469,14 @@ function Row({ p }: { p: PoolPlayer }) {
         return (
           <td
             key={c.key as string}
-            className={`whitespace-nowrap px-2 py-2 tabular-nums ${
+            className={`whitespace-nowrap px-3 py-1.5 align-middle tabular-nums ${
               c.numeric ? "text-right" : ""
             }`}
           >
             {tier ? (
               <span
-                className="inline-block min-w-[2.1rem] rounded-full px-2 py-0.5 text-center text-[0.78rem] font-semibold"
-                style={{ background: tier.bg, color: tier.fg }}
+                className="font-semibold"
+                style={{ color: tier.bg }}
                 title={`${c.label} rank tier: ${tier.label}`}
               >
                 {cell(p, c)}
@@ -515,7 +487,7 @@ function Row({ p }: { p: PoolPlayer }) {
           </td>
         );
       })}
-      <td className="whitespace-nowrap px-2 py-2 text-right">
+      <td className="whitespace-nowrap px-3 py-1.5 text-right align-middle">
         <span className="inline-flex items-center justify-end gap-2">
           <button
             onClick={() =>
@@ -533,25 +505,6 @@ function Row({ p }: { p: PoolPlayer }) {
             style={{ color: p.is_marquee ? "#E3A81B" : "var(--muted)" }}
           >
             {p.is_marquee ? "★" : "☆"}
-          </button>
-          <button
-            onClick={() =>
-              startTransition(async () => {
-                const cur = (p.reg_status ?? "registered") as RegStatus;
-                const next: RegStatus = cur === "verified" ? "registered" : "verified";
-                const res = await setRegStatus(p.id, next);
-                if (res.error)
-                  alert(
-                    `Couldn't set status: ${res.error}\n\nIf this mentions "reg_status", run supabase/registration_status.sql in Supabase first.`
-                  );
-              })
-            }
-            disabled={pending}
-            title={(p.reg_status ?? "registered") === "verified" ? "Verified — click to unverify" : "Mark verified"}
-            className="text-sm leading-none transition-transform hover:scale-110"
-            style={{ color: (p.reg_status ?? "registered") === "verified" ? "var(--up)" : "var(--muted)" }}
-          >
-            {(p.reg_status ?? "registered") === "verified" ? "☑" : "☐"}
           </button>
           {p.is_rejected ? (
           <button
@@ -582,58 +535,19 @@ function Row({ p }: { p: PoolPlayer }) {
               Undo
             </button>
           </span>
-        ) : buying ? (
-          <span className="inline-flex items-center gap-1">
-            <input
-              type="number"
-              autoFocus
-              className="input w-20 py-1"
-              placeholder="₹"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && confirmBuy()}
-            />
-            <button onClick={confirmBuy} disabled={pending} className="text-xs text-accent-text">
-              ✓
-            </button>
-            <button onClick={() => setBuying(false)} className="text-xs text-muted">
-              ✕
-            </button>
-          </span>
         ) : (
-          <span className="inline-flex items-center gap-2">
-            <button
-              onClick={() =>
-                startTransition(async () => {
-                  await markBought(p.id, 2000);
-                })
-              }
-              disabled={pending}
-              title="Dummy buy at base (₹2,000) — adds to the pseudo squad"
-              className="text-xs font-medium hover:underline"
-              style={{ color: "#D2451F" }}
-            >
-              ⚡ Buy
-            </button>
-            <button
-              onClick={() => setBuying(true)}
-              className="text-xs font-medium text-accent-text hover:underline"
-            >
-              Buy ₹
-            </button>
-            <button
-              onClick={() =>
-                startTransition(async () => {
-                  await setRegStatus(p.id, "rejected");
-                })
-              }
-              disabled={pending}
-              className="text-xs text-muted hover:text-down"
-            >
-              Reject
-            </button>
-          </span>
-          )}
+          <button
+            onClick={() =>
+              startTransition(async () => {
+                await setRegStatus(p.id, "rejected");
+              })
+            }
+            disabled={pending}
+            className="text-xs text-muted hover:text-down"
+          >
+            Reject
+          </button>
+        )}
         </span>
       </td>
     </tr>

@@ -250,15 +250,14 @@ export default function AuctionConsole({
                 <Chip label={`A: ${aCount}`} />
                 <Chip label={hasLegend ? "Legend ✓" : "Legend ✗"} warn={!hasLegend} />
               </div>
-              {canExtend && (
-                <button
-                  type="button"
-                  disabled={pending}
-                  onClick={() => run(() => setPurse(t.id, t.purse_max as number), `${t.name} purse raised to ${inr(t.purse_max as number)}`)}
-                  className="mt-2 text-xs font-medium text-accent hover:underline disabled:opacity-60"
-                >
-                  Extend purse to {inr(t.purse_max as number)}
-                </button>
+              {canExtend ? (
+                <TopUp
+                  team={t}
+                  pending={pending}
+                  onSet={(total) => run(() => setPurse(t.id, total), `${t.name} purse → ${inr(total)}`)}
+                />
+              ) : (
+                <p className="mt-2 text-xs text-muted">Purse at max — {inr(t.purse_total)}</p>
               )}
               {roster.length > 0 && (
                 <ul className="mt-3 divide-y divide-border/70 text-sm">
@@ -287,6 +286,39 @@ export default function AuctionConsole({
           );
         })}
       </div>
+    </div>
+  );
+}
+
+// Top-up: raise a team's purse in steps or jump to the ₹4L ceiling.
+function TopUp({ team, pending, onSet }: { team: ConsoleTeam; pending: boolean; onSet: (total: number) => void }) {
+  const max = team.purse_max ?? team.purse_total;
+  const headroom = max - team.purse_total;
+  if (headroom <= 0) return null;
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
+      <span className="text-muted">Top up:</span>
+      {[25000, 50000, 100000]
+        .filter((a) => a <= headroom)
+        .map((a) => (
+          <button
+            key={a}
+            type="button"
+            disabled={pending}
+            onClick={() => onSet(Math.min(max, team.purse_total + a))}
+            className="rounded-md border border-border px-2 py-0.5 font-medium text-accent hover:bg-wash disabled:opacity-60"
+          >
+            +{inr(a)}
+          </button>
+        ))}
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() => onSet(max)}
+        className="rounded-md border border-border px-2 py-0.5 font-medium text-accent hover:bg-wash disabled:opacity-60"
+      >
+        Max {inr(max)}
+      </button>
     </div>
   );
 }

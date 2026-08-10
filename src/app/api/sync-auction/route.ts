@@ -83,14 +83,9 @@ export async function GET() {
       }
     }
 
-    // Anantanity un-sold something we still show as taken → release it.
-    let cleared = 0;
-    for (const p of mine ?? []) {
-      if (p.team_id && !assigned.has(norm(p.full_name))) {
-        await admin.from("scout_players").update({ team_id: null, sold_price: null, acquired: null }).eq("id", p.id);
-        cleared++;
-      }
-    }
+    // Additive mirror only: we never un-assign here, so manual squad additions
+    // (players won but not yet reflected on Anantanity) are preserved.
+    const cleared = 0;
 
     lastSyncAt = now;
     return NextResponse.json({ ok: true, updated, cleared, players: rows.length, at: new Date().toISOString() });

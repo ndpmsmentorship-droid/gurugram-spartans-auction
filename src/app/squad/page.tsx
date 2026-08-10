@@ -1,101 +1,41 @@
-import { createClient } from "@/lib/supabase/server";
-import { getCurrentProfile, getActiveSeason } from "@/lib/auth";
-import { resolveCategory } from "@/lib/scout/category";
-import { rankPlayers } from "@/lib/scout/ranks";
-import type { ScoutPlayerRow } from "@/lib/supabase/types";
-import { type SquadPlayer } from "./SquadList";
-import RetainedShowcase from "./RetainedShowcase";
-import MarqueeCards, { type MarqueePlayer } from "./MarqueeCards";
-import PositionTargets, { type SquadSlotPlayer } from "./PositionTargets";
+import { getActiveSeason } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
+import SquadDisplay, { type SquadCard } from "./SquadDisplay";
 
+export const dynamic = "force-dynamic";
+
+// Public showcase of the final Gurugram Spartans squad (team_id assignments,
+// synced from the live auction + any manual additions). Read with the service
+// role so it renders without a login.
 export default async function SquadPage() {
-  const supabase = await createClient();
+  const season = await getActiveSeason();
+  const admin = createAdminClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sb = admin as unknown as { from: (t: string) => any };
 
-  // Real Gurugram Spartans auction squad (team_id) + position-slot tags.
-  const [profile, season] = await Promise.all([getCurrentProfile(), getActiveSeason()]);
-  const isAdmin = profile?.role === "admin";
-  let squad: SquadSlotPlayer[] = [];
+  let team: { name: string; purse_total: number } | null = null;
+  let squad: SquadCard[] = [];
   if (season) {
-    // team_id / squad_slot aren't in the generated types — use a loose client.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = supabase as unknown as { from: (t: string) => any };
-    const { data: sp } = await sb
+    const { data: t } = await sb
       .from("teams")
-      .select("id")
+      .select("id, name, purse_total")
       .eq("season_id", season.id)
       .eq("name", "Gurugram Spartans")
       .maybeSingle();
-    if (sp) {
-      const cols = "id, full_name, primary_role, is_keeper, auction_category, acquired, sold_price";
-      // squad_slot may not exist yet (pre-migration) — fall back gracefully.
-      let res = await sb
+    if (t) {
+      team = { name: t.name, purse_total: t.purse_total };
+      const { data } = await sb
         .from("scout_players")
-        .select(`${cols}, squad_slot`)
-        .eq("team_id", sp.id)
-        .order("sold_price", { ascending: false, nullsFirst: false });
-      if (res.error) {
-        res = await sb
-          .from("scout_players")
-          .select(cols)
-          .eq("team_id", sp.id)
-          .order("sold_price", { ascending: false, nullsFirst: false });
-      }
-      squad = ((res.data ?? []) as SquadSlotPlayer[]).map((r) => ({
-        ...r,
-        squad_slot: r.squad_slot ?? null,
-      }));
+        .select("id, full_name, auction_category, primary_role, is_keeper, acquired, sold_price, photo_url, overall_index")
+        .eq("team_id", t.id);
+      squad = (data ?? []) as SquadCard[];
     }
   }
-  const { data, error } = await supabase
-    .from("scout_players")
-    .select(
-      "id, full_name, primary_role, auction_category, is_keeper, bought_price, utility_tag, " +
-        "suggested_batting_order, bat_index, bowl_index, field_index, keep_index"
-    )
-    .eq("is_bought", true)
-    .order("suggested_batting_order", { ascending: true, nullsFirst: false });
 
-  const players = error ? [] : ((data ?? []) as unknown as SquadPlayer[]);
+  // jersey numbers (table may not exist yet → fall back to blank)
+  const jerseyByPlayer: Record<string, string | null> = {};
+  const { data: js } = await sb.from("jersey_sizes").select("player_id, jersey_number");
+  for (const r of js ?? []) jerseyByPlayer[r.player_id] = r.jersey_number;
 
-  // Marquee ("must buy") targets, ranked against the whole pool (1 = best).
-  // Guarded so the page still renders if the is_marquee column isn't there yet.
-  const { data: poolData } = await supabase.from("scout_players").select("*");
-  const pool = (poolData ?? []) as ScoutPlayerRow[];
-  const rankMap = new Map(rankPlayers(pool).map((p) => [p.id, p.overall_rank]));
-  const marquee: MarqueePlayer[] = pool
-    .filter((p) => p.is_marquee)
-    .sort((a, b) => (b.overall_index ?? -1) - (a.overall_index ?? -1))
-    .map((p) => ({
-      id: p.id,
-      full_name: p.full_name,
-      category: resolveCategory(p).category,
-      primary_role: p.primary_role,
-      auction_category: p.auction_category,
-      batting_style: p.batting_style,
-      bowling_style: p.bowling_style,
-      overall_rank: rankMap.get(p.id) ?? null,
-      photo_url: p.photo_url,
-    }));
-
-  const categoryById = new Map(pool.map((p) => [p.id, resolveCategory(p).category]));
-  const signings = players.map((p) => ({
-    id: p.id,
-    name: p.full_name,
-    role: p.primary_role,
-    isKeeper: p.is_keeper,
-    order: p.suggested_batting_order,
-    price: p.bought_price,
-    category: categoryById.get(p.id) ?? null,
-    tier: p.auction_category,
-  }));
-
-  return (
-    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-5">
-      <PositionTargets players={squad} isAdmin={isAdmin} />
-
-      <div className="mt-10 border-t border-border pt-8">
-        <RetainedShowcase signings={signings} marquee={<MarqueeCards players={marquee} />} />
-      </div>
-    </main>
-  );
+  return <SquadDisplay team={team} squad={squad} jerseyByPlayer={jerseyByPlayer} />;
 }

@@ -1,13 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-// /auction is the PUBLIC live squads board (read-only, admin-client data) — not gated.
+// /auction (live board), /squad (final squad display) and /jersey (size form) are
+// PUBLIC — read-only, service-role data. Everything below stays login-gated.
 const PROTECTED_PREFIXES = [
   "/admin",
   "/my-team",
   "/players",
   "/scout",
-  "/squad",
 ];
 
 export async function proxy(request: NextRequest) {

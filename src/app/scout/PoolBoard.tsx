@@ -321,15 +321,20 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
             </option>
           ))}
         </select>
-        <select
-          className="input max-w-[9rem]"
-          value={avail}
-          onChange={(e) => setAvail(e.target.value as typeof avail)}
-        >
-          <option value="all">All</option>
-          <option value="unsold">Unsold</option>
-          <option value="sold">Sold</option>
-        </select>
+        <div className="inline-flex overflow-hidden rounded-lg border border-border text-sm">
+          {(["all", "unsold", "sold"] as const).map((opt) => (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => setAvail(opt)}
+              className={`px-3 py-1.5 capitalize transition ${
+                avail === opt ? "bg-accent font-semibold text-white" : "hover:bg-wash"
+              }`}
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
         <span className="self-center text-xs text-muted">{filtered.length} shown</span>
       </div>
 

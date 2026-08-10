@@ -58,9 +58,12 @@ export default async function RootLayout({
               Spartans Scout <SpartansStars />
             </Link>
             <nav className="flex items-center gap-4 overflow-x-auto whitespace-nowrap text-[0.8rem] text-muted sm:gap-6 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {/* public live auction board — visible to everyone */}
+              {/* public pages — visible to everyone */}
               <Link href="/auction" className="transition hover:text-foreground">
                 Live Board
+              </Link>
+              <Link href="/squad" className="transition hover:text-foreground">
+                Squad
               </Link>
               {/* cross-app link to the public Spartans ball library (root, not basePath) */}
               <a
@@ -75,10 +78,6 @@ export default async function RootLayout({
                 <>
                   <Link href="/scout" className="transition hover:text-foreground">
                     Pool
-                  </Link>
-                  <Link href="/squad" className="transition hover:text-foreground">
-                    <span className="sm:hidden">Squad</span>
-                    <span className="hidden sm:inline">Season 6 Squad</span>
                   </Link>
                   {profile.role === "admin" && (
                     <Link href="/admin/auction" className="font-medium text-accent-text transition hover:text-foreground">

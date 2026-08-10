@@ -44,6 +44,11 @@ async function fetchAll(token: string): Promise<any[]> {
 }
 
 export async function GET() {
+  // Auction is over and the squad is curated manually — the mirror is disabled so
+  // it can't overwrite manual edits. Re-enable by removing this guard if needed.
+  return NextResponse.json({ ok: true, disabled: true, note: "sync disabled post-auction" });
+
+  // eslint-disable-next-line no-unreachable
   const now = Date.now();
   if (now - lastSyncAt < 60_000) {
     return NextResponse.json({ skipped: true, reason: "synced <60s ago" });

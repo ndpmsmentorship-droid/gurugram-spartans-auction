@@ -36,8 +36,14 @@ export default async function ScoutPage() {
 
   if (error) {
     return (
-      <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-10">
-        <p className="text-down">Failed to load pool: {error.message}</p>
+      <main className="mx-auto w-full max-w-md flex-1 px-5 py-16 text-center">
+        <h1 className="font-display text-2xl font-bold">Pool temporarily unavailable</h1>
+        <p className="mt-2 text-muted">
+          The database didn&rsquo;t respond just now (a brief hiccup). Please refresh in a moment.
+        </p>
+        <a href="/scout" className="btn-primary mt-6 inline-block">
+          Retry
+        </a>
       </main>
     );
   }

@@ -125,47 +125,44 @@ export default function SquadDisplay({
       </header>
 
       {/* squad table */}
-      {/* mobile: cards */}
+      {/* mobile: cards (sizes in-line on the right) */}
       <div className="mt-5 space-y-2 sm:hidden">
         {sorted.map((p) => {
           const cb = catBadge(p.auction_category);
           const jn = jersey(p.id);
-          const tag = acqTag(p.acquired);
           const sizes = sizesByPlayer[p.id];
           const dn = displayByPlayer[p.id];
           return (
-            <div key={p.id} className="rounded-xl border border-border bg-surface p-3">
-              <div className="flex items-start gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-wash font-display text-base font-bold text-accent-text">
-                  {jn ?? "—"}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <Link href={`/scout/${p.id}`} className="font-semibold hover:text-accent-text">
-                      {p.full_name}
-                    </Link>
-                    {cb && (
-                      <span
-                        className="rounded-full px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide"
-                        style={{ background: cb.bg, color: cb.fg }}
-                      >
-                        {cb.label}
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-0.5 text-xs text-muted">
-                    {roleOf(p)} · {tag.label}
-                    {dn ? ` · “${dn}”` : ""}
-                  </p>
+            <div key={p.id} className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-wash font-display text-base font-bold text-accent-text">
+                {jn ?? "—"}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <Link href={`/scout/${p.id}`} className="truncate font-semibold hover:text-accent-text">
+                    {p.full_name}
+                  </Link>
+                  {cb && (
+                    <span
+                      className="shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
+                      style={{ background: cb.bg, color: cb.fg }}
+                    >
+                      {cb.label}
+                    </span>
+                  )}
                 </div>
+                <p className="mt-0.5 truncate text-xs text-muted">
+                  {roleOf(p)}
+                  {dn ? ` · “${dn}”` : ""}
+                </p>
               </div>
-              <div className="mt-2 flex gap-5 border-t border-border/70 pt-2 text-xs">
-                <span className="text-muted">
-                  T-shirt <b className="text-foreground tabular-nums">{sizes?.tshirt || "—"}</b>
-                </span>
-                <span className="text-muted">
-                  Lower <b className="text-foreground tabular-nums">{sizes?.lower || "—"}</b>
-                </span>
+              <div className="shrink-0 text-right text-[11px] leading-tight">
+                <div className="text-muted">
+                  Tee <b className="text-foreground tabular-nums">{sizes?.tshirt || "—"}</b>
+                </div>
+                <div className="text-muted">
+                  Low <b className="text-foreground tabular-nums">{sizes?.lower || "—"}</b>
+                </div>
               </div>
             </div>
           );

@@ -6,7 +6,6 @@ import { getCurrentProfile } from "@/lib/auth";
 import { signOut } from "@/app/login/actions";
 import SpartansStars from "./SpartansStars";
 import spartansMark from "./spartans-mark.png";
-import AuctionSync from "./AuctionSync";
 
 const SITE_DESCRIPTION =
   "Rank, analyze and buy players on auction day for The Gurugram Spartans.";
@@ -40,7 +39,8 @@ export default async function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <AuctionSync />
+        {/* Auto-sync disabled post-auction — squad is curated manually now.
+            Re-enable <AuctionSync /> if the live mirror is needed again. */}
         <header className="sticky top-0 z-30 border-b border-border/70 bg-[color-mix(in_srgb,var(--background)_80%,transparent)] backdrop-blur-xl">
           <div className="mx-auto flex h-12 max-w-6xl items-center justify-between gap-3 px-4 sm:px-5">
             <Link

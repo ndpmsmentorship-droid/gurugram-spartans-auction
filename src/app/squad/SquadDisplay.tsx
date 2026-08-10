@@ -127,7 +127,7 @@ export default function SquadDisplay({
         <table className="w-full min-w-[640px] text-sm">
           <thead className="bg-wash text-left text-muted">
             <tr>
-              <th className="w-14 px-3 py-3 text-center font-medium">#</th>
+              <th className="w-20 px-3 py-3 text-center font-medium">Jersey #</th>
               <th className="px-3 py-3 font-medium">Player</th>
               <th className="px-3 py-3 font-medium">Category</th>
               <th className="px-3 py-3 font-medium">Role</th>

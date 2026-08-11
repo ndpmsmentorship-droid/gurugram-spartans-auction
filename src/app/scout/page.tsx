@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { rankPlayers } from "@/lib/scout/ranks";
 import {
   computeAnalytics,
@@ -31,8 +31,21 @@ function rankMetric(
 }
 
 export default async function ScoutPage() {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("scout_players").select("*");
+  // Admin client (page is login-gated by the proxy) — the reliable path used by
+  // /auction & /squad. Retry a couple of times: it's a ~1.2 MB pull and Supabase
+  // can throw a transient 522 on the Vercel→origin hop.
+  const supabase = createAdminClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let data: any[] | null = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let error: any = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const res = await supabase.from("scout_players").select("*");
+    data = res.data;
+    error = res.error;
+    if (!error) break;
+    if (attempt < 2) await new Promise((r) => setTimeout(r, 500));
+  }
 
   if (error) {
     return (

@@ -1,6 +1,6 @@
 # Handoff — Gurugram Spartans Auction App
 
-_Local Claude memory does not transfer across machines — this file is the source of truth. Last updated 2026-08-11._
+_Local Claude memory does not transfer across machines — this file is the source of truth. Last updated 2026-08-12._
 
 ## What this is
 Next.js 16 app for the SARDA Corporate Cricket League (SCCL) Season 6 auction + Spartans scouting.
@@ -29,11 +29,26 @@ Deployed on Vercel; served at **https://www.ndpms.in/spartansscout** via a rewri
 2. **[LAST] Internet research on players** in the Anantanity rosters — confirm scope (Spartans 17 vs all rostered) before running.
 3. Optional: Anantanity now has ~9 more registrations than our pool (775 vs 766) — import if wanted.
 
-## NEXT UP — Ball Library ↔ Analysis cross-link (cross-repo; user wants **UI redesign FIRST**)
-Ball Library = **static site in the LMS repo** at `public/spartans/` (`index.html`, `manifest.json` = `{team, match_count, players[]}`, `players/*.mp4`). 20 players, ball-by-ball logs w/ pitch coords, **1 match so far (vs ACCI)**. Deep-link: **`/spartans?p=<kind>-<name>`** (e.g. `?p=batter-Abhinav Jain`; `kind` ∈ batter|bowler).
-User's asks: (1) two-way link profile↔library, (2) **better UI (do first)**, (3) add more matches / enrich.
-- Profile → library: on `/scout/[id]`, show a "Ball Library" button when the player has clips — read `manifest.json` live so it auto-updates as matches are added → link `/spartans?p=<kind>-<name>`.
-- Library → profile: add "Analysis ↗" per player → `/spartansscout/scout/<uuid>`; map by name. **11/20 match the auction DB exactly**; near-matches to hardcode: Nitin→Nitin Yadav, Vikas 10→Vikas Grover, Russell→Russell Stamets, Vishal Salgy→Vishal Salgotra, Naveen Gujjar→Naveen (Gujjar) Tanwar. No profile: Asgar Khan, Rajiv Rishi, Kundan, Chandan Jha (opponents).
+## BALL LIBRARY — status 2026-08-12 (LIVE at ndpms.in/spartans, actively growing)
+Broadcast-redesigned (dark/sports-app), **multi-match** (per-player tab bar: All / vs OPP). Static site in LMS repo `public/spartans/`. Deep-link `/spartans?p=<kind>-<name>` (kind ∈ batter|bowler).
+
+**⚠️ PIPELINE IS LOCAL, NOT IN GIT: `~/spartans-tools/` (2.8 GB, mostly regenerable video).** The irreplaceable part (scripts + every match's DATA json = marks/skeletons/charts) is now a git repo there + bundled to **`~/Desktop/spartans-tools-pipeline.tgz` (238 KB)**. **On a NEW machine:** (1) clone `ycwism-lms` → you get the deployed clips in `public/spartans/`; (2) extract the bundle → `~/spartans-tools` (source pipeline + match data); (3) re-download match videos only if re-cutting: `~/Library/Python/3.9/bin/yt-dlp --extractor-args "youtube:player_client=android" -f 18 -o video/<ytid>.mp4 <url>`. No dedicated GitHub repo yet (gh not authed) — create `spartans-tools` repo + push for true auto-sync when convenient.
+
+**Matches** (`matches/<id>-inn1|inn2/` = meta.json+rosters.json+skeleton.json+marks.json+clips/):
+- `22328280` ACCI Final — live
+- `22101793` Bengal Tigers Semi Final — timed+clipped, **DEPLOYED LIVE**
+- `21990344` Bangalore KS Blasters Quarter Final (GS 277/3 won by 144) — built from scorecard, **NEEDS MANUAL TIMING** (`timer.html?m=21990344-inn1`), then recut→rebuild→deploy
+
+**Workflow (proven):** `cd ~/spartans-tools && python3 serve_nocache.py` → localhost:8765/admin.html (no-cache server; if a page looks stale, hard-refresh or append `?v=N`). Add match = paste **YouTube + CricHeroes links** → Claude reads the **CricHeroes scorecard PDF** (`pip install --user pypdf`; poppler NOT installed so Read-tool PDF render fails, use pypdf text) → builds both innings (crease pairs walked from batting order + FoW; bare "10 ov" FoW = skeleton 9.6). User times each innings in `timer.html` → export `<id>_marks.json` (time field = `delivery` seconds) → `recut_match.py matches/<id>` → `build_library.py` + `build_index.py` + `build_admin.py`.
+**DEPLOY:** `cd ~/ycwism-lms; git fetch; git merge --ff-only origin/main; rm -rf public/spartans/*; cp -R ~/spartans-tools/site/* public/spartans/; git add public/spartans; git commit` (**author MUST be ndpmsmentorship@ndpms.in or Vercel silently blocks**) `; git push --no-thin origin main`. Verify live: `curl -L https://ndpms.in/spartans` (grep a new marker) + a video URL = 200. Vercel auto-deploys ~15-60s.
+
+**OPEN TODOs (user-requested):**
+1. **Ball-by-ball SCORES on player cards** — currently shows dots "·" because marks have `r:null`. Needs per-ball runs (from a full commentary-scroll OCR, or capture runs while timing). Rendered by `badges()` in build_index.py.
+2. **Move library videos OFF-repo** (object storage) — ycwism-lms `.git` bloats ~618 MB per deploy, will crawl clones/pushes. `URLBASE` indirection in build_index.py already makes this a small change (point at absolute video URLs).
+3. **Commentary-OCR auto-timing** — CricHeroes Commentary tab screen-record is OCR-able (retina text) → per-ball bowler/batsman/runs → fully pre-filled skeleton (timing = just times). Pilot capture was partial (~overs 3-14) + `parse_commentary.py` crashed. Needs a FULL top-to-bottom scroll capture, then finish the parser.
+4. **Ball Library ↔ profile cross-link** (original plan, not started): on `/scout/[id]` a "Ball Library" button (read manifest.json live) → `/spartans?p=<kind>-<name>`; and library→profile "Analysis ↗" → `/spartansscout/scout/<uuid>` (map by name; near-matches: Nitin→Nitin Yadav, Vikas 10→Vikas Grover, Vishal Salgy→Vishal Salgotra, Naveen Gujjar→Naveen (Gujjar) Tanwar).
+
+See local memory [[gurugram-spartans-video-clips]] for deep pipeline detail.
 
 ## Handy scripts (`scripts/`, run with `node scripts/*.mts` — Node 26 strips TS types)
 - `import-from-api.mts` — full re-import from Anantanity (⚠️ replaces pool; would overwrite manual squad — don't run casually now).

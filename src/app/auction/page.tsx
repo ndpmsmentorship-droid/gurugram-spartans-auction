@@ -18,7 +18,7 @@ export default async function AuctionPage() {
     sb.from("teams").select("id, name, division, purse_total").eq("season_id", season.id).order("name"),
     sb
       .from("scout_players")
-      .select("id, full_name, auction_category, team_id, sold_price, acquired")
+      .select("id, full_name, auction_category, team_id, sold_price, acquired, bat_index, bowl_index")
       .not("team_id", "is", null),
     // whole pool by index, to derive each player's "Our Rank" (1 = best)
     sb.from("scout_players").select("id, overall_index").not("overall_index", "is", null),

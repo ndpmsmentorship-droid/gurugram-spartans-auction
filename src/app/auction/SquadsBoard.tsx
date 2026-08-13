@@ -24,19 +24,20 @@ export type BoardPlayer = {
 const inr = (n: number) => "₹" + Math.round(n || 0).toLocaleString("en-IN");
 const DIVISIONS = ["Elite", "Challengers", "Fighters"];
 
-// Ids of the top-N players in a roster by a strength metric (nulls excluded).
-function topIds(
+// Map of player id -> their 1-based rank among a roster's top-N by a strength
+// metric (nulls excluded). Rank 1 = strongest in this squad.
+function topRanks(
   roster: BoardPlayer[],
   metric: (p: BoardPlayer) => number | null | undefined,
   n = 5
-): Set<string> {
-  return new Set(
-    roster
-      .filter((p) => metric(p) != null)
-      .sort((a, b) => (metric(b) as number) - (metric(a) as number))
-      .slice(0, n)
-      .map((p) => p.id)
-  );
+): Map<string, number> {
+  const m = new Map<string, number>();
+  roster
+    .filter((p) => metric(p) != null)
+    .sort((a, b) => (metric(b) as number) - (metric(a) as number))
+    .slice(0, n)
+    .forEach((p, i) => m.set(p.id, i + 1));
+  return m;
 }
 
 export default function SquadsBoard({ teams, players }: { teams: BoardTeam[]; players: BoardPlayer[] }) {
@@ -64,7 +65,7 @@ export default function SquadsBoard({ teams, players }: { teams: BoardTeam[]; pl
           <p className="text-sm text-muted">
             Updates live as players are sold. <span className="text-highlight-ink">R</span> = retained ·{" "}
             <span className="text-accent-text">O</span> = owner · #n = our overall rank ·{" "}
-            <span className="text-up">Bat</span>/<span className="text-accent-text">Bowl</span> = squad top-5
+            <span className="text-up">Bat 1–5</span>/<span className="text-accent-text">Bowl 1–5</span> = squad&rsquo;s top-5 by our index
           </p>
         </div>
         <p className="text-sm text-muted tabular-nums">
@@ -81,8 +82,8 @@ export default function SquadsBoard({ teams, players }: { teams: BoardTeam[]; pl
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {divTeams.map((t) => {
                 const roster = rosterOf(t.id);
-                const topBat = topIds(roster, (p) => p.bat_index);
-                const topBowl = topIds(roster, (p) => p.bowl_index);
+                const topBat = topRanks(roster, (p) => p.bat_index);
+                const topBowl = topRanks(roster, (p) => p.bowl_index);
                 const spent = roster.reduce((s, p) => s + (Number(p.sold_price) || 0), 0);
                 const remaining = t.purse_total - spent;
                 const pct = Math.min(100, (spent / t.purse_total) * 100);
@@ -132,17 +133,17 @@ export default function SquadsBoard({ teams, players }: { teams: BoardTeam[]; pl
                               {topBat.has(p.id) && (
                                 <span
                                   className="shrink-0 rounded-sm bg-wash px-1 text-[9px] font-bold uppercase leading-tight tracking-wide text-up"
-                                  title="Top-5 batter in this squad (by our batting index)"
+                                  title={`#${topBat.get(p.id)} batter in this squad (by our batting index)`}
                                 >
-                                  Bat
+                                  Bat {topBat.get(p.id)}
                                 </span>
                               )}
                               {topBowl.has(p.id) && (
                                 <span
                                   className="shrink-0 rounded-sm bg-wash px-1 text-[9px] font-bold uppercase leading-tight tracking-wide text-accent-text"
-                                  title="Top-5 bowler in this squad (by our bowling index)"
+                                  title={`#${topBowl.get(p.id)} bowler in this squad (by our bowling index)`}
                                 >
-                                  Bowl
+                                  Bowl {topBowl.get(p.id)}
                                 </span>
                               )}
                             </span>

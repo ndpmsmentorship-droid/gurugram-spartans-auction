@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import { useLotSync } from "./useLotSync";
+import OnTheBlock, { type BlockState } from "./OnTheBlock";
 
 export type BoardTeam = {
   id: string;
@@ -30,20 +31,19 @@ export default function SquadsBoard({
   teams,
   players,
   poolSize,
+  block,
 }: {
   teams: BoardTeam[];
   players: BoardPlayer[];
   poolSize?: number;
+  block?: BlockState;
 }) {
-  const router = useRouter();
   const [division, setDivision] = useState<string>("All");
   const [query, setQuery] = useState("");
 
-  // Live: re-pull the board every few seconds so spectators see sales roll in.
-  useEffect(() => {
-    const id = setInterval(() => router.refresh(), 8000);
-    return () => clearInterval(id);
-  }, [router]);
+  // Realtime on the lot, with a slow poll behind it so a dropped socket can't
+  // freeze the room on a stale price.
+  useLotSync();
 
   const rosterOf = (teamId: string) =>
     players
@@ -91,7 +91,13 @@ export default function SquadsBoard({
         </div>
       </div>
 
-      <div className="mt-8 flex flex-wrap items-center gap-2 border-t border-line pt-6">
+      {block ? (
+        <div className="mt-7">
+          <OnTheBlock state={block} />
+        </div>
+      ) : null}
+
+      <div className="mt-7 flex flex-wrap items-center gap-2 border-t border-line pt-6">
         <span className="label-mono mr-1">Division</span>
         {divisions.map((d) => (
           <button
@@ -172,6 +178,13 @@ function TeamCard({
   const remaining = team.purse_total - spent;
   const pct = Math.min(100, (spent / Math.max(1, team.purse_total)) * 100);
 
+  // Cap the visible roster so four cards stay comparable side by side — a
+  // 22-man squad next to a 9-man one made the grid unreadable. Expand on click.
+  const [expanded, setExpanded] = useState(false);
+  const CAP = 10;
+  const overflow = roster.length - CAP;
+  const shown = expanded ? roster : roster.slice(0, CAP);
+
   return (
     <div className="flex flex-col overflow-hidden rounded-[12px] border border-line bg-surface">
       {/* blush header block, per the design comp */}
@@ -225,7 +238,7 @@ function TeamCard({
             No players yet
           </li>
         ) : (
-          roster.map((p) => {
+          shown.map((p) => {
             const hit =
               highlight && p.full_name.toLowerCase().includes(highlight);
             return (
@@ -263,6 +276,16 @@ function TeamCard({
               </li>
             );
           })
+        )}
+        {overflow > 0 && (
+          <li>
+            <button
+              onClick={() => setExpanded((v) => !v)}
+              className="label-mono w-full px-4 py-2.5 text-center transition hover:!text-red"
+            >
+              {expanded ? "Show less" : `+${overflow} more`}
+            </button>
+          </li>
         )}
       </ul>
     </div>

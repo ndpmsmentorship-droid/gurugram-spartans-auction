@@ -174,36 +174,32 @@ export default function SquadDisplay({
           const sizes = sizesByPlayer[p.id];
           const dn = displayByPlayer[p.id];
           return (
-            <div key={p.id} className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-wash font-display text-base font-bold text-accent-text">
+            <div key={p.id} className="flex items-center gap-3 rounded-[12px] border border-line bg-surface p-3">
+              <span className="num flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-tile font-display text-[1.125rem] font-bold text-red">
                 {jn ?? "—"}
               </span>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <Link href={`/scout/${p.id}`} className="truncate font-semibold hover:text-accent-text">
+                <div className="flex items-center gap-2">
+                  <Link href={`/scout/${p.id}`} className="truncate text-[0.938rem] text-ink transition hover:text-red">
                     {p.full_name}
                   </Link>
                   {cb && (
                     <span
-                      className="shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
+                      className="badge shrink-0 uppercase"
                       style={{ background: cb.bg, color: cb.fg }}
                     >
                       {cb.label}
                     </span>
                   )}
                 </div>
-                <p className="mt-0.5 truncate text-xs text-muted">
+                <p className="mt-1 truncate text-[0.75rem] text-muted">
                   {roleOf(p)}
                   {dn ? ` · “${dn}”` : ""}
                 </p>
               </div>
-              <div className="shrink-0 text-right text-[11px] leading-tight">
-                <div className="text-muted">
-                  Tee <b className="text-foreground tabular-nums">{sizes?.tshirt || "—"}</b>
-                </div>
-                <div className="text-muted">
-                  Low <b className="text-foreground tabular-nums">{sizes?.lower || "—"}</b>
-                </div>
+              <div className="num shrink-0 text-right text-[0.688rem] leading-relaxed text-muted">
+                <div>Tee <b className="font-medium text-ink">{sizes?.tshirt || "—"}</b></div>
+                <div>Low <b className="font-medium text-ink">{sizes?.lower || "—"}</b></div>
               </div>
             </div>
           );

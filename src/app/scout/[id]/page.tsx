@@ -131,11 +131,10 @@ export default async function PlayerDetailPage({
             few characters wide and the name wraps to one word per line */}
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 sm:flex-1">
+            {/* role · archetype, per the comp — the bat/bowl style is a chip
+                below, not part of the identity line */}
             <p className="eyebrow">
-              {a.roleGroup}
-              {handSkill(player.batting_style, player.bowling_style)
-                ? ` · ${handSkill(player.batting_style, player.bowling_style)}`
-                : ""}
+              {a.roleGroup} · {a.archetype}
             </p>
             <h1
               className="mt-3 font-display font-bold"
@@ -161,9 +160,11 @@ export default async function PlayerDetailPage({
                   Age {player.age}
                 </span>
               ) : null}
-              <span className="badge border border-line2 bg-surface/70 uppercase text-muted">
-                {a.archetype}
-              </span>
+              {handSkill(player.batting_style, player.bowling_style) ? (
+                <span className="badge border border-line2 bg-surface/70 uppercase text-muted">
+                  {handSkill(player.batting_style, player.bowling_style)}
+                </span>
+              ) : null}
               {a.riskFlags.map((f) => (
                 <span
                   key={f.label}

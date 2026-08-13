@@ -31,15 +31,15 @@ export default function MarqueeToggle({
       }
       disabled={pending}
       title={on ? "Unmark marquee" : "Mark as marquee (must buy)"}
-      className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold transition hover:scale-[1.03] disabled:opacity-50"
+      className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border px-3.5 py-1.5 font-mono text-[0.688rem] uppercase tracking-[0.06em] transition disabled:opacity-50"
       style={{
-        borderColor: on ? "#E3A81B" : "var(--border)",
-        color: on ? "#B4820F" : "var(--muted)",
-        background: on ? "color-mix(in srgb, #E3A81B 14%, transparent)" : "transparent",
+        borderColor: on ? "var(--gold-line)" : "var(--line2)",
+        color: on ? "var(--gold)" : "var(--muted)",
+        background: on ? "var(--gold-fill)" : "transparent",
       }}
     >
-      <span className="text-base leading-none">{on ? "★" : "☆"}</span>
-      {on ? "Marquee — must buy" : "Mark for auction"}
+      <span className="text-[0.875rem] leading-none">{on ? "★" : "☆"}</span>
+      {on ? "Marquee — must buy" : "Mark marquee"}
     </button>
   );
 }

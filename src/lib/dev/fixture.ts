@@ -68,10 +68,15 @@ function uuid(i: number) {
   return `aaaaaaaa-bbbb-4ccc-8ddd-${h}`;
 }
 
-let cached: ScoutPlayerRow[] | null = null;
+// Pinned to globalThis, NOT a module-level `let`: Next instantiates server
+// modules per route bundle, so a plain module cache gives /auction and
+// /admin/auction separate copies of the pool — the console would record a sale
+// the board could never see. One process, one pool.
+const g = globalThis as unknown as { __sdllPool?: ScoutPlayerRow[] };
 
 export function fixturePlayers(): ScoutPlayerRow[] {
-  if (cached) return cached;
+  if (g.__sdllPool) return g.__sdllPool;
+  let cached: ScoutPlayerRow[] | null = null;
   const r = rng(20260813);
   const rows: ScoutPlayerRow[] = [];
 
@@ -215,7 +220,8 @@ export function fixturePlayers(): ScoutPlayerRow[] {
   }
 
   cached = rows;
-  return rows;
+  g.__sdllPool = cached;
+  return cached;
 }
 
 export const FIXTURE_SEASON = { id: "5eaa0000-0000-4000-8000-000000000001", is_active: true, name: "Season 1" };

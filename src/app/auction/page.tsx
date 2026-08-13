@@ -1,5 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { readLiveLot } from "@/lib/auction/read";
 import SquadsBoard, { type BoardPlayer, type BoardTeam } from "./SquadsBoard";
+import type { BlockState } from "./OnTheBlock";
 
 export const dynamic = "force-dynamic";
 
@@ -39,12 +41,38 @@ export default async function AuctionPage() {
     overall_rank: rankMap.get(p.id) ?? null,
   }));
 
+  // ---- what's on the block right now ----
+  const lot = await readLiveLot(season.id);
+  let block: BlockState = {
+    status: lot.status,
+    base_price: lot.base_price,
+    current_bid: lot.current_bid,
+    leadingTeam: null,
+    player: null,
+  };
+  if (lot.player_id) {
+    const { data: lp } = await sb
+      .from("scout_players")
+      .select("id, full_name, auction_category, primary_role, overall_index, is_marquee")
+      .eq("id", lot.player_id)
+      .maybeSingle();
+    if (lp) {
+      block = {
+        ...block,
+        player: { ...lp, overall_rank: rankMap.get(lp.id) ?? null },
+        leadingTeam:
+          (teams ?? []).find((t: BoardTeam) => t.id === lot.leading_team_id)?.name ?? null,
+      };
+    }
+  }
+
   return (
     <div className="mx-auto w-full max-w-[1400px] flex-1 px-5 py-8 sm:px-7">
       <SquadsBoard
         teams={(teams ?? []) as BoardTeam[]}
         players={withRank}
         poolSize={poolSize ?? undefined}
+        block={block}
       />
     </div>
   );

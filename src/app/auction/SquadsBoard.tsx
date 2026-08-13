@@ -24,20 +24,74 @@ export type BoardPlayer = {
 const inr = (n: number) => "₹" + Math.round(n || 0).toLocaleString("en-IN");
 const DIVISIONS = ["Elite", "Challengers", "Fighters"];
 
-// Map of player id -> their 1-based rank among a roster's top-N by a strength
-// metric (nulls excluded). Rank 1 = strongest in this squad.
-function topRanks(
+// Roster's top-N players by a strength metric (nulls excluded), strongest first.
+function topList(
   roster: BoardPlayer[],
   metric: (p: BoardPlayer) => number | null | undefined,
   n = 5
-): Map<string, number> {
-  const m = new Map<string, number>();
-  roster
+): BoardPlayer[] {
+  return roster
     .filter((p) => metric(p) != null)
     .sort((a, b) => (metric(b) as number) - (metric(a) as number))
-    .slice(0, n)
-    .forEach((p, i) => m.set(p.id, i + 1));
-  return m;
+    .slice(0, n);
+}
+
+// Small tags after a name (retained / owner).
+function Tags({ p }: { p: BoardPlayer }) {
+  return (
+    <>
+      {p.acquired === "retained" && (
+        <span className="ml-1 text-[9px] font-semibold uppercase text-highlight-ink" title="Retained">
+          R
+        </span>
+      )}
+      {p.acquired === "owner" && (
+        <span className="ml-1 text-[9px] font-semibold uppercase text-accent-text" title="Owner">
+          O
+        </span>
+      )}
+    </>
+  );
+}
+
+function RankedGroup({
+  label,
+  accent,
+  list,
+}: {
+  label: string;
+  accent: "bat" | "bowl";
+  list: BoardPlayer[];
+}) {
+  const color = accent === "bat" ? "text-up" : "text-accent-text";
+  return (
+    <div className="min-w-0">
+      <div className={`mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${color}`}>{label}</div>
+      {list.length === 0 ? (
+        <div className="text-[11px] text-muted">—</div>
+      ) : (
+        <ol className="space-y-1">
+          {list.map((p, i) => (
+            <li key={p.id} className="flex items-baseline gap-1.5 text-[13px] leading-tight">
+              <span className={`w-3 shrink-0 tabular-nums text-[10px] font-bold ${color}`}>{i + 1}</span>
+              <span className="min-w-0 flex-1 truncate">
+                {p.full_name}
+                <Tags p={p} />
+              </span>
+              {p.overall_rank != null && (
+                <span
+                  className="shrink-0 tabular-nums text-[10px] text-muted"
+                  title="Our overall pool rank (1 = best)"
+                >
+                  #{p.overall_rank}
+                </span>
+              )}
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  );
 }
 
 export default function SquadsBoard({ teams, players }: { teams: BoardTeam[]; players: BoardPlayer[] }) {
@@ -63,9 +117,10 @@ export default function SquadsBoard({ teams, players }: { teams: BoardTeam[]; pl
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Live Squads</h1>
           <p className="text-sm text-muted">
-            Updates live as players are sold. <span className="text-highlight-ink">R</span> = retained ·{" "}
-            <span className="text-accent-text">O</span> = owner · #n = our overall rank ·{" "}
-            <span className="text-up">Bat 1–5</span>/<span className="text-accent-text">Bowl 1–5</span> = squad&rsquo;s top-5 by our index
+            Each squad&rsquo;s <span className="text-up">top-5 batters</span> and{" "}
+            <span className="text-accent-text">top-5 bowlers</span> by our index ·{" "}
+            <span className="text-highlight-ink">R</span> retained · <span className="text-accent-text">O</span> owner ·
+            #n = overall pool rank
           </p>
         </div>
         <p className="text-sm text-muted tabular-nums">
@@ -79,20 +134,23 @@ export default function SquadsBoard({ teams, players }: { teams: BoardTeam[]; pl
         return (
           <section key={div}>
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-highlight-ink">{div}</h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {divTeams.map((t) => {
                 const roster = rosterOf(t.id);
-                const topBat = topRanks(roster, (p) => p.bat_index);
-                const topBowl = topRanks(roster, (p) => p.bowl_index);
+                const batTop = topList(roster, (p) => p.bat_index);
+                const bowlTop = topList(roster, (p) => p.bowl_index);
+                const topIds = new Set([...batTop, ...bowlTop].map((p) => p.id));
+                const rest = roster.filter((p) => !topIds.has(p.id));
                 const spent = roster.reduce((s, p) => s + (Number(p.sold_price) || 0), 0);
                 const remaining = t.purse_total - spent;
                 const pct = Math.min(100, (spent / t.purse_total) * 100);
                 return (
-                  <div key={t.id} className="flex flex-col rounded-xl border border-border bg-surface p-4">
+                  <div key={t.id} className="flex flex-col rounded-2xl border border-border bg-surface p-4">
+                    {/* header */}
                     <div className="flex items-start justify-between gap-2">
                       <div className="font-semibold leading-tight">{t.name}</div>
-                      <span className="shrink-0 rounded-full bg-wash px-2 py-0.5 text-xs tabular-nums text-muted">
-                        {roster.length}
+                      <span className="shrink-0 rounded-full bg-wash px-2 py-0.5 text-xs font-medium tabular-nums text-muted">
+                        {roster.length} <span className="text-[10px]">players</span>
                       </span>
                     </div>
                     <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-wash">
@@ -106,52 +164,38 @@ export default function SquadsBoard({ teams, players }: { teams: BoardTeam[]; pl
                       <span className={remaining < 0 ? "text-down font-medium" : ""}>{inr(remaining)} left</span>
                     </div>
 
-                    <ul className="mt-3 flex-1 space-y-1 text-sm">
-                      {roster.length === 0 ? (
-                        <li className="py-2 text-center text-xs text-muted">No players yet</li>
-                      ) : (
-                        roster.map((p) => (
-                          <li key={p.id} className="flex items-center justify-between gap-2">
-                            <span className="flex min-w-0 items-center gap-1.5">
-                              {p.overall_rank != null && (
+                    {roster.length === 0 ? (
+                      <div className="mt-4 flex-1 py-6 text-center text-xs text-muted">No players yet</div>
+                    ) : (
+                      <>
+                        {/* ranked groups */}
+                        <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-border pt-3">
+                          <RankedGroup label="Top Batters" accent="bat" list={batTop} />
+                          <RankedGroup label="Top Bowlers" accent="bowl" list={bowlTop} />
+                        </div>
+
+                        {/* rest of squad as chips */}
+                        {rest.length > 0 && (
+                          <div className="mt-3 border-t border-border pt-3">
+                            <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
+                              Rest of squad · {rest.length}
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {rest.map((p) => (
                                 <span
-                                  className="shrink-0 tabular-nums text-[11px] font-semibold text-accent-text"
-                                  title="Our Rank — position in the overall auction pool (1 = best)"
+                                  key={p.id}
+                                  className="rounded-md bg-wash px-1.5 py-0.5 text-[11px] leading-tight text-ink"
+                                  title={p.overall_rank != null ? `Overall pool rank #${p.overall_rank}` : undefined}
                                 >
-                                  #{p.overall_rank}
+                                  {p.full_name}
+                                  <Tags p={p} />
                                 </span>
-                              )}
-                              <span className="truncate">
-                                {p.full_name}
-                                {p.acquired === "retained" && (
-                                  <span className="ml-1.5 text-[10px] uppercase text-highlight-ink" title="Retained">R</span>
-                                )}
-                                {p.acquired === "owner" && (
-                                  <span className="ml-1.5 text-[10px] uppercase text-accent-text" title="Owner">O</span>
-                                )}
-                              </span>
-                              {topBat.has(p.id) && (
-                                <span
-                                  className="shrink-0 rounded-sm bg-wash px-1 text-[9px] font-bold uppercase leading-tight tracking-wide text-up"
-                                  title={`#${topBat.get(p.id)} batter in this squad (by our batting index)`}
-                                >
-                                  Bat {topBat.get(p.id)}
-                                </span>
-                              )}
-                              {topBowl.has(p.id) && (
-                                <span
-                                  className="shrink-0 rounded-sm bg-wash px-1 text-[9px] font-bold uppercase leading-tight tracking-wide text-accent-text"
-                                  title={`#${topBowl.get(p.id)} bowler in this squad (by our bowling index)`}
-                                >
-                                  Bowl {topBowl.get(p.id)}
-                                </span>
-                              )}
-                            </span>
-                            <span className="shrink-0 tabular-nums text-muted">{inr(Number(p.sold_price) || 0)}</span>
-                          </li>
-                        ))
-                      )}
-                    </ul>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 );
               })}

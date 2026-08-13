@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { tierStyle } from "@/lib/scout/tier";
+import { tierStyle, LEGEND_STYLE } from "@/lib/scout/tier";
 import { roleGroup } from "@/lib/scout/analytics";
 import SpartansStars from "@/app/SpartansStars";
 
@@ -18,27 +18,28 @@ export type SquadCard = {
 const inr = (n: number) => "₹" + Math.round(n || 0).toLocaleString("en-IN");
 const inrK = (n: number) => "₹" + Math.round((n || 0) / 1000) + "K";
 
+// Composition-bar hues, matching the design comp's legend.
 const ROLE_COLORS: Record<string, string> = {
-  Batter: "#E3A81B",
-  "All-rounder": "#57ac7e",
-  Bowler: "#4a6bb5",
-  Keeper: "#9AA0A6",
-  Other: "#c9ced3",
+  Batter: "#D9A82C",
+  "All-rounder": "#4FA97A",
+  Bowler: "#7B9FD4",
+  Keeper: "#A99B99",
+  Other: "#CFC7C6",
 };
 
 function catBadge(cat: string | null): { bg: string; fg: string; label: string } | null {
   if (!cat) return null;
-  if (/legend/i.test(cat)) return { bg: "color-mix(in srgb, #E3A81B 20%, transparent)", fg: "#B4820F", label: cat };
+  if (/legend/i.test(cat)) return { ...LEGEND_STYLE, label: cat };
   const ts = tierStyle(cat);
-  return ts ? { bg: ts.bg, fg: ts.fg, label: cat } : { bg: "var(--wash)", fg: "var(--muted)", label: cat };
+  return ts ? { bg: ts.bg, fg: ts.fg, label: cat } : { bg: "var(--chip)", fg: "var(--muted)", label: cat };
 }
 
 const acqTag = (a: string | null) =>
   a === "owner"
-    ? { label: "Owner", cls: "bg-[color-mix(in_srgb,var(--accent)_16%,transparent)] text-accent-text" }
+    ? { label: "Owner", cls: "bg-[color-mix(in_srgb,var(--red)_14%,#fff)] text-accent-text" }
     : a === "retained"
-      ? { label: "Retained", cls: "bg-[color-mix(in_srgb,#E3A81B_18%,transparent)] text-highlight-ink" }
-      : { label: "Auction", cls: "bg-wash text-muted" };
+      ? { label: "Retained", cls: "bg-[var(--gold-fill)] text-gold" }
+      : { label: "Auction", cls: "bg-chip text-muted" };
 
 export default function SquadDisplay({
   team,
@@ -82,47 +83,87 @@ export default function SquadDisplay({
   const roleCounts = roleOrder.map((r) => ({ role: r, n: squad.filter((p) => roleOf(p) === r).length }));
 
   return (
-    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6">
-      <header className="border-b border-border pb-6">
-        <p className="eyebrow">SARDA Corporate Cricket League · Season 6</p>
-        <h1 className="mt-1 flex flex-wrap items-center gap-2 font-display text-3xl font-bold tracking-tight sm:text-4xl">
-          The {team?.name ?? "Gurugram Spartans"} <SpartansStars />
-        </h1>
-        <p className="mt-1 text-sm text-muted tabular-nums">
-          {squad.length} players · {inr(spent)} spent · {inr(remaining)} of {inr(budget)} left
-        </p>
+    <main className="flex-1">
+      {/* Full-bleed maroon hero, per the design comp — the team's identity band. */}
+      <header className="band">
+        <div className="mx-auto flex w-full max-w-[1400px] flex-wrap items-center justify-between gap-8 px-5 py-10 sm:px-7">
+          <div className="flex min-w-0 items-center gap-7">
+            <span
+              className="hidden h-[130px] w-[112px] shrink-0 items-center justify-center rounded-[8px_8px_46px_46px] border border-white/20 font-mono text-[0.563rem] uppercase tracking-[0.16em] text-white/45 sm:flex"
+              style={{
+                background:
+                  "repeating-linear-gradient(135deg, rgba(255,255,255,.06) 0 7px, transparent 7px 14px)",
+              }}
+              aria-hidden
+            >
+              Team logo
+            </span>
+            <div className="min-w-0">
+              <p className="font-mono text-[0.625rem] uppercase tracking-[0.24em] text-white/55">
+                SARDA Corporate Cricket League · Season 6
+              </p>
+              <h1 className="mt-3 flex flex-wrap items-center gap-3 font-display text-[2.5rem] leading-[0.95] text-white sm:text-[3.25rem]">
+                The {team?.name ?? "Gurugram Spartans"}
+                {/* the mark sizes in em, so it needs its own font-size here or
+                    it scales to the 3.25rem headline */}
+                <SpartansStars className="text-[1.25rem]" />
+              </h1>
+              <p className="num mt-3 text-[0.875rem] text-white/70">
+                {squad.length} players · {inr(spent)} spent · {inr(remaining)} of{" "}
+                {inr(budget)} left
+              </p>
+            </div>
+          </div>
 
-        {/* gauges */}
-        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Ring value={aCount} total={8} center={`${aCount}`} label="Category A" sub="max 8 · 6 in XI" color="#E0453A" />
-          <Ring value={u35Count} total={5} center={`${u35Count}`} label="Under-35" sub="max 5 · 3 in XI" color="#4a6bb5" />
-          <Ring value={legendCount} total={Math.max(1, legendCount)} center={`${legendCount}`} label="Legends" sub="min 1 in XI" color="#E3A81B" />
-          <Ring value={spent} total={budget} center={`${Math.round((spent / budget) * 100)}%`} label="Purse used" sub={`${inrK(spent)} / ${inrK(budget)}`} color="#57ac7e" />
+          <div className="grid shrink-0 grid-cols-2 gap-3 sm:grid-cols-4">
+            <BandStat n={`${aCount}`} label="Category A" sub="max 8 · 6 in XI" color="#F0564A" />
+            <BandStat n={`${u35Count}`} label="Under-35" sub="max 5 · 3 in XI" color="#7FA9EC" />
+            <BandStat
+              n={`${legendCount}`}
+              label="Legends"
+              sub="min 1 in XI"
+              color="#E3B44A"
+            />
+            <BandStat
+              n={`${Math.round((spent / budget) * 100)}%`}
+              label="Purse used"
+              sub={`${inrK(spent)} / ${inrK(budget)}`}
+              color="#5FC48D"
+            />
+          </div>
         </div>
+      </header>
 
+      <div className="mx-auto w-full max-w-[1400px] px-5 py-8 sm:px-7">
         {/* role composition */}
-        <div className="mt-4">
-          <div className="flex h-3 overflow-hidden rounded-full">
+        <div>
+          <div className="flex h-2.5 gap-1 overflow-hidden">
             {roleCounts.map((r) =>
               r.n > 0 ? (
                 <div
                   key={r.role}
-                  style={{ width: `${(r.n / squad.length) * 100}%`, background: ROLE_COLORS[r.role] }}
+                  className="rounded-full"
+                  style={{
+                    width: `${(r.n / Math.max(1, squad.length)) * 100}%`,
+                    background: ROLE_COLORS[r.role],
+                  }}
                   title={`${r.role}: ${r.n}`}
                 />
               ) : null,
             )}
           </div>
-          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-[0.813rem] text-muted">
             {roleCounts.map((r) => (
-              <span key={r.role} className="inline-flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full" style={{ background: ROLE_COLORS[r.role] }} />
-                {r.role} <b className="text-foreground">{r.n}</b>
+              <span key={r.role} className="inline-flex items-center gap-2">
+                <span
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ background: ROLE_COLORS[r.role] }}
+                />
+                {r.role} <b className="num font-medium text-ink">{r.n}</b>
               </span>
             ))}
           </div>
         </div>
-      </header>
 
       {/* squad table */}
       {/* mobile: cards (sizes in-line on the right) */}
@@ -170,43 +211,53 @@ export default function SquadDisplay({
       </div>
 
       {/* desktop: table */}
-      <div className="mt-5 hidden overflow-x-auto rounded-2xl border border-border sm:block">
-        <table className="w-full min-w-[720px] text-sm">
-          <thead className="bg-wash text-left text-muted">
+      <div className="mt-6 hidden overflow-x-auto rounded-[12px] border border-line sm:block">
+        <table className="w-full min-w-[860px] border-separate border-spacing-0 text-[0.875rem]">
+          <thead className="text-left">
             <tr>
-              <th className="w-20 px-3 py-3 text-center font-medium">Jersey #</th>
-              <th className="px-3 py-3 font-medium">Player</th>
-              <th className="px-3 py-3 font-medium">Category</th>
-              <th className="px-3 py-3 font-medium">Role</th>
-              <th className="px-3 py-3 font-medium">On jersey</th>
-              <th className="px-3 py-3 text-center font-medium">T-shirt</th>
-              <th className="px-3 py-3 text-center font-medium">Lower</th>
+              {["Jersey", "Player", "Category", "Role", "On jersey", "T-shirt", "Lower"].map(
+                (h, i) => (
+                  <th
+                    key={h}
+                    className={`label-mono border-b border-line px-4 py-3.5 ${
+                      i >= 5 ? "text-center" : ""
+                    }`}
+                    style={{ background: "var(--wash)" }}
+                  >
+                    {h}
+                  </th>
+                ),
+              )}
             </tr>
           </thead>
           <tbody>
-            {sorted.map((p) => {
+            {sorted.map((p, i) => {
               const cb = catBadge(p.auction_category);
               const jn = jersey(p.id);
               const tag = acqTag(p.acquired);
               const sizes = sizesByPlayer[p.id];
               const dn = displayByPlayer[p.id];
               return (
-                <tr key={p.id} className="border-t border-border hover:bg-wash/40">
-                  <td className="px-3 py-2.5 text-center font-display text-lg font-bold tabular-nums text-accent-text">
+                <tr
+                  key={p.id}
+                  style={{ background: i % 2 ? "var(--zebra)" : "var(--surface)" }}
+                >
+                  <td className="num border-b border-line px-4 py-3 font-display text-[1.25rem] font-bold text-red">
                     {jn ?? "—"}
                   </td>
-                  <td className="px-3 py-2.5">
-                    <Link href={`/scout/${p.id}`} className="font-medium hover:text-accent-text">
+                  <td className="border-b border-line px-4 py-3">
+                    <Link
+                      href={`/scout/${p.id}`}
+                      className="text-ink transition hover:text-red"
+                    >
                       {p.full_name}
                     </Link>
-                    <span className={`ml-2 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase ${tag.cls}`}>
-                      {tag.label}
-                    </span>
+                    <span className={`badge ml-2.5 uppercase ${tag.cls}`}>{tag.label}</span>
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td className="border-b border-line px-4 py-3">
                     {cb ? (
                       <span
-                        className="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide"
+                        className="badge uppercase"
                         style={{ background: cb.bg, color: cb.fg }}
                       >
                         {cb.label}
@@ -215,10 +266,14 @@ export default function SquadDisplay({
                       "—"
                     )}
                   </td>
-                  <td className="px-3 py-2.5 text-muted">{roleOf(p)}</td>
-                  <td className="px-3 py-2.5 font-medium">{dn || "—"}</td>
-                  <td className="px-3 py-2.5 text-center font-semibold tabular-nums">{sizes?.tshirt || "—"}</td>
-                  <td className="px-3 py-2.5 text-center font-semibold tabular-nums">{sizes?.lower || "—"}</td>
+                  <td className="border-b border-line px-4 py-3 text-muted">{roleOf(p)}</td>
+                  <td className="border-b border-line px-4 py-3 text-muted">{dn || "—"}</td>
+                  <td className="num border-b border-line px-4 py-3 text-center text-muted">
+                    {sizes?.tshirt || "—"}
+                  </td>
+                  <td className="num border-b border-line px-4 py-3 text-center text-muted">
+                    {sizes?.lower || "—"}
+                  </td>
                 </tr>
               );
             })}
@@ -226,52 +281,38 @@ export default function SquadDisplay({
         </table>
       </div>
 
-      {squad.length === 0 && <p className="mt-10 text-center text-muted">No players in the squad yet.</p>}
+        {squad.length === 0 && (
+          <p className="py-16 text-center text-muted">No players in the squad yet.</p>
+        )}
+      </div>
     </main>
   );
 }
 
-// SVG ring gauge
-function Ring({
-  value,
-  total,
-  center,
+// A stat tile sitting on the maroon hero band — the number carries the colour,
+// the chrome stays neutral so four of them don't fight each other.
+function BandStat({
+  n,
   label,
   sub,
   color,
 }: {
-  value: number;
-  total: number;
-  center: string;
+  n: string;
   label: string;
   sub: string;
   color: string;
 }) {
-  const r = 30;
-  const c = 2 * Math.PI * r;
-  const pct = total > 0 ? Math.min(1, value / total) : 0;
   return (
-    <div className="flex flex-col items-center rounded-xl border border-border bg-surface p-3">
-      <svg width="76" height="76" viewBox="0 0 76 76">
-        <circle cx="38" cy="38" r={r} fill="none" stroke="var(--wash)" strokeWidth="7" />
-        <circle
-          cx="38"
-          cy="38"
-          r={r}
-          fill="none"
-          stroke={color}
-          strokeWidth="7"
-          strokeLinecap="round"
-          strokeDasharray={c}
-          strokeDashoffset={c * (1 - pct)}
-          transform="rotate(-90 38 38)"
-        />
-        <text x="38" y="39" textAnchor="middle" dominantBaseline="central" fontSize="18" fontWeight="700" fill="var(--foreground)">
-          {center}
-        </text>
-      </svg>
-      <p className="mt-1.5 text-xs font-semibold">{label}</p>
-      <p className="text-[0.62rem] text-muted">{sub}</p>
+    <div className="min-w-[8.25rem] rounded-[12px] border border-white/15 bg-white/[0.06] px-4 py-4 text-center">
+      <p className="font-display text-[1.875rem] leading-none" style={{ color }}>
+        {n}
+      </p>
+      <p className="mt-2.5 font-mono text-[0.594rem] uppercase tracking-[0.13em] text-white/80">
+        {label}
+      </p>
+      <p className="num mt-1 text-[0.625rem] text-white/45">{sub}</p>
     </div>
   );
 }
+
+// SVG ring gauge

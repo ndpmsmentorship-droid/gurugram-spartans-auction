@@ -8,13 +8,10 @@ import PlayerSearch from "./PlayerSearch";
 import { rankPlayers } from "@/lib/scout/ranks";
 import { computeAnalytics, type AnalyticsInput } from "@/lib/scout/analytics";
 import { deriveMetrics, percentileColumn, type RawStats } from "@/lib/scout/rankings";
-import { tierStyle, handSkill } from "@/lib/scout/tier";
+import { tierStyle, handSkill, isGradeA, parseTier } from "@/lib/scout/tier";
 import type { ScoutPlayerRow } from "@/lib/supabase/types";
-import Radar from "../Radar";
 import PlayerWorkshop from "./PlayerWorkshop";
 import MarqueeToggle from "./MarqueeToggle";
-
-const ACCENT = "var(--red)"; // brand red — the only hue in the Shanti Devi book
 
 export default async function PlayerDetailPage({
   params,
@@ -67,24 +64,67 @@ export default async function PlayerDetailPage({
     v == null ? "—" : Math.round(v * 10) / 10;
   const fmt = (v: number | null | undefined) =>
     v == null ? "—" : Math.round(v).toLocaleString("en-IN");
+  const inr = (n: number) => "₹" + Math.round(n || 0).toLocaleString("en-IN");
+
+  // Auction facts for the portrait card. Base price follows the organizers'
+  // rule: grade A players open at ₹15,000, grade B at ₹5,000.
+  const basePrice = isGradeA(player.auction_category)
+    ? inr(15000)
+    : parseTier(player.auction_category).grade === "B"
+      ? inr(5000)
+      : "—";
+  const soldPrice = (player as unknown as { sold_price: number | null }).sold_price;
 
   return (
-    <main className="mx-auto w-full max-w-[1100px] flex-1 px-5 py-8 sm:px-8">
+    <main className="mx-auto w-full max-w-[1400px] flex-1 px-5 py-7 sm:px-7">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link href="/scout" className="text-[0.813rem] text-muted transition hover:text-red">
+        <Link href="/scout" className="text-[0.875rem] text-muted transition hover:text-red">
           ← Back to pool
         </Link>
         <PlayerSearch players={pool.map((p) => ({ id: p.id, full_name: p.full_name }))} />
       </div>
 
+      {/* Portrait column beside everything else, per the design comp: the photo
+          card carries the auction facts (base price / tier / status) so the
+          numbers an owner needs mid-lot never scroll away. */}
+      <div className="mt-5 grid items-start gap-6 lg:grid-cols-[minmax(0,17rem)_minmax(0,1fr)]">
+        <aside className="overflow-hidden rounded-[12px] border border-line bg-surface">
+          <Headshot name={player.full_name} url={player.photo_url} />
+          <dl className="flex flex-col gap-3 border-t border-line px-4 py-4 text-[0.813rem]">
+            <BioRow k="Base price" v={basePrice} />
+            <BioRow k="Auction tier" v={player.auction_category ?? "—"} />
+            <BioRow
+              k="Status"
+              v={soldPrice != null ? `Sold · ${inr(soldPrice)}` : "Unsold"}
+              accent={soldPrice != null}
+            />
+            {player.cricheroes_link ? (
+              <div className="flex items-baseline justify-between gap-3">
+                <dt className="text-muted">CricHeroes</dt>
+                <dd>
+                  <a
+                    href={player.cricheroes_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent-text hover:underline"
+                  >
+                    View profile ↗
+                  </a>
+                </dd>
+              </div>
+            ) : null}
+          </dl>
+        </aside>
+
+        <div className="flex min-w-0 flex-col gap-6">
       {/* identity hero — container-queried so it scales intact when the live
           board later renders this on a projector */}
       <section
-        className="mt-4 rounded-[14px] border border-line px-6 py-7 sm:px-8"
+        className="rounded-[12px] border border-line px-6 py-7 sm:px-8"
         style={{
           containerType: "inline-size",
           background:
-            "linear-gradient(120deg, color-mix(in srgb, var(--red-deep) 18%, transparent), transparent 62%), var(--surface)",
+            "linear-gradient(105deg, var(--blush-a) 0%, var(--blush-b) 55%, var(--surface) 100%)",
         }}
       >
         {/* stacks below sm — side by side the identity column collapses to a
@@ -103,17 +143,7 @@ export default async function PlayerDetailPage({
             >
               {player.full_name}
             </h1>
-            {player.cricheroes_link && (
-              <a
-                href={player.cricheroes_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2.5 inline-block text-[0.813rem] text-accent-text hover:underline"
-              >
-                View CricHeroes profile ↗
-              </a>
-            )}
-            <div className="mt-4 flex flex-wrap items-center gap-2">
+            <div className="mt-5 flex flex-wrap items-center gap-2">
               {(() => {
                 const ts = tierStyle(player.auction_category);
                 return ts ? (
@@ -126,28 +156,29 @@ export default async function PlayerDetailPage({
                   </span>
                 ) : null;
               })()}
-              <span
-                className="badge"
-                style={{ border: "1px solid var(--line2)", color: "var(--muted)" }}
-              >
+              {player.age != null ? (
+                <span className="badge border border-line2 bg-surface/70 uppercase text-muted">
+                  Age {player.age}
+                </span>
+              ) : null}
+              <span className="badge border border-line2 bg-surface/70 uppercase text-muted">
                 {a.archetype}
               </span>
               {a.riskFlags.map((f) => (
                 <span
                   key={f.label}
-                  className="badge"
+                  className="badge border uppercase"
                   style={
                     f.level === "red"
                       ? {
-                          background: "color-mix(in srgb, var(--down) 16%, transparent)",
+                          background: "color-mix(in srgb, var(--down) 10%, #fff)",
                           color: "var(--down)",
-                          border: "1px solid color-mix(in srgb, var(--down) 40%, transparent)",
+                          borderColor: "color-mix(in srgb, var(--down) 35%, transparent)",
                         }
                       : {
-                          background: "color-mix(in srgb, var(--highlight) 14%, transparent)",
-                          color: "var(--highlight)",
-                          border:
-                            "1px solid color-mix(in srgb, var(--highlight) 38%, transparent)",
+                          background: "var(--gold-fill)",
+                          color: "var(--gold)",
+                          borderColor: "var(--gold-line)",
                         }
                   }
                 >
@@ -157,29 +188,28 @@ export default async function PlayerDetailPage({
             </div>
           </div>
           <div className="shrink-0 text-left sm:text-right">
-            {isAdmin && (
-              <div className="mb-2 flex justify-start sm:justify-end">
+            {isAdmin ? (
+              <div className="mb-3 flex justify-start sm:justify-end">
                 <MarqueeToggle id={player.id} initial={player.is_marquee} />
               </div>
-            )}
-            {player.is_marquee && !isAdmin && (
+            ) : player.is_marquee ? (
               <div
-                className="badge mb-2"
+                className="badge mb-3 border uppercase"
                 style={{
-                  background: "color-mix(in srgb, var(--highlight) 14%, transparent)",
-                  border: "1px solid color-mix(in srgb, var(--highlight) 45%, transparent)",
-                  color: "var(--highlight)",
+                  background: "var(--gold-fill)",
+                  borderColor: "var(--gold-line)",
+                  color: "var(--gold)",
                 }}
               >
                 ★ Marquee — must buy
               </div>
-            )}
+            ) : null}
             <p
               className="font-display font-bold leading-[0.85]"
-              style={{ fontSize: "clamp(2.75rem, 5.2cqw, 4.5rem)" }}
+              style={{ fontSize: "clamp(2.75rem, 5.4cqw, 4.75rem)" }}
             >
               {round1(player.overall_index)}
-              <span className="num text-[0.3em] font-normal text-faint">/100</span>
+              <span className="num text-[0.28em] font-normal text-muted">/100</span>
             </p>
             <p className="num mt-2.5 text-[0.688rem] uppercase tracking-[0.14em] text-muted">
               Overall #{rankedSelf.overall_rank} · VOR {a.vor >= 0 ? "+" : ""}
@@ -189,47 +219,24 @@ export default async function PlayerDetailPage({
         </div>
       </section>
 
-      {/* headshot + index profile side by side — the portrait is deliberately
-          narrow so the index card, not the photo, carries the width */}
-      <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,17rem)_minmax(0,1fr)]">
-        <div className="flex justify-center lg:justify-start">
-          <Headshot name={player.full_name} url={player.photo_url} />
-        </div>
+      {/* Index profile beside Batting, per the design comp. The sub-indices
+          read as four horizontal bars — a radar is prettier but you cannot
+          compare two players' spokes by eye, and length you can. */}
+      <div className="grid items-start gap-6 xl:grid-cols-2">
         <section className="card">
-          <h2 className="mb-3 border-b border-line pb-3 font-display text-[0.938rem] tracking-[0.16em]">
+          <h2 className="mb-4 font-display text-[1rem] tracking-[0.14em]">
             Index profile
           </h2>
-          <Radar
-            series={[
-              {
-                label: player.full_name,
-                color: ACCENT,
-                values: [
-                  player.bat_index ?? 0,
-                  player.bowl_index ?? 0,
-                  player.field_index ?? 0,
-                  player.keep_index ?? 0,
-                ],
-              },
-            ]}
-          />
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <RankPill label="Batting" score={player.bat_index} rank={rankedSelf.bat_rank} />
-            <RankPill label="Bowling" score={player.bowl_index} rank={rankedSelf.bowl_rank} />
-            <RankPill label="Fielding" score={player.field_index} rank={rankedSelf.field_rank} />
-            <RankPill label="Keeping" score={player.keep_index} rank={rankedSelf.keep_rank} />
+          <div className="flex flex-col gap-4">
+            <IndexRow label="Batting" score={player.bat_index} rank={rankedSelf.bat_rank} />
+            <IndexRow label="Bowling" score={player.bowl_index} rank={rankedSelf.bowl_rank} />
+            <IndexRow label="Fielding" score={player.field_index} rank={rankedSelf.field_rank} />
+            <IndexRow label="Keeping" score={player.keep_index} rank={rankedSelf.keep_rank} />
           </div>
         </section>
-      </div>
 
-
-      {/* Batting runs full width — 12 tiles never fit a half-column without
-          crushing them, and it was previously stranded in a 2-col grid with an
-          empty right half. */}
-      <div className="mt-6">
         <StatSection
           title="Batting"
-          cols={6}
           indexScore={player.bat_index}
           rank={rankedSelf.bat_rank}
           tiles={[
@@ -256,7 +263,7 @@ export default async function PlayerDetailPage({
         </StatSection>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 xl:grid-cols-2">
         {/* bowling stat tiles + control bars */}
         <StatSection
           title="Bowling"
@@ -331,7 +338,7 @@ export default async function PlayerDetailPage({
 
       {/* scouting clip / note (if set) */}
       {(player.scouting_clip_url || player.scouting_note) && (
-        <section className="card mt-6">
+        <section className="card">
           <p className="eyebrow mb-3">Scouting note</p>
           {player.scouting_note && (
             <p className="text-[0.875rem] leading-relaxed">{player.scouting_note}</p>
@@ -353,7 +360,7 @@ export default async function PlayerDetailPage({
       {isAdmin && <PlayerWorkshop player={player} />}
 
       {/* similar players */}
-      <section className="mt-6">
+      <section>
         <p className="eyebrow mb-3">Players like {player.full_name}</p>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {a.similarIds.map((sid) => {
@@ -379,7 +386,49 @@ export default async function PlayerDetailPage({
           })}
         </div>
       </section>
+        </div>
+      </div>
     </main>
+  );
+}
+
+// A label/value line in the portrait card's auction facts.
+function BioRow({ k, v, accent }: { k: string; v: string; accent?: boolean }) {
+  return (
+    <div className="flex items-baseline justify-between gap-3">
+      <dt className="text-muted">{k}</dt>
+      <dd className={`num ${accent ? "text-red" : "text-ink"}`}>{v}</dd>
+    </div>
+  );
+}
+
+// One sub-index: name + score/rank on a line, bar beneath. Replaces the radar —
+// four bars can be read (and compared between players) at a glance.
+function IndexRow({
+  label,
+  score,
+  rank,
+}: {
+  label: string;
+  score: number | null;
+  rank: number | null;
+}) {
+  const v = score == null ? 0 : Math.max(2, Math.min(100, score));
+  return (
+    <div>
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="text-[0.938rem] text-ink">{label}</span>
+        <span className="num shrink-0 text-[0.938rem] font-medium text-ink">
+          {score == null ? "—" : Math.round(score)}
+          {rank != null && rank < 9999 && (
+            <span className="ml-1.5 text-[0.75rem] font-normal text-muted">#{rank}</span>
+          )}
+        </span>
+      </div>
+      <div className="rail mt-2">
+        <span style={{ width: `${v}%` }} />
+      </div>
+    </div>
   );
 }
 
@@ -399,18 +448,16 @@ function Headshot({ name, url }: { name: string; url: string | null }) {
         width={448}
         height={560}
         unoptimized={false}
-        className="aspect-[4/5] w-full max-w-md rounded-[14px] border border-line object-cover object-center"
-        style={{ boxShadow: "var(--elev)" }}
+        className="aspect-[4/5] w-full object-cover object-center"
       />
     );
   }
   return (
     <div
-      className="flex aspect-[4/5] w-full max-w-md items-center justify-center rounded-[14px] border border-line font-display text-[5rem] text-faint"
+      className="flex aspect-[4/5] w-full items-center justify-center font-display text-[3.5rem] text-faint"
       style={{
         background:
-          "repeating-linear-gradient(135deg, var(--chip) 0 8px, transparent 8px 16px), var(--surface)",
-        boxShadow: "var(--elev)",
+          "repeating-linear-gradient(135deg, var(--chip) 0 9px, transparent 9px 18px), var(--tile)",
       }}
       aria-hidden
     >
@@ -461,23 +508,23 @@ function MetricBar({
   unit?: string;
 }) {
   const fill = percentile == null ? 0 : Math.max(2, Math.min(100, percentile));
-  // One hue ramp, not a traffic light: strength is carried by how FAR the rail
-  // fills, and the brand red simply deepens with it. A green/amber/red scale
-  // would put two competing hues next to the brand colour.
+  // Percentile bars are a strength read, so they carry the up/down encoding
+  // (green strong, amber mid, red weak) — distinct from the index bars above,
+  // which are maroon because they're a magnitude, not a verdict.
   const color =
     percentile == null
       ? "var(--line2)"
       : percentile >= 66
-        ? "linear-gradient(90deg, var(--red-deep), var(--red))"
+        ? "var(--up)"
         : percentile >= 33
-          ? "color-mix(in srgb, var(--red) 62%, var(--line2))"
-          : "color-mix(in srgb, var(--red) 32%, var(--line2))";
+          ? "#C08A2E"
+          : "var(--down)";
   return (
     <div>
-      <div className="flex items-baseline justify-between gap-2 text-[0.813rem]">
-        <span className="text-muted">
+      <div className="flex items-baseline justify-between gap-2 text-[0.875rem]">
+        <span className="text-ink">
           {label}
-          {hint ? <span className="text-faint"> · {hint}</span> : null}
+          {hint ? <span className="text-muted"> · {hint}</span> : null}
         </span>
         <span className="num shrink-0 font-medium text-ink">
           {value == null ? "—" : `${value.toFixed(decimals)}${unit}`}
@@ -489,7 +536,7 @@ function MetricBar({
           style={{ width: `${fill}%`, background: color }}
         />
       </div>
-      <p className="label-mono mt-1.5">
+      <p className="mt-1.5 text-[0.75rem] text-muted">
         {percentile != null
           ? `Top ${Math.max(1, Math.round(100 - percentile))}% of the pool`
           : "No data"}

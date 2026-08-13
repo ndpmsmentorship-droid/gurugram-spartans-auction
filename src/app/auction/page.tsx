@@ -14,15 +14,18 @@ export default async function AuctionPage() {
     return <p className="p-6 text-muted">No active season yet.</p>;
   }
 
-  const [{ data: teams }, { data: players }, { data: ranked }] = await Promise.all([
-    sb.from("teams").select("id, name, division, purse_total").eq("season_id", season.id).order("name"),
-    sb
-      .from("scout_players")
-      .select("id, full_name, auction_category, team_id, sold_price, acquired")
-      .not("team_id", "is", null),
-    // whole pool by index, to derive each player's "Our Rank" (1 = best)
-    sb.from("scout_players").select("id, overall_index").not("overall_index", "is", null),
-  ]);
+  const [{ data: teams }, { data: players }, { data: ranked }, { count: poolSize }] =
+    await Promise.all([
+      sb.from("teams").select("id, name, division, purse_total").eq("season_id", season.id).order("name"),
+      sb
+        .from("scout_players")
+        .select("id, full_name, auction_category, team_id, sold_price, acquired")
+        .not("team_id", "is", null),
+      // whole pool by index, to derive each player's "Our Rank" (1 = best)
+      sb.from("scout_players").select("id, overall_index").not("overall_index", "is", null),
+      // pool total, so the board can show how many lots are still to come
+      sb.from("scout_players").select("id", { count: "exact", head: true }),
+    ]);
 
   // rank the entire pool by overall index; retained rows without stats stay unranked
   const rankMap = new Map<string, number>();
@@ -37,8 +40,12 @@ export default async function AuctionPage() {
   }));
 
   return (
-    <div className="mx-auto w-full max-w-6xl flex-1 p-4 sm:p-6">
-      <SquadsBoard teams={(teams ?? []) as BoardTeam[]} players={withRank} />
+    <div className="mx-auto w-full max-w-[1400px] flex-1 px-5 py-8 sm:px-7">
+      <SquadsBoard
+        teams={(teams ?? []) as BoardTeam[]}
+        players={withRank}
+        poolSize={poolSize ?? undefined}
+      />
     </div>
   );
 }

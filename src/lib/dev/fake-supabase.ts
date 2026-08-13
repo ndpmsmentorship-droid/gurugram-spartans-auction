@@ -11,6 +11,7 @@
 
 import {
   fixturePlayers,
+  fixtureJerseySizes,
   FIXTURE_TEAMS,
   FIXTURE_SEASON,
   FIXTURE_PROFILE,
@@ -30,6 +31,8 @@ function tableRows(table: string): Row[] {
       return [FIXTURE_SEASON] as unknown as Row[];
     case "profiles":
       return [FIXTURE_PROFILE] as unknown as Row[];
+    case "jersey_sizes":
+      return fixtureJerseySizes() as unknown as Row[];
     default:
       return [];
   }

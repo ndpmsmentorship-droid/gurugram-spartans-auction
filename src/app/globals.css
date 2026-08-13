@@ -1,74 +1,39 @@
 @import "tailwindcss";
 
 /* ==================================================================
-   SHANTI DEVI LEGEND LEAGUE
-   Palette is straight from the brand book (Playful Ventures, p.6):
-     EBEBEB  light neutral
-     B12520  primary red
-     570F0C  maroon
-     250201  near-black
-   The book specifies no gold, blue or green — those exist here only as
-   DATA colours (marquee / positive / negative) and are held well away
-   from brand red so they never read as a second brand colour.
+   SHANTI DEVI LEGEND LEAGUE — light theme, single mode.
+   There is no dark mode: the board is a broadcast surface and every
+   owner should see exactly the same thing. Do not reintroduce
+   prefers-color-scheme or [data-theme] blocks here.
 
-   Dark by default and NOT tied to prefers-color-scheme: this is a
-   broadcast surface. Every owner watching the auction should see the
-   same board regardless of what their laptop is set to. Light is
-   available explicitly via [data-theme="light"].
+   Brand book (Playful Ventures p.6): EBEBEB / B12520 / 570F0C / 250201.
+   Blue and gold appear ONLY as data encodings (U35 age band, legend /
+   marquee) exactly as the approved design comps use them.
 ================================================================== */
 
-:root,
-:root[data-theme="dark"] {
-  --background: #120302;
-  --wash: #1b0806; /* quiet raised band */
-  --surface: #1f0b09; /* cards, panels */
-  --tile: #2b120f; /* stat tiles inside a card */
-  --chip: rgba(255, 255, 255, 0.055); /* zebra rows, quiet fills */
-
-  --ink: #f4edec;
-  --foreground: #f4edec;
-  --muted: rgba(244, 237, 236, 0.62);
-  /* .55 not the mockup's .38 — --faint carries .label-mono (table headers,
-     tile captions) at ~9.5px, and .38 lands at 3.2:1 against both the page
-     and the tiles. .55 clears AA (5.3:1 worst case) on a board people read
-     from across a room. */
-  --faint: rgba(244, 237, 236, 0.55);
-
-  --line: rgba(255, 255, 255, 0.09);
-  --line2: rgba(255, 255, 255, 0.16);
-  --border: rgba(255, 255, 255, 0.09);
-
-  --red: #e2453a; /* brand red, lifted for legibility on near-black */
-  --red-deep: #b12520; /* brand book B12520 */
-  --maroon: #570f0c; /* brand book 570F0C */
-  --accent: #e2453a;
-  --accent-text: #ef6a60; /* links/labels — needs to clear AA on #120302 */
-
-  --highlight: #e0a93b; /* marquee gold — data colour, used sparingly */
-  --highlight-ink: #e0a93b;
-  --up: #4fb477;
-  --down: #e2453a;
-
-  --elev: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 2px 3px rgba(0, 0, 0, 0.5),
-    0 18px 40px -12px rgba(0, 0, 0, 0.75);
-  --elev-sm: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 2px 5px rgba(0, 0, 0, 0.45);
-}
-
-:root[data-theme="light"] {
+:root {
   --background: #ffffff;
-  --wash: #fbf8f7;
-  --surface: #ffffff;
-  --tile: #f2eceb;
+  --wash: #f7f1f0; /* table header band, quiet fills */
+  --surface: #ffffff; /* cards */
+  --tile: #fbf7f6; /* stat tiles inside a card */
   --chip: rgba(37, 2, 1, 0.045);
+  /* Opaque, NOT a translucent chip: the pinned first column paints its own
+     background over the row's, so any alpha here composites twice and leaves a
+     visible seam down the table. */
+  --zebra: #fbf6f5;
+
+  /* blush wash used on team-card headers and the player hero */
+  --blush-a: #f6e0de;
+  --blush-b: #fdf8f7;
 
   --ink: #250201;
   --foreground: #250201;
-  --muted: rgba(37, 2, 1, 0.62);
-  --faint: rgba(37, 2, 1, 0.62); /* .42 failed at 2.9:1 on white — see dark note */
+  --muted: rgba(37, 2, 1, 0.6);
+  --faint: rgba(37, 2, 1, 0.6); /* .label-mono lives here — must clear AA at ~9.5px */
 
-  --line: rgba(37, 2, 1, 0.13);
-  --line2: rgba(37, 2, 1, 0.24);
-  --border: rgba(37, 2, 1, 0.13);
+  --line: rgba(37, 2, 1, 0.1);
+  --line2: rgba(37, 2, 1, 0.2);
+  --border: rgba(37, 2, 1, 0.1);
 
   --red: #b12520;
   --red-deep: #8e1a16;
@@ -76,14 +41,23 @@
   --accent: #b12520;
   --accent-text: #8e1a16;
 
-  --highlight: #8c6008; /* darkened from 9A6B10 — that only made 4.0:1 on --tile */
+  /* masthead + full-bleed hero bands */
+  --header-a: #4d1310;
+  --header-b: #360b09;
+
+  /* data encodings — never brand colours */
+  --gold: #8c6008; /* legend / marquee text */
+  --gold-fill: #fbf3df;
+  --gold-line: #ddbd78;
+  --highlight: #8c6008;
   --highlight-ink: #8c6008;
+  --u35: #40639e; /* under-35 age band */
+  --u35-fill: #dde6f5;
   --up: #2e7d50;
   --down: #b12520;
 
-  --elev: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 1px 2px rgba(37, 2, 1, 0.1),
-    0 14px 30px -14px rgba(37, 2, 1, 0.35);
-  --elev-sm: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 1px 2px rgba(37, 2, 1, 0.12);
+  --elev: 0 1px 2px rgba(37, 2, 1, 0.05), 0 8px 24px -14px rgba(37, 2, 1, 0.25);
+  --elev-sm: 0 1px 2px rgba(37, 2, 1, 0.06);
 }
 
 @theme inline {
@@ -104,30 +78,28 @@
   --color-red: var(--red);
   --color-red-deep: var(--red-deep);
   --color-maroon: var(--maroon);
+  --color-gold: var(--gold);
   --color-highlight: var(--highlight);
   --color-highlight-ink: var(--highlight-ink);
+  --color-u35: var(--u35);
   --color-up: var(--up);
   --color-down: var(--down);
 
   /* Brand book specifies Kaneda Gothic (Bold) + Brooklyn — both commercial and
-     not licensed here. Oswald stands in for Kaneda (condensed heavy grotesque,
-     uppercase display) and Jost for Brooklyn (geometric sans, circular bowls).
-     Swap the two --font-* families below if the real files are licensed. */
+     not licensed here. Oswald stands in for Kaneda (condensed heavy grotesque)
+     and Jost for Brooklyn (geometric sans). Swap these two lines if licensed. */
   --font-display: var(--font-oswald), "Arial Narrow", system-ui, sans-serif;
   --font-sans: var(--font-jost), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", monospace;
 
   --radius-pill: 980px;
-  --radius-card: 14px;
-  --radius-md: 12px;
+  --radius-card: 12px;
+  --radius-md: 10px;
 }
 
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color-scheme: dark;
-}
-html[data-theme="light"] {
   color-scheme: light;
 }
 
@@ -135,8 +107,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  font-weight: 300;
-  letter-spacing: 0;
+  font-weight: 400;
   overflow-x: hidden;
 }
 
@@ -152,23 +123,23 @@ h3,
 }
 
 ::selection {
-  background: var(--red-deep);
+  background: var(--red);
   color: #fff;
 }
 
 ::-webkit-scrollbar {
-  width: 9px;
-  height: 9px;
+  width: 10px;
+  height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--wash);
 }
 ::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--red-deep) 55%, transparent);
-  border-radius: 9px;
+  background: color-mix(in srgb, var(--red) 45%, transparent);
+  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--red-deep);
+  background: var(--red);
 }
 
 /* ---- shared type utilities ------------------------------------- */
@@ -184,13 +155,13 @@ h3,
   color: var(--red);
 }
 
-/* Small all-caps mono label (table headers, tile captions, chips). */
+/* Small all-caps mono label (table headers, tile captions). */
 .label-mono {
   font-family: var(--font-mono);
   font-size: 0.594rem;
   font-weight: 500;
-  line-height: 1;
-  letter-spacing: 0.12em;
+  line-height: 1.1;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
   color: var(--faint);
 }
@@ -203,7 +174,7 @@ h3,
 /* ---- components -------------------------------------------------- */
 
 .input {
-  @apply w-full rounded-[7px] border border-line bg-surface px-3.5 py-2 text-[0.875rem] text-foreground outline-none transition;
+  @apply w-full rounded-full border border-line bg-surface px-4 py-2.5 text-[0.875rem] text-foreground outline-none transition;
   font-family: var(--font-sans);
 }
 .input::placeholder {
@@ -211,17 +182,21 @@ h3,
 }
 .input:focus {
   border-color: var(--red);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 22%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 15%, transparent);
+}
+/* Two-class selector on purpose: .input's own @apply padding outranks a bare
+   pl-* utility, so the leading glyph would sit on top of the placeholder. */
+.input.with-icon {
+  padding-left: 2.5rem;
 }
 
 .card {
-  @apply rounded-[14px] border border-line bg-surface p-5;
-  box-shadow: var(--elev);
+  @apply rounded-[12px] border border-line bg-surface p-5;
+  box-shadow: var(--elev-sm);
 }
 
 .tile {
   @apply rounded-[10px] border border-line bg-tile;
-  box-shadow: var(--elev-sm);
 }
 
 .badge {
@@ -230,33 +205,48 @@ h3,
   letter-spacing: 0.06em;
 }
 
-.btn-primary {
-  @apply rounded-[7px] px-5 py-2.5 text-[0.781rem] font-medium text-white transition hover:brightness-110 disabled:opacity-50;
+/* Pill button rail — the filter row shape used across Board and Pool. */
+.pill {
+  @apply inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-line bg-surface px-4 py-2 text-[0.75rem] font-medium text-muted transition;
+}
+.pill:hover {
+  border-color: var(--line2);
+  color: var(--ink);
+}
+.pill[data-active="true"] {
   background: var(--red-deep);
-  letter-spacing: 0.08em;
+  border-color: var(--red-deep);
+  color: #fff;
+}
+
+.btn-primary {
+  @apply rounded-full px-6 py-2.5 text-[0.813rem] font-medium text-white transition hover:brightness-110 disabled:opacity-50;
+  background: var(--red-deep);
 }
 
 .btn-ghost {
-  @apply rounded-[7px] border border-line2 bg-transparent px-5 py-2.5 text-[0.781rem] font-medium text-foreground transition hover:border-red disabled:opacity-50;
-  letter-spacing: 0.08em;
+  @apply rounded-full border border-line2 bg-surface px-6 py-2.5 text-[0.813rem] font-medium text-foreground transition hover:border-red disabled:opacity-50;
 }
 
-/* amber CTA — the single most important action on a view. Dark text: the
-   marquee gold doesn't carry white legibly. */
 .btn-accent {
-  @apply rounded-[7px] px-5 py-2.5 text-[0.781rem] font-semibold transition hover:brightness-105 disabled:opacity-50;
-  background: var(--highlight);
-  color: #2b1a02;
-  letter-spacing: 0.08em;
+  @apply rounded-full px-6 py-2.5 text-[0.813rem] font-semibold transition hover:brightness-105 disabled:opacity-50;
+  background: var(--gold-fill);
+  border: 1px solid var(--gold-line);
+  color: var(--gold);
 }
 
-/* Progress / purse rail — reused by the profile index bars and (phase 2) the
-   live board's team purse meters. */
+/* Progress / purse rail — shared by the board's purse meters and the
+   profile's index bars. */
 .rail {
-  @apply h-[5px] w-full overflow-hidden rounded-full;
-  background: var(--chip);
+  @apply h-[6px] w-full overflow-hidden rounded-full;
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
 }
 .rail > span {
   @apply block h-full rounded-full;
-  background: linear-gradient(90deg, var(--red-deep), var(--red));
+  background: linear-gradient(90deg, var(--maroon), var(--red));
+}
+
+/* Full-bleed maroon band: masthead and the squad hero. */
+.band {
+  background: linear-gradient(180deg, var(--header-a) 0%, var(--header-b) 100%);
 }

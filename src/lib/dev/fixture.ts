@@ -221,7 +221,9 @@ export function fixturePlayers(): ScoutPlayerRow[] {
 export const FIXTURE_SEASON = { id: "5eaa0000-0000-4000-8000-000000000001", is_active: true, name: "Season 1" };
 
 export const FIXTURE_TEAMS = [
-  { id: TEAM_IDS[0], name: "Bengal Tigers", division: "Elite", purse_total: 400000, season_id: FIXTURE_SEASON.id },
+  // "Gurugram Spartans" must exist — /squad looks the team up by that exact
+  // name, so without it the squad page renders empty.
+  { id: TEAM_IDS[0], name: "Gurugram Spartans", division: "Elite", purse_total: 400000, season_id: FIXTURE_SEASON.id },
   { id: TEAM_IDS[1], name: "Goa Monks", division: "Elite", purse_total: 400000, season_id: FIXTURE_SEASON.id },
   { id: TEAM_IDS[2], name: "Jaipur Royals", division: "Challengers", purse_total: 400000, season_id: FIXTURE_SEASON.id },
   { id: TEAM_IDS[3], name: "UP Warriors", division: "Challengers", purse_total: 400000, season_id: FIXTURE_SEASON.id },
@@ -229,6 +231,22 @@ export const FIXTURE_TEAMS = [
 
 // A signed-in admin, so the gated Pool page and the admin-only profile controls
 // both render while designing.
+// Kit form rows for the Spartans squad, so /squad renders with jersey numbers
+// and sizes rather than a column of em-dashes.
+const TEE = ["M", "L", "XL", "2XL", "3XL"];
+const LOWER = ["30", "32", "34", "36"];
+export function fixtureJerseySizes() {
+  return fixturePlayers()
+    .filter((p) => (p as unknown as { team_id: string | null }).team_id === TEAM_IDS[0])
+    .map((p, i) => ({
+      player_id: p.id,
+      display_name: p.full_name.split(/\s+/)[0],
+      jersey_number: 4 + i * 2,
+      tshirt_size: TEE[i % TEE.length],
+      lower_size: LOWER[i % LOWER.length],
+    }));
+}
+
 export const FIXTURE_PROFILE = {
   id: "00000000-0000-4000-8000-00000000cafe",
   role: "admin",

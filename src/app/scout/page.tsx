@@ -136,19 +136,19 @@ export default async function ScoutPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-8">
-      <div className="flex items-end justify-between gap-3">
+    <main className="mx-auto w-full max-w-[1360px] flex-1 px-5 py-8 sm:px-8">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="eyebrow">The pool</p>
-          <h1 className="mt-1 font-display text-2xl font-bold">
-            {pool.length} players
+          <h1 className="mt-3 font-display text-[2.75rem] leading-[0.95]">
+            {pool.length} Players
           </h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2.5">
           <Link href="/scout/compare" className="btn-ghost">
             Compare
           </Link>
-          <Link href="/scout/import" className="btn-ghost">
+          <Link href="/scout/import" className="btn-primary">
             Re-import
           </Link>
         </div>

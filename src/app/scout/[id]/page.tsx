@@ -14,7 +14,7 @@ import Radar from "../Radar";
 import PlayerWorkshop from "./PlayerWorkshop";
 import MarqueeToggle from "./MarqueeToggle";
 
-const ACCENT = "#4a6bb5"; // pastel navy — matches the app accent
+const ACCENT = "var(--red)"; // brand red — the only hue in the Shanti Devi book
 
 export default async function PlayerDetailPage({
   params,
@@ -69,84 +69,136 @@ export default async function PlayerDetailPage({
     v == null ? "—" : Math.round(v).toLocaleString("en-IN");
 
   return (
-    <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-8">
+    <main className="mx-auto w-full max-w-[1100px] flex-1 px-5 py-8 sm:px-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link href="/squad" className="text-sm text-muted hover:text-accent-text">
-          ← Back to squad
+        <Link href="/scout" className="text-[0.813rem] text-muted transition hover:text-red">
+          ← Back to pool
         </Link>
         <PlayerSearch players={pool.map((p) => ({ id: p.id, full_name: p.full_name }))} />
       </div>
 
-      {/* identity bar */}
-      <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="eyebrow">{a.roleGroup}</p>
-          <h1 className="mt-1 font-display text-3xl font-bold">{player.full_name}</h1>
-          {player.cricheroes_link && (
-            <a
-              href={player.cricheroes_link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-1 inline-block text-sm text-accent-text hover:underline"
+      {/* identity hero — container-queried so it scales intact when the live
+          board later renders this on a projector */}
+      <section
+        className="mt-4 rounded-[14px] border border-line px-6 py-7 sm:px-8"
+        style={{
+          containerType: "inline-size",
+          background:
+            "linear-gradient(120deg, color-mix(in srgb, var(--red-deep) 18%, transparent), transparent 62%), var(--surface)",
+        }}
+      >
+        {/* stacks below sm — side by side the identity column collapses to a
+            few characters wide and the name wraps to one word per line */}
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 sm:flex-1">
+            <p className="eyebrow">
+              {a.roleGroup}
+              {handSkill(player.batting_style, player.bowling_style)
+                ? ` · ${handSkill(player.batting_style, player.bowling_style)}`
+                : ""}
+            </p>
+            <h1
+              className="mt-3 font-display font-bold"
+              style={{ fontSize: "clamp(2rem, 4.4cqw, 3.75rem)", lineHeight: 0.9 }}
             >
-              View CricHeroes profile ↗
-            </a>
-          )}
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            {(() => {
-              const ts = tierStyle(player.auction_category);
-              return ts ? (
-                <span
-                  className="badge font-bold uppercase tracking-wide"
-                  style={{ background: ts.bg, color: ts.fg }}
-                  title="Organizers' auction category"
-                >
-                  {player.auction_category}
-                </span>
-              ) : null;
-            })()}
-            <span className="badge bg-wash text-accent-text">{a.archetype}</span>
-            {handSkill(player.batting_style, player.bowling_style) ? (
-              <span className="badge bg-wash text-muted">
-                {handSkill(player.batting_style, player.bowling_style)}
-              </span>
-            ) : null}
-            {a.riskFlags.map((f) => (
-              <span
-                key={f.label}
-                className={`badge ${
-                  f.level === "red" ? "bg-down/15 text-down" : "bg-accent/20 text-accent-text"
-                }`}
+              {player.full_name}
+            </h1>
+            {player.cricheroes_link && (
+              <a
+                href={player.cricheroes_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2.5 inline-block text-[0.813rem] text-accent-text hover:underline"
               >
-                {f.label}
+                View CricHeroes profile ↗
+              </a>
+            )}
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              {(() => {
+                const ts = tierStyle(player.auction_category);
+                return ts ? (
+                  <span
+                    className="badge uppercase"
+                    style={{ background: ts.bg, color: ts.fg }}
+                    title="Organizers' auction category"
+                  >
+                    {player.auction_category}
+                  </span>
+                ) : null;
+              })()}
+              <span
+                className="badge"
+                style={{ border: "1px solid var(--line2)", color: "var(--muted)" }}
+              >
+                {a.archetype}
               </span>
-            ))}
+              {a.riskFlags.map((f) => (
+                <span
+                  key={f.label}
+                  className="badge"
+                  style={
+                    f.level === "red"
+                      ? {
+                          background: "color-mix(in srgb, var(--down) 16%, transparent)",
+                          color: "var(--down)",
+                          border: "1px solid color-mix(in srgb, var(--down) 40%, transparent)",
+                        }
+                      : {
+                          background: "color-mix(in srgb, var(--highlight) 14%, transparent)",
+                          color: "var(--highlight)",
+                          border:
+                            "1px solid color-mix(in srgb, var(--highlight) 38%, transparent)",
+                        }
+                  }
+                >
+                  {f.label}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="shrink-0 text-left sm:text-right">
+            {isAdmin && (
+              <div className="mb-2 flex justify-start sm:justify-end">
+                <MarqueeToggle id={player.id} initial={player.is_marquee} />
+              </div>
+            )}
+            {player.is_marquee && !isAdmin && (
+              <div
+                className="badge mb-2"
+                style={{
+                  background: "color-mix(in srgb, var(--highlight) 14%, transparent)",
+                  border: "1px solid color-mix(in srgb, var(--highlight) 45%, transparent)",
+                  color: "var(--highlight)",
+                }}
+              >
+                ★ Marquee — must buy
+              </div>
+            )}
+            <p
+              className="font-display font-bold leading-[0.85]"
+              style={{ fontSize: "clamp(2.75rem, 5.2cqw, 4.5rem)" }}
+            >
+              {round1(player.overall_index)}
+              <span className="num text-[0.3em] font-normal text-faint">/100</span>
+            </p>
+            <p className="num mt-2.5 text-[0.688rem] uppercase tracking-[0.14em] text-muted">
+              Overall #{rankedSelf.overall_rank} · VOR {a.vor >= 0 ? "+" : ""}
+              {a.vor}
+            </p>
           </div>
         </div>
-        <div className="text-right">
-          {isAdmin && (
-            <div className="mb-2 flex justify-end">
-              <MarqueeToggle id={player.id} initial={player.is_marquee} />
-            </div>
-          )}
-          <span className="badge bg-ink text-[var(--surface)]">
-            Overall #{rankedSelf.overall_rank}
-          </span>
-          <p className="mt-1 font-display text-2xl font-bold">
-            {round1(player.overall_index)}
-            <span className="text-sm font-normal text-muted">/100</span>
-          </p>
-          <p className="text-xs text-muted">VOR {a.vor >= 0 ? "+" : ""}{a.vor}</p>
-        </div>
-      </div>
+      </section>
 
-      {/* big headshot + index profile side by side */}
-      <div className="mt-6 grid items-start gap-6 lg:grid-cols-2">
+      {/* headshot + index profile side by side — the portrait is deliberately
+          narrow so the index card, not the photo, carries the width */}
+      <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,17rem)_minmax(0,1fr)]">
         <div className="flex justify-center lg:justify-start">
           <Headshot name={player.full_name} url={player.photo_url} />
         </div>
         <section className="card">
-          <p className="eyebrow mb-2">Index profile</p>
+          <h2 className="mb-3 border-b border-line pb-3 font-display text-[0.938rem] tracking-[0.16em]">
+            Index profile
+          </h2>
           <Radar
             series={[
               {
@@ -161,7 +213,7 @@ export default async function PlayerDetailPage({
               },
             ]}
           />
-          <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+          <div className="mt-4 grid grid-cols-2 gap-2">
             <RankPill label="Batting" score={player.bat_index} rank={rankedSelf.bat_rank} />
             <RankPill label="Bowling" score={player.bowl_index} rank={rankedSelf.bowl_rank} />
             <RankPill label="Fielding" score={player.field_index} rank={rankedSelf.field_rank} />
@@ -171,11 +223,13 @@ export default async function PlayerDetailPage({
       </div>
 
 
-      <div className="mt-6 grid gap-6 md:grid-cols-2">
-
-        {/* batting stat tiles + boundary % */}
+      {/* Batting runs full width — 12 tiles never fit a half-column without
+          crushing them, and it was previously stranded in a 2-col grid with an
+          empty right half. */}
+      <div className="mt-6">
         <StatSection
           title="Batting"
+          cols={6}
           indexScore={player.bat_index}
           rank={rankedSelf.bat_rank}
           tiles={[
@@ -278,9 +332,9 @@ export default async function PlayerDetailPage({
       {/* scouting clip / note (if set) */}
       {(player.scouting_clip_url || player.scouting_note) && (
         <section className="card mt-6">
-          <p className="eyebrow mb-2">Scouting note</p>
+          <p className="eyebrow mb-3">Scouting note</p>
           {player.scouting_note && (
-            <p className="text-sm">{player.scouting_note}</p>
+            <p className="text-[0.875rem] leading-relaxed">{player.scouting_note}</p>
           )}
           {player.scouting_clip_url && (
             <a
@@ -300,18 +354,25 @@ export default async function PlayerDetailPage({
 
       {/* similar players */}
       <section className="mt-6">
-        <p className="eyebrow mb-2">Players like {player.full_name}</p>
+        <p className="eyebrow mb-3">Players like {player.full_name}</p>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {a.similarIds.map((sid) => {
             const sp = byId.get(sid);
             if (!sp) return null;
             const sa = analytics.get(sid)!;
             return (
-              <Link key={sid} href={`/scout/${sid}`} className="card hover:border-accent">
-                <p className="truncate font-display font-semibold">{sp.full_name}</p>
-                <p className="text-xs text-muted">{sa.archetype}</p>
-                <p className="mt-1 text-sm">
-                  Overall {round1(sp.overall_index)}
+              <Link
+                key={sid}
+                href={`/scout/${sid}`}
+                className="card p-4 transition hover:border-red"
+              >
+                <p className="truncate font-display text-[1rem] font-semibold">
+                  {sp.full_name}
+                </p>
+                <p className="mt-1 truncate text-[0.75rem] text-faint">{sa.archetype}</p>
+                <p className="num mt-2.5 text-[0.813rem] text-muted">
+                  Overall{" "}
+                  <span className="font-medium text-ink">{round1(sp.overall_index)}</span>
                 </p>
               </Link>
             );
@@ -336,15 +397,21 @@ function Headshot({ name, url }: { name: string; url: string | null }) {
         src={url}
         alt={name}
         width={448}
-        height={448}
+        height={560}
         unoptimized={false}
-        className="aspect-square w-full max-w-md rounded-2xl object-cover object-center shadow-sm ring-1 ring-border"
+        className="aspect-[4/5] w-full max-w-md rounded-[14px] border border-line object-cover object-center"
+        style={{ boxShadow: "var(--elev)" }}
       />
     );
   }
   return (
     <div
-      className="flex aspect-square w-full max-w-md items-center justify-center rounded-2xl bg-wash text-8xl font-bold text-accent-text ring-1 ring-border"
+      className="flex aspect-[4/5] w-full max-w-md items-center justify-center rounded-[14px] border border-line font-display text-[5rem] text-faint"
+      style={{
+        background:
+          "repeating-linear-gradient(135deg, var(--chip) 0 8px, transparent 8px 16px), var(--surface)",
+        boxShadow: "var(--elev)",
+      }}
       aria-hidden
     >
       {initials || "?"}
@@ -362,12 +429,14 @@ function RankPill({
   rank: number | null;
 }) {
   return (
-    <div className="rounded-[12px] bg-wash px-3 py-2">
-      <p className="text-xs text-muted">{label}</p>
-      <p className="font-semibold">
+    <div className="tile px-3 py-2.5">
+      <p className="label-mono">{label}</p>
+      <p className="mt-1.5 font-display text-[1.125rem] font-semibold leading-none">
         {score == null ? "—" : Math.round(score)}
         {rank != null && rank < 9999 && (
-          <span className="ml-1 text-xs font-normal text-muted">#{rank}</span>
+          <span className="num ml-1.5 text-[0.688rem] font-normal text-faint">
+            #{rank}
+          </span>
         )}
       </p>
     </div>
@@ -392,52 +461,51 @@ function MetricBar({
   unit?: string;
 }) {
   const fill = percentile == null ? 0 : Math.max(2, Math.min(100, percentile));
+  // One hue ramp, not a traffic light: strength is carried by how FAR the rail
+  // fills, and the brand red simply deepens with it. A green/amber/red scale
+  // would put two competing hues next to the brand colour.
   const color =
     percentile == null
-      ? "var(--muted)"
+      ? "var(--line2)"
       : percentile >= 66
-        ? "var(--up)"
+        ? "linear-gradient(90deg, var(--red-deep), var(--red))"
         : percentile >= 33
-          ? ACCENT
-          : "var(--down)";
+          ? "color-mix(in srgb, var(--red) 62%, var(--line2))"
+          : "color-mix(in srgb, var(--red) 32%, var(--line2))";
   return (
     <div>
-      <div className="flex items-baseline justify-between gap-2 text-sm">
+      <div className="flex items-baseline justify-between gap-2 text-[0.813rem]">
         <span className="text-muted">
           {label}
-          {hint ? <span className="text-xs"> · {hint}</span> : null}
+          {hint ? <span className="text-faint"> · {hint}</span> : null}
         </span>
-        <span className="shrink-0 font-semibold tabular-nums">
+        <span className="num shrink-0 font-medium text-ink">
           {value == null ? "—" : `${value.toFixed(decimals)}${unit}`}
         </span>
       </div>
-      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-wash">
-        <div
-          className="h-full rounded-full transition-[width]"
+      <div className="rail mt-2">
+        <span
+          className="transition-[width]"
           style={{ width: `${fill}%`, background: color }}
         />
       </div>
-      {percentile != null ? (
-        <p className="mt-0.5 text-[0.65rem] text-muted">
-          Top {Math.max(1, Math.round(100 - percentile))}% of the pool
-        </p>
-      ) : (
-        <p className="mt-0.5 text-[0.65rem] text-muted">No data</p>
-      )}
+      <p className="label-mono mt-1.5">
+        {percentile != null
+          ? `Top ${Math.max(1, Math.round(100 - percentile))}% of the pool`
+          : "No data"}
+      </p>
     </div>
   );
 }
 
-// A single CricHeroes-style stat tile: bold number over a small label.
+// A single CricHeroes-style stat tile: bold number over a small mono label.
 function Tile({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-[12px] bg-wash px-1.5 py-2.5 text-center">
-      <p className="font-display text-[1.3rem] font-bold leading-none tabular-nums">
+    <div className="tile px-1.5 py-3 text-center">
+      <p className="font-display text-[1.375rem] font-bold leading-none">
         {value === "" ? "—" : value}
       </p>
-      <p className="mt-1 text-[0.58rem] font-medium uppercase leading-tight tracking-wide text-muted">
-        {label}
-      </p>
+      <p className="label-mono mt-1.5">{label}</p>
     </div>
   );
 }
@@ -449,35 +517,48 @@ function StatSection({
   indexScore,
   rank,
   tiles,
+  cols = 4,
   children,
 }: {
   title: string;
   indexScore: number | null;
   rank: number | null;
   tiles: { label: string; value: string | number }[];
+  /** tile columns at >=sm; 4 for half-width cards, 6 for a full-width one */
+  cols?: 4 | 6;
   children?: ReactNode;
 }) {
   return (
     <section className="card">
-      <div className="flex items-center justify-between gap-2">
-        <p className="eyebrow">{title}</p>
+      <div className="flex items-center justify-between gap-2 border-b border-line pb-3">
+        <h2 className="font-display text-[0.938rem] tracking-[0.16em]">{title}</h2>
         {indexScore != null ? (
-          <span className="badge" style={{ background: "var(--wash)", color: ACCENT }}>
+          <span
+            className="badge"
+            style={{
+              background: "color-mix(in srgb, var(--red-deep) 20%, transparent)",
+              color: "var(--accent-text)",
+            }}
+          >
             {Math.round(indexScore)}
-            <span className="text-muted">/100</span>
+            <span className="text-faint">/100</span>
             {rank != null && rank < 9999 ? (
-              <span className="ml-1 text-muted">· #{rank}</span>
+              <span className="ml-1 text-faint">· #{rank}</span>
             ) : null}
           </span>
         ) : null}
       </div>
-      <div className="mt-3 grid grid-cols-4 gap-1.5">
+      <div
+        className={`mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4 ${
+          cols === 6 ? "lg:grid-cols-6" : ""
+        }`}
+      >
         {tiles.map((t) => (
           <Tile key={t.label} label={t.label} value={t.value} />
         ))}
       </div>
       {children ? (
-        <div className="mt-3 flex flex-col gap-3 border-t border-border pt-3">{children}</div>
+        <div className="mt-4 flex flex-col gap-3.5 border-t border-line pt-4">{children}</div>
       ) : null}
     </section>
   );

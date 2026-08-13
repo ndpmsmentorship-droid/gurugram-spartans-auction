@@ -1,174 +1,262 @@
 @import "tailwindcss";
 
-/* ------------------------------------------------------------------
-   Spartans light look: white base, blue primary, orange accent.
-   Minimalist, generous whitespace, subtle depth. Blue = actions /
-   links / structure; orange (--highlight) = accents / CTAs / emphasis.
------------------------------------------------------------------- */
+/* ==================================================================
+   SHANTI DEVI LEGEND LEAGUE
+   Palette is straight from the brand book (Playful Ventures, p.6):
+     EBEBEB  light neutral
+     B12520  primary red
+     570F0C  maroon
+     250201  near-black
+   The book specifies no gold, blue or green — those exist here only as
+   DATA colours (marquee / positive / negative) and are held well away
+   from brand red so they never read as a second brand colour.
 
-:root {
+   Dark by default and NOT tied to prefers-color-scheme: this is a
+   broadcast surface. Every owner watching the auction should see the
+   same board regardless of what their laptop is set to. Light is
+   available explicitly via [data-theme="light"].
+================================================================== */
+
+:root,
+:root[data-theme="dark"] {
+  --background: #120302;
+  --wash: #1b0806; /* quiet raised band */
+  --surface: #1f0b09; /* cards, panels */
+  --tile: #2b120f; /* stat tiles inside a card */
+  --chip: rgba(255, 255, 255, 0.055); /* zebra rows, quiet fills */
+
+  --ink: #f4edec;
+  --foreground: #f4edec;
+  --muted: rgba(244, 237, 236, 0.62);
+  /* .55 not the mockup's .38 — --faint carries .label-mono (table headers,
+     tile captions) at ~9.5px, and .38 lands at 3.2:1 against both the page
+     and the tiles. .55 clears AA (5.3:1 worst case) on a board people read
+     from across a room. */
+  --faint: rgba(244, 237, 236, 0.55);
+
+  --line: rgba(255, 255, 255, 0.09);
+  --line2: rgba(255, 255, 255, 0.16);
+  --border: rgba(255, 255, 255, 0.09);
+
+  --red: #e2453a; /* brand red, lifted for legibility on near-black */
+  --red-deep: #b12520; /* brand book B12520 */
+  --maroon: #570f0c; /* brand book 570F0C */
+  --accent: #e2453a;
+  --accent-text: #ef6a60; /* links/labels — needs to clear AA on #120302 */
+
+  --highlight: #e0a93b; /* marquee gold — data colour, used sparingly */
+  --highlight-ink: #e0a93b;
+  --up: #4fb477;
+  --down: #e2453a;
+
+  --elev: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 2px 3px rgba(0, 0, 0, 0.5),
+    0 18px 40px -12px rgba(0, 0, 0, 0.75);
+  --elev-sm: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 2px 5px rgba(0, 0, 0, 0.45);
+}
+
+:root[data-theme="light"] {
   --background: #ffffff;
-  --wash: #f2f6fd; /* airy pastel blue */
+  --wash: #fbf8f7;
   --surface: #ffffff;
-  --ink: #2a3a5c; /* soft navy ink (not pure black) */
-  --foreground: #2a3a5c;
-  --muted: #7683a0; /* muted slate-blue */
-  --line: #e7ecf6;
-  --border: #e7ecf6;
-  --accent: #4a6bb5; /* pastel navy — primary buttons / links / structure */
-  --accent-text: #3f5da6; /* navy link */
-  --highlight: #f4b869; /* pastel amber — accent / CTA / emphasis */
-  --highlight-ink: #b57621; /* amber text on light */
-  --up: #57ac7e; /* pastel green — verified / positive */
-  --down: #e07b74; /* pastel red — rejected / negative */
+  --tile: #f2eceb;
+  --chip: rgba(37, 2, 1, 0.045);
+
+  --ink: #250201;
+  --foreground: #250201;
+  --muted: rgba(37, 2, 1, 0.62);
+  --faint: rgba(37, 2, 1, 0.62); /* .42 failed at 2.9:1 on white — see dark note */
+
+  --line: rgba(37, 2, 1, 0.13);
+  --line2: rgba(37, 2, 1, 0.24);
+  --border: rgba(37, 2, 1, 0.13);
+
+  --red: #b12520;
+  --red-deep: #8e1a16;
+  --maroon: #570f0c;
+  --accent: #b12520;
+  --accent-text: #8e1a16;
+
+  --highlight: #8c6008; /* darkened from 9A6B10 — that only made 4.0:1 on --tile */
+  --highlight-ink: #8c6008;
+  --up: #2e7d50;
+  --down: #b12520;
+
+  --elev: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 1px 2px rgba(37, 2, 1, 0.1),
+    0 14px 30px -14px rgba(37, 2, 1, 0.35);
+  --elev-sm: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 1px 2px rgba(37, 2, 1, 0.12);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-wash: var(--wash);
   --color-surface: var(--surface);
+  --color-tile: var(--tile);
+  --color-chip: var(--chip);
   --color-ink: var(--ink);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
+  --color-faint: var(--faint);
   --color-line: var(--line);
+  --color-line2: var(--line2);
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-text: var(--accent-text);
+  --color-red: var(--red);
+  --color-red-deep: var(--red-deep);
+  --color-maroon: var(--maroon);
   --color-highlight: var(--highlight);
   --color-highlight-ink: var(--highlight-ink);
   --color-up: var(--up);
   --color-down: var(--down);
-  --font-sans:
-    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-    "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-display:
-    -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue",
-    Helvetica, Arial, sans-serif;
+
+  /* Brand book specifies Kaneda Gothic (Bold) + Brooklyn — both commercial and
+     not licensed here. Oswald stands in for Kaneda (condensed heavy grotesque,
+     uppercase display) and Jost for Brooklyn (geometric sans, circular bowls).
+     Swap the two --font-* families below if the real files are licensed. */
+  --font-display: var(--font-oswald), "Arial Narrow", system-ui, sans-serif;
+  --font-sans: var(--font-jost), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", monospace;
+
   --radius-pill: 980px;
-  --radius-card: 18px;
+  --radius-card: 14px;
   --radius-md: 12px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f1420;
-    --wash: #182031;
-    --surface: #151c2b;
-    --ink: #e9eef8;
-    --foreground: #e9eef8;
-    --muted: #94a2bd;
-    --line: #29324a;
-    --border: #29324a;
-    --accent: #7c9de6;
-    --accent-text: #9db8f0;
-    --highlight: #f4c07d;
-    --highlight-ink: #f4c07d;
-    --up: #5cc08a;
-    --down: #e98a83;
-  }
-}
-
-:root[data-theme="dark"] {
-  --background: #0f1420;
-  --wash: #182031;
-  --surface: #151c2b;
-  --ink: #e9eef8;
-  --foreground: #e9eef8;
-  --muted: #94a2bd;
-  --line: #29324a;
-  --border: #29324a;
-  --accent: #7c9de6;
-  --accent-text: #9db8f0;
-  --highlight: #f4c07d;
-  --highlight-ink: #f4c07d;
-  --up: #5cc08a;
-  --down: #e98a83;
-}
-
-:root[data-theme="light"] {
-  --background: #ffffff;
-  --wash: #f2f6fd;
-  --surface: #ffffff;
-  --ink: #2a3a5c;
-  --foreground: #2a3a5c;
-  --muted: #7683a0;
-  --line: #e7ecf6;
-  --border: #e7ecf6;
-  --accent: #4a6bb5;
-  --accent-text: #3f5da6;
-  --highlight: #f4b869;
-  --highlight-ink: #b57621;
-  --up: #57ac7e;
-  --down: #e07b74;
 }
 
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color-scheme: dark;
+}
+html[data-theme="light"] {
+  color-scheme: light;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family:
-    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue",
-    Helvetica, Arial, sans-serif;
-  letter-spacing: -0.01em;
+  font-family: var(--font-sans);
+  font-weight: 300;
+  letter-spacing: 0;
+  overflow-x: hidden;
 }
 
 h1,
 h2,
 h3,
 .font-display {
-  font-family:
-    -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue",
-    Helvetica, Arial, sans-serif;
-  letter-spacing: -0.022em;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  line-height: 0.95;
 }
 
-.eyebrow {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--accent-text);
-  letter-spacing: 0;
+::selection {
+  background: var(--red-deep);
+  color: #fff;
 }
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--red-deep) 55%, transparent);
+  border-radius: 9px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--red-deep);
+}
+
+/* ---- shared type utilities ------------------------------------- */
+
+/* Mono kicker above a heading — the league's signature label style. */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--red);
+}
+
+/* Small all-caps mono label (table headers, tile captions, chips). */
+.label-mono {
+  font-family: var(--font-mono);
+  font-size: 0.594rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- components -------------------------------------------------- */
 
 .input {
-  @apply w-full rounded-[12px] border border-border bg-surface px-3.5 py-2 text-[0.95rem] text-foreground outline-none transition;
+  @apply w-full rounded-[7px] border border-line bg-surface px-3.5 py-2 text-[0.875rem] text-foreground outline-none transition;
+  font-family: var(--font-sans);
+}
+.input::placeholder {
+  color: var(--faint);
 }
 .input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 22%, transparent);
 }
 
 .card {
-  @apply rounded-[18px] bg-surface p-5;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 6px 24px rgba(0, 0, 0, 0.05);
+  @apply rounded-[14px] border border-line bg-surface p-5;
+  box-shadow: var(--elev);
 }
-@media (prefers-color-scheme: dark) {
-  .card {
-    box-shadow: none;
-    border: 1px solid var(--border);
-  }
+
+.tile {
+  @apply rounded-[10px] border border-line bg-tile;
+  box-shadow: var(--elev-sm);
 }
 
 .badge {
-  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  @apply inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-1 text-[0.688rem] font-medium;
+  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
 }
 
 .btn-primary {
-  @apply rounded-full bg-accent px-5 py-2 text-[0.95rem] font-medium text-white transition hover:brightness-110 disabled:opacity-50;
+  @apply rounded-[7px] px-5 py-2.5 text-[0.781rem] font-medium text-white transition hover:brightness-110 disabled:opacity-50;
+  background: var(--red-deep);
+  letter-spacing: 0.08em;
 }
 
 .btn-ghost {
-  @apply rounded-full border border-border bg-surface px-4 py-2 text-[0.95rem] font-medium text-foreground transition hover:bg-wash disabled:opacity-50;
+  @apply rounded-[7px] border border-line2 bg-transparent px-5 py-2.5 text-[0.781rem] font-medium text-foreground transition hover:border-red disabled:opacity-50;
+  letter-spacing: 0.08em;
 }
 
-/* amber CTA — use sparingly for the single most important action on a view.
-   Dark text: pastel amber doesn't carry white legibly. */
+/* amber CTA — the single most important action on a view. Dark text: the
+   marquee gold doesn't carry white legibly. */
 .btn-accent {
-  @apply rounded-full px-5 py-2 text-[0.95rem] font-semibold transition hover:brightness-105 disabled:opacity-50;
+  @apply rounded-[7px] px-5 py-2.5 text-[0.781rem] font-semibold transition hover:brightness-105 disabled:opacity-50;
   background: var(--highlight);
-  color: #4a2e05;
+  color: #2b1a02;
+  letter-spacing: 0.08em;
+}
+
+/* Progress / purse rail — reused by the profile index bars and (phase 2) the
+   live board's team purse meters. */
+.rail {
+  @apply h-[5px] w-full overflow-hidden rounded-full;
+  background: var(--chip);
+}
+.rail > span {
+  @apply block h-full rounded-full;
+  background: linear-gradient(90deg, var(--red-deep), var(--red));
 }

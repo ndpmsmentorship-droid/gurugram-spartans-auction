@@ -16,19 +16,23 @@ export function parseTier(tier: string | null | undefined): TierParts {
 export const isGradeA = (tier: string | null | undefined) => parseTier(tier).grade === "A";
 export const isU35 = (tier: string | null | undefined) => parseTier(tier).age === "U35";
 
-// Solid pill colours: A tiers warm (orange/red), B tiers cool-neutral; U35 runs
-// a shade brighter than 35+ so the age band reads at a glance.
+// Pill colours, all drawn from the Shanti Devi palette — the brand book carries
+// no second hue, so the tiers separate by WEIGHT rather than by colour:
+// A grades take a solid red fill (they are the premium lots and should shout),
+// B grades recede to a red tint / neutral chip. Within each grade U35 runs a
+// step brighter than 35+ so the age band still reads at a glance.
+// Returns CSS custom properties, so both themes are handled for free.
 export function tierStyle(tier: string | null | undefined): { bg: string; fg: string } | null {
   const { age, grade } = parseTier(tier);
   if (!age || !grade) return null;
   if (grade === "A") {
     return age === "U35"
-      ? { bg: "#E0453A", fg: "#ffffff" } // U35A — brightest, top of the tree
-      : { bg: "#C2371D", fg: "#ffffff" }; // 35+A
+      ? { bg: "var(--red)", fg: "#ffffff" } // U35A — brightest, top of the tree
+      : { bg: "var(--red-deep)", fg: "#ffffff" }; // 35+A
   }
   return age === "U35"
-    ? { bg: "#3E7BD1", fg: "#ffffff" } // U35B
-    : { bg: "#5B6270", fg: "#ffffff" }; // 35+B
+    ? { bg: "color-mix(in srgb, var(--red-deep) 26%, transparent)", fg: "var(--accent-text)" } // U35B
+    : { bg: "var(--chip)", fg: "var(--muted)" }; // 35+B
 }
 
 // "LHB · Right-arm off-break" style one-liner; either half may be missing.

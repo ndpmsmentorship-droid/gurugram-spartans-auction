@@ -1,6 +1,6 @@
-// Four sub-index mini-bars. Colors follow a consistent scale (dataviz skill:
-// one hue family, sufficient contrast, labeled) — orange = the brand accent for
-// the dominant skill, neutral track behind each.
+// Four sub-index mini-bars. One hue family only — the brand red ramp — so the
+// bars read as a single measure at four positions, not four categories. The
+// same rail treatment carries the team purse meters on the live board.
 
 const BARS: { key: "bat" | "bowl" | "field" | "keep"; label: string }[] = [
   { key: "bat", label: "BAT" },
@@ -27,17 +27,12 @@ export default function IndexBars({
       {BARS.map(({ key, label }) => {
         const v = values[key];
         return (
-          <div key={key} className="flex items-center gap-2">
-            <span className="w-8 shrink-0 font-mono text-[10px] text-muted">
-              {label}
-            </span>
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-line">
-              <div
-                className="h-full rounded-full bg-accent"
-                style={{ width: `${v == null ? 0 : Math.max(2, v)}%` }}
-              />
+          <div key={key} className="flex items-center gap-2.5">
+            <span className="label-mono w-8 shrink-0">{label}</span>
+            <div className="rail flex-1">
+              <span style={{ width: `${v == null ? 0 : Math.max(2, v)}%` }} />
             </div>
-            <span className="w-7 shrink-0 text-right text-[10px] tabular-nums text-muted">
+            <span className="num w-7 shrink-0 text-right text-[0.625rem] text-muted">
               {v == null ? "—" : Math.round(v)}
             </span>
           </div>

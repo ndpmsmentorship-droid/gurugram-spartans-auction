@@ -1,8 +1,15 @@
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import type { Database } from "@/lib/supabase/types";
+import { DEV_FIXTURE, createFixtureClient } from "@/lib/dev/fake-supabase";
 
 export async function createClient() {
+  // Local design preview (SPARTANS_DEV_FIXTURE=1) — signed in as a fixture admin.
+  if (DEV_FIXTURE) {
+    return createFixtureClient() as unknown as ReturnType<
+      typeof createServerClient<Database>
+    >;
+  }
   const cookieStore = await cookies();
 
   return createServerClient<Database>(

@@ -13,6 +13,9 @@ const PROTECTED_PREFIXES = [
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
+  // Local design preview — no Supabase, treat every request as a signed-in admin.
+  if (process.env.SPARTANS_DEV_FIXTURE === "1") return response;
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

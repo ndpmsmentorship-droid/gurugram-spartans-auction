@@ -31,10 +31,14 @@ export default function Radar({
 
   const rings = [25, 50, 75, 100];
 
+  // Side labels ("BOWLING", "KEEPING") are wider than the plot, so the viewBox
+  // is padded horizontally — otherwise they get clipped at the edge.
+  const padX = 52;
+
   return (
     <svg
-      viewBox={`0 0 ${size} ${size}`}
-      className="mx-auto h-auto w-full max-w-[280px]"
+      viewBox={`${-padX} 0 ${size + padX * 2} ${size}`}
+      className="mx-auto h-auto w-full max-w-[340px]"
       role="img"
       aria-label="Player index radar"
     >
@@ -53,19 +57,24 @@ export default function Radar({
       {/* spokes + labels */}
       {axes.map((label, i) => {
         const [x, y] = pointAt(i, 100);
-        const [lx, ly] = pointAt(i, 118);
+        const [lx, ly] = pointAt(i, 116);
+        // anchor away from the plot so side labels never overlap the rings
+        const cos = Math.cos((Math.PI * 2 * i) / count - Math.PI / 2);
+        const anchor = cos > 0.3 ? "start" : cos < -0.3 ? "end" : "middle";
         return (
           <g key={label}>
             <line x1={cx} y1={cy} x2={x} y2={y} stroke="var(--line)" strokeWidth={1} />
             <text
               x={lx}
               y={ly}
-              textAnchor="middle"
+              textAnchor={anchor}
               dominantBaseline="middle"
-              fontSize={11}
-              fill="var(--muted)"
+              fontSize={9.5}
+              letterSpacing="0.12em"
+              fontFamily="var(--font-mono)"
+              fill="var(--faint)"
             >
-              {label}
+              {label.toUpperCase()}
             </text>
           </g>
         );

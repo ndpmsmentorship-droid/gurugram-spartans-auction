@@ -96,13 +96,13 @@ const COLS: Col[] = [
   { key: "economy", label: "Econ", asc: true, numeric: true, help: "Runs conceded per over (lower is better)." },
 ];
 
-// Rank-tier colour code: only the top 30 are coloured — top 10 = red, next 20
-// (11–30) = orange. Everyone 31+ shows a plain, uncoloured score.
-// Solid pills so they read in both light and dark themes.
+// Rank-tier colour code: only the top 30 are coloured — top 10 = brand red,
+// next 20 (11–30) = marquee gold. Everyone 31+ shows a plain, uncoloured score.
+// Tokens, so both themes are handled for free.
 type RankTier = { label: string; bg: string; fg: string };
 const RANK_TIERS: Record<"elite" | "strong", RankTier> = {
-  elite: { label: "Top 10", bg: "#E0453A", fg: "#ffffff" },
-  strong: { label: "11–30", bg: "#F08A3D", fg: "#1d1d1f" },
+  elite: { label: "Top 10", bg: "var(--red)", fg: "#ffffff" },
+  strong: { label: "11–30", bg: "var(--highlight)", fg: "#2b1a02" },
 };
 
 function rankTier(rank: number | null | undefined): RankTier | null {
@@ -212,40 +212,38 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
   }, [players]);
 
   return (
-    <div className="mt-5">
+    <div className="mt-6">
       {/* Major filter — organizers' auction tier (analyse A vs B separately) */}
-      <div className="mb-3 flex flex-wrap items-center gap-1.5">
-        <span className="mr-1 text-[0.72rem] font-semibold uppercase tracking-wide text-muted">
-          Auction tier
-        </span>
+      <div className="mb-2.5 flex flex-wrap items-center gap-1.5">
+        <span className="label-mono mr-1.5 w-[5.5rem] shrink-0">Auction tier</span>
         {TIER_FILTERS.map((t) => {
           const active = tier === t;
           const solid =
             t === "All"
-              ? { bg: "var(--ink)", fg: "var(--surface)" }
+              ? { bg: "var(--red-deep)", fg: "#ffffff" }
               : t === "A"
-                ? { bg: "#E0453A", fg: "#ffffff" }
+                ? { bg: "var(--red)", fg: "#ffffff" }
                 : t === "B"
-                  ? { bg: "#5B6270", fg: "#ffffff" }
-                  : (tierStyle(t) ?? { bg: "var(--ink)", fg: "var(--surface)" });
+                  ? { bg: "var(--chip)", fg: "var(--ink)" }
+                  : (tierStyle(t) ?? { bg: "var(--red-deep)", fg: "#ffffff" });
           return (
             <button
               key={t}
               onClick={() => setTier(t)}
-              className="rounded-full px-3 py-1 text-[0.78rem] font-semibold transition-colors"
+              className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[0.75rem] font-medium transition-colors"
               style={
                 active
                   ? { background: solid.bg, color: solid.fg }
                   : {
-                      background: "var(--wash)",
+                      background: "transparent",
                       color: "var(--muted)",
-                      boxShadow: "inset 0 0 0 1px var(--border)",
+                      boxShadow: "inset 0 0 0 1px var(--line)",
                     }
               }
             >
               {t === "All" ? "All tiers" : t}
               {t !== "All" ? (
-                <span className="ml-1.5 tabular-nums opacity-70">{tierCounts[t]}</span>
+                <span className="num text-[0.625rem] opacity-70">{tierCounts[t]}</span>
               ) : null}
             </button>
           );
@@ -253,47 +251,46 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
       </div>
 
       {/* Registration status — the auction-day showcase axis */}
-      <div className="mb-3 flex flex-wrap items-center gap-1.5">
-        <span className="mr-1 text-[0.72rem] font-semibold uppercase tracking-wide text-muted">
-          Status
-        </span>
+      <div className="mb-2.5 flex flex-wrap items-center gap-1.5">
+        <span className="label-mono mr-1.5 w-[5.5rem] shrink-0">Status</span>
         {(["All", "registered", "verified", "rejected"] as const).map((s) => {
           const active = status === s;
           const solid =
             s === "All"
-              ? { bg: "var(--ink)", fg: "var(--surface)" }
+              ? { bg: "var(--red-deep)", fg: "#ffffff" }
               : s === "registered"
-                ? { bg: "var(--accent)", fg: "#ffffff" }
+                ? { bg: "var(--red)", fg: "#ffffff" }
                 : s === "verified"
                   ? { bg: "var(--up)", fg: "#ffffff" }
-                  : { bg: "var(--down)", fg: "#ffffff" };
+                  : { bg: "var(--chip)", fg: "var(--muted)" };
           return (
             <button
               key={s}
               onClick={() => setStatus(s)}
-              className="rounded-full px-3 py-1 text-[0.78rem] font-semibold capitalize transition-colors"
+              className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[0.75rem] font-medium capitalize transition-colors"
               style={
                 active
                   ? { background: solid.bg, color: solid.fg }
                   : {
-                      background: "var(--wash)",
+                      background: "transparent",
                       color: "var(--muted)",
-                      boxShadow: "inset 0 0 0 1px var(--border)",
+                      boxShadow: "inset 0 0 0 1px var(--line)",
                     }
               }
             >
               {s === "All" ? "All" : s}
               {s !== "All" ? (
-                <span className="ml-1.5 tabular-nums opacity-70">{statusCounts[s]}</span>
+                <span className="num text-[0.625rem] opacity-70">{statusCounts[s]}</span>
               ) : null}
             </button>
           );
         })}
       </div>
 
-      <div className="mb-3 flex flex-wrap gap-2">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <span className="label-mono mr-1.5 w-[5.5rem] shrink-0">Find</span>
         <input
-          className="input max-w-[12rem]"
+          className="input max-w-[13rem]"
           placeholder="Search player…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -321,109 +318,153 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
             </option>
           ))}
         </select>
-        <div className="inline-flex overflow-hidden rounded-lg border border-border text-sm">
+        <div className="inline-flex overflow-hidden rounded-full border border-line">
           {(["all", "unsold", "sold"] as const).map((opt) => (
             <button
               key={opt}
               type="button"
               onClick={() => setAvail(opt)}
-              className={`px-3 py-1.5 capitalize transition ${
-                avail === opt ? "bg-accent font-semibold text-white" : "hover:bg-wash"
+              className={`px-3.5 py-1.5 text-[0.75rem] capitalize transition ${
+                avail === opt
+                  ? "bg-red-deep font-medium text-white"
+                  : "text-muted hover:text-ink"
               }`}
             >
               {opt}
             </button>
           ))}
         </div>
-        <span className="self-center text-xs text-muted">{filtered.length} shown</span>
-      </div>
-
-      <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[0.72rem] text-muted">
-        <span className="font-medium">Colour code — Bat, Bowl &amp; Field rank (top 30 only):</span>
-        {(["elite", "strong"] as const).map((k) => (
-          <span key={k} className="inline-flex items-center gap-1.5">
-            <span
-              className="inline-block h-3 w-3 rounded-full"
-              style={{ background: RANK_TIERS[k].bg }}
-            />
-            {k === "elite" ? "Top 10" : "Next 20 (11–30)"}
-          </span>
-        ))}
-        <span className="inline-flex items-center gap-1.5">
-          <span className="inline-block h-3 w-3 rounded-full" style={{ boxShadow: "inset 0 0 0 1px var(--border)" }} />
-          31+ (no colour)
+        <span className="num ml-auto text-[0.688rem] text-faint">
+          {filtered.length} shown
         </span>
       </div>
 
-      <details className="mb-3 text-sm">
-        <summary className="cursor-pointer text-accent-text">
-          What do the columns mean?
+      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+        <span className="label-mono">Rank colour · bat · bowl · field</span>
+        {(["elite", "strong"] as const).map((k) => (
+          <span
+            key={k}
+            className="inline-flex items-center gap-1.5 text-[0.688rem] text-muted"
+          >
+            <span
+              className="inline-block h-2 w-2 rounded-full"
+              style={{ background: RANK_TIERS[k].bg }}
+            />
+            {k === "elite" ? "Top 10" : "11–30"}
+          </span>
+        ))}
+        <span className="inline-flex items-center gap-1.5 text-[0.688rem] text-muted">
+          <span
+            className="inline-block h-2 w-2 rounded-full"
+            style={{ boxShadow: "inset 0 0 0 1px var(--line2)" }}
+          />
+          31+
+        </span>
+      </div>
+
+      <details className="group mb-3">
+        <summary className="label-mono cursor-pointer list-none text-muted transition hover:text-red">
+          <span className="inline-block transition group-open:rotate-90">▸</span> What
+          do the columns mean?
         </summary>
-        <dl className="mt-2 grid gap-x-6 gap-y-1.5 rounded-[12px] bg-wash p-4 sm:grid-cols-2">
+        <dl className="mt-2 grid gap-x-6 gap-y-2 rounded-[12px] border border-line bg-wash p-4 text-[0.813rem] sm:grid-cols-2">
           {COLS.filter((c) => c.key !== "overall_rank").map((c) => (
             <div key={c.key as string} className="flex gap-2">
-              <dt className="shrink-0 font-medium">{c.label}</dt>
+              <dt className="label-mono shrink-0 pt-0.5 text-red">{c.label}</dt>
               <dd className="text-muted">{c.help}</dd>
             </div>
           ))}
         </dl>
       </details>
 
-      <div className="overflow-x-auto rounded-[16px] border border-border">
-        <table className="w-full min-w-[820px] text-sm">
-          <thead className="bg-wash text-left">
+      {/* Header row and player column both pin, so a 700-row pool stays
+          readable while you scan sideways to Econ on auction day. */}
+      <div
+        className="max-h-[calc(100vh-11rem)] overflow-auto rounded-[12px] border border-line"
+        style={{ boxShadow: "var(--elev)", background: "var(--surface)" }}
+      >
+        <table className="w-full min-w-[1080px] border-separate border-spacing-0 text-[0.813rem]">
+          <thead className="text-left">
             <tr>
-              <th className="sticky left-0 z-10 bg-wash px-3 py-2 font-medium">
+              {/* fixed width: a content-sized sticky column lets the next
+                  column's digits peek out beside it while scrolling */}
+              <th
+                className="label-mono sticky left-0 top-0 z-30 w-[250px] min-w-[250px] border-b border-line px-3.5 py-3 text-left"
+                style={{ background: "var(--wash)" }}
+              >
                 Player
               </th>
               {COLS.map((c) => (
                 <th
                   key={c.key as string}
                   onClick={() => toggleSort(c)}
-                  className={`cursor-help select-none whitespace-nowrap px-3 py-2 font-medium hover:text-accent-text ${
+                  className={`label-mono sticky top-0 z-20 cursor-pointer select-none whitespace-nowrap border-b border-line px-3 py-3 transition hover:text-red ${
                     c.numeric ? "text-right" : ""
-                  } ${sortKey === c.key ? "text-accent-text" : ""}`}
+                  } ${sortKey === c.key ? "!text-red" : ""}`}
+                  style={{ background: "var(--wash)" }}
                   title={`${c.help}\n\n(Click to sort)`}
                 >
                   {c.label}
                   {sortKey === c.key ? (sortAsc ? " ↑" : " ↓") : ""}
                 </th>
               ))}
-              <th className="px-3 py-2 text-right font-medium">Action</th>
+              <th
+                className="label-mono sticky top-0 z-20 border-b border-line px-3.5 py-3 text-right"
+                style={{ background: "var(--wash)" }}
+              >
+                Action
+              </th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((p) => (
-              <Row key={p.id} p={p} />
+            {filtered.map((p, i) => (
+              <Row key={p.id} p={p} zebra={i % 2 === 1} sortKey={sortKey} />
             ))}
           </tbody>
         </table>
         {filtered.length === 0 && (
-          <p className="p-6 text-center text-muted">No players match.</p>
+          <p className="p-8 text-center text-[0.813rem] text-muted">No players match.</p>
         )}
       </div>
     </div>
   );
 }
 
-function Row({ p }: { p: PoolPlayer }) {
+// The three columns that actually drive an auction-day decision — they get
+// display weight; the raw career stats stay quiet mono.
+const DECISION_COLS = new Set<keyof PoolPlayer>(["fit_score", "overall_index", "vor"]);
+
+function Row({
+  p,
+  zebra,
+  sortKey,
+}: {
+  p: PoolPlayer;
+  zebra: boolean;
+  sortKey: keyof PoolPlayer;
+}) {
   const [pending, startTransition] = useTransition();
 
-  const rowTint = p.sold
-    ? "bg-wash text-muted"
-    : p.is_rejected
-      ? "opacity-50"
-      : "";
+  // One background per row, shared with the pinned name cell so the two never
+  // disagree while scrolling sideways. Sold players are out of contention, so
+  // they RECEDE — dimmed, never tinted louder than the rows still biddable.
+  const rowBg = zebra ? "var(--chip)" : "var(--surface)";
 
   return (
-    <tr className={`border-t border-border ${rowTint}`}>
-      <td className="sticky left-0 z-10 max-w-[230px] bg-[var(--surface)] px-3 py-1.5 align-middle">
-        <div className="flex items-center gap-1.5 leading-tight">
+    <tr
+      className={`border-line ${p.sold ? "opacity-45" : ""} ${p.is_rejected ? "opacity-30" : ""}`}
+      style={{ background: rowBg }}
+    >
+      <td
+        className="sticky left-0 z-10 w-[250px] min-w-[250px] max-w-[250px] border-b border-line px-3.5 py-2 align-middle"
+        style={{ background: rowBg }}
+      >
+        <div className="flex items-center gap-2 leading-tight">
           {(() => {
             const ts = tierStyle(p.auction_category);
             return ts ? (
               <span
-                className="shrink-0 rounded px-1 py-px text-[9px] font-bold uppercase tracking-wide"
+                className="num shrink-0 rounded-[4px] px-1.5 py-[3px] text-[0.594rem] font-medium uppercase tracking-[0.06em]"
                 style={{ background: ts.bg, color: ts.fg }}
                 title="Organizers' auction category"
               >
@@ -433,14 +474,13 @@ function Row({ p }: { p: PoolPlayer }) {
           })()}
           <Link
             href={`/scout/${p.id}`}
-            className="min-w-0 truncate font-medium hover:text-accent-text"
+            className="min-w-0 truncate text-[0.906rem] font-normal text-ink transition hover:text-red"
           >
             {p.full_name}
           </Link>
           {p.is_marquee && (
             <span
-              className="shrink-0 text-xs leading-none"
-              style={{ color: "#E3A81B" }}
+              className="shrink-0 text-[0.75rem] leading-none text-highlight"
               title="Marquee — must buy"
             >
               ★
@@ -448,17 +488,17 @@ function Row({ p }: { p: PoolPlayer }) {
           )}
           {p.hasRecentForm && (
             <span
-              className="shrink-0 text-[10px] leading-none text-up"
+              className="shrink-0 text-[0.625rem] leading-none text-up"
               title="Score is form-adjusted (recent 2-year data captured)"
             >
               ●
             </span>
           )}
         </div>
-        <div className="mt-0.5 truncate text-[11px] leading-tight text-muted">
+        <div className="mt-[3px] truncate text-[0.688rem] leading-tight text-faint">
           {p.archetype}
           {p.topRisk && (
-            <span className={p.topRisk.level === "red" ? "ml-1 text-down" : "ml-1 text-accent-text"}>
+            <span className={p.topRisk.level === "red" ? "ml-1 text-down" : "ml-1 text-highlight"}>
               · {p.topRisk.label}
             </span>
           )}
@@ -467,18 +507,36 @@ function Row({ p }: { p: PoolPlayer }) {
       {COLS.map((c) => {
         const rankKey = TIER_COL[c.key];
         const tier = rankKey ? rankTier(p[rankKey] as number | null) : null;
+        const isDecision = DECISION_COLS.has(c.key);
         return (
           <td
             key={c.key as string}
-            className={`whitespace-nowrap px-3 py-1.5 align-middle tabular-nums ${
+            className={`num whitespace-nowrap border-b border-line px-3 py-2 align-middle text-[0.781rem] ${
               c.numeric ? "text-right" : ""
-            }`}
+            } ${sortKey === c.key ? "text-ink" : "text-muted"}`}
           >
             {tier ? (
               <span
-                className="font-semibold"
+                className="font-medium"
                 style={{ color: tier.bg }}
                 title={`${c.label} rank tier: ${tier.label}`}
+              >
+                {cell(p, c)}
+              </span>
+            ) : isDecision ? (
+              <span
+                className={
+                  c.key === "overall_index"
+                    ? "font-display text-[0.938rem] font-semibold text-ink"
+                    : c.key === "vor"
+                      ? // only NEGATIVE VOR is called out — a wall of green on
+                        // every positive row buries the signal and fights the
+                        // brand red
+                        Number(p.vor) < 0
+                        ? "text-down"
+                        : "text-ink"
+                      : "font-medium text-ink"
+                }
               >
                 {cell(p, c)}
               </span>
@@ -488,7 +546,7 @@ function Row({ p }: { p: PoolPlayer }) {
           </td>
         );
       })}
-      <td className="whitespace-nowrap px-3 py-1.5 text-right align-middle">
+      <td className="whitespace-nowrap border-b border-line px-3.5 py-2 text-right align-middle">
         <span className="inline-flex items-center justify-end gap-2">
           <button
             onClick={() =>
@@ -502,8 +560,8 @@ function Row({ p }: { p: PoolPlayer }) {
             }
             disabled={pending}
             title={p.is_marquee ? "Unmark marquee" : "Mark as marquee (must buy)"}
-            className="text-base leading-none transition-transform hover:scale-110"
-            style={{ color: p.is_marquee ? "#E3A81B" : "var(--muted)" }}
+            className="text-[0.938rem] leading-none transition-transform hover:scale-110"
+            style={{ color: p.is_marquee ? "var(--highlight)" : "var(--faint)" }}
           >
             {p.is_marquee ? "★" : "☆"}
           </button>
@@ -515,12 +573,17 @@ function Row({ p }: { p: PoolPlayer }) {
               })
             }
             disabled={pending}
-            className="text-xs text-muted hover:text-accent-text"
+            className="label-mono transition hover:text-red"
           >
             Restore
           </button>
         ) : p.sold ? (
-          <span className="badge bg-wash text-muted">Sold</span>
+          <span
+            className="num rounded-full px-2 py-[3px] text-[0.594rem] uppercase tracking-[0.1em]"
+            style={{ background: "var(--chip)", color: "var(--muted)" }}
+          >
+            Sold
+          </span>
         ) : (
           <button
             onClick={() =>
@@ -529,7 +592,7 @@ function Row({ p }: { p: PoolPlayer }) {
               })
             }
             disabled={pending}
-            className="text-xs text-muted hover:text-down"
+            className="label-mono transition hover:text-down"
           >
             Reject
           </button>

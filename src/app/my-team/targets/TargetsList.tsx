@@ -16,7 +16,7 @@ export type PoolPlayer = {
   bat_avg: number | null;
   bat_sr: number | null;
   economy: number | null;
-  wickets: number | null;
+  overs: number | null;
   stumpings: number | null;
 };
 
@@ -24,7 +24,7 @@ const rankId = (r: number | null) => (r == null ? "—" : "#" + String(r).padSta
 const n1 = (v: number | null) => (v == null ? "—" : Math.round(v * 10) / 10);
 const int = (v: number | null) => (v == null ? "—" : Math.round(v).toLocaleString("en-IN"));
 
-type SortKey = "name" | "rank" | "bat_avg" | "bat_sr" | "economy" | "wickets" | "stumpings";
+type SortKey = "name" | "rank" | "bat_avg" | "bat_sr" | "economy" | "overs" | "stumpings";
 
 // For each sortable stat: how to read it and which direction is "best" so the
 // first click surfaces the strongest players (economy: lower is better).
@@ -38,7 +38,7 @@ const COLUMNS: {
   { key: "bat_avg", label: "Bat Avg", get: (p) => p.bat_avg, bestHigh: true },
   { key: "bat_sr", label: "Bat SR", get: (p) => p.bat_sr, bestHigh: true },
   { key: "economy", label: "Economy", get: (p) => p.economy, bestHigh: false },
-  { key: "wickets", label: "Wkts", get: (p) => p.wickets, bestHigh: true },
+  { key: "overs", label: "Overs", get: (p) => p.overs, bestHigh: true },
   { key: "stumpings", label: "Stmp", get: (p) => p.stumpings, bestHigh: true },
 ];
 
@@ -209,7 +209,7 @@ export default function TargetsList({ players }: { players: PoolPlayer[] }) {
                 <Td active={sort === "bat_avg"}>{n1(p.bat_avg)}</Td>
                 <Td active={sort === "bat_sr"}>{n1(p.bat_sr)}</Td>
                 <Td active={sort === "economy"}>{n1(p.economy)}</Td>
-                <Td active={sort === "wickets"}>{int(p.wickets)}</Td>
+                <Td active={sort === "overs"}>{n1(p.overs)}</Td>
                 <Td active={sort === "stumpings"}>{int(p.stumpings)}</Td>
                 <td className="border-b border-line px-3 py-2.5 text-right">
                   <MarkButton playerId={p.id} marked={p.marked} />

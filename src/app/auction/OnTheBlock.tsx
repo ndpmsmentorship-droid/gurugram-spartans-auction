@@ -1,17 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { inr } from "@/lib/auction/rules";
+import PlayerIdentity, { type LotPlayerDetail } from "./PlayerIdentity";
 
-export type BlockPlayer = {
-  id: string;
-  full_name: string;
-  auction_category: string | null;
-  primary_role: string | null;
-  overall_index: number | null;
-  overall_rank: number | null;
-  is_marquee: boolean;
-};
+export type BlockPlayer = LotPlayerDetail;
 
 export type BlockState = {
   status: "idle" | "live" | "sold" | "unsold";
@@ -67,27 +59,10 @@ export default function OnTheBlock({ state }: { state: BlockState }) {
             </span>
           </p>
 
-          <h2 className="mt-2.5 flex flex-wrap items-center gap-3 font-display text-[2.25rem] leading-none sm:text-[2.75rem]">
-            <Link href={`/scout/${player.id}`} className="transition hover:text-red">
-              {player.full_name}
-            </Link>
-            {player.is_marquee && (
-              <span className="text-[1.25rem] leading-none text-gold" title="Marquee — must buy">
-                ★
-              </span>
-            )}
-          </h2>
-
-          <p className="num mt-2.5 text-[0.75rem] uppercase tracking-[0.12em] text-muted">
-            {[
-              player.auction_category,
-              player.primary_role,
-              player.overall_rank != null ? `Overall #${player.overall_rank}` : null,
-              `Base ${inr(state.base_price)}`,
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
+          <div className="mt-3">
+            <PlayerIdentity player={player} />
+          </div>
+          <p className="num mt-2 text-[0.688rem] text-faint">Base {inr(state.base_price)}</p>
         </div>
 
         <div className="shrink-0 text-left sm:text-right">

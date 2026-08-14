@@ -28,7 +28,10 @@ export default async function AdminAuctionPage() {
       .order("name"),
     sb
       .from("scout_players")
-      .select("id, full_name, auction_category, primary_role, is_keeper, age, team_id, sold_price, acquired, is_marquee")
+      .select(
+        "id, full_name, auction_category, primary_role, is_keeper, age, team_id, sold_price, acquired, is_marquee, " +
+          "photo_url, bat_matches, runs, bat_avg, bat_sr, wickets, economy, bat_index, bowl_index, overall_index"
+      )
       .order("full_name"),
     // full rows, so the lot control can show each player's overall rank —
     // the auctioneer needs to know if the next lot is a #3 or a #300
@@ -48,13 +51,25 @@ export default async function AdminAuctionPage() {
     ? rows.find((p) => p.id === lotRow.player_id)
     : undefined;
 
-  const toLotPlayer = (p: ConsolePlayer & { is_marquee?: boolean }): LotPlayer => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const toLotPlayer = (p: any): LotPlayer => ({
     id: p.id,
     full_name: p.full_name,
     auction_category: p.auction_category,
     primary_role: p.primary_role,
     overall_rank: rankMap.get(p.id) ?? null,
     is_marquee: !!p.is_marquee,
+    photo_url: p.photo_url ?? null,
+    age: p.age ?? null,
+    bat_matches: p.bat_matches ?? null,
+    runs: p.runs ?? null,
+    bat_avg: p.bat_avg ?? null,
+    bat_sr: p.bat_sr ?? null,
+    wickets: p.wickets ?? null,
+    economy: p.economy ?? null,
+    bat_index: p.bat_index ?? null,
+    bowl_index: p.bowl_index ?? null,
+    overall_index: p.overall_index ?? null,
   });
 
   const lot: LotView = {

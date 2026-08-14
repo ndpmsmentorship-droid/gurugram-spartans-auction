@@ -53,7 +53,10 @@ export default async function AuctionPage() {
   if (lot.player_id) {
     const { data: lp } = await sb
       .from("scout_players")
-      .select("id, full_name, auction_category, primary_role, overall_index, is_marquee")
+      .select(
+        "id, full_name, auction_category, primary_role, overall_index, is_marquee, " +
+          "photo_url, age, bat_matches, runs, bat_avg, bat_sr, wickets, economy, bat_index, bowl_index"
+      )
       .eq("id", lot.player_id)
       .maybeSingle();
     if (lp) {

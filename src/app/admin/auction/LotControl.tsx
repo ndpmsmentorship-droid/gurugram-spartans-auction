@@ -11,6 +11,7 @@ import {
 } from "./live-actions";
 import { DEFAULT_RULES, blockReason, inr, raiseSteps } from "@/lib/auction/rules";
 import { normCategory } from "@/lib/scout/tier";
+import PlayerIdentity, { type LotPlayerDetail } from "@/app/auction/PlayerIdentity";
 
 export type LotTeam = {
   id: string;
@@ -21,14 +22,7 @@ export type LotTeam = {
   /** how many players the team holds per auction category (A+ / A / B / Special) */
   catCounts: Record<string, number>;
 };
-export type LotPlayer = {
-  id: string;
-  full_name: string;
-  auction_category: string | null;
-  primary_role: string | null;
-  overall_rank: number | null;
-  is_marquee: boolean;
-};
+export type LotPlayer = LotPlayerDetail;
 export type LotView = {
   status: "idle" | "live" | "sold" | "unsold";
   base_price: number | null;
@@ -88,29 +82,16 @@ export default function LotControl({
         }}
       >
         {lot.player ? (
-          <div className="flex flex-wrap items-center justify-between gap-5">
+          <div className="flex flex-wrap items-start justify-between gap-5">
             <div className="min-w-0">
-              <p className="eyebrow">
+              <p className="eyebrow mb-2.5">
                 {lot.status === "sold"
                   ? "Sold"
                   : lot.status === "unsold"
                     ? "Unsold"
                     : "On the block"}
               </p>
-              <h2 className="mt-2 flex items-center gap-2.5 font-display text-[2rem] leading-none">
-                {lot.player.full_name}
-                {lot.player.is_marquee && <span className="text-[1rem] text-gold">★</span>}
-              </h2>
-              <p className="num mt-2 text-[0.75rem] uppercase tracking-[0.12em] text-muted">
-                {[
-                  lot.player.auction_category,
-                  lot.player.primary_role,
-                  lot.player.overall_rank != null ? `Overall #${lot.player.overall_rank}` : null,
-                  `Base ${inr(lot.base_price)}`,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </p>
+              <PlayerIdentity player={lot.player} />
             </div>
             <div className="shrink-0 text-right">
               <p className="font-display text-[2.5rem] leading-none">
@@ -121,6 +102,7 @@ export default function LotControl({
                   ? teams.find((t) => t.id === lot.leading_team_id)?.name
                   : "No bids yet"}
               </p>
+              <p className="num mt-1 text-[0.688rem] text-faint">Base {inr(lot.base_price)}</p>
             </div>
           </div>
         ) : (

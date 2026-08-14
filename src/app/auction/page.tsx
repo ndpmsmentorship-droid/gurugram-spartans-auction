@@ -1,48 +1,76 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { readLiveLot } from "@/lib/auction/read";
+import { getAuctionSeasonId, AUCTION_DIVISIONS } from "@/lib/auction/target";
 import SquadsBoard, { type BoardPlayer, type BoardTeam } from "./SquadsBoard";
 import type { BlockState } from "./OnTheBlock";
 
 export const dynamic = "force-dynamic";
 
-// Public live board — read with the service-role client so anyone (no login) can
-// watch. Read-only; only non-sensitive auction results (teams, sold players).
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+// Public live board. The auction runs on the SCCL Elite/Fighters teams (the
+// owners' teams); each card shows that team's real SCCL squad, plus anything
+// bought in the live auction. The on-the-block lot draws from the player pool.
 export default async function AuctionPage() {
   const admin = createAdminClient();
-  const sb = admin as unknown as { from: (t: string) => any }; // eslint-disable-line @typescript-eslint/no-explicit-any
+  const sb = admin as unknown as { from: (t: string) => any };
 
-  const { data: season } = await admin.from("seasons").select("id").eq("is_active", true).maybeSingle();
-  if (!season) {
-    return <p className="p-6 text-muted">No active season yet.</p>;
+  const seasonId = await getAuctionSeasonId();
+  if (!seasonId) {
+    return <p className="p-6 text-muted">Auction season not found.</p>;
   }
 
-  const [{ data: teams }, { data: players }, { data: ranked }, { count: poolSize }] =
-    await Promise.all([
-      sb.from("teams").select("id, name, division, purse_total").eq("season_id", season.id).order("name"),
-      sb
-        .from("scout_players")
-        .select("id, full_name, auction_category, team_id, sold_price, acquired")
-        .not("team_id", "is", null),
-      // whole pool by index, to derive each player's "Our Rank" (1 = best)
-      sb.from("scout_players").select("id, overall_index").not("overall_index", "is", null),
-      // pool total, so the board can show how many lots are still to come
-      sb.from("scout_players").select("id", { count: "exact", head: true }),
-    ]);
+  const [{ data: teams }, { data: sccl }, { data: bought }] = await Promise.all([
+    sb
+      .from("teams")
+      .select("id, name, division, purse_total")
+      .eq("season_id", seasonId)
+      .in("division", AUCTION_DIVISIONS)
+      .order("name"),
+    // real SCCL squads for these teams
+    sb
+      .from("sccl_s6_players")
+      .select("id, full_name, auction_category, team_id, sold_price, acquired, overall_index")
+      .not("team_id", "is", null),
+    // anything bought in the live auction (pool → these teams)
+    sb
+      .from("scout_players")
+      .select("id, full_name, auction_category, team_id, sold_price, acquired, overall_index")
+      .not("team_id", "is", null),
+  ]);
 
-  // rank the entire pool by overall index; retained rows without stats stay unranked
+  const teamIds = new Set(((teams ?? []) as BoardTeam[]).map((t) => t.id));
+  const roster = [...(sccl ?? []), ...(bought ?? [])].filter((p: any) => teamIds.has(p.team_id));
+
+  // our rank across everyone shown (1 = best by overall index)
   const rankMap = new Map<string, number>();
-  (ranked ?? [])
-    .slice()
-    .sort((a: { overall_index: number }, b: { overall_index: number }) => b.overall_index - a.overall_index)
-    .forEach((r: { id: string }, i: number) => rankMap.set(r.id, i + 1));
+  roster
+    .filter((p: any) => p.overall_index != null)
+    .sort((a: any, b: any) => b.overall_index - a.overall_index)
+    .forEach((p: any, i: number) => rankMap.set(p.id, i + 1));
 
-  const withRank = ((players ?? []) as BoardPlayer[]).map((p) => ({
-    ...p,
+  const players: BoardPlayer[] = roster.map((p: any) => ({
+    id: p.id,
+    full_name: p.full_name,
+    auction_category: p.auction_category,
+    team_id: p.team_id,
+    sold_price: p.sold_price,
+    acquired: p.acquired,
     overall_rank: rankMap.get(p.id) ?? null,
   }));
 
-  // ---- what's on the block right now ----
-  const lot = await readLiveLot(season.id);
+  // ---- what's on the block right now (from the player pool) ----
+  const poolRankMap = new Map<string, number>();
+  const { data: ranked } = await sb
+    .from("scout_players")
+    .select("id, overall_index")
+    .not("overall_index", "is", null);
+  (ranked ?? [])
+    .slice()
+    .sort((a: any, b: any) => b.overall_index - a.overall_index)
+    .forEach((r: any, i: number) => poolRankMap.set(r.id, i + 1));
+
+  const lot = await readLiveLot(seasonId);
   let block: BlockState = {
     status: lot.status,
     base_price: lot.base_price,
@@ -62,21 +90,16 @@ export default async function AuctionPage() {
     if (lp) {
       block = {
         ...block,
-        player: { ...lp, overall_rank: rankMap.get(lp.id) ?? null },
+        player: { ...lp, overall_rank: poolRankMap.get(lp.id) ?? null },
         leadingTeam:
-          (teams ?? []).find((t: BoardTeam) => t.id === lot.leading_team_id)?.name ?? null,
+          ((teams ?? []) as BoardTeam[]).find((t) => t.id === lot.leading_team_id)?.name ?? null,
       };
     }
   }
 
   return (
     <div className="mx-auto w-full max-w-[1400px] flex-1 px-5 py-8 sm:px-7">
-      <SquadsBoard
-        teams={(teams ?? []) as BoardTeam[]}
-        players={withRank}
-        poolSize={poolSize ?? undefined}
-        block={block}
-      />
+      <SquadsBoard teams={(teams ?? []) as BoardTeam[]} players={players} block={block} />
     </div>
   );
 }

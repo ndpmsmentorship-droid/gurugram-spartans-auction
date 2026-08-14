@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentProfile } from "@/lib/auth";
+import { getAuctionSeasonId } from "@/lib/auction/target";
 import { DEV_FIXTURE } from "@/lib/dev/fake-supabase";
 import * as devLot from "@/lib/dev/live-lot";
 
@@ -19,10 +20,10 @@ async function requireAdmin(): Promise<Result | null> {
   return null;
 }
 
+// The auction is driven off the SCCL Elite/Fighters season, not the (nominal)
+// active SDLL season — see lib/auction/target.ts.
 async function activeSeasonId(): Promise<string | null> {
-  const sb = createAdminClient() as unknown as { from: (t: string) => any }; // eslint-disable-line @typescript-eslint/no-explicit-any
-  const { data } = await sb.from("seasons").select("id").eq("is_active", true).maybeSingle();
-  return data?.id ?? null;
+  return getAuctionSeasonId();
 }
 
 // Postgres RAISE messages arrive wrapped; surface just the sentence so the

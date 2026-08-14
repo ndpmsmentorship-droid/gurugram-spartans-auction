@@ -1,6 +1,6 @@
-import { getActiveSeason } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { readLiveLot } from "@/lib/auction/read";
+import { getAuctionSeasonId, AUCTION_DIVISIONS } from "@/lib/auction/target";
 import { rankPlayers } from "@/lib/scout/ranks";
 import { normCategory } from "@/lib/scout/tier";
 import type { ScoutPlayerRow } from "@/lib/supabase/types";
@@ -10,9 +10,10 @@ import LotControl, { type LotPlayer, type LotTeam, type LotView } from "./LotCon
 export const dynamic = "force-dynamic";
 
 export default async function AdminAuctionPage() {
-  const season = await getActiveSeason();
-  if (!season) {
-    return <p className="text-muted">No active season yet.</p>;
+  // The auction runs on the SCCL Elite/Fighters teams (owners' teams).
+  const seasonId = await getAuctionSeasonId();
+  if (!seasonId) {
+    return <p className="text-muted">Auction season not found.</p>;
   }
 
   // /admin is gated to admins (admin/layout). Use the service-role client so the
@@ -24,7 +25,8 @@ export default async function AdminAuctionPage() {
     sb
       .from("teams")
       .select("id, name, division, purse_total, purse_max")
-      .eq("season_id", season.id)
+      .eq("season_id", seasonId)
+      .in("division", AUCTION_DIVISIONS)
       .order("name"),
     sb
       .from("scout_players")
@@ -46,7 +48,7 @@ export default async function AdminAuctionPage() {
   }
 
   // ---- live lot ----
-  const lotRow = await readLiveLot(season.id);
+  const lotRow = await readLiveLot(seasonId);
   const lotPlayerRow = lotRow.player_id
     ? rows.find((p) => p.id === lotRow.player_id)
     : undefined;

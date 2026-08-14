@@ -78,7 +78,12 @@ export default async function RootLayout({
   const items: NavItem[] = [
     { href: "/auction", label: "Live Board" },
     { href: "/squad", label: "Squads" },
-    ...(profile?.role === "owner" ? [{ href: "/my-team", label: "My Squad" }] : []),
+    ...(profile?.role === "owner"
+      ? [
+          { href: "/my-team", label: "My Squad" },
+          { href: "/my-team/targets", label: "Targets" },
+        ]
+      : []),
     ...(profile?.role === "admin" ? [{ href: "/scout", label: "Pool" }] : []),
     { href: "https://www.ndpms.in/spartans", label: "Ball Library", external: true },
     ...(profile?.role === "admin"

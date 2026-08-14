@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { getCurrentProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import MarkButton from "./MarkButton";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +75,27 @@ export default async function MyTeamPage() {
 
   const squad = (squadRaw ?? []) as P[];
 
+  // ---- marked players (targets from the auction pool) ----
+  let marked: any[] = [];
+  try {
+    const { data: marks } = await sb
+      .from("player_marks")
+      .select("player_id")
+      .eq("marker_profile_id", profile.id);
+    const ids = (marks ?? []).map((m: any) => m.player_id);
+    if (ids.length) {
+      const { data } = await sb
+        .from("scout_players")
+        .select("id, full_name, auction_category, primary_role, team_id, sold_price, overall_index")
+        .in("id", ids);
+      marked = ((data ?? []) as any[]).sort(
+        (a, b) => (b.overall_index ?? 0) - (a.overall_index ?? 0)
+      );
+    }
+  } catch {
+    marked = [];
+  }
+
   // ---- insights ----
   const roles = { BAT: 0, BOWL: 0, AR: 0, WK: 0 };
   squad.forEach((p) => (roles[bucket(p)] += 1));
@@ -117,6 +140,43 @@ export default async function MyTeamPage() {
         <Chip label="All-rounders" n={roles.AR} />
         <Chip label="Bowlers" n={roles.BOWL} />
         <Chip label="Keepers" n={roles.WK} />
+      </div>
+
+      {/* marked players — targets from the auction pool */}
+      <div className="mt-6 rounded-[12px] border border-line bg-surface">
+        <div className="flex items-center justify-between border-b border-line px-4 py-3">
+          <span className="label-mono">Marked players · {marked.length}</span>
+          <Link href="/my-team/targets" className="text-[0.8rem] font-medium text-red hover:underline">
+            Browse pool →
+          </Link>
+        </div>
+        {marked.length === 0 ? (
+          <p className="px-4 py-6 text-center text-sm text-muted">
+            No marked players yet.{" "}
+            <Link href="/my-team/targets" className="text-red hover:underline">
+              Mark your targets →
+            </Link>
+          </p>
+        ) : (
+          <ul className="divide-y divide-line">
+            {marked.map((p: any) => (
+              <li key={p.id} className="flex items-center gap-3 px-4 py-2.5">
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium">
+                    {p.full_name}
+                    {p.team_id && (
+                      <span className="ml-1.5 text-[0.6rem] uppercase text-muted">sold</span>
+                    )}
+                  </span>
+                  <span className="num block text-[0.7rem] text-muted">
+                    {[p.auction_category, p.primary_role].filter(Boolean).join(" · ")}
+                  </span>
+                </span>
+                <MarkButton playerId={p.id} marked={true} />
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {/* top performers */}

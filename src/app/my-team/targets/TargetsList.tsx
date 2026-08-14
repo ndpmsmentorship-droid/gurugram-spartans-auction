@@ -24,7 +24,7 @@ const rankId = (r: number | null) => (r == null ? "—" : "#" + String(r).padSta
 const n1 = (v: number | null) => (v == null ? "—" : Math.round(v * 10) / 10);
 const int = (v: number | null) => (v == null ? "—" : Math.round(v).toLocaleString("en-IN"));
 
-type SortKey = "rank" | "bat_avg" | "bat_sr" | "economy" | "wickets" | "stumpings";
+type SortKey = "name" | "rank" | "bat_avg" | "bat_sr" | "economy" | "wickets" | "stumpings";
 
 // For each sortable stat: how to read it and which direction is "best" so the
 // first click surfaces the strongest players (economy: lower is better).
@@ -53,7 +53,8 @@ export default function TargetsList({ players }: { players: PoolPlayer[] }) {
   const [sort, setSort] = useState<SortKey>("rank");
   const [asc, setAsc] = useState(false); // false = best-first for the active column
 
-  const col = COLUMNS.find((c) => c.key === sort)!;
+  // A numeric column when one is active; undefined while sorting by name.
+  const col = COLUMNS.find((c) => c.key === sort);
 
   const groupCounts = useMemo(() => {
     const c: Record<string, number> = { All: players.length };
@@ -73,6 +74,14 @@ export default function TargetsList({ players }: { players: PoolPlayer[] }) {
       if (s && !p.full_name.toLowerCase().includes(s)) return false;
       return true;
     });
+    // Alphabetical when the Player column is active (asc = A→Z).
+    if (!col) {
+      return filtered.sort((a, b) =>
+        asc
+          ? a.full_name.localeCompare(b.full_name)
+          : b.full_name.localeCompare(a.full_name)
+      );
+    }
     // "best first" means: high-is-good columns descend, low-is-good ascend.
     // `asc` flips that. Nulls always sink to the bottom.
     const bestFirst = col.bestHigh ? !asc : asc;
@@ -84,7 +93,7 @@ export default function TargetsList({ players }: { players: PoolPlayer[] }) {
       if (vb == null) return -1;
       return bestFirst ? vb - va : va - vb;
     });
-  }, [players, q, onlyMarked, col, asc]);
+  }, [players, q, onlyMarked, group, col, asc]);
 
   const markedCount = players.filter((p) => p.marked).length;
 
@@ -92,12 +101,14 @@ export default function TargetsList({ players }: { players: PoolPlayer[] }) {
     if (k === sort) setAsc((v) => !v);
     else {
       setSort(k);
-      setAsc(false);
+      // Name defaults A→Z; numeric columns default best-first.
+      setAsc(k === "name");
     }
   };
 
   const arrow = (k: SortKey) => {
     if (k !== sort) return "";
+    if (k === "name") return asc ? " ↓" : " ↑"; // A→Z shows ↓
     const c = COLUMNS.find((x) => x.key === k)!;
     const bestFirst = c.bestHigh ? !asc : asc;
     // show the direction of the values, not of "best"
@@ -148,7 +159,15 @@ export default function TargetsList({ players }: { players: PoolPlayer[] }) {
         <table className="w-full min-w-[720px] border-separate border-spacing-0 text-[0.875rem]">
           <thead>
             <tr>
-              <Th>Player</Th>
+              <th
+                className="label-mono cursor-pointer select-none border-b border-line px-3 py-3 text-left hover:text-red"
+                style={{ background: "var(--wash)" }}
+                onClick={() => clickSort("name")}
+                aria-sort={sort === "name" ? (asc ? "ascending" : "descending") : "none"}
+              >
+                Player
+                <span className="text-red">{arrow("name")}</span>
+              </th>
               {COLUMNS.map((c) => (
                 <th
                   key={c.key}
@@ -171,12 +190,6 @@ export default function TargetsList({ players }: { players: PoolPlayer[] }) {
                   <div className="flex items-center gap-2.5">
                     <span className="num w-9 shrink-0 text-[0.7rem] font-semibold text-red">
                       {rankId(p.overall_rank)}
-                    </span>
-                    <span className="h-8 w-8 shrink-0 overflow-hidden rounded-full border border-line bg-wash">
-                      {p.photo_url && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
-                      )}
                     </span>
                     <span className="min-w-0">
                       <Link

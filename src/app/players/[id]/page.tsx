@@ -188,6 +188,8 @@ function backLink(from?: string): { href: string; label: string } {
   switch (from) {
     case "my-team":
       return { href: "/my-team", label: "Back to My Squad" };
+    case "targets":
+      return { href: "/my-team/targets", label: "Back to Targets" };
     case "squad":
       return { href: "/squad", label: "Back to Squads" };
     case "auction":

@@ -9,6 +9,8 @@ export type MarkResult = { error?: string; marked?: boolean };
 function friendly(msg: string): string {
   if (/relation .*player_marks.* does not exist|could not find the table/i.test(msg))
     return "Marks aren't set up yet — ask the admin to run supabase/player_marks.sql.";
+  if (/foreign key|violates foreign key|player_marks_player_id_fkey/i.test(msg))
+    return "Marks need a quick update — ask the admin to run supabase/player_marks_repoint_sccl.sql.";
   return msg;
 }
 

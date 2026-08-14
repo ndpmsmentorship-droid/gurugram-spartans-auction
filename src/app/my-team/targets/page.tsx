@@ -15,11 +15,12 @@ export default async function TargetsPage() {
   const admin = createAdminClient();
   const sb = admin as unknown as { from: (t: string) => any };
 
+  // The auction pool is the SCCL roster (same table My Squad + profiles use).
   const { data: pool } = await sb
-    .from("scout_players")
+    .from("sccl_s6_players")
     .select(
       "id, full_name, auction_category, primary_role, overall_index, photo_url, team_id, " +
-        "bat_avg, bat_sr, economy, runs, wickets"
+        "bat_avg, bat_sr, economy, wickets, stumpings"
     );
 
   // rank the whole pool by overall index (1 = best)
@@ -56,8 +57,8 @@ export default async function TargetsPage() {
       bat_avg: p.bat_avg ?? null,
       bat_sr: p.bat_sr ?? null,
       economy: p.economy ?? null,
-      runs: p.runs ?? null,
       wickets: p.wickets ?? null,
+      stumpings: p.stumpings ?? null,
     }))
     .sort((a, b) => (a.overall_rank ?? 1e9) - (b.overall_rank ?? 1e9));
 
@@ -82,5 +83,5 @@ export default async function TargetsPage() {
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto w-full max-w-3xl flex-1 px-5 py-8 sm:px-7">{children}</div>;
+  return <div className="mx-auto w-full max-w-[1100px] flex-1 px-5 py-8 sm:px-7">{children}</div>;
 }

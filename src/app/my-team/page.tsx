@@ -93,7 +93,7 @@ export default async function MyTeamPage() {
     const ids = (marks ?? []).map((m: any) => m.player_id);
     if (ids.length) {
       const { data } = await sb
-        .from("scout_players")
+        .from("sccl_s6_players")
         .select("id, full_name, auction_category, primary_role, team_id, sold_price, overall_index")
         .in("id", ids);
       marked = ((data ?? []) as any[]).sort(
@@ -198,7 +198,7 @@ export default async function MyTeamPage() {
               <li key={p.id} className="flex items-center gap-3 px-4 py-2.5">
                 <span className="min-w-0 flex-1">
                   <Link
-                    href={`/scout/${p.id}`}
+                    href={`/players/${p.id}?from=my-team`}
                     className="block truncate text-sm font-medium hover:text-red hover:underline"
                   >
                     {p.full_name}

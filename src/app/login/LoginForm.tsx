@@ -20,13 +20,16 @@ export default function LoginForm({ next }: { next: string }) {
 
       <form action={action} className="mt-6 space-y-4">
         <input type="hidden" name="next" value={next} />
-        <Field label="Email">
+        <Field label="Username or email">
           <input
-            type="email"
+            type="text"
             name="email"
             required
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             className="input"
-            placeholder="you@example.com"
+            placeholder="your username"
           />
         </Field>
         <Field label="Password">

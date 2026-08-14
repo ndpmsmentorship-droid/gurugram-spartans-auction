@@ -1,4 +1,6 @@
+import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentProfile } from "@/lib/auth";
 import SquadDisplay, { type SquadCard } from "./SquadDisplay";
 
 export const dynamic = "force-dynamic";
@@ -7,6 +9,11 @@ export const dynamic = "force-dynamic";
 // synced from the live auction + any manual additions). Read with the service
 // role so it renders without a login.
 export default async function SquadPage() {
+  // Owners have their own My Squad — keep the Gurugram Spartans showcase out of
+  // their portal.
+  const profile = await getCurrentProfile();
+  if (profile?.role === "owner") redirect("/my-team");
+
   const admin = createAdminClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = admin as unknown as { from: (t: string) => any };

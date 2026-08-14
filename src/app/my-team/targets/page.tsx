@@ -17,7 +17,10 @@ export default async function TargetsPage() {
 
   const { data: pool } = await sb
     .from("scout_players")
-    .select("id, full_name, auction_category, primary_role, overall_index, photo_url, team_id");
+    .select(
+      "id, full_name, auction_category, primary_role, overall_index, photo_url, team_id, " +
+        "bat_avg, bat_sr, economy, stumpings"
+    );
 
   // rank the whole pool by overall index (1 = best)
   const rank = new Map<string, number>();
@@ -50,6 +53,10 @@ export default async function TargetsPage() {
       photo_url: p.photo_url ?? null,
       sold: p.team_id != null,
       marked: markedIds.has(p.id),
+      bat_avg: p.bat_avg ?? null,
+      bat_sr: p.bat_sr ?? null,
+      economy: p.economy ?? null,
+      stumpings: p.stumpings ?? null,
     }))
     .sort((a, b) => (a.overall_rank ?? 1e9) - (b.overall_rank ?? 1e9));
 

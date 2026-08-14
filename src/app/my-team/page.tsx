@@ -25,8 +25,16 @@ type P = {
   economy: number | null;
 };
 
-const n1 = (v: number | null | undefined) => (v == null ? "—" : Math.round(v * 10) / 10);
+const n1 = (v: number | null | undefined) => (v == null ? "—" : String(Math.round(v * 10) / 10));
 const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
+
+// Composition-bar hues, matching the Squads showcase legend.
+const ROLE_COLORS: Record<string, string> = {
+  Batter: "#D9A82C",
+  "All-rounder": "#4FA97A",
+  Bowler: "#7B9FD4",
+  Keeper: "#A99B99",
+};
 
 function bucket(p: P): "WK" | "AR" | "BOWL" | "BAT" {
   const r = (p.primary_role || "").toLowerCase();
@@ -112,34 +120,61 @@ export default async function MyTeamPage() {
   const topBat = [...squad].filter((p) => p.bat_index != null).sort((a, b) => b.bat_index! - a.bat_index!).slice(0, 5);
   const topBowl = [...squad].filter((p) => p.bowl_index != null).sort((a, b) => b.bowl_index! - a.bowl_index!).slice(0, 5);
 
+  // role composition for the infographic bar
+  const roleComp = [
+    { key: "BAT", label: "Batters", n: roles.BAT, color: ROLE_COLORS.Batter },
+    { key: "AR", label: "All-rounders", n: roles.AR, color: ROLE_COLORS["All-rounder"] },
+    { key: "BOWL", label: "Bowlers", n: roles.BOWL, color: ROLE_COLORS.Bowler },
+    { key: "WK", label: "Keepers", n: roles.WK, color: ROLE_COLORS.Keeper },
+  ];
+
   return (
     <Shell wide>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="eyebrow">My Squad</p>
-          <h1 className="mt-2 font-display text-[2.5rem] leading-none">{team.name}</h1>
-          <p className="mt-2 label-mono">
-            {team.division ?? "—"} · {squad.length} players
-          </p>
+      {/* maroon identity band with headline stats — matches the Squads showcase */}
+      <header className="band overflow-hidden rounded-[16px]">
+        <div className="flex flex-wrap items-center justify-between gap-8 px-6 py-8 sm:px-8">
+          <div className="min-w-0">
+            <p className="font-mono text-[0.625rem] uppercase tracking-[0.24em] text-white/55">
+              My Squad · {team.division ?? "—"}
+            </p>
+            <h1 className="mt-3 font-display text-[2.5rem] leading-[0.95] text-white sm:text-[3.25rem]">
+              {team.name}
+            </h1>
+            <p className="num mt-3 text-[0.875rem] text-white/70">
+              {squad.length} players · {totRuns.toLocaleString("en-IN")} career runs · {totWkts} wickets
+            </p>
+          </div>
+          <div className="grid shrink-0 grid-cols-2 gap-3 sm:grid-cols-4">
+            <BandStat n={n1(teamStrength)} label="Team strength" sub="avg overall index" color="#F0564A" />
+            <BandStat n={n1(batStrength)} label="Batting" sub="top 7 index" color="#E3B44A" />
+            <BandStat n={n1(bowlStrength)} label="Bowling" sub="top 5 index" color="#7FA9EC" />
+            <BandStat n={String(marquee)} label="Marquee" sub="must-buy stars" color="#5FC48D" />
+          </div>
         </div>
-      </div>
+      </header>
 
-      {/* insight tiles */}
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <Tile label="Squad" value={String(squad.length)} />
-        <Tile label="Team strength" value={n1(teamStrength)} accent />
-        <Tile label="Batting" value={n1(batStrength)} sub="top 7 index" />
-        <Tile label="Bowling" value={n1(bowlStrength)} sub="top 5 index" />
-        <Tile label="Marquee" value={String(marquee)} />
-        <Tile label="Career runs" value={totRuns.toLocaleString("en-IN")} sub={`${totWkts} wkts`} />
-      </div>
-
-      {/* role mix */}
-      <div className="mt-3 flex flex-wrap gap-2">
-        <Chip label="Batters" n={roles.BAT} />
-        <Chip label="All-rounders" n={roles.AR} />
-        <Chip label="Bowlers" n={roles.BOWL} />
-        <Chip label="Keepers" n={roles.WK} />
+      {/* role composition bar + legend */}
+      <div className="mt-6">
+        <div className="flex h-2.5 gap-1 overflow-hidden">
+          {roleComp.map((r) =>
+            r.n > 0 ? (
+              <div
+                key={r.key}
+                className="rounded-full"
+                style={{ width: `${(r.n / Math.max(1, squad.length)) * 100}%`, background: r.color }}
+                title={`${r.label}: ${r.n}`}
+              />
+            ) : null
+          )}
+        </div>
+        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-[0.813rem] text-muted">
+          {roleComp.map((r) => (
+            <span key={r.key} className="inline-flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full" style={{ background: r.color }} />
+              {r.label} <b className="num font-medium text-ink">{r.n}</b>
+            </span>
+          ))}
+        </div>
       </div>
 
       {/* marked players — targets from the auction pool */}
@@ -162,12 +197,15 @@ export default async function MyTeamPage() {
             {marked.map((p: any) => (
               <li key={p.id} className="flex items-center gap-3 px-4 py-2.5">
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium">
+                  <Link
+                    href={`/scout/${p.id}`}
+                    className="block truncate text-sm font-medium hover:text-red hover:underline"
+                  >
                     {p.full_name}
                     {p.team_id && (
                       <span className="ml-1.5 text-[0.6rem] uppercase text-muted">sold</span>
                     )}
-                  </span>
+                  </Link>
                   <span className="num block text-[0.7rem] text-muted">
                     {[p.auction_category, p.primary_role].filter(Boolean).join(" · ")}
                   </span>
@@ -204,7 +242,9 @@ export default async function MyTeamPage() {
               {squad.map((p) => (
                 <tr key={p.id} className="border-t border-line [&>td]:px-4 [&>td]:py-2">
                   <td className="font-medium">
-                    {p.full_name}
+                    <Link href={`/players/${p.id}?from=my-team`} className="hover:text-red hover:underline">
+                      {p.full_name}
+                    </Link>
                     {p.is_marquee && <span className="ml-1.5 text-[0.6rem] uppercase text-red">★</span>}
                   </td>
                   <td className="text-muted">{p.primary_role ?? "—"}</td>
@@ -237,21 +277,17 @@ function Shell({ children, wide }: { children: React.ReactNode; wide?: boolean }
   );
 }
 
-function Tile({ label, value, sub, accent }: { label: string; value: string | number; sub?: string; accent?: boolean }) {
+// Stat tile on the maroon identity band — number carries the colour, chrome
+// stays neutral so the four tiles don't fight each other.
+function BandStat({ n, label, sub, color }: { n: string; label: string; sub: string; color: string }) {
   return (
-    <div className="rounded-[12px] border border-line bg-surface px-4 py-3">
-      <p className={`font-display text-[1.6rem] leading-none ${accent ? "text-red" : "text-ink"}`}>{value}</p>
-      <p className="label-mono mt-1.5">{label}</p>
-      {sub && <p className="mt-0.5 text-[0.65rem] text-muted">{sub}</p>}
+    <div className="min-w-[8rem] rounded-[12px] border border-white/15 bg-white/[0.06] px-4 py-4 text-center">
+      <p className="font-display text-[1.875rem] leading-none" style={{ color }}>
+        {n}
+      </p>
+      <p className="mt-2.5 font-mono text-[0.594rem] uppercase tracking-[0.13em] text-white/80">{label}</p>
+      <p className="num mt-1 text-[0.625rem] text-white/45">{sub}</p>
     </div>
-  );
-}
-
-function Chip({ label, n }: { label: string; n: number }) {
-  return (
-    <span className="rounded-full border border-line bg-surface px-3 py-1 text-[0.8rem]">
-      <span className="num font-semibold">{n}</span> <span className="text-muted">{label}</span>
-    </span>
   );
 }
 
@@ -282,7 +318,12 @@ function TopCard({
             return (
               <li key={p.id} className="flex items-center gap-3">
                 <span className="w-3 shrink-0 num text-[0.7rem] text-muted">{i + 1}</span>
-                <span className="w-32 shrink-0 truncate text-sm font-medium sm:w-40">{p.full_name}</span>
+                <Link
+                  href={`/players/${p.id}?from=my-team`}
+                  className="w-32 shrink-0 truncate text-sm font-medium hover:text-red hover:underline sm:w-40"
+                >
+                  {p.full_name}
+                </Link>
                 <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--line)_60%,transparent)]">
                   <span
                     className="block h-full rounded-full"

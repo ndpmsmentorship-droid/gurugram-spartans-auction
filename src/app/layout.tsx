@@ -77,7 +77,9 @@ export default async function RootLayout({
 
   const items: NavItem[] = [
     { href: "/auction", label: "Live Board" },
-    { href: "/squad", label: "Squads" },
+    // The Squads showcase is the single Gurugram Spartans team page — hidden
+    // from owners, who have their own My Squad instead.
+    ...(profile?.role === "owner" ? [] : [{ href: "/squad", label: "Squads" }]),
     ...(profile?.role === "owner"
       ? [
           { href: "/my-team", label: "My Squad" },

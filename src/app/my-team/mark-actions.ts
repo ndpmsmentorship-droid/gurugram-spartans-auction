@@ -22,30 +22,31 @@ export async function toggleMark(playerId: string): Promise<MarkResult> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = supabase as any;
 
-  const { data: existing, error: readErr } = await sb
+  // Delete-first and let the DB tell us what actually happened via .select():
+  // idempotent, no read/write race, and immune to a stale "existing" read.
+  const { data: removed, error: delErr } = await sb
     .from("player_marks")
-    .select("player_id")
+    .delete()
     .eq("marker_profile_id", profile.id)
     .eq("player_id", playerId)
-    .maybeSingle();
-  if (readErr) return { error: friendly(readErr.message) };
+    .select("player_id");
+  if (delErr) return { error: friendly(delErr.message) };
 
-  if (existing) {
-    const { error } = await sb
-      .from("player_marks")
-      .delete()
-      .eq("marker_profile_id", profile.id)
-      .eq("player_id", playerId);
-    if (error) return { error: friendly(error.message) };
+  if (removed && removed.length > 0) {
     revalidatePath("/my-team");
     revalidatePath("/my-team/targets");
     return { marked: false };
   }
 
-  const { error } = await sb
+  // Nothing was there to remove → add it. Upsert so a concurrent double-click
+  // can't 409 on the primary key.
+  const { error: insErr } = await sb
     .from("player_marks")
-    .insert({ marker_profile_id: profile.id, player_id: playerId });
-  if (error) return { error: friendly(error.message) };
+    .upsert(
+      { marker_profile_id: profile.id, player_id: playerId },
+      { onConflict: "marker_profile_id,player_id" }
+    );
+  if (insErr) return { error: friendly(insErr.message) };
   revalidatePath("/my-team");
   revalidatePath("/my-team/targets");
   return { marked: true };

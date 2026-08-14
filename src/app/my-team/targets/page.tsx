@@ -19,7 +19,7 @@ export default async function TargetsPage() {
     .from("scout_players")
     .select(
       "id, full_name, auction_category, primary_role, overall_index, photo_url, team_id, " +
-        "bat_avg, bat_sr, economy, stumpings"
+        "bat_avg, bat_sr, economy, runs, wickets"
     );
 
   // rank the whole pool by overall index (1 = best)
@@ -56,7 +56,8 @@ export default async function TargetsPage() {
       bat_avg: p.bat_avg ?? null,
       bat_sr: p.bat_sr ?? null,
       economy: p.economy ?? null,
-      stumpings: p.stumpings ?? null,
+      runs: p.runs ?? null,
+      wickets: p.wickets ?? null,
     }))
     .sort((a, b) => (a.overall_rank ?? 1e9) - (b.overall_rank ?? 1e9));
 

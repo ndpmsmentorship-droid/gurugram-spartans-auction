@@ -16,14 +16,15 @@ export type PoolPlayer = {
   bat_avg: number | null;
   bat_sr: number | null;
   economy: number | null;
-  stumpings: number | null;
+  runs: number | null;
+  wickets: number | null;
 };
 
 const rankId = (r: number | null) => (r == null ? "—" : "#" + String(r).padStart(3, "0"));
 const n1 = (v: number | null) => (v == null ? "—" : Math.round(v * 10) / 10);
-const int = (v: number | null) => (v == null ? "—" : Math.round(v));
+const int = (v: number | null) => (v == null ? "—" : Math.round(v).toLocaleString("en-IN"));
 
-type SortKey = "rank" | "bat_avg" | "bat_sr" | "economy" | "stumpings";
+type SortKey = "rank" | "bat_avg" | "bat_sr" | "economy" | "runs" | "wickets";
 
 // For each sortable stat: how to read it and which direction is "best" so the
 // first click surfaces the strongest players (economy: lower is better).
@@ -37,7 +38,8 @@ const COLUMNS: {
   { key: "bat_avg", label: "Bat Avg", get: (p) => p.bat_avg, bestHigh: true },
   { key: "bat_sr", label: "Bat SR", get: (p) => p.bat_sr, bestHigh: true },
   { key: "economy", label: "Economy", get: (p) => p.economy, bestHigh: false },
-  { key: "stumpings", label: "Stmp", get: (p) => p.stumpings, bestHigh: true },
+  { key: "runs", label: "Runs", get: (p) => p.runs, bestHigh: true },
+  { key: "wickets", label: "Wkts", get: (p) => p.wickets, bestHigh: true },
 ];
 
 export default function TargetsList({ players }: { players: PoolPlayer[] }) {
@@ -158,7 +160,8 @@ export default function TargetsList({ players }: { players: PoolPlayer[] }) {
                 <Td active={sort === "bat_avg"}>{n1(p.bat_avg)}</Td>
                 <Td active={sort === "bat_sr"}>{n1(p.bat_sr)}</Td>
                 <Td active={sort === "economy"}>{n1(p.economy)}</Td>
-                <Td active={sort === "stumpings"}>{int(p.stumpings)}</Td>
+                <Td active={sort === "runs"}>{int(p.runs)}</Td>
+                <Td active={sort === "wickets"}>{int(p.wickets)}</Td>
                 <td className="border-b border-line px-3 py-2.5 text-right">
                   <MarkButton playerId={p.id} marked={p.marked} />
                 </td>
@@ -166,7 +169,7 @@ export default function TargetsList({ players }: { players: PoolPlayer[] }) {
             ))}
             {shown.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-3 py-8 text-center text-sm text-muted">
+                <td colSpan={8} className="px-3 py-8 text-center text-sm text-muted">
                   No players match.
                 </td>
               </tr>

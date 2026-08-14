@@ -53,7 +53,9 @@ const BOWL_STYLES = [
   "Right-arm medium", "Right-arm fast", "Right-arm off-break", "Left-arm orthodox",
   "Left-arm medium", "Right-arm leg-break", null,
 ];
-const TIERS = ["U35A", "35+A", "U35B", "35+B"];
+// SDLL categories, weighted roughly like the real 295-player pool
+// (43 A+ / 117 A / 123 B / 12 Special).
+const TIERS = ["A+", "A", "A", "A", "B", "B", "B", "B", "Special"];
 const TEAM_IDS = [
   "11111111-1111-4111-8111-111111111111",
   "22222222-2222-4222-8222-222222222222",
@@ -224,15 +226,16 @@ export function fixturePlayers(): ScoutPlayerRow[] {
   return cached;
 }
 
-export const FIXTURE_SEASON = { id: "5eaa0000-0000-4000-8000-000000000001", is_active: true, name: "Season 1" };
+export const FIXTURE_SEASON = { id: "5eaa0000-0000-4000-8000-000000000001", is_active: true, name: "Shanti Devi Legend's League — Season 2" };
 
 export const FIXTURE_TEAMS = [
   // "Gurugram Spartans" must exist — /squad looks the team up by that exact
-  // name, so without it the squad page renders empty.
-  { id: TEAM_IDS[0], name: "Gurugram Spartans", division: "Elite", purse_total: 400000, season_id: FIXTURE_SEASON.id },
-  { id: TEAM_IDS[1], name: "Goa Monks", division: "Elite", purse_total: 400000, season_id: FIXTURE_SEASON.id },
-  { id: TEAM_IDS[2], name: "Jaipur Royals", division: "Challengers", purse_total: 400000, season_id: FIXTURE_SEASON.id },
-  { id: TEAM_IDS[3], name: "UP Warriors", division: "Challengers", purse_total: 400000, season_id: FIXTURE_SEASON.id },
+  // name, so without it the squad page renders empty. Names, groups and the
+  // ₹3,00,000 clean-slate purse mirror the real SDLL migration.
+  { id: TEAM_IDS[0], name: "Gurugram Spartans", division: "Group B", purse_total: 300000, season_id: FIXTURE_SEASON.id },
+  { id: TEAM_IDS[1], name: "Goan Monks", division: "Group B", purse_total: 300000, season_id: FIXTURE_SEASON.id },
+  { id: TEAM_IDS[2], name: "Bengal Tigers", division: "Group A", purse_total: 300000, season_id: FIXTURE_SEASON.id },
+  { id: TEAM_IDS[3], name: "Patna Panthers", division: "Group A", purse_total: 300000, season_id: FIXTURE_SEASON.id },
 ];
 
 // A signed-in admin, so the gated Pool page and the admin-only profile controls

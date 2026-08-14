@@ -8,7 +8,8 @@ import PlayerSearch from "./PlayerSearch";
 import { rankPlayers } from "@/lib/scout/ranks";
 import { computeAnalytics, type AnalyticsInput } from "@/lib/scout/analytics";
 import { deriveMetrics, percentileColumn, type RawStats } from "@/lib/scout/rankings";
-import { tierStyle, handSkill, isGradeA, parseTier } from "@/lib/scout/tier";
+import { tierStyle, handSkill, normCategory } from "@/lib/scout/tier";
+import { basePriceFor } from "@/lib/auction/rules";
 import type { ScoutPlayerRow } from "@/lib/supabase/types";
 import PlayerWorkshop from "./PlayerWorkshop";
 import MarqueeToggle from "./MarqueeToggle";
@@ -66,13 +67,12 @@ export default async function PlayerDetailPage({
     v == null ? "—" : Math.round(v).toLocaleString("en-IN");
   const inr = (n: number) => "₹" + Math.round(n || 0).toLocaleString("en-IN");
 
-  // Auction facts for the portrait card. Base price follows the organizers'
-  // rule: grade A players open at ₹15,000, grade B at ₹5,000.
-  const basePrice = isGradeA(player.auction_category)
-    ? inr(15000)
-    : parseTier(player.auction_category).grade === "B"
-      ? inr(5000)
-      : "—";
+  // Auction facts for the portrait card. Base price follows the SDLL category
+  // rule (A+ ₹30,000 / A ₹20,000 / B ₹10,000 / Special ₹5,000).
+  const basePrice =
+    normCategory(player.auction_category) == null
+      ? "—"
+      : inr(basePriceFor(player.auction_category));
   const soldPrice = (player as unknown as { sold_price: number | null }).sold_price;
 
   return (

@@ -3,6 +3,8 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { assignPlayer, unassignPlayer, setPurse } from "./actions";
+import { normCategory } from "@/lib/scout/tier";
+import { DEFAULT_RULES, basePriceFor } from "@/lib/auction/rules";
 
 export type ConsoleTeam = {
   id: string;
@@ -25,16 +27,16 @@ export type ConsolePlayer = {
 
 const inr = (n: number) => "₹" + Math.round(n || 0).toLocaleString("en-IN");
 
-// ---- SCCL 6 rules helpers ----
-const catCode = (c: string | null) => (c ?? "").toUpperCase().replace(/\s+/g, "");
-const isLegend = (c: string | null) => catCode(c).includes("LEGEND");
-// 'A' = U35A / 35+A. Legend is its own compulsory slot, priced as B — not an 'A'.
-const isGradeA = (c: string | null) => !isLegend(c) && catCode(c).endsWith("A");
-// Auction base price: 'A' ₹15K, everything else (B / Legend) ₹5K.
-const basePrice = (c: string | null) => (isGradeA(c) ? 15000 : 5000);
-const MAX_BID = 65000;
-const SQUAD_MIN = 16;
-const SQUAD_MAX = 20;
+// ---- SDLL rules helpers (mirror @/lib/auction/rules) ----
+const isLegend = (c: string | null) => normCategory(c) === "Special";
+const isGradeA = (c: string | null) => {
+  const n = normCategory(c);
+  return n === "A+" || n === "A";
+};
+const basePrice = (c: string | null) => basePriceFor(c);
+const MAX_BID = DEFAULT_RULES.maxBid;
+const SQUAD_MIN = DEFAULT_RULES.squadMin;
+const SQUAD_MAX = DEFAULT_RULES.squadMax;
 
 export default function AuctionConsole({
   teams,
@@ -228,7 +230,6 @@ export default function AuctionConsole({
           const canExtend = t.purse_max != null && t.purse_total < t.purse_max;
           const aCount = roster.filter((p) => isGradeA(p.auction_category)).length;
           const hasLegend = roster.some((p) => isLegend(p.auction_category));
-          const age3035 = roster.filter((p) => p.age != null && p.age >= 30 && p.age <= 35).length;
           return (
             <div key={t.id} className="rounded-xl border border-border bg-surface p-4">
               <div className="flex items-center justify-between gap-2">
@@ -246,9 +247,11 @@ export default function AuctionConsole({
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5 text-[11px]">
                 <Chip label={`Squad ${roster.length}/${SQUAD_MAX}`} warn={roster.length > SQUAD_MAX} />
-                <Chip label={`30–35: ${age3035}/4`} warn={age3035 > 4} />
-                <Chip label={`A: ${aCount}`} />
-                <Chip label={hasLegend ? "Legend ✓" : "Legend ✗"} warn={!hasLegend} />
+                <Chip
+                  label={`A+/A: ${aCount}/${DEFAULT_RULES.cap["A+"] + DEFAULT_RULES.cap.A}`}
+                  warn={aCount > DEFAULT_RULES.cap["A+"] + DEFAULT_RULES.cap.A}
+                />
+                <Chip label={hasLegend ? "Special ✓" : "Special —"} warn={false} />
               </div>
               {canExtend ? (
                 <TopUp

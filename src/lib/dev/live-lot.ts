@@ -15,7 +15,8 @@
  */
 
 import { fixturePlayers, FIXTURE_TEAMS } from "./fixture";
-import { DEFAULT_RULES, isGradeA } from "@/lib/auction/rules";
+import { DEFAULT_RULES, basePriceFor, categoryCap } from "@/lib/auction/rules";
+import { normCategory } from "@/lib/scout/tier";
 
 export type Lot = {
   player_id: string | null;
@@ -87,7 +88,7 @@ export function call(fn: string, args: Record<string, unknown>): string | null {
     if (p.team_id) return "That player is already sold";
     lot.player_id = p.id;
     lot.status = "live";
-    lot.base_price = isGradeA(p.auction_category) ? r.baseGradeA : r.baseGradeB;
+    lot.base_price = basePriceFor(p.auction_category, r);
     lot.current_bid = null;
     lot.leading_team_id = null;
     lot.updated_at = stamp();
@@ -114,6 +115,16 @@ export function call(fn: string, args: Record<string, unknown>): string | null {
     if (spent + amount > team.purse_total)
       return `Over purse: ${spent} spent + ${amount} exceeds ${team.purse_total}`;
     if (squadSize(teamId) >= r.squadMax) return `Squad is already full (${r.squadMax})`;
+
+    // per-category cap — mirrors place_raise in sdll_migration.sql
+    const lotCat = normCategory(byId(lot.player_id)?.auction_category ?? null);
+    if (lotCat) {
+      const catCount = rows().filter(
+        (p) => p.team_id === teamId && normCategory(p.auction_category) === lotCat
+      ).length;
+      if (catCount >= categoryCap(lotCat, r))
+        return `Category ${lotCat} is full for that team (max ${categoryCap(lotCat, r)})`;
+    }
 
     lot.current_bid = amount;
     lot.leading_team_id = teamId;

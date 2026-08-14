@@ -1,39 +1,59 @@
-// The organizers' auction tier (U35A / U35B / 35+A / 35+B) and a compact
-// batting-hand + bowling-style descriptor, shared by every card that shows a
-// scout player. Tier drives the squad composition caps (≤6 A, ≤3 U35) too, so
-// the parsing lives in one place.
+// The SDLL auction categories (source: the league's own platform config,
+// tournament 698076ec…, pulled 14-Aug-26):
+//
+//   A+       U35    base ₹30,000   max 3 per team
+//   A        U35    base ₹20,000   max 8 per team
+//   B        18–39  base ₹10,000   max 13 per team
+//   Special  35–45  base  ₹5,000   max 3 per team
+//
+// This replaces the SCCL S6 tier grid (U35A / 35+B …). The import stores the
+// short display name in scout_players.auction_category; normCategory() also
+// accepts the platform's long names ("A+ Category", "Special Status") so raw
+// API strings render correctly wherever they leak through.
 
-export type TierParts = { age: "U35" | "35+" | null; grade: "A" | "B" | null };
+export type AuctionCategory = "A+" | "A" | "B" | "Special";
+export const CATEGORIES: AuctionCategory[] = ["A+", "A", "B", "Special"];
 
-// "U35A" → { age:"U35", grade:"A" };  "35+B" → { age:"35+", grade:"B" }
-export function parseTier(tier: string | null | undefined): TierParts {
-  const t = (tier ?? "").toUpperCase().replace(/\s+/g, "");
-  const age = t.startsWith("U35") ? "U35" : t.startsWith("35+") ? "35+" : null;
-  const grade = t.endsWith("A") ? "A" : t.endsWith("B") ? "B" : null;
-  return { age, grade };
+export function normCategory(c: string | null | undefined): AuctionCategory | null {
+  const t = (c ?? "").trim().toUpperCase();
+  if (!t) return null;
+  if (t.startsWith("A+")) return "A+";
+  if (t.startsWith("SPECIAL") || t === "SS") return "Special";
+  if (t.startsWith("A")) return "A";
+  if (t.startsWith("B")) return "B";
+  return null;
 }
 
-export const isGradeA = (tier: string | null | undefined) => parseTier(tier).grade === "A";
-export const isU35 = (tier: string | null | undefined) => parseTier(tier).age === "U35";
+// "Premium" = the two U35 marquee categories. Kept under the old name because
+// the squad-composition helpers reason in terms of A-grade slots.
+export const isGradeA = (c: string | null | undefined) => {
+  const n = normCategory(c);
+  return n === "A+" || n === "A";
+};
+export const isU35 = isGradeA; // A+ and A are the U35 categories in SDLL
 
-// Chip colours per the approved design comps: the AGE band carries the hue
-// (35+ = brand rose, U35 = blue) and the GRADE carries the weight (A saturated,
-// B muted). Blue is a data encoding for the age band only — it is never used as
-// a second brand colour anywhere else in the UI.
-export function tierStyle(tier: string | null | undefined): { bg: string; fg: string } | null {
-  const { age, grade } = parseTier(tier);
-  if (!age || !grade) return null;
-  if (age === "U35") {
-    return grade === "A"
-      ? { bg: "var(--u35-fill)", fg: "var(--u35)" }
-      : { bg: "color-mix(in srgb, var(--u35-fill) 55%, #ffffff)", fg: "var(--u35)" };
+// Chip colours: category rank carries the visual hierarchy. A+ wears the brand
+// red (top of the market), A the blue that encoded "young" in the approved
+// comps, B stays a quiet neutral (half the pool), Special goes gold — the
+// 35–45 veterans' slot, matching the crest's star motif.
+export function tierStyle(
+  category: string | null | undefined
+): { bg: string; fg: string } | null {
+  switch (normCategory(category)) {
+    case "A+":
+      return { bg: "color-mix(in srgb, var(--red) 16%, #ffffff)", fg: "var(--accent-text)" };
+    case "A":
+      return { bg: "var(--u35-fill)", fg: "var(--u35)" };
+    case "B":
+      return { bg: "var(--chip)", fg: "var(--muted)" };
+    case "Special":
+      return { bg: "var(--gold-fill)", fg: "var(--gold)" };
+    default:
+      return null;
   }
-  return grade === "A"
-    ? { bg: "color-mix(in srgb, var(--red) 16%, #ffffff)", fg: "var(--accent-text)" }
-    : { bg: "var(--chip)", fg: "var(--muted)" };
 }
 
-// Legend is a category, not a tier — gold, matching the crest's star motif.
+// Marquee / legend accent — gold, matching the crest's star motif.
 export const LEGEND_STYLE = { bg: "var(--gold-fill)", fg: "var(--gold)" };
 
 // "LHB · Right-arm off-break" style one-liner; either half may be missing.

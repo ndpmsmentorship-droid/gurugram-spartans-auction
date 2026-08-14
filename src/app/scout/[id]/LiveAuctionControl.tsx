@@ -3,15 +3,14 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { assignPlayer, unassignPlayer } from "@/app/admin/auction/actions";
+import { basePriceFor } from "@/lib/auction/rules";
 
 export type LiveTeam = { id: string; name: string; division: string | null };
 export type LiveStatus = { teamId: string; teamName: string; price: number | null; acquired: string | null };
 
 const inr = (n: number | null) => "₹" + Math.round(n || 0).toLocaleString("en-IN");
-const catCode = (c: string | null) => (c ?? "").toUpperCase().replace(/\s+/g, "");
-const isLegend = (c: string | null) => catCode(c).includes("LEGEND");
-const basePrice = (c: string | null) => (!isLegend(c) && catCode(c).endsWith("A") ? 15000 : 5000);
-const DIVS = ["Elite", "Challengers", "Fighters"];
+const basePrice = (c: string | null) => basePriceFor(c);
+const DIVS = ["Group A", "Group B"];
 
 export default function LiveAuctionControl({
   playerId,

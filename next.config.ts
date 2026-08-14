@@ -15,6 +15,17 @@ const nextConfig: NextConfig = {
         hostname: "sarda-corporate-league.anantanity.com",
         pathname: "/public/**",
       },
+      // SDLL registration photos (import-sdll.mts) live on these two hosts.
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/dlz7ypjrl/**",
+      },
+      {
+        protocol: "https",
+        hostname: "media.cricheroes.in",
+        pathname: "/**",
+      },
     ],
   },
 };

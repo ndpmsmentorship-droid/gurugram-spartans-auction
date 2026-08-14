@@ -2,6 +2,7 @@ import { getActiveSeason } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { readLiveLot } from "@/lib/auction/read";
 import { rankPlayers } from "@/lib/scout/ranks";
+import { normCategory } from "@/lib/scout/tier";
 import type { ScoutPlayerRow } from "@/lib/supabase/types";
 import AuctionConsole, { type ConsolePlayer, type ConsoleTeam } from "./AuctionConsole";
 import LotControl, { type LotPlayer, type LotTeam, type LotView } from "./LotControl";
@@ -66,10 +67,17 @@ export default async function AdminAuctionPage() {
 
   const spent = new Map<string, number>();
   const size = new Map<string, number>();
+  const cats = new Map<string, Record<string, number>>();
   for (const p of rows) {
     if (!p.team_id) continue;
     spent.set(p.team_id, (spent.get(p.team_id) ?? 0) + (Number(p.sold_price) || 0));
     size.set(p.team_id, (size.get(p.team_id) ?? 0) + 1);
+    const cat = normCategory(p.auction_category);
+    if (cat) {
+      const c = cats.get(p.team_id) ?? {};
+      c[cat] = (c[cat] ?? 0) + 1;
+      cats.set(p.team_id, c);
+    }
   }
 
   const lotTeams: LotTeam[] = ((teams ?? []) as ConsoleTeam[]).map((t) => ({
@@ -78,6 +86,7 @@ export default async function AdminAuctionPage() {
     purse_total: t.purse_total,
     spent: spent.get(t.id) ?? 0,
     squadSize: size.get(t.id) ?? 0,
+    catCounts: cats.get(t.id) ?? {},
   }));
 
   const available = rows.filter((p) => !p.team_id).map(toLotPlayer);

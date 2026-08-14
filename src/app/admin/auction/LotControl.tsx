@@ -10,6 +10,7 @@ import {
   undoLastSale,
 } from "./live-actions";
 import { DEFAULT_RULES, blockReason, inr, raiseSteps } from "@/lib/auction/rules";
+import { normCategory } from "@/lib/scout/tier";
 
 export type LotTeam = {
   id: string;
@@ -17,6 +18,8 @@ export type LotTeam = {
   purse_total: number;
   spent: number;
   squadSize: number;
+  /** how many players the team holds per auction category (A+ / A / B / Special) */
+  catCounts: Record<string, number>;
 };
 export type LotPlayer = {
   id: string;
@@ -69,7 +72,7 @@ export default function LotControl({
   }, [q, available]);
 
   const live = lot.status === "live";
-  const base = lot.base_price ?? DEFAULT_RULES.baseGradeB;
+  const base = lot.base_price ?? DEFAULT_RULES.base.B;
   const steps = raiseSteps(lot.current_bid, base);
   const nextAmount = lot.current_bid == null ? base : steps[0];
 
@@ -199,12 +202,16 @@ export default function LotControl({
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {teams.map((t) => {
                 const amount = Number(custom) || nextAmount;
+                const lotCategory = lot.player?.auction_category ?? null;
                 const reason = blockReason({
                   amount,
                   spent: t.spent,
                   purse: t.purse_total,
                   squadSize: t.squadSize,
                   isLeading: lot.leading_team_id === t.id,
+                  lotCategory,
+                  categoryCount:
+                    (lotCategory && t.catCounts[normCategory(lotCategory) ?? ""]) || 0,
                 });
                 return (
                   <button

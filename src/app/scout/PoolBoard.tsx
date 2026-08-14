@@ -5,7 +5,7 @@ import { useMemo, useState, useTransition } from "react";
 import type { RankedPlayer } from "@/lib/scout/ranks";
 import type { RiskFlag } from "@/lib/scout/analytics";
 import { CATEGORIES, type Category } from "@/lib/scout/category";
-import { tierStyle, parseTier, isGradeA } from "@/lib/scout/tier";
+import { tierStyle, normCategory, CATEGORIES as AUCTION_CATEGORIES, type AuctionCategory } from "@/lib/scout/tier";
 import {
   setMarquee,
   setRegStatus,
@@ -112,14 +112,12 @@ function rankTier(rank: number | null | undefined): RankTier | null {
   return null; // 31+ — no colour
 }
 
-// Organizers' auction-tier filter: coarse A/B grade + the four exact tiers.
-type TierFilter = "All" | "A" | "B" | "U35A" | "35+A" | "U35B" | "35+B";
-const TIER_FILTERS: TierFilter[] = ["All", "A", "B", "U35A", "35+A", "U35B", "35+B"];
+// Organizers' auction-category filter — the four SDLL categories.
+type TierFilter = "All" | AuctionCategory;
+const TIER_FILTERS: TierFilter[] = ["All", ...AUCTION_CATEGORIES];
 function matchesTier(auctionCategory: string | null, f: TierFilter): boolean {
   if (f === "All") return true;
-  if (f === "A") return isGradeA(auctionCategory);
-  if (f === "B") return parseTier(auctionCategory).grade === "B";
-  return (auctionCategory ?? "").toUpperCase().replace(/\s+/g, "") === f;
+  return normCategory(auctionCategory) === f;
 }
 
 // which columns get the rank-tier colour code, and the rank they key off
@@ -201,12 +199,10 @@ export default function PoolBoard({ players }: { players: PoolPlayer[] }) {
   }, [players]);
 
   const tierCounts = useMemo(() => {
-    const c: Record<string, number> = { A: 0, B: 0, U35A: 0, "35+A": 0, U35B: 0, "35+B": 0 };
+    const c: Record<string, number> = { "A+": 0, A: 0, B: 0, Special: 0 };
     for (const p of players) {
-      if (isGradeA(p.auction_category)) c.A++;
-      if (parseTier(p.auction_category).grade === "B") c.B++;
-      const key = (p.auction_category ?? "").toUpperCase().replace(/\s+/g, "");
-      if (key in c) c[key]++;
+      const key = normCategory(p.auction_category);
+      if (key) c[key]++;
     }
     return c;
   }, [players]);

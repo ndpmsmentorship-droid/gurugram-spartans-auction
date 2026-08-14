@@ -1,36 +1,36 @@
-// SCCL house rules, in one place. These MIRROR the server-side checks in
-// supabase/live_auction_schema.sql — the database is the authority, this copy
+// SDLL house rules, in one place. These MIRROR the server-side checks in
+// supabase/sdll_migration.sql — the database is the authority, this copy
 // exists so the console can grey out an illegal button before you press it.
 // If you change a number here, change it in auction_rules too.
+//
+// Source: the league platform's tournament config (pulled 14-Aug-26).
+// min_increment 500 — Season 1 cleared at ₹500 steps (…372,500 / …431,500).
+
+import { normCategory, type AuctionCategory } from "@/lib/scout/tier";
 
 export type Rules = {
   squadMin: number;
   squadMax: number;
   maxBid: number;
-  baseGradeA: number;
-  baseGradeB: number;
   minIncrement: number;
+  base: Record<AuctionCategory, number>;
+  cap: Record<AuctionCategory, number>;
 };
 
 export const DEFAULT_RULES: Rules = {
   squadMin: 16,
-  squadMax: 20,
-  maxBid: 65000,
-  baseGradeA: 15000,
-  baseGradeB: 5000,
-  minIncrement: 1000,
+  squadMax: 25,
+  maxBid: 400000,
+  minIncrement: 500,
+  base: { "A+": 30000, A: 20000, B: 10000, Special: 5000 },
+  cap: { "A+": 3, A: 8, B: 13, Special: 3 },
 };
 
-const code = (c: string | null | undefined) =>
-  (c ?? "").toUpperCase().replace(/\s+/g, "");
-
-export const isLegend = (c: string | null | undefined) => code(c).includes("LEGEND");
-// 'A' = U35A / 35+A. Legend is its own compulsory slot and prices as B.
-export const isGradeA = (c: string | null | undefined) =>
-  !isLegend(c) && code(c).endsWith("A");
-
 export const basePriceFor = (c: string | null | undefined, r: Rules = DEFAULT_RULES) =>
-  isGradeA(c) ? r.baseGradeA : r.baseGradeB;
+  r.base[normCategory(c) ?? "B"];
+
+export const categoryCap = (c: string | null | undefined, r: Rules = DEFAULT_RULES) =>
+  r.cap[normCategory(c) ?? "B"];
 
 export const inr = (n: number | null | undefined) =>
   "₹" + Math.round(n || 0).toLocaleString("en-IN");
@@ -38,7 +38,7 @@ export const inr = (n: number | null | undefined) =>
 /** Quick-raise ladder — coarser as the price climbs, the way a room bids. */
 export function raiseSteps(current: number | null, base: number, r: Rules = DEFAULT_RULES) {
   const from = current ?? base;
-  const step = from < 20000 ? 1000 : from < 40000 ? 2500 : 5000;
+  const step = from < 20000 ? r.minIncrement : from < 50000 ? 1000 : 2500;
   return [step, step * 2, step * 4]
     .map((s) => from + s)
     .filter((v) => v <= r.maxBid);
@@ -55,6 +55,9 @@ export function blockReason(
     purse: number;
     squadSize: number;
     isLeading: boolean;
+    /** lot player's category + how many of it the team already holds */
+    lotCategory: string | null;
+    categoryCount: number;
   },
   r: Rules = DEFAULT_RULES
 ): string | null {
@@ -63,5 +66,8 @@ export function blockReason(
   if (args.squadSize >= r.squadMax) return `Squad full (${r.squadMax})`;
   if (args.spent + args.amount > args.purse)
     return `Over purse — ${inr(args.purse - args.spent)} left`;
+  const cat = normCategory(args.lotCategory);
+  if (cat && args.categoryCount >= r.cap[cat])
+    return `${cat} slots full (${r.cap[cat]})`;
   return null;
 }

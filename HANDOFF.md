@@ -9,6 +9,34 @@ production** the same day. Deployed on Vercel; served at **https://www.ndpms.in/
 in the LMS repo (`ycwism-lms` `next.config.ts`). `basePath: "/spartansscout"`.
 Repo: `ndpmsmentorship-droid/gurugram-spartans-auction`.
 
+## 🚚 NEW MACHINE SETUP (project moved off the Windows laptop 14-Aug-26)
+Everything needed is in this repo + the Supabase/Vercel dashboards. Nothing on the old machine is required.
+
+1. **Clone** (private repo — needs the `ndpmsmentorship-droid` PAT, minted 14-Aug-26 at github.com/settings/personal-access-tokens while logged in as droid):
+   ```
+   git clone https://ndpmsmentorship-droid@github.com/ndpmsmentorship-droid/gurugram-spartans-auction
+   ```
+   Store the PAT once via a credential file OUTSIDE any cloud-synced folder, and — if the machine's global git credential manager knows another GitHub account — clear the helper chain repo-locally first, or pushes 403 as the wrong user:
+   ```
+   git config --local --replace-all credential.helper ""
+   git config --local --add credential.helper "store --file=<path>/.git-credentials-ndpms"
+   ```
+   (credential-store line format: `https://ndpmsmentorship-droid:<PAT>@github.com`)
+2. **`.env.local`** (gitignored — recreate by hand). Vercel env vars are marked *sensitive*, so `vercel env pull` returns blanks; get the Supabase keys from the dashboard instead (project `hlouwxtyotrmlehaxgav` → Settings → API):
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=https://hlouwxtyotrmlehaxgav.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=<dashboard>
+   SUPABASE_SERVICE_ROLE_KEY=<dashboard>
+   SDLL_EMAIL=Teamowners@shantidevi.com
+   SDLL_PASSWORD=Season1
+   ```
+   Do NOT set `SPARTANS_DEV_FIXTURE` (dev-only stub that bypasses the real DB).
+3. **Run locally**: `npm install && npm run dev` → http://localhost:3000/spartansscout (Node ≥ 20; repo built on Node 24/26).
+4. **Deploy**: `vercel login` (the Vercel account owning project `gurugram-spartans-auction`, team `nikhil-dhingra-s-projects`) → `vercel link --yes --project gurugram-spartans-auction` → `vercel deploy --prod --yes`. No Git integration exists — CLI is the only deploy path. Production env vars are already set on the project; don't recreate them.
+5. **Verify after any deploy**: https://www.ndpms.in/spartansscout/auction shows 12 SDLL teams + idle lot; `/squad` banner says "Shanti Devi Legend's League — Season 2"; login works at `/login` (`auctioneer@shantidevi.com`). Pool = 295 players.
+6. **Not transferred, by design**: `supabase/backups/sccl_s6_allocations.csv` (player-PII, `.gitignore` blocks all CSVs) — the canonical S6 archive lives in the DB as `sccl_s6_players`/`sccl_s6_jersey_sizes`, nothing is lost. Build artifacts (`.next/`, `node_modules/`, `.vercel/`) regenerate.
+7. If the clone lands under OneDrive/Dropbox: cloud sync can evict tracked files. On any mysteriously missing file run `git ls-files --deleted` first; restore with `git ls-files -d -z | xargs -0 git checkout --`. Prefer cloning outside synced folders.
+
 ## ⚠️ SDLL CUTOVER — read before touching data (2026-08-14)
 - **The DB was migrated in place** (Supabase project `hlouwxtyotrmlehaxgav`, migration in `supabase/sdll_migration.sql`, already executed):
   - SCCL S6 archived: `scout_players` (766 rows, 442 allocated, ₹74,03,000 checksum) → `sccl_s6_players`; `jersey_sizes` → `sccl_s6_jersey_sizes`. Then both live tables cleared.

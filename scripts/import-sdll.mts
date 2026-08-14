@@ -73,23 +73,22 @@ async function login(): Promise<string> {
   return j.token;
 }
 
+// One oversized page, NOT page-by-page: the endpoint has no stable sort, so
+// consecutive pages overlap — a 100-per-page sweep once returned 295 rows of
+// which only 175 were distinct, and the upsert silently collapsed the rest.
 async function fetchAll(token: string): Promise<Row[]> {
   const headers = { Authorization: `Bearer ${token}` };
-  const out: Row[] = [];
-  let page = 1;
-  for (;;) {
-    const res = await fetch(
-      `${API}/admin/players/tournament/${TOURNAMENT_ID}?page=${page}&limit=100`,
-      { headers }
-    );
-    const j = await res.json();
-    const rows: Row[] = j?.data ?? [];
-    out.push(...rows);
-    const total = j?.pagination?.total ?? j?.total ?? out.length;
-    if (!rows.length || out.length >= total) break;
-    page++;
+  const res = await fetch(
+    `${API}/admin/players/tournament/${TOURNAMENT_ID}?page=1&limit=2000`,
+    { headers }
+  );
+  const j = await res.json();
+  const rows: Row[] = j?.data ?? [];
+  const distinct = new Set(rows.map((r) => String(r._id)));
+  if (distinct.size !== rows.length) {
+    throw new Error(`Duplicate rows from the platform: ${rows.length} fetched, ${distinct.size} distinct`);
   }
-  return out;
+  return rows;
 }
 
 function mapRow(p: Row) {

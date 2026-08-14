@@ -42,12 +42,14 @@ const acqTag = (a: string | null) =>
       : { label: "Auction", cls: "bg-chip text-muted" };
 
 export default function SquadDisplay({
+  seasonName,
   team,
   squad,
   jerseyByPlayer = {},
   displayByPlayer = {},
   sizesByPlayer = {},
 }: {
+  seasonName?: string | null;
   team: { name: string; purse_total: number } | null;
   squad: SquadCard[];
   jerseyByPlayer?: Record<string, string | number | null>;
@@ -100,7 +102,7 @@ export default function SquadDisplay({
             </span>
             <div className="min-w-0">
               <p className="font-mono text-[0.625rem] uppercase tracking-[0.24em] text-white/55">
-                SARDA Corporate Cricket League · Season 6
+                {seasonName ?? "Shanti Devi Legend's League"}
               </p>
               <h1 className="mt-3 flex flex-wrap items-center gap-3 font-display text-[2.5rem] leading-[0.95] text-white sm:text-[3.25rem]">
                 The {team?.name ?? "Gurugram Spartans"}

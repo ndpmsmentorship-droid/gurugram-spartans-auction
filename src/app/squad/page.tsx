@@ -10,7 +10,7 @@ export default async function SquadPage() {
   const admin = createAdminClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = admin as unknown as { from: (t: string) => any };
-  const { data: season } = await sb.from("seasons").select("id").eq("is_active", true).maybeSingle();
+  const { data: season } = await sb.from("seasons").select("id, name").eq("is_active", true).maybeSingle();
 
   let team: { name: string; purse_total: number } | null = null;
   let squad: SquadCard[] = [];
@@ -44,6 +44,7 @@ export default async function SquadPage() {
 
   return (
     <SquadDisplay
+      seasonName={season?.name ?? null}
       team={team}
       squad={squad}
       jerseyByPlayer={jerseyByPlayer}

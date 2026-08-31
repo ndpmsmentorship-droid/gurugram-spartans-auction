@@ -13,6 +13,7 @@ import { basePriceFor } from "@/lib/auction/rules";
 import type { ScoutPlayerRow } from "@/lib/supabase/types";
 import PlayerWorkshop from "./PlayerWorkshop";
 import MarqueeToggle from "./MarqueeToggle";
+import SardaScout from "./SardaScout";
 
 export default async function PlayerDetailPage({
   params,
@@ -35,8 +36,26 @@ export default async function PlayerDetailPage({
     );
   }
 
-  const pool = (data ?? []) as ScoutPlayerRow[];
-  const player = pool.find((p) => p.id === id);
+  let pool = (data ?? []) as ScoutPlayerRow[];
+  let player = pool.find((p) => p.id === id);
+
+  // Squads borrowed for the prototype come from the SARDA archive, not the
+  // live pool, so their profiles 404 unless we look there too. Falling back to
+  // the whole archive (rather than just the one row) is deliberate: the
+  // rankings and percentiles below are peer-relative, and a borrowed player
+  // must be scored against his own league, not against the SDLL pool.
+  if (!player) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = supabase as unknown as { from: (t: string) => any };
+    const { data: archived } = await sb.from("sccl_s6_players").select("*");
+    const archivePool = (archived ?? []) as ScoutPlayerRow[];
+    const found = archivePool.find((p) => p.id === id);
+    if (found) {
+      pool = archivePool;
+      player = found;
+    }
+  }
+
   if (!player) notFound();
 
   const ranked = rankPlayers(pool);
@@ -387,6 +406,7 @@ export default async function PlayerDetailPage({
           })}
         </div>
       </section>
+        <div className="mt-5"><SardaScout playerName={player.full_name} /></div>
         </div>
       </div>
     </main>

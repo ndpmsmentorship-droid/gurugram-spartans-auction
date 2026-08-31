@@ -16,6 +16,7 @@ type Row = {
   f_stumpings: number | null; f_dismissals: number | null;
 };
 type Dis = { name: string; pace: number; spin: number; unknown: number; total: number; list: { how: string; bowler: string; t: string }[] };
+type Rvt = { name: string; pace_r: number; pace_b: number; spin_r: number; spin_b: number; unk_b: number };
 
 const nzp = (s: string) => (s || "").toLowerCase().replace(/\([^)]*\)/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
 const nf = (v: number | null | undefined) => (v == null ? "—" : v);
@@ -63,6 +64,7 @@ export default function SardaScout({ playerName }: { playerName: string }) {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [pool, setPool] = useState<Agg[]>([]);
   const [dis, setDis] = useState<Dis | null>(null);
+  const [rvt, setRvt] = useState<Rvt | null>(null);
   const [err, setErr] = useState(false);
 
   useEffect(() => {
@@ -70,16 +72,18 @@ export default function SardaScout({ playerName }: { playerName: string }) {
     Promise.all([
       fetch(`${BASE}/api/spartans/stats`).then((r) => r.json()),
       fetch(`${BASE}/spartans/dismissals.json`).then((r) => r.json()).catch(() => ({})),
-    ]).then(([sj, dj]) => {
+      fetch(`${BASE}/spartans/runs_vs_type.json`).then((r) => r.json()).catch(() => ({})),
+    ]).then(([sj, dj, rj]) => {
       const all: Row[] = sj.rows || [];
       setRows(all.filter((r) => nzp(r.player) === key));
       setPool(computeProp(aggregate(all)));
       setDis((dj as Record<string, Dis>)[key] || null);
+      setRvt((rj as Record<string, Rvt>)[key] || null);
     }).catch(() => setErr(true));
   }, [playerName]);
 
   if (err || rows == null) return null;
-  if (!rows.length && !dis) return null;
+  if (!rows.length && !dis && !rvt) return null;
 
   const bat = rows.filter((r) => r.b_innings != null).sort((a, b) => seasonNum(b.season) - seasonNum(a.season));
   const bowl = rows.filter((r) => r.o_innings != null).sort((a, b) => seasonNum(b.season) - seasonNum(a.season));
@@ -153,6 +157,23 @@ export default function SardaScout({ playerName }: { playerName: string }) {
             <div className="mt-2 flex flex-col gap-1 text-[0.78rem] text-muted">
               <div><span className="mr-2 inline-block w-10 rounded text-center text-[0.6rem] font-bold" style={{ background: "rgba(227,180,74,.16)", color: "var(--gold,#e3b44a)" }}>SPIN</span>{md(mm.spin)}</div>
               <div><span className="mr-2 inline-block w-10 rounded text-center text-[0.6rem] font-bold" style={{ background: "rgba(240,101,90,.16)", color: "var(--red-deep,#f0655a)" }}>PACE</span>{md(mm.pace)}</div>
+            </div>
+          </div>
+        );
+      })()}
+      {rvt && (rvt.pace_r || rvt.spin_r) && (() => {
+        const tot = rvt.pace_r + rvt.spin_r, pw = tot ? Math.round(rvt.pace_r / tot * 100) : 50, sw = 100 - pw;
+        const psr = rvt.pace_b ? Math.round(rvt.pace_r / rvt.pace_b * 100) : 0, ssr = rvt.spin_b ? Math.round(rvt.spin_r / rvt.spin_b * 100) : 0;
+        return (
+          <div className="mt-4 border-t border-line pt-4">
+            <h3 className="mb-2 font-display text-[0.78rem] uppercase tracking-wider" style={{ color: "var(--gold,#e3b44a)" }}>Runs scored — vs pace / vs spin</h3>
+            <div className="flex h-6 overflow-hidden rounded border border-line text-[0.7rem] font-bold">
+              {pw > 0 && <span className="flex items-center justify-center text-white" style={{ width: `${pw}%`, background: "linear-gradient(var(--red-deep),#c63f36)" }}>{rvt.pace_r} r</span>}
+              {sw > 0 && <span className="flex items-center justify-center" style={{ width: `${sw}%`, background: "linear-gradient(var(--gold,#e3b44a),#b8891f)", color: "#241203" }}>{rvt.spin_r} r</span>}
+            </div>
+            <div className="mt-2 flex flex-col gap-1 text-[0.78rem] text-muted">
+              <div><span className="mr-2 inline-block w-10 rounded text-center text-[0.6rem] font-bold" style={{ background: "rgba(240,101,90,.16)", color: "var(--red-deep,#f0655a)" }}>PACE</span><b className="text-ink">{rvt.pace_r}</b> r · {rvt.pace_b} b · SR <b className="text-ink">{psr}</b></div>
+              <div><span className="mr-2 inline-block w-10 rounded text-center text-[0.6rem] font-bold" style={{ background: "rgba(227,180,74,.16)", color: "var(--gold,#e3b44a)" }}>SPIN</span><b className="text-ink">{rvt.spin_r}</b> r · {rvt.spin_b} b · SR <b className="text-ink">{ssr}</b></div>
             </div>
           </div>
         );

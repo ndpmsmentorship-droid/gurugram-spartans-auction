@@ -89,7 +89,7 @@ export default function SardaScout({ playerName }: { playerName: string }) {
   const Bar = ({ label, v }: { label: string; v: number }) => (
     <div className="flex items-center gap-2.5 text-[0.78rem]">
       <span className="w-16 text-muted">{label}</span>
-      <div className="h-[7px] flex-1 overflow-hidden rounded bg-white/[0.06]">
+      <div className="h-[7px] flex-1 overflow-hidden rounded" style={{ background: "color-mix(in srgb, var(--ink,#000) 10%, transparent)" }}>
         <i className="block h-full" style={{ width: `${Math.round(v)}%`, background: "linear-gradient(90deg,var(--red-deep),var(--gold,#e3b44a))" }} />
       </div>
       <b className="w-6 text-right font-mono text-ink">{Math.round(v)}</b>

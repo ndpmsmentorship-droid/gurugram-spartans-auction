@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import TeamCrest from "@/app/TeamCrest";
 import {
   createOwner,
   resetOwnerPassword,
@@ -12,20 +13,22 @@ export type TeamRow = {
   id: string;
   name: string;
   division: string;
+  logoUrl: string | null;
   squad: number;
   owner: { id: string; name: string; username: string } | null;
 };
 
-const DIVS = ["Elite", "Fighters"];
-
 export default function OwnersManager({ rows }: { rows: TeamRow[] }) {
   const withOwner = rows.filter((r) => r.owner).length;
+  // Groups come from the data, not a hardcoded list — renaming or adding one
+  // in Admin › Teams shouldn't require editing this file.
+  const divs = [...new Set(rows.map((r) => r.division))].sort();
   return (
     <div className="mt-6">
       <p className="label-mono mb-4">
         {withOwner} of {rows.length} teams have a login
       </p>
-      {DIVS.map((div) => {
+      {divs.map((div) => {
         const teams = rows.filter((r) => r.division === div);
         if (!teams.length) return null;
         return (
@@ -49,9 +52,12 @@ function TeamOwnerCard({ team }: { team: TeamRow }) {
   return (
     <div className="rounded-[12px] border border-line bg-surface p-4">
       <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="truncate font-display text-[1.05rem] leading-none">{team.name}</p>
-          <p className="label-mono mt-1.5">{team.squad} players</p>
+        <div className="flex min-w-0 items-center gap-2.5">
+          <TeamCrest name={team.name} logoUrl={team.logoUrl} size={32} />
+          <div className="min-w-0">
+            <p className="truncate font-display text-[1.05rem] leading-none">{team.name}</p>
+            <p className="label-mono mt-1.5">{team.squad} players</p>
+          </div>
         </div>
         {team.owner ? (
           <span className="shrink-0 rounded-full bg-[color-mix(in_oklab,var(--up)_18%,transparent)] px-2 py-0.5 text-[0.7rem] font-semibold text-up">

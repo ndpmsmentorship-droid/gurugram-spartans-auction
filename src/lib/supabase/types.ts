@@ -115,6 +115,61 @@ export type ScoutPlayerInsert = Partial<ScoutNumericCols> & {
   scouting_note?: string | null;
 };
 
+// ---- Match schedule (see supabase/schedule_schema.sql) ---------------------
+
+export type FixtureStage = "group" | "semi" | "third" | "final";
+export type FixtureStatus =
+  | "scheduled"
+  | "completed"
+  | "no_result"
+  | "abandoned";
+
+export type ScheduleConfigRow = {
+  season_id: string;
+  start_date: string;
+  match_days: string[];
+  slots: string[];
+  blackout_dates: string[];
+  venue: string;
+  seed: number;
+  generated_at: string | null;
+  updated_at: string;
+};
+
+export type ScheduleConfigInsert = Omit<
+  ScheduleConfigRow,
+  "updated_at" | "generated_at"
+> & { generated_at?: string | null };
+
+export type FixtureRow = {
+  id: string;
+  season_id: string;
+  match_no: number;
+  stage: FixtureStage;
+  round: number;
+  match_date: string;
+  day_name: string;
+  slot: string;
+  group_name: string | null;
+  home_team_id: string | null;
+  away_team_id: string | null;
+  home_label: string | null;
+  away_label: string | null;
+  venue: string | null;
+  status: FixtureStatus;
+  home_score: string | null;
+  away_score: string | null;
+  winner_team_id: string | null;
+  result_note: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type FixtureInsert = Omit<
+  FixtureRow,
+  "id" | "created_at" | "updated_at" | "status"
+> & { status?: FixtureStatus };
+
 export interface Database {
   public: {
     Tables: {
@@ -155,16 +210,21 @@ export interface Database {
           id: string;
           season_id: string;
           name: string;
+          /** 'Group A' | 'Group B' for SDLL — the league's own grouping. */
+          division: string | null;
           owner_profile_id: string | null;
           is_mock: boolean;
           purse_total: number;
           purse_remaining: number;
           logo_url: string | null;
+          /** Prototype: team whose archived squad this team displays. */
+          source_team_id: string | null;
           created_at: string;
         };
         Insert: {
           season_id: string;
           name: string;
+          division?: string | null;
           owner_profile_id?: string | null;
           is_mock?: boolean;
           purse_total: number;
@@ -173,11 +233,13 @@ export interface Database {
         };
         Update: Partial<{
           name: string;
+          division: string | null;
           owner_profile_id: string | null;
           is_mock: boolean;
           purse_total: number;
           purse_remaining: number;
           logo_url: string | null;
+          source_team_id: string | null;
         }>;
         Relationships: [];
       };
@@ -389,6 +451,18 @@ export interface Database {
         Row: ScoutPlayerRow;
         Insert: ScoutPlayerInsert;
         Update: Partial<ScoutPlayerInsert>;
+        Relationships: [];
+      };
+      schedule_config: {
+        Row: ScheduleConfigRow;
+        Insert: ScheduleConfigInsert;
+        Update: Partial<ScheduleConfigInsert>;
+        Relationships: [];
+      };
+      fixtures: {
+        Row: FixtureRow;
+        Insert: FixtureInsert;
+        Update: Partial<FixtureInsert>;
         Relationships: [];
       };
     };

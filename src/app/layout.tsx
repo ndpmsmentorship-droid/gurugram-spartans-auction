@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Oswald, Jost, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { getCurrentProfile } from "@/lib/auth";
+import { isAuctionLive } from "@/lib/auction/state";
 import { signOut } from "@/app/login/actions";
 import Nav, { type NavItem } from "./Nav";
 import crest from "./brand/crest.png";
@@ -74,12 +75,17 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const profile = await getCurrentProfile();
+  const auctionLive = await isAuctionLive();
 
+  // Only the two public routes are advertised to a signed-out visitor —
+  // everything else redirects to /login (see proxy.ts), so linking to it from
+  // the masthead would just bounce them.
   const items: NavItem[] = [
     { href: "/auction", label: "Live Board" },
     // The Squads showcase is the single Gurugram Spartans team page — hidden
     // from owners, who have their own My Squad instead.
     ...(profile?.role === "owner" ? [] : [{ href: "/squad", label: "Squads" }]),
+    ...(profile ? [{ href: "/schedule", label: "Schedule" }] : []),
     ...(profile?.role === "owner"
       ? [
           { href: "/my-team", label: "My Squad" },
@@ -129,13 +135,22 @@ export default async function RootLayout({
             <Nav items={items} />
 
             <div className="flex shrink-0 items-center gap-3">
-              <span className="hidden items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 font-mono text-[0.625rem] uppercase tracking-[0.16em] text-white sm:inline-flex">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#F0564A] opacity-75" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#F0564A]" />
+              {/* Reflects the actual lot state — it used to be hardcoded, so the
+                  masthead claimed a live auction at all times. */}
+              {auctionLive ? (
+                <span className="hidden items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 font-mono text-[0.625rem] uppercase tracking-[0.16em] text-white sm:inline-flex">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#F0564A] opacity-75" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#F0564A]" />
+                  </span>
+                  Auction Live
                 </span>
-                Auction Live
-              </span>
+              ) : (
+                <span className="hidden items-center gap-2 rounded-full border border-white/15 px-3.5 py-1.5 font-mono text-[0.625rem] uppercase tracking-[0.16em] text-white/45 sm:inline-flex">
+                  <span className="inline-flex h-1.5 w-1.5 rounded-full bg-white/30" />
+                  Auction Idle
+                </span>
+              )}
               {profile ? (
                 <form action={signOut}>
                   <button

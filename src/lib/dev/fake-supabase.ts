@@ -12,9 +12,11 @@
 import {
   fixturePlayers,
   fixtureJerseySizes,
+  fixtureMatches,
   FIXTURE_TEAMS,
   FIXTURE_SEASON,
   FIXTURE_PROFILE,
+  FIXTURE_SCHEDULE_CONFIG,
 } from "./fixture";
 
 export const DEV_FIXTURE = process.env.SPARTANS_DEV_FIXTURE === "1";
@@ -33,6 +35,10 @@ function tableRows(table: string): Row[] {
       return [FIXTURE_PROFILE] as unknown as Row[];
     case "jersey_sizes":
       return fixtureJerseySizes() as unknown as Row[];
+    case "fixtures":
+      return fixtureMatches() as unknown as Row[];
+    case "schedule_config":
+      return [FIXTURE_SCHEDULE_CONFIG] as unknown as Row[];
     default:
       return [];
   }
@@ -74,6 +80,16 @@ class Query implements PromiseLike<{ data: unknown; error: null; count?: number 
   }
   is(col: string, val: unknown) {
     this.rows = val === null ? this.rows.filter((r) => r[col] == null) : this.rows;
+    return this;
+  }
+  // Case-insensitive LIKE with % wildcards — getAuctionSeasonId() matches the
+  // season by name this way, so /auction 500s in preview without it.
+  ilike(col: string, pattern: string) {
+    const re = new RegExp(
+      "^" + pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/%/g, ".*") + "$",
+      "i"
+    );
+    this.rows = this.rows.filter((r) => re.test(String(r[col] ?? "")));
     return this;
   }
   order(col: string, opts?: { ascending?: boolean }) {

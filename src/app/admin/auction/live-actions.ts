@@ -71,9 +71,18 @@ export async function hammerLot(): Promise<Result> {
   return call("hammer_lot", {});
 }
 
-/** No bids / withdrawn — the player goes back to the pool. */
+/** No bids — records the player as UNSOLD. A verdict, and it sticks. */
 export async function passLot(): Promise<Result> {
   return call("pass_lot", {});
+}
+
+/**
+ * Take the lot off the block with no verdict, to auction later. Unlike
+ * passLot() this records nothing against the player — he simply returns to the
+ * pool and can be put up again.
+ */
+export async function withdrawLot(): Promise<Result> {
+  return call("withdraw_lot", {});
 }
 
 /** Reverse the most recent sale. */

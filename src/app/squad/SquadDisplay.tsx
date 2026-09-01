@@ -2,6 +2,7 @@ import Link from "next/link";
 import { tierStyle, LEGEND_STYLE } from "@/lib/scout/tier";
 import { roleGroup } from "@/lib/scout/analytics";
 import SpartansStars from "@/app/SpartansStars";
+import TeamCrest from "@/app/TeamCrest";
 
 export type SquadCard = {
   id: string;
@@ -47,14 +48,12 @@ export default function SquadDisplay({
   squad,
   jerseyByPlayer = {},
   displayByPlayer = {},
-  sizesByPlayer = {},
 }: {
   seasonName?: string | null;
-  team: { name: string; purse_total: number } | null;
+  team: { name: string; logo_url: string | null; purse_total: number } | null;
   squad: SquadCard[];
   jerseyByPlayer?: Record<string, string | number | null>;
   displayByPlayer?: Record<string, string | null>;
-  sizesByPlayer?: Record<string, { tshirt: string | null; lower: string | null }>;
 }) {
   const jersey = (id: string) => {
     const v = jerseyByPlayer[id];
@@ -90,15 +89,12 @@ export default function SquadDisplay({
       <header className="band">
         <div className="mx-auto flex w-full max-w-[1400px] flex-wrap items-center justify-between gap-8 px-5 py-10 sm:px-7">
           <div className="flex min-w-0 items-center gap-7">
-            <span
-              className="hidden h-[130px] w-[112px] shrink-0 items-center justify-center rounded-[8px_8px_46px_46px] border border-white/20 font-mono text-[0.563rem] uppercase tracking-[0.16em] text-white/45 sm:flex"
-              style={{
-                background:
-                  "repeating-linear-gradient(135deg, rgba(255,255,255,.06) 0 7px, transparent 7px 14px)",
-              }}
-              aria-hidden
-            >
-              Team logo
+            <span className="hidden shrink-0 sm:block">
+              <TeamCrest
+                name={team?.name ?? "Gurugram Spartans"}
+                logoUrl={team?.logo_url}
+                size={112}
+              />
             </span>
             <div className="min-w-0">
               <p className="font-mono text-[0.625rem] uppercase tracking-[0.24em] text-white/55">
@@ -168,12 +164,11 @@ export default function SquadDisplay({
         </div>
 
       {/* squad table */}
-      {/* mobile: cards (sizes in-line on the right) */}
+      {/* mobile: cards */}
       <div className="mt-5 space-y-2 sm:hidden">
         {sorted.map((p) => {
           const cb = catBadge(p.auction_category);
           const jn = jersey(p.id);
-          const sizes = sizesByPlayer[p.id];
           const dn = displayByPlayer[p.id];
           return (
             <div key={p.id} className="flex items-center gap-3 rounded-[12px] border border-line bg-surface p-3">
@@ -199,10 +194,6 @@ export default function SquadDisplay({
                   {dn ? ` · “${dn}”` : ""}
                 </p>
               </div>
-              <div className="num shrink-0 text-right text-[0.688rem] leading-relaxed text-muted">
-                <div>Tee <b className="font-medium text-ink">{sizes?.tshirt || "—"}</b></div>
-                <div>Low <b className="font-medium text-ink">{sizes?.lower || "—"}</b></div>
-              </div>
             </div>
           );
         })}
@@ -213,7 +204,7 @@ export default function SquadDisplay({
         <table className="w-full min-w-[860px] border-separate border-spacing-0 text-[0.875rem]">
           <thead className="text-left">
             <tr>
-              {["Jersey", "Player", "Category", "Role", "On jersey", "T-shirt", "Lower"].map(
+              {["Jersey", "Player", "Category", "Role", "On jersey"].map(
                 (h, i) => (
                   <th
                     key={h}
@@ -233,8 +224,7 @@ export default function SquadDisplay({
               const cb = catBadge(p.auction_category);
               const jn = jersey(p.id);
               const tag = acqTag(p.acquired);
-              const sizes = sizesByPlayer[p.id];
-              const dn = displayByPlayer[p.id];
+                  const dn = displayByPlayer[p.id];
               return (
                 <tr
                   key={p.id}
@@ -266,12 +256,6 @@ export default function SquadDisplay({
                   </td>
                   <td className="border-b border-line px-4 py-3 text-muted">{roleOf(p)}</td>
                   <td className="border-b border-line px-4 py-3 text-muted">{dn || "—"}</td>
-                  <td className="num border-b border-line px-4 py-3 text-center text-muted">
-                    {sizes?.tshirt || "—"}
-                  </td>
-                  <td className="num border-b border-line px-4 py-3 text-center text-muted">
-                    {sizes?.lower || "—"}
-                  </td>
                 </tr>
               );
             })}

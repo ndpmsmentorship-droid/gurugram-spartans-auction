@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getCurrentProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import MarkButton from "./MarkButton";
+import TeamCrest from "@/app/TeamCrest";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +56,7 @@ export default async function MyTeamPage() {
 
   const { data: team } = await sb
     .from("teams")
-    .select("id, name, division, purse_total")
+    .select("id, name, division, logo_url, purse_total")
     .eq("owner_profile_id", profile.id)
     .maybeSingle();
 
@@ -137,7 +138,8 @@ export default async function MyTeamPage() {
             <p className="font-mono text-[0.625rem] uppercase tracking-[0.24em] text-white/55">
               My Squad · {team.division ?? "—"}
             </p>
-            <h1 className="mt-3 font-display text-[2.5rem] leading-[0.95] text-white sm:text-[3.25rem]">
+            <h1 className="mt-3 flex items-center gap-3 font-display text-[2.5rem] leading-[0.95] text-white sm:text-[3.25rem]">
+              <TeamCrest name={team.name} logoUrl={team.logo_url} size={48} />
               {team.name}
             </h1>
             <p className="num mt-3 text-[0.875rem] text-white/70">

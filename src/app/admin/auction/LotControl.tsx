@@ -7,6 +7,7 @@ import {
   placeRaise,
   hammerLot,
   passLot,
+  withdrawLot,
   undoLastSale,
 } from "./live-actions";
 import { DEFAULT_RULES, blockReason, inr, raiseSteps } from "@/lib/auction/rules";
@@ -235,8 +236,17 @@ export default function LotControl({
               disabled={pending}
               onClick={() => run(() => passLot())}
               className="btn-ghost"
+              title="Records the player as unsold"
             >
               Unsold — pass
+            </button>
+            <button
+              disabled={pending}
+              onClick={() => run(() => withdrawLot())}
+              className="btn-ghost"
+              title="Take off the block with no result — he can be put up again later"
+            >
+              Sell later — withdraw
             </button>
             <button
               disabled={pending}

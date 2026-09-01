@@ -56,8 +56,47 @@ Everything needed is in this repo + the Supabase/Vercel dashboards. Nothing on t
 - Deploy: `vercel deploy --prod --yes` (CLI login `ndpmsmentorship-2641`, project `gurugram-spartans-auction`). Project has **no Git integration** — must deploy via CLI. Repo-local git pushes use `credential.helper=store --file=C:/Users/lovet/.git-credentials-ndpms` (Windows machine).
 
 ## Pages
-- **Public:** `/auction` (live board — on-the-block lot + 12 team cards, Realtime), `/squad` (squad display, season banner from DB), `/jersey`, `/sarda` (SCCL league record, not in nav), `/scout/[id]` (player profiles, admin-gated edit controls), `/login`.
-- **Login-gated:** `/scout` (pool board, category filters A+/A/B/Special), `/admin/auction` (auctioneer console: search → put up lot → per-team raise buttons with purse/cap enforcement → hammer/pass/undo), `/admin`, `/players`, `/my-team`.
+- **Public:** `/auction` (live board — on-the-block lot + 12 team cards, Realtime), `/schedule` (match schedule — fixtures / weekend view / points tables / slot spread, see below), `/squad` (squad display, season banner from DB), `/jersey`, `/sarda` (SCCL league record, not in nav), `/scout/[id]` (player profiles, admin-gated edit controls), `/login`.
+- **Login-gated:** `/scout` (pool board, category filters A+/A/B/Special), `/admin/auction` (auctioneer console: search → put up lot → per-team raise buttons with purse/cap enforcement → hammer/pass/undo), `/admin`, `/admin/schedule`, `/players`, `/my-team`.
+
+## MATCH SCHEDULE PORTAL — added 2026-08-17
+**⚠️ Needs its migration run once before use:** paste `supabase/schedule_schema.sql` into the Supabase
+SQL Editor (project `hlouwxtyotrmlehaxgav`). It is additive — two new tables (`fixtures`,
+`schedule_config`) plus a `touch_updated_at()` trigger fn; it touches nothing that already exists.
+Until it runs, `/schedule` renders its empty state rather than erroring.
+
+- **Format** (12 teams, Group A/B of six): single round robin inside each group, **one round of both
+  groups per weekend** — so 6 matches a weekend (3 Sat + 3 Sun) and every team plays exactly once.
+  "No team plays twice in a weekend" is therefore structural, not a solved constraint. 5 weekends =
+  30 group matches, then a finals weekend (2 semis + 3rd place + final) = **34 fixtures**.
+- **Generator** `src/lib/schedule/generate.ts` — pure, no Supabase/React, so it runs in an action, a
+  route handler or a script. Circle-method round robin → seeded hill-climb that assigns matches to
+  (day, slot) boxes. Cost function priorities: never lock a team out of a slot (40) > slot counts
+  within one (6) > even Sat/Sun split (4) > no same slot two weekends running (2). Default config
+  reaches **cost 0**: all 12 teams get 5 matches across all 3 slots (2-2-1) with a 3/2 day split.
+  Same seed + config ⇒ identical schedule.
+- **There is no home/away in this league** — one venue, so the concept was removed from every
+  surface (2026-08-17). The `fixtures.home_team_id`/`away_team_id` columns are kept as the
+  persistence contract but mean only "listed first"/"listed second"; the export calls them
+  Team 1 / Team 2, and the slot-spread table has no home/away column.
+- **Defaults**: start Sat **20 Feb 2027** (third weekend of Feb), slots 08:00/12:00/16:00,
+  Sportscube Gurugram. All of it is editable in the admin UI, including blackout dates (any weekend
+  touching one is skipped wholesale).
+- **`/admin/schedule`** — generate/regenerate (destructive: replaces all fixtures and discards
+  entered results; the UI warns), clear (needs an explicit confirm token in the form), and per-match
+  result entry by weekend.
+- **`/schedule`** — public, works signed out. Tabs: All Fixtures / By Weekend / Points Table / Slot
+  Spread, plus a team filter and an **.xlsx export** (`/api/schedule/export`) whose sheet layout
+  mirrors the SCCL workbook the league already circulates.
+- **Standings are never stored** — `src/lib/schedule/standings.ts` recomputes them from `fixtures` on
+  every read (win 2 / tie 1 / NR 1). Knockout placeholders ("Winner Group A") resolve to real team
+  names only once *every* group match has a result. No NRR: scores are free text, which can't yield
+  overs faced.
+- **Reads go through `createAdminClient()`**, like `/auction` and `/squad` — `seasons`/`teams` are
+  RLS-gated to signed-in users but the schedule must render for anyone. Server-only, and the team
+  select is narrowed to id/name/division so no purse figures cross the boundary.
+- Dev fixture (`SPARTANS_DEV_FIXTURE=1`) now covers all 12 teams and a generated season, so both
+  pages can be designed against real-shaped data with no DB.
 
 ## Pending / next
 1. **Projector mode** view for the public board (venue screen).

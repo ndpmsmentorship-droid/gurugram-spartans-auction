@@ -1,14 +1,23 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-// /auction (live board), /squad (final squad display) and /jersey (size form) are
-// PUBLIC — read-only, service-role data. Everything below stays login-gated.
-const PROTECTED_PREFIXES = [
-  "/admin",
-  "/my-team",
-  "/players",
-  "/scout",
+// ALLOWLIST, not a denylist: only the live board and the squad display are
+// public. Everything else — schedule, pool, jersey form, player profiles, the
+// league record, my-team, admin — needs a login. Inverted deliberately, so a
+// new route is private by default rather than public by accident.
+//
+// /admin/* additionally requires the admin role, enforced in admin/layout.tsx.
+const PUBLIC_PATHS = [
+  "/login",
+  "/auction", // live board
+  "/squad", // squad display
 ];
+
+function isPublic(pathname: string): boolean {
+  return PUBLIC_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`)
+  );
+}
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -42,12 +51,8 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
-  // Player profile pages (/scout/<uuid>) are public — the pool board and tools stay gated.
-  const isPublicProfile = /^\/scout\/[0-9a-f-]{36}$/.test(pathname);
-  const isProtected =
-    !isPublicProfile && PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
-  if (isProtected && !user) {
+  if (!isPublic(pathname) && !user) {
     // clone() keeps the deployment's basePath (/spartansscout) on the redirect
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
@@ -59,5 +64,11 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  matcher: [
+    // "/" must be listed on its own: the pattern below compiles to a segment
+    // that requires at least one character, so the bare root never matched it
+    // and the landing page was served without a login.
+    "/",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };

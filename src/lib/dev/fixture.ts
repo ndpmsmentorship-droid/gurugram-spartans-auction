@@ -11,6 +11,7 @@
  */
 
 import type { ScoutPlayerRow } from "@/lib/supabase/types";
+import { generateSchedule, DEFAULT_CONFIG } from "@/lib/schedule/generate";
 
 // mulberry32 — deterministic, no dependency
 function rng(seed: number) {
@@ -56,11 +57,22 @@ const BOWL_STYLES = [
 // SDLL categories, weighted roughly like the real 295-player pool
 // (43 A+ / 117 A / 123 B / 12 Special).
 const TIERS = ["A+", "A", "A", "A", "B", "B", "B", "B", "Special"];
+// All twelve SDLL franchises. The first four carry the original fixture ids so
+// the pre-existing player allocations below keep pointing at real teams; the
+// rest exist so the schedule preview has a full 6-a-side group to work with.
 const TEAM_IDS = [
   "11111111-1111-4111-8111-111111111111",
   "22222222-2222-4222-8222-222222222222",
   "33333333-3333-4333-8333-333333333333",
   "44444444-4444-4444-8444-444444444444",
+  "55555555-5555-4555-8555-555555555555",
+  "66666666-6666-4666-8666-666666666666",
+  "77777777-7777-4777-8777-777777777777",
+  "88888888-8888-4888-8888-888888888888",
+  "99999999-9999-4999-8999-999999999999",
+  "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+  "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
 ];
 
 const COUNT = 240;
@@ -216,7 +228,9 @@ export function fixturePlayers(): ScoutPlayerRow[] {
       sold_price: number | null;
       acquired: string | null;
     };
-    last.team_id = sold ? TEAM_IDS[Math.floor(r() * TEAM_IDS.length)] : null;
+    // Deliberately only the first four teams: spreading 240 players over all
+    // twelve would leave the Spartans squad page too thin to design against.
+    last.team_id = sold ? TEAM_IDS[Math.floor(r() * 4)] : null;
     last.sold_price = sold ? last.bought_price : null;
     last.acquired = sold ? (r() < 0.15 ? "retained" : "auction") : null;
   }
@@ -232,11 +246,70 @@ export const FIXTURE_TEAMS = [
   // "Gurugram Spartans" must exist — /squad looks the team up by that exact
   // name, so without it the squad page renders empty. Names, groups and the
   // ₹3,00,000 clean-slate purse mirror the real SDLL migration.
-  { id: TEAM_IDS[0], name: "Gurugram Spartans", division: "Group B", purse_total: 300000, season_id: FIXTURE_SEASON.id },
-  { id: TEAM_IDS[1], name: "Goan Monks", division: "Group B", purse_total: 300000, season_id: FIXTURE_SEASON.id },
-  { id: TEAM_IDS[2], name: "Bengal Tigers", division: "Group A", purse_total: 300000, season_id: FIXTURE_SEASON.id },
-  { id: TEAM_IDS[3], name: "Patna Panthers", division: "Group A", purse_total: 300000, season_id: FIXTURE_SEASON.id },
+  { id: TEAM_IDS[0], name: "Gurugram Spartans", division: "Group B", is_mock: false, purse_total: 300000, season_id: FIXTURE_SEASON.id },
+  { id: TEAM_IDS[1], name: "Goan Monks", division: "Group B", is_mock: false, purse_total: 300000, season_id: FIXTURE_SEASON.id },
+  { id: TEAM_IDS[2], name: "Bengal Tigers", division: "Group A", is_mock: false, purse_total: 300000, season_id: FIXTURE_SEASON.id },
+  { id: TEAM_IDS[3], name: "Patna Panthers", division: "Group A", is_mock: false, purse_total: 300000, season_id: FIXTURE_SEASON.id },
+  { id: TEAM_IDS[4], name: "ACCI", division: "Group A", is_mock: false, purse_total: 300000, season_id: FIXTURE_SEASON.id },
+  { id: TEAM_IDS[5], name: "Chennai Thalaiva", division: "Group A", is_mock: false, purse_total: 300000, season_id: FIXTURE_SEASON.id },
+  { id: TEAM_IDS[6], name: "Lucknow Strikers", division: "Group A", is_mock: false, purse_total: 300000, season_id: FIXTURE_SEASON.id },
+  { id: TEAM_IDS[7], name: "NCR Turbo Chargers", division: "Group A", is_mock: false, purse_total: 300000, season_id: FIXTURE_SEASON.id },
+  { id: TEAM_IDS[8], name: "Bhojpuri Dabangs", division: "Group B", is_mock: false, purse_total: 300000, season_id: FIXTURE_SEASON.id },
+  { id: TEAM_IDS[9], name: "Jaipur Royals", division: "Group B", is_mock: false, purse_total: 300000, season_id: FIXTURE_SEASON.id },
+  { id: TEAM_IDS[10], name: "Punjab Royals Legends", division: "Group B", is_mock: false, purse_total: 300000, season_id: FIXTURE_SEASON.id },
+  { id: TEAM_IDS[11], name: "Uttrakhand Yoddhas", division: "Group B", is_mock: false, purse_total: 300000, season_id: FIXTURE_SEASON.id },
 ];
+
+/**
+ * A generated season's fixtures, so /schedule and /admin/schedule can be
+ * designed against real-shaped data. Runs the actual generator rather than
+ * hand-writing rows, which keeps the preview honest about what it produces.
+ */
+export function fixtureMatches() {
+  const { fixtures } = generateSchedule(
+    FIXTURE_TEAMS.map((t) => ({ id: t.id, name: t.name, group: t.division })),
+    DEFAULT_CONFIG
+  );
+  // Play out the first two weekends so the points table has something in it.
+  return fixtures.map((f, i) => {
+    const played = f.stage === "group" && f.round <= 2;
+    return {
+      id: `f${String(i + 1).padStart(3, "0")}-0000-4000-8000-000000000000`,
+      season_id: FIXTURE_SEASON.id,
+      match_no: f.matchNo,
+      stage: f.stage,
+      round: f.round,
+      match_date: f.date,
+      day_name: f.dayName,
+      slot: f.slot,
+      group_name: f.groupName,
+      home_team_id: f.homeTeamId,
+      away_team_id: f.awayTeamId,
+      home_label: f.homeLabel,
+      away_label: f.awayLabel,
+      venue: f.venue,
+      status: played ? "completed" : "scheduled",
+      home_score: played ? "164/6" : null,
+      away_score: played ? "158/8" : null,
+      winner_team_id: played ? (i % 2 ? f.awayTeamId : f.homeTeamId) : null,
+      result_note: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+  });
+}
+
+export const FIXTURE_SCHEDULE_CONFIG = {
+  season_id: FIXTURE_SEASON.id,
+  start_date: DEFAULT_CONFIG.startDate,
+  match_days: DEFAULT_CONFIG.matchDays,
+  slots: DEFAULT_CONFIG.slots,
+  blackout_dates: DEFAULT_CONFIG.blackoutDates,
+  venue: DEFAULT_CONFIG.venue,
+  seed: DEFAULT_CONFIG.seed,
+  generated_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
 
 // A signed-in admin, so the gated Pool page and the admin-only profile controls
 // both render while designing.

@@ -3,17 +3,20 @@
 import { useMemo, useState } from "react";
 import { useLotSync } from "./useLotSync";
 import OnTheBlock, { type BlockState } from "./OnTheBlock";
+import TeamCrest from "@/app/TeamCrest";
 
 export type BoardTeam = {
   id: string;
   name: string;
   division: string | null;
+  logo_url: string | null;
   purse_total: number;
 };
 export type BoardPlayer = {
   id: string;
   full_name: string;
   auction_category: string | null;
+  cricheroes_link?: string | null;
   team_id: string | null;
   sold_price: number | null;
   acquired: string | null;
@@ -76,7 +79,8 @@ export default function SquadsBoard({
           <p className="mt-3 max-w-md text-[0.875rem] text-muted">
             Updates the moment a player is sold.{" "}
             <span className="text-red">R</span> = retained ·{" "}
-            <span className="text-red">O</span> = owner · #n = overall rank.
+            <span className="text-red">O</span> = owner · #n = overall rank ·
+            tap a name for its CricHeroes profile.
           </p>
         </div>
 
@@ -197,16 +201,7 @@ function TeamCard({
       >
         <div className="flex items-start justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2.5">
-            <span
-              className="flex h-9 w-8 shrink-0 items-center justify-center rounded-[3px_3px_12px_12px] border border-line text-[0.5rem] text-faint"
-              style={{
-                background:
-                  "repeating-linear-gradient(135deg, rgba(37,2,1,.07) 0 5px, transparent 5px 10px)",
-              }}
-              aria-hidden
-            >
-              LOGO
-            </span>
+            <TeamCrest name={team.name} logoUrl={team.logo_url} size={36} />
             <div className="min-w-0">
               <p className="truncate font-display text-[1.063rem] leading-none">
                 {team.name}
@@ -243,7 +238,7 @@ function TeamCard({
               highlight && p.full_name.toLowerCase().includes(highlight);
             return (
               <li
-                key={p.id}
+                key={`${p.team_id ?? ""}-${p.id}`}
                 className="flex items-center justify-between gap-2 px-4 py-2"
                 style={hit ? { background: "var(--gold-fill)" } : undefined}
               >
@@ -256,9 +251,21 @@ function TeamCard({
                       #{p.overall_rank}
                     </span>
                   )}
-                  <span className="truncate text-[0.875rem] text-ink">
-                    {p.full_name}
-                  </span>
+                  {p.cricheroes_link ? (
+                    <a
+                      href={p.cricheroes_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={`${p.full_name} — CricHeroes profile`}
+                      className="truncate text-[0.875rem] text-ink underline decoration-line decoration-dotted underline-offset-[3px] transition hover:text-red hover:decoration-solid"
+                    >
+                      {p.full_name}
+                    </a>
+                  ) : (
+                    <span className="truncate text-[0.875rem] text-ink">
+                      {p.full_name}
+                    </span>
+                  )}
                   {p.acquired === "retained" && (
                     <span className="num shrink-0 text-[0.594rem] text-red" title="Retained">
                       R

@@ -1,5 +1,10 @@
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { loadRosters } from "@/lib/auction/roster";
+
+// The showcase team. Renaming it in Admin › Teams renames this page's subject
+// too, so keep the constant in step if the flagship franchise ever changes.
+const SQUAD_TEAM_NAME = "Gurugram Spartans";
 import { getCurrentProfile } from "@/lib/auth";
 import SquadDisplay, { type SquadCard } from "./SquadDisplay";
 
@@ -19,34 +24,30 @@ export default async function SquadPage() {
   const sb = admin as unknown as { from: (t: string) => any };
   const { data: season } = await sb.from("seasons").select("id, name").eq("is_active", true).maybeSingle();
 
-  let team: { name: string; purse_total: number } | null = null;
+  let team: { name: string; logo_url: string | null; purse_total: number } | null = null;
   let squad: SquadCard[] = [];
   if (season) {
     const { data: t } = await sb
       .from("teams")
-      .select("id, name, purse_total")
+      .select("id, name, logo_url, purse_total, source_team_id")
       .eq("season_id", season.id)
-      .eq("name", "Gurugram Spartans")
+      .eq("name", SQUAD_TEAM_NAME)
       .maybeSingle();
     if (t) {
-      team = { name: t.name, purse_total: t.purse_total };
-      const { data } = await sb
-        .from("scout_players")
-        .select("id, full_name, auction_category, primary_role, is_keeper, acquired, sold_price, photo_url, overall_index")
-        .eq("team_id", t.id);
-      squad = (data ?? []) as SquadCard[];
+      team = { name: t.name, logo_url: t.logo_url ?? null, purse_total: t.purse_total };
+      // Own signings plus the borrowed SARDA squad, so the showcase isn't
+      // empty while the SDLL pool is still unallocated.
+      squad = (await loadRosters(sb, [t], "primary_role, is_keeper, photo_url")) as unknown as SquadCard[];
     }
   }
 
   // jersey number, display name + kit sizes from the form (table may not exist yet → blank)
   const jerseyByPlayer: Record<string, string | null> = {};
   const displayByPlayer: Record<string, string | null> = {};
-  const sizesByPlayer: Record<string, { tshirt: string | null; lower: string | null }> = {};
-  const { data: js } = await sb.from("jersey_sizes").select("player_id, display_name, jersey_number, tshirt_size, lower_size");
+  const { data: js } = await sb.from("jersey_sizes").select("player_id, display_name, jersey_number");
   for (const r of js ?? []) {
     jerseyByPlayer[r.player_id] = r.jersey_number;
     displayByPlayer[r.player_id] = r.display_name;
-    sizesByPlayer[r.player_id] = { tshirt: r.tshirt_size, lower: r.lower_size };
   }
 
   return (
@@ -56,7 +57,6 @@ export default async function SquadPage() {
       squad={squad}
       jerseyByPlayer={jerseyByPlayer}
       displayByPlayer={displayByPlayer}
-      sizesByPlayer={sizesByPlayer}
     />
   );
 }

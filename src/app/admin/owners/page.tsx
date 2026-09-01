@@ -1,26 +1,32 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailToUsername } from "@/lib/owner-auth";
+import { getAuctionSeasonId, AUCTION_DIVISIONS } from "@/lib/auction/target";
 import OwnersManager, { type TeamRow } from "./OwnersManager";
 
 export const dynamic = "force-dynamic";
-
-// Team-owner logins. The owner experience runs on the SCCL Elite + Fighters
-// squads (real rosters, full stats), so those are the teams we hand out here.
-const DIVISIONS = ["Elite", "Fighters"];
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export default async function OwnersPage() {
   const admin = createAdminClient();
   const sb = admin as unknown as { from: (t: string) => any };
 
+  // Owner logins must list exactly the teams the auction runs on, otherwise
+  // this page and /my-team disagree about who owns what. Both now resolve
+  // through lib/auction/target.ts, so repointing the prototype at a different
+  // season is a one-file change rather than a hunt through every surface.
+  // (It previously filtered divisions with NO season filter at all.)
+  const seasonId = await getAuctionSeasonId();
+
   const { data: teams } = await sb
     .from("teams")
-    .select("id, name, division, owner_profile_id")
-    .in("division", DIVISIONS)
+    .select("id, name, division, logo_url, owner_profile_id")
+    .eq("season_id", seasonId ?? "")
+    .in("division", AUCTION_DIVISIONS)
+    .eq("is_mock", false)
     .order("division")
     .order("name");
 
-  // squad size per team (from the SCCL archive)
+  // Squad sizes from the archive the auction prototype runs on.
   const { data: sq } = await sb
     .from("sccl_s6_players")
     .select("team_id")
@@ -56,6 +62,7 @@ export default async function OwnersPage() {
     id: t.id,
     name: t.name,
     division: t.division,
+    logoUrl: t.logo_url ?? null,
     squad: counts.get(t.id) ?? 0,
     owner: t.owner_profile_id
       ? {
@@ -72,8 +79,12 @@ export default async function OwnersPage() {
       <p className="mt-2 max-w-2xl text-sm text-muted">
         Create a login for each team owner. They sign in at{" "}
         <span className="num">/login</span> with their username &amp; password and land on{" "}
-        <span className="num">My Squad</span> — their team&rsquo;s roster and insights. Owner
-        squads use the SCCL Elite &amp; Fighters rosters; the live SDLL auction board is separate.
+        <span className="num">My Squad</span> — their team&rsquo;s roster and insights. Names and
+        logos come from{" "}
+        <a href="/admin/teams" className="underline underline-offset-2 hover:text-red">
+          Admin &rsaquo; Teams
+        </a>
+        , so rename a franchise there and it updates here too.
       </p>
       <OwnersManager rows={rows} />
     </div>

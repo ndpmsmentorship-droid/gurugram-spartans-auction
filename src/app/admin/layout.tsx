@@ -21,8 +21,14 @@ export default async function AdminLayout({
         <Link href="/admin/players" className="font-medium hover:text-primary">
           Player Pool
         </Link>
+        <Link href="/admin/teams" className="font-medium hover:text-primary">
+          Teams
+        </Link>
         <Link href="/admin/owners" className="font-medium hover:text-primary">
           Team Owners
+        </Link>
+        <Link href="/admin/schedule" className="font-medium hover:text-primary">
+          Schedule
         </Link>
       </nav>
       {children}

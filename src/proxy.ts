@@ -9,6 +9,7 @@ import { NextResponse, type NextRequest } from "next/server";
 // /admin/* additionally requires the admin role, enforced in admin/layout.tsx.
 const PUBLIC_PATHS = [
   "/login",
+  "/register", // player registration form
   "/auction", // live board
   "/squad", // squad display
 ];

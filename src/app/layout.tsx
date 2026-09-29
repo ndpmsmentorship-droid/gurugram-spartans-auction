@@ -83,6 +83,8 @@ export default async function RootLayout({
   // the masthead would just bounce them.
   const items: NavItem[] = [
     { href: "/auction", label: "Live Board" },
+    // Player registration is for the public, not for signed-in owners/admins.
+    ...(profile ? [] : [{ href: "/register", label: "Register" }]),
     // The Squads showcase is the single Gurugram Spartans team page — hidden
     // from owners, who have their own My Squad instead.
     ...(profile?.role === "owner" ? [] : [{ href: "/squad", label: "Squads" }]),

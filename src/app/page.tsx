@@ -128,9 +128,9 @@ export default async function Home() {
               that builds every squad. Presented by {PRESENTED_BY.name}.
             </p>
             <div className="mt-7 flex flex-wrap justify-center gap-3 md:justify-start">
-              <a href="#register" className="btn-accent">
+              <Link href="/register" className="btn-accent">
                 Register for Season 2
-              </a>
+              </Link>
               <Link
                 href="/auction"
                 className="rounded-full border border-white/30 px-6 py-2.5 text-[0.813rem] font-medium text-white transition hover:border-white"
@@ -208,9 +208,12 @@ export default async function Home() {
           <p className="eyebrow">Player registration · Season 2</p>
           <h2 className="mt-2 text-3xl sm:text-4xl">Enter the pool</h2>
           <p className="mt-3 max-w-2xl text-muted">
-            Registration opens here shortly. Returning players won&apos;t need to fill
-            anything twice: your profile, stats and photo are already with us.
+            Returning players won&apos;t fill anything twice: enter your mobile number and your
+            profile, stats and photo come up ready. You only add your kit details.
           </p>
+          <Link href="/register" className="btn-primary mt-5 inline-block">
+            Start registration
+          </Link>
           <ol className="mt-7 grid gap-4 md:grid-cols-3">
             {STEPS.map((s, k) => (
               <li key={s.title} className="tile p-5">

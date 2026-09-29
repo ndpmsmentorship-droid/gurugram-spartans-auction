@@ -170,6 +170,20 @@ Bandhwari, Gurugram; read from Nikhil's screenshots because WebFetch was blocked
 3. **Squad tracker** `/my-team` per owner: purse, category caps, role mix, pace/spin + L/R arm, L/R bat,
    16–25 squad gaps, "fill this gap" suggestions (via the AI chat), live via Realtime.
 
+## LANDING PAGE + SPONSOR BAR — built 2026-09-29 (commit 0d4b724), NOT YET DEPLOYED
+- `/` is now the **public** league landing page (proxy allows "/" as an exact match only). It shows Season 1
+  honours (ACCI champions in a gold frame, Goan Monks runners-up in silver), a 12-photo award carousel
+  (`Season1Gallery.tsx`), registration steps + the ₹3,000 fee note, and the sponsor wall. Signed-in users get quick links.
+- `SponsorBar.tsx` sits under the masthead on **every** page: title sponsor PlayfulNeuro + "Presented by"
+  Playful Ventures fixed, 9 partners in a marquee. Sponsors and their roles live in `src/app/sponsors.ts`.
+- Assets come from the league Drive "SLL'26 - Repository" (public link, folder id 1QVhk_CVlXpVctdO3VKJnjw5Y5OouOJ4S):
+  the logos were cut from `Grounds PRINTABLES/SPONSOR STRIP (1).png`, the honours from `Final AVs/Stills/*.pdf`, and the
+  photos from `FINALS DATA/MOM & FOM` (full-size downloads get rate-limited, so they're fetched via
+  `drive.google.com/thumbnail?id=…&sz=w1600`). Everything is in `src/app/brand/{sponsors,season1,gallery}`.
+- **Deploy blocker:** this Mac has no Vercel login. Run `npx vercel login`, then
+  `npx vercel link --yes --project gurugram-spartans-auction` and `npx vercel deploy --prod --yes`.
+- Next up: the `/register` form (phone lookup against Nikhil's master player file) + the admin review queue.
+
 ## STATUS AUDIT 2026-09-29 — fix before SDLL auction day
 Site map + status page: https://claude.ai/artifact/Lbv7FNUzAKaXoe6AijMZyo (private to Nikhil).
 - The board, /squad, /my-team and /players/[id] still run in **prototype mode on borrowed SARDA S6 squads**

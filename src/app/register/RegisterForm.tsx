@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { lookupPlayer, prepareUploads, submitRegistration, type LookupResult } from "./actions";
+import {
+  lookupPlayer,
+  searchByName,
+  prepareUploads,
+  submitRegistration,
+  type CardProfile,
+} from "./actions";
+import PlayerCard, { PlayerPhoto, prettyRole } from "./PlayerCard";
 import {
   BUCKET,
   MAX_FILE_BYTES,
@@ -15,15 +22,8 @@ import {
   normalizePhone,
 } from "./shared";
 
-type Profile = Extract<LookupResult, { found: true }>["profile"];
-
-// Source sheets spell roles "ALL_ROUNDER", "Batsman", "wicket keeper"…
-function prettyRole(r: string | null): string | null {
-  if (!r) return null;
-  const t = r.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
-  return t === "All Rounder" ? "All-rounder" : t;
-}
-type Stage = "phone" | "confirm" | "form" | "done";
+type Profile = CardProfile;
+type Stage = "phone" | "search" | "confirm" | "form" | "done";
 
 function Field({
   label,
@@ -120,6 +120,9 @@ export default function RegisterForm() {
 
   const [phone, setPhone] = useState("");
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [matchedBy, setMatchedBy] = useState<"phone" | "name" | null>(null);
+  const [nameQ, setNameQ] = useState("");
+  const [results, setResults] = useState<Profile[] | null>(null);
 
   const [fullName, setFullName] = useState("");
   const [dob, setDob] = useState("");
@@ -152,18 +155,50 @@ export default function RegisterForm() {
       return setErr("This number is already registered for Season 2. Contact the league to change your details.");
     if (res.found) {
       setProfile(res.profile);
+      setMatchedBy("phone");
       setLinkedin(res.profile.linkedin_link ?? "");
       setStage("confirm");
     } else {
       setProfile(null);
-      setStage("form");
+      setResults(null);
+      setStage("search");
     }
   }
 
-  function notMe() {
-    setProfile(null);
+  async function runSearch(e: React.FormEvent) {
+    e.preventDefault();
+    setErr(null);
+    setBusy(true);
+    const res = await searchByName(nameQ);
+    setBusy(false);
+    if (res.error) return setErr(res.error);
+    setResults(res.results ?? []);
+  }
+
+  function pick(p: Profile) {
+    setProfile(p);
+    setMatchedBy("name");
     setLinkedin("");
+    setErr(null);
+    setStage("confirm");
+  }
+
+  function newPlayer() {
+    setProfile(null);
+    setMatchedBy(null);
+    setLinkedin("");
+    setErr(null);
     setStage("form");
+  }
+
+  function notMe() {
+    // A wrong phone match may still be a returning player under another
+    // number, so offer the name search before the new-player form.
+    setProfile(null);
+    setMatchedBy(null);
+    setLinkedin("");
+    setResults(null);
+    setStage("search");
   }
 
   function checkFile(f: File | null, label: string): string | null {
@@ -213,6 +248,7 @@ export default function RegisterForm() {
       const res = await submitRegistration({
         phone,
         masterId: profile?.id ?? null,
+        matchedBy,
         full_name: returning ? profile!.full_name : fullName,
         dob,
         email,
@@ -289,33 +325,70 @@ export default function RegisterForm() {
     );
   }
 
-  if (stage === "confirm" && profile) {
+  if (stage === "search") {
     return (
       <div className="card space-y-5 p-6 sm:p-8">
-        <p className="eyebrow">We found you</p>
-        <div className="flex items-center gap-4">
-          {profile.photo_url ? (
-            // Photos sit on whichever host the league's file points at, so a
-            // plain <img> (with a graceful hide on error) beats next/image here.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={profile.photo_url}
-              alt=""
-              className="h-20 w-20 rounded-full object-cover"
-              onError={(e) => (e.currentTarget.style.display = "none")}
-            />
-          ) : (
-            <span className="grid h-20 w-20 place-items-center rounded-full bg-wash font-display text-2xl">
-              {profile.full_name.slice(0, 1)}
-            </span>
-          )}
-          <div>
-            <h2 className="text-2xl sm:text-3xl">{profile.full_name}</h2>
-            <p className="mt-1 text-sm text-muted">
-              {[prettyRole(profile.primary_role), profile.last_team, profile.last_season].filter(Boolean).join(" · ")}
-            </p>
-          </div>
+        <div>
+          <p className="eyebrow">Number not on file</p>
+          <h2 className="mt-2 text-2xl sm:text-3xl">Played with us before?</h2>
+          <p className="mt-2 text-sm text-muted">
+            We don&apos;t have {normalizePhone(phone)} on record. Search your name to find your
+            profile, or register as a new player.
+          </p>
         </div>
+        <form onSubmit={runSearch} className="flex flex-col gap-3 sm:flex-row">
+          <input
+            id="reg-search"
+            className="input"
+            placeholder="Your name, e.g. Kanishk Sheel"
+            value={nameQ}
+            onChange={(e) => setNameQ(e.target.value)}
+            autoComplete="name"
+          />
+          <button type="submit" className="btn-primary shrink-0" disabled={busy}>
+            {busy ? "Searching…" : "Search"}
+          </button>
+        </form>
+        {error}
+        {results && results.length === 0 && (
+          <p className="text-sm text-muted">No one by that name. Try your surname only, or register as new.</p>
+        )}
+        {results && results.length > 0 && (
+          <ul className="grid gap-3">
+            {results.map((r) => (
+              <li key={r.id}>
+                <button
+                  type="button"
+                  onClick={() => pick(r)}
+                  className="flex w-full items-center gap-4 rounded-[12px] border border-line bg-surface p-3 text-left transition hover:border-red"
+                >
+                  <PlayerPhoto src={r.photo_url} name={r.full_name} className="h-20 w-16 shrink-0 rounded-[8px]" sizes="64px" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-display text-xl uppercase leading-tight">{r.full_name}</span>
+                    <span className="mt-1 block text-sm text-muted">
+                      {[r.is_owner ? "Team owner" : null, r.last_team, prettyRole(r.primary_role)].filter(Boolean).join(" · ")}
+                    </span>
+                  </span>
+                  <span className="label-mono shrink-0 text-red">That&apos;s me →</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="border-t border-line pt-5">
+          <button type="button" className="btn-ghost" onClick={newPlayer}>
+            I&apos;m new. Register as a new player
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (stage === "confirm" && profile) {
+    return (
+      <div className="space-y-5">
+        <p className="eyebrow">{matchedBy === "phone" ? "We found you" : "Is this you?"}</p>
+        <PlayerCard p={profile} />
         <div className="flex flex-wrap gap-3">
           <button type="button" className="btn-primary" onClick={() => setStage("form")}>
             This is me
@@ -454,7 +527,7 @@ export default function RegisterForm() {
         <button type="submit" className="btn-primary" disabled={busy || !feeAck}>
           {busy ? "Submitting…" : "Submit registration"}
         </button>
-        <button type="button" className="btn-ghost" onClick={() => { setStage("phone"); setProfile(null); setErr(null); }}>
+        <button type="button" className="btn-ghost" onClick={() => { setStage("phone"); setProfile(null); setMatchedBy(null); setResults(null); setErr(null); }}>
           Start over
         </button>
       </div>

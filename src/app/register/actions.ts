@@ -14,23 +14,31 @@ const db = () => createAdminClient() as unknown as Sb;
 const SETUP_HINT =
   "Registration isn't switched on yet. The league needs to run supabase/registration_schema.sql once.";
 
+// What the player card shows: enough to recognise yourself, nothing private
+// (no phone, email, DOB or sold price).
+export type CardProfile = {
+  id: string;
+  full_name: string;
+  photo_url: string | null;
+  primary_role: string | null;
+  batting_style: string | null;
+  bowling_style: string | null;
+  category: string | null;
+  is_owner: boolean;
+  last_team: string | null;
+  last_season: string | null;
+  seasons: string[];
+  stats: Record<string, number | string> | null;
+  linkedin_link: string | null; // only returned on a phone match
+};
+
+const CARD_COLS =
+  "id, full_name, photo_url, primary_role, batting_style, bowling_style, category, is_owner, last_team, last_season, seasons, stats, linkedin_link";
+
 export type LookupResult =
   | { error: string }
   | { found: false; alreadyRegistered: boolean }
-  | {
-      found: true;
-      alreadyRegistered: boolean;
-      // Only what a player needs to recognise themselves: no email, no DOB.
-      profile: {
-        id: string;
-        full_name: string;
-        photo_url: string | null;
-        primary_role: string | null;
-        last_team: string | null;
-        last_season: string | null;
-        linkedin_link: string | null;
-      };
-    };
+  | { found: true; alreadyRegistered: boolean; profile: CardProfile };
 
 export async function lookupPlayer(rawPhone: string): Promise<LookupResult> {
   const phone = normalizePhone(rawPhone);
@@ -38,11 +46,7 @@ export async function lookupPlayer(rawPhone: string): Promise<LookupResult> {
 
   const sb = db();
   const [{ data: master, error: e1 }, { data: reg, error: e2 }] = await Promise.all([
-    sb
-      .from("player_master")
-      .select("id, full_name, photo_url, primary_role, last_team, last_season, linkedin_link")
-      .eq("phone", phone)
-      .maybeSingle(),
+    sb.from("player_master").select(CARD_COLS).eq("phone", phone).maybeSingle(),
     sb.from("registrations").select("id").eq("season", SEASON).eq("phone", phone).maybeSingle(),
   ]);
   if (e1 || e2) return { error: SETUP_HINT };
@@ -50,6 +54,20 @@ export async function lookupPlayer(rawPhone: string): Promise<LookupResult> {
   const alreadyRegistered = !!reg;
   if (!master) return { found: false, alreadyRegistered };
   return { found: true, alreadyRegistered, profile: master };
+}
+
+// Fallback when a returning player's number isn't on file (common for squad
+// members who never appeared in a registration sheet). Name, photo and team
+// are already public on the squad pages; LinkedIn is withheld here.
+export async function searchByName(q: string): Promise<{ error?: string; results?: CardProfile[] }> {
+  const term = q.trim().replace(/[%_,()]/g, " ").replace(/\s+/g, " ");
+  if (term.length < 3) return { error: "Type at least 3 letters of your name." };
+  const words = term.split(" ").filter((w) => w.length >= 2).slice(0, 3);
+  let query = db().from("player_master").select(CARD_COLS);
+  for (const w of words) query = query.ilike("full_name", `%${w}%`);
+  const { data, error } = await query.order("full_name").limit(8);
+  if (error) return { error: SETUP_HINT };
+  return { results: (data ?? []).map((r: CardProfile) => ({ ...r, linkedin_link: null })) };
 }
 
 // Files go straight from the browser to private storage via one-time signed
@@ -89,6 +107,7 @@ export async function prepareUploads(
 export type RegistrationInput = {
   phone: string;
   masterId: string | null;
+  matchedBy: "phone" | "name" | null;
   full_name: string;
   dob: string;
   email: string;
@@ -123,17 +142,27 @@ export async function submitRegistration(
 
   // Re-read the master row on the server instead of trusting the client's
   // "returning player" claim: it must belong to this phone number.
+  // A phone match must really be this number's row. A name match may be any
+  // row (the number wasn't on file); admins see it flagged "matched by name".
   let master: { id: string; full_name: string } | null = null;
+  const matchedBy = input.matchedBy === "name" ? "name" : "phone";
   if (input.masterId) {
-    const { data } = await sb
-      .from("player_master")
-      .select("id, full_name")
-      .eq("id", input.masterId)
-      .eq("phone", phone)
-      .maybeSingle();
+    let q = sb.from("player_master").select("id, full_name").eq("id", input.masterId);
+    if (matchedBy === "phone") q = q.eq("phone", phone);
+    const { data } = await q.maybeSingle();
     master = data ?? null;
   }
   const returning = !!master;
+  if (master) {
+    const { data: taken } = await sb
+      .from("registrations")
+      .select("id")
+      .eq("season", SEASON)
+      .eq("master_id", master.id)
+      .maybeSingle();
+    if (taken)
+      return { error: "This player is already registered for Season 2. Contact the league if that wasn't you." };
+  }
 
   const name = clean(input.full_name) ?? master?.full_name ?? null;
   if (!name) return { error: "Please enter your full name." };
@@ -166,6 +195,7 @@ export async function submitRegistration(
     phone,
     master_id: master?.id ?? null,
     is_returning: returning,
+    matched_by: returning ? matchedBy : null,
     full_name: name,
     dob: input.dob || null,
     email: clean(input.email),

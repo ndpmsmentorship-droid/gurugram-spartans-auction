@@ -107,6 +107,11 @@ export default async function RegistrationsPage({
                     <h2 className="text-xl">{r.full_name}</h2>
                     <span className={`badge ${STATUS_STYLE[r.status] ?? ""}`}>{r.status.replace("_", " ")}</span>
                     <span className="badge bg-wash">{r.is_returning ? "Returning" : "New player"}</span>
+                    {r.matched_by === "name" && (
+                      <span className="badge bg-gold-fill text-gold" title="Their number wasn't on file; they picked this profile by name. Check it's really them.">
+                        Matched by name · check
+                      </span>
+                    )}
                   </div>
                   <p className="num mt-1 text-sm text-muted">
                     {[r.phone, r.email, age(r.dob)].filter(Boolean).join(" · ")}

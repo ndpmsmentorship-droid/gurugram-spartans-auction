@@ -40,6 +40,27 @@ const SLIDES: Slide[] = [
   { src: g12, caption: "Match awards · Lucknow Strikers v Chennai Thalaivas · 22 Mar 2026" },
 ];
 
+// Identical blocks so the two finalists line up; only the frame (gold vs
+// silver) and the sheen mark the champions.
+const HONOURS = [
+  {
+    team: "American Cricket Club of India",
+    title: "Champions",
+    note: "ACCI lifted the first Shanti Devi Legend's League trophy.",
+    logo: acciLogo,
+    banner: acciChampions,
+    gold: true,
+  },
+  {
+    team: "Goan Monks",
+    title: "Runners-up",
+    note: "Goan Monks reached the Season 1 final against ACCI.",
+    logo: goanLogo,
+    banner: goanRunnersUp,
+    gold: false,
+  },
+];
+
 const STEPS = [
   {
     title: "Register",
@@ -139,53 +160,38 @@ export default async function Home() {
         <p className="eyebrow">Season 1 · 2026 honours</p>
         <h2 className="mt-2 text-4xl sm:text-5xl">The teams to beat</h2>
 
-        <div className="mt-8">
-          <div className="mb-4 flex items-center gap-4">
-            <Image src={acciLogo} alt="" className="h-14 w-auto sm:h-16" sizes="64px" />
-            <div>
-              <p className="font-mono text-[0.688rem] uppercase tracking-[0.2em] text-gold">
-                ★ Champions
-              </p>
-              <h3 className="mt-1 text-2xl sm:text-3xl">American Cricket Club of India</h3>
-            </div>
-          </div>
-          <div className="honour-frame">
-            <div className="honour-inner">
-              <Image
-                src={acciChampions}
-                alt="The ACCI squad, Season 1 champions"
-                className="h-auto w-full"
-                sizes="(max-width: 1200px) 100vw, 1150px"
-                loading="eager"
-              />
-            </div>
-            <span className="honour-sheen" aria-hidden />
-          </div>
-        </div>
-
-        <div className="mt-12 grid items-center gap-6 md:grid-cols-[1.6fr_1fr]">
-          <div className="honour-frame silver">
-            <div className="honour-inner">
-              <Image
-                src={goanRunnersUp}
-                alt="Goan Monks, Season 1 runners-up"
-                className="h-auto w-full"
-                sizes="(max-width: 768px) 100vw, 720px"
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-4 md:block">
-            <Image src={goanLogo} alt="" className="h-14 w-auto md:h-20" sizes="80px" />
-            <div className="md:mt-4">
-              <p className="font-mono text-[0.688rem] uppercase tracking-[0.2em] text-muted">
-                Runners-up
-              </p>
-              <h3 className="mt-1 text-2xl sm:text-3xl">Goan Monks</h3>
-              <p className="mt-2 hidden max-w-xs text-sm text-muted md:block">
-                Reached the Season 1 final against ACCI.
-              </p>
-            </div>
-          </div>
+        <div className="mt-8 grid gap-10 lg:grid-cols-2 lg:gap-8">
+          {HONOURS.map((h) => (
+            <article key={h.team}>
+              <div className="mb-4 flex items-center gap-4">
+                <Image src={h.logo} alt="" className="h-16 w-16 object-contain" sizes="64px" />
+                <div>
+                  <p
+                    className={`font-mono text-[0.688rem] uppercase tracking-[0.2em] ${
+                      h.gold ? "text-gold" : "text-muted"
+                    }`}
+                  >
+                    {h.gold ? "★ " : ""}
+                    {h.title}
+                  </p>
+                  <h3 className="mt-1 text-2xl sm:text-3xl">{h.team}</h3>
+                </div>
+              </div>
+              <div className={`honour-frame${h.gold ? "" : " silver"}`}>
+                <div className="honour-inner">
+                  <Image
+                    src={h.banner}
+                    alt={`${h.team}, Season 1 ${h.title.toLowerCase()}`}
+                    className="h-auto w-full"
+                    sizes="(max-width: 1024px) 100vw, 580px"
+                    loading="eager"
+                  />
+                </div>
+                {h.gold && <span className="honour-sheen" aria-hidden />}
+              </div>
+              <p className="mt-3 text-sm text-muted">{h.note}</p>
+            </article>
+          ))}
         </div>
       </section>
 

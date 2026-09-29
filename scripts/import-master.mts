@@ -51,7 +51,10 @@ const FIELDS: [RegExp, keyof Rec][] = [
   [/^(role|primaryrole|playingas|playingrole|skill)$/, "primary_role"],
   [/^(battingstyle|batting|battinghand)$/, "batting_style"],
   [/^(bowlingstyle|bowling|bowlingtype|bowlingstyles)$/, "bowling_style"],
-  [/^(team|teamname|lastteam|franchise|soldto)$/, "last_team"],
+  [/^(team|teamname|lastteam|franchise|soldto|boughtbyteam)$/, "last_team"],
+  [/^(category|auctioncategory)$/, "category"],
+  [/^(isowner|owner)$/, "is_owner"],
+  [/^(soldamount|soldprice)$/, "sold_amount"],
 ];
 
 type Rec = {
@@ -66,6 +69,10 @@ type Rec = {
   batting_style: string | null;
   bowling_style: string | null;
   last_team: string | null;
+  category: string | null;
+  is_owner: boolean;
+  sold_amount: number | null;
+  stats: Record<string, string | number> | null;
   last_season: string | null;
   seasons: string[];
   source: string;
@@ -80,6 +87,26 @@ function toDate(v: unknown): string | null {
   const t = Date.parse(String(v));
   return Number.isFinite(t) ? new Date(t).toISOString().slice(0, 10) : null;
 }
+
+// Career numbers for the player card, keyed by normalised header. SDLL's export
+// says "Runs"/"Strike Rate"; the SARDA sheet says "batting_runs"/"Batting SR".
+const STATS: [RegExp, string][] = [
+  [/^(battingmatches|matches)$/, "matches"],
+  [/^(runs|battingruns)$/, "runs"],
+  [/^(highestscore|highestruns)$/, "highest"],
+  [/^(battingavg|battingaverage)$/, "bat_avg"],
+  [/^(strikerate|battingsr)$/, "bat_sr"],
+  [/^(fifties|s)$/, "fifties"],
+  [/^(wickets)$/, "wickets"],
+  [/^(economy)$/, "economy"],
+  [/^(bowlingavg)$/, "bowl_avg"],
+  [/^(bestbowling)$/, "best_bowling"],
+  [/^(catches)$/, "catches"],
+];
+const num = (v: unknown) => {
+  const n = Number(v);
+  return v !== null && v !== "" && Number.isFinite(n) ? Math.round(n * 100) / 100 : null;
+};
 
 const merged = new Map<string, Rec>();
 let skippedNoPhone = 0;
@@ -103,6 +130,11 @@ for (const input of inputs) {
       const hit = FIELDS.find(([re]) => re.test(h));
       if (hit && col[hit[1]] === undefined) col[hit[1]] = i;
     });
+    const statCol: [string, number][] = [];
+    header.forEach((h, i) => {
+      const hit = STATS.find(([re]) => re.test(h));
+      if (hit && !statCol.some(([k]) => k === hit[1])) statCol.push([hit[1], i]);
+    });
     const season = label ?? `${path.basename(file)} › ${sheetName}`;
     let n = 0;
     for (const r of rows.slice(hIdx + 1)) {
@@ -124,15 +156,35 @@ for (const input of inputs) {
         batting_style: str(get("batting_style")),
         bowling_style: str(get("bowling_style")),
         last_team: str(get("last_team")),
+        category: str(get("category")),
       };
+      const stats: Record<string, string | number> = {};
+      for (const [k, i] of statCol) {
+        const v = k === "best_bowling" || k === "highest" ? str(r[i]) : num(r[i]);
+        if (v !== null && v !== "") stats[k] = v;
+      }
+      const ownerRaw = get("is_owner");
+      const isOwner = ownerRaw === true || /^(true|yes|y|1|owner)$/i.test(String(ownerRaw ?? ""));
       const cur = merged.get(phone);
       if (!cur) {
-        merged.set(phone, { phone, ...incoming, last_season: season, seasons: [season], source: path.basename(file) });
+        merged.set(phone, {
+          phone,
+          ...incoming,
+          is_owner: isOwner,
+          sold_amount: num(get("sold_amount")),
+          stats: Object.keys(stats).length ? stats : null,
+          last_season: season,
+          seasons: [season],
+          source: path.basename(file),
+        });
       } else {
         for (const [k, v] of Object.entries(incoming)) {
           if (v && !(cur as Record<string, unknown>)[k]) (cur as Record<string, unknown>)[k] = v;
         }
         if (!cur.seasons.includes(season)) cur.seasons.push(season);
+        if (isOwner) cur.is_owner = true;
+        cur.sold_amount ??= num(get("sold_amount"));
+        if (!cur.stats && Object.keys(stats).length) cur.stats = stats;
       }
     }
     console.log(`  ${path.basename(file)} › ${sheetName}: ${n} rows with a valid mobile`);
@@ -145,6 +197,7 @@ console.log(
   `\n${recs.length} distinct players by mobile (${skippedNoPhone} named rows had no valid mobile).` +
     `\n  email ${filled("email")} · linkedin ${filled("linkedin_link")} · cricheroes ${filled("cricheroes_link")}` +
     ` · photo ${filled("photo_url")} · dob ${filled("dob")} · role ${filled("primary_role")} · team ${filled("last_team")}` +
+    `\n  owners ${recs.filter((r) => r.is_owner).length} · category ${filled("category")} · stats ${filled("stats")}` +
     `\n  in 2+ seasons: ${recs.filter((r) => r.seasons.length > 1).length}`
 );
 
@@ -159,6 +212,30 @@ for (const line of fs.readFileSync(path.join(ROOT, ".env.local"), "utf8").split(
   if (m) env[m[1]] = m[2].replace(/^["']|["']$/g, "");
 }
 const sb = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
+// A player may already sit in the master WITHOUT a phone (added from the
+// archive by enrich-master.mts). Give that row the number instead of creating
+// a second copy of the same person.
+const chId = (link: string | null) =>
+  link?.match(/player-profile\/(\d+)/)?.[1] ?? link?.match(/\/(\d{4,})(?:\/|$)/)?.[1] ?? null;
+const { data: phoneless } = await sb.from("player_master").select("id, cricheroes_link").is("phone", null).limit(20000);
+const phonelessByCh = new Map<string, string>();
+for (const r of phoneless ?? []) {
+  const id = chId(r.cricheroes_link);
+  if (id) phonelessByCh.set(id, r.id);
+}
+const { data: withPhone } = await sb.from("player_master").select("phone").not("phone", "is", null).limit(20000);
+const known = new Set((withPhone ?? []).map((r: { phone: string }) => r.phone));
+let claimed = 0;
+for (const r of recs) {
+  const rowId = !known.has(r.phone) && phonelessByCh.get(chId(r.cricheroes_link) ?? "");
+  if (!rowId) continue;
+  const { error } = await sb.from("player_master").update({ ...r, updated_at: new Date().toISOString() }).eq("id", rowId);
+  if (error) throw new Error(`attach phone: ${error.message}`);
+  known.add(r.phone);
+  claimed++;
+}
+if (claimed) console.log(`  gave a phone to ${claimed} players already listed without one`);
+
 for (let i = 0; i < recs.length; i += 200) {
   const batch = recs.slice(i, i + 200).map((r) => ({ ...r, updated_at: new Date().toISOString() }));
   const { error } = await sb.from("player_master").upsert(batch, { onConflict: "phone" });

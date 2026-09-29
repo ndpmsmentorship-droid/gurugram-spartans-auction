@@ -83,3 +83,18 @@ create index if not exists registrations_status_idx on registrations (season, st
 alter table player_master enable row level security;
 alter table registrations enable row level security;
 -- deliberately no policies: service role only.
+
+-- ---- 2026-09-29 addendum: player card + name search ----------------------
+-- Archive players with no known mobile (e.g. SARDA S6 squad members who were
+-- never in a registration sheet) live in player_master with phone NULL, so a
+-- returning player can find themselves by name when their number isn't on file.
+-- UNIQUE still holds for non-null phones (Postgres allows many NULLs).
+alter table player_master alter column phone drop not null;
+alter table player_master
+  add column if not exists is_owner boolean not null default false,
+  add column if not exists category text,
+  add column if not exists sold_amount numeric,
+  add column if not exists stats jsonb;
+-- 'phone' when the lookup matched the number, 'name' when the player picked
+-- their profile from the name search (admin should double-check those).
+alter table registrations add column if not exists matched_by text;

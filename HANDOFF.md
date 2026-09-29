@@ -170,6 +170,24 @@ Bandhwari, Gurugram; read from Nikhil's screenshots because WebFetch was blocked
 3. **Squad tracker** `/my-team` per owner: purse, category caps, role mix, pace/spin + L/R arm, L/R bat,
    16–25 squad gaps, "fill this gap" suggestions (via the AI chat), live via Realtime.
 
+## PLAYER REGISTRATION — LIVE 2026-09-29 (merge db41545)
+- `/register` (public): mobile → lookup in `player_master` → returning player confirms ("This is me") + kit +
+  LinkedIn + ₹3,000 fee tick; new player fills name, DOB (**min age 30**, enforced client + server), email,
+  CricHeroes, LinkedIn, role pills, photo, Aadhaar, kit, fee tick. One registration per phone per season
+  (`unique(season, phone)`). Files go browser → PRIVATE bucket `registrations` via signed upload URLs
+  (Vercel's ~4.5 MB body cap rules out routing them through a server action).
+- `/admin/registrations`: New / Under review / Approved / Rejected tabs; LinkedIn "500+ ✓" / "Under 500" manual
+  tick; Approve without the 500+ tick → Under review. Photo/Aadhaar shown via 1-hour signed URLs.
+- Tables `player_master` + `registrations` exist (Nikhil ran `supabase/registration_schema.sql` on 29 Sep). RLS on, no
+  policies; verified that the anon key reads 0 rows from both.
+- `player_master` = **521 SARDA S6 players** (`scripts/import-master.mts`, from the "SSCL6 Registrations" sheet),
+  enriched by `scripts/enrich-master.mts` (CricHeroes-id match against the archive + pool: 407 photos, 226 teams).
+  **The SDLL platform has phones for only 1 of 295 players**, so the rest of the ~723 need Nikhil's master file:
+  `node scripts/import-master.mts "SDLL S1=file.xlsx" … --write`, then `node scripts/enrich-master.mts`.
+- E2E tested with Playwright (under-30 blocked, new player, returning player, duplicate). Test rows and files deleted.
+- Not built yet: approving a player doesn't add them to the auction pool (`scout_players`). That's the next step.
+- Sponsors: `logoSize()` in `src/app/sponsors.ts` gives each logo equal area (square marks no longer tiny).
+
 ## LANDING PAGE + SPONSOR BAR — LIVE 2026-09-29 (commit 0d4b724)
 - `/` is now the **public** league landing page (proxy allows "/" as an exact match only). It shows Season 1
   honours (ACCI champions in a gold frame, Goan Monks runners-up in silver), a 12-photo award carousel

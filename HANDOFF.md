@@ -160,6 +160,18 @@ Bandhwari, Gurugram; read from Nikhil's screenshots because WebFetch was blocked
 3. **Squad tracker** `/my-team` per owner: purse, category caps, role mix, pace/spin + L/R arm, L/R bat,
    16–25 squad gaps, "fill this gap" suggestions (via the AI chat), live via Realtime.
 
+## STATUS AUDIT 2026-09-29 — fix before SDLL auction day
+Site map + status page: https://claude.ai/artifact/Lbv7FNUzAKaXoe6AijMZyo (private to Nikhil).
+- The board, /squad, /my-team and /players/[id] still run in **prototype mode on borrowed SARDA S6 squads**
+  (`teams.source_team_id` → `sccl_s6_players`, 443 assigned). 0 SDLL `scout_players` sold.
+- **Owners: 0/12 SDLL teams have `owner_profile_id`.** 4 owner profiles exist from the SARDA prototype.
+- `/auction` shows the 2 `is_mock` teams (UP Warriors, Japani Tsunami) and hides Lucknow Strikers + Bhojpuri
+  Dabangs. The filter in `src/app/auction/page.tsx` is `source_team_id != null || has buys` and never checks `is_mock`.
+- Gurugram Spartans purse is ₹4,00,000 while every other team has ₹3,00,000. Confirm with Nikhil.
+- `/jersey` is meant for players, but `src/proxy.ts` only allows `/login`, `/auction`, `/squad` publicly → players
+  can't open it. `/schedule` also needs a login now (contrary to the schedule section above).
+- A stale SARDA-season `auction_lot` row has been `status='live'` since 14 Aug. Harmless: `isAuctionLive()` reads only the SDLL season.
+
 ## Pending / next
 1. **Projector mode** view for the public board (venue screen).
 2. Restyle secondary pages to the SDLL brand (`/login`, `/my-team`, `/players`, `/team`, `/jersey`, `/scout/compare`, `/scout/import`).

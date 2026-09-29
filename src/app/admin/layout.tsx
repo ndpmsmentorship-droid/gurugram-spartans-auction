@@ -18,6 +18,9 @@ export default async function AdminLayout({
         <Link href="/admin/auction" className="font-medium hover:text-primary">
           Auction Console
         </Link>
+        <Link href="/admin/registrations" className="font-medium hover:text-primary">
+          Registrations
+        </Link>
         <Link href="/admin/players" className="font-medium hover:text-primary">
           Player Pool
         </Link>

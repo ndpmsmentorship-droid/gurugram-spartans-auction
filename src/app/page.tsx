@@ -19,7 +19,7 @@ import g10 from "./brand/gallery/g10.jpg";
 import g11 from "./brand/gallery/g11.jpg";
 import g12 from "./brand/gallery/g12.jpg";
 import Season1Gallery, { type Slide } from "./Season1Gallery";
-import { TITLE_SPONSOR, PRESENTED_BY, PARTNERS } from "./sponsors";
+import { TITLE_SPONSOR, PRESENTED_BY, PARTNERS, logoSize } from "./sponsors";
 
 // Public front door of the league (no login — see PUBLIC_PATHS in proxy.ts).
 // Season 1 honours lead the page: ACCI (champions) and Goan Monks (runners-up).
@@ -128,9 +128,9 @@ export default async function Home() {
               that builds every squad. Presented by {PRESENTED_BY.name}.
             </p>
             <div className="mt-7 flex flex-wrap justify-center gap-3 md:justify-start">
-              <a href="#register" className="btn-accent">
+              <Link href="/register" className="btn-accent">
                 Register for Season 2
-              </a>
+              </Link>
               <Link
                 href="/auction"
                 className="rounded-full border border-white/30 px-6 py-2.5 text-[0.813rem] font-medium text-white transition hover:border-white"
@@ -208,9 +208,12 @@ export default async function Home() {
           <p className="eyebrow">Player registration · Season 2</p>
           <h2 className="mt-2 text-3xl sm:text-4xl">Enter the pool</h2>
           <p className="mt-3 max-w-2xl text-muted">
-            Registration opens here shortly. Returning players won&apos;t need to fill
-            anything twice: your profile, stats and photo are already with us.
+            Returning players won&apos;t fill anything twice: enter your mobile number and your
+            profile, stats and photo come up ready. You only add your kit details.
           </p>
+          <Link href="/register" className="btn-primary mt-5 inline-block">
+            Start registration
+          </Link>
           <ol className="mt-7 grid gap-4 md:grid-cols-3">
             {STEPS.map((s, k) => (
               <li key={s.title} className="tile p-5">
@@ -233,7 +236,9 @@ export default async function Home() {
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           {[TITLE_SPONSOR, PRESENTED_BY].map((s) => (
             <div key={s.name} className="card flex items-center gap-5">
-              <Image src={s.logo} alt={s.name} className="h-16 w-auto" sizes="200px" />
+              <div className="flex h-20 w-40 shrink-0 items-center justify-center">
+                <Image src={s.logo} alt={s.name} style={logoSize(s.logo, 9000, 76)} sizes="200px" />
+              </div>
               <div>
                 <p className="label-mono">{s.role}</p>
                 <p className="mt-1 font-medium">{s.name}</p>
@@ -243,9 +248,9 @@ export default async function Home() {
         </div>
         <ul className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
           {PARTNERS.map((s) => (
-            <li key={s.name} className="tile flex flex-col items-center gap-3 p-4 text-center">
-              <div className="flex h-14 items-center">
-                <Image src={s.logo} alt={s.name} className="max-h-14 w-auto" sizes="160px" />
+            <li key={s.name} className="flex flex-col items-center gap-3 rounded-[10px] border border-line bg-surface p-4 text-center">
+              <div className="flex h-16 items-center">
+                <Image src={s.logo} alt={s.name} style={logoSize(s.logo, 5200, 60)} sizes="200px" />
               </div>
               <p className="label-mono">{s.role}</p>
             </li>

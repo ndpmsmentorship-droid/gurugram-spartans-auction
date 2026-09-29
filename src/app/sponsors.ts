@@ -40,3 +40,14 @@ export const PARTNERS: Sponsor[] = [
   { name: "Smart Strength", role: "Fitness Partner", logo: smartstrength },
   { name: "Satya", role: "Wellness Partner", logo: satya },
 ];
+
+// Equal-area sizing: a fixed height makes square marks (SportsCube, Mykos)
+// look tiny beside wide wordmarks (Satya, Smart Strength). Giving every logo
+// the same AREA instead balances their visual weight; maxH stops square marks
+// from towering over the row.
+export function logoSize(logo: StaticImageData, area: number, maxH: number) {
+  const ratio = logo.width / logo.height;
+  let h = Math.sqrt(area / ratio);
+  if (h > maxH) h = maxH;
+  return { width: Math.round(h * ratio), height: Math.round(h) };
+}

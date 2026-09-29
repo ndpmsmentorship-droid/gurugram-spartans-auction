@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { TITLE_SPONSOR, PRESENTED_BY, PARTNERS, type Sponsor } from "./sponsors";
+import { TITLE_SPONSOR, PRESENTED_BY, PARTNERS, logoSize, type Sponsor } from "./sponsors";
 
 // Sponsor bar under the masthead on every page. The title sponsor and the
 // presenter hold fixed slots on the left; the partners run as a slow marquee on
@@ -18,7 +18,7 @@ function Lockup({ s }: { s: Sponsor }) {
       <Image
         src={s.logo}
         alt={`${s.name} — ${s.role}`}
-        className="h-8 w-auto sm:h-9"
+        style={logoSize(s.logo, 3400, 40)}
         sizes="120px"
       />
     </div>
@@ -43,8 +43,8 @@ export default function SponsorBar() {
                 <Image
                   src={s.logo}
                   alt={i < PARTNERS.length ? `${s.name} — ${s.role}` : ""}
-                  className="h-7 w-auto"
-                  sizes="110px"
+                  style={logoSize(s.logo, 2400, 34)}
+                  sizes="140px"
                 />
               </li>
             ))}

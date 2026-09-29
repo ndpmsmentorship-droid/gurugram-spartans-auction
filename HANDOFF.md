@@ -122,6 +122,32 @@ Bandhwari, Gurugram; read from Nikhil's screenshots because WebFetch was blocked
 - Consent checkbox: ₹3,000 mandatory fee **only if selected at auction**; details accurate; OK to contact.
   Button "Submit Registration". Footer repeats the fee note.
 
+**Nikhil's requirements for the SDLL version (2026-09-29, second pass)**
+1. Attractive Shanti Devi landing page: previous-season winners featured + a photo carousel.
+   NEEDS FROM NIKHIL: winner names/team photos per season + carousel photos.
+2. Returning players pick their existing profile + data from our stored database — no re-registration.
+3. Jersey name, number and kit sizes are collected inside the registration itself.
+4. Fee disclaimer + mandatory checkbox (the USCL ₹3,000-if-selected wording).
+5. Aadhaar is required ONLY for players not already in the database.
+6. LinkedIn must show 500+ connections, otherwise the player goes to an "under review" category.
+
+**Data findings (2026-09-29)**
+- The DB has **no phone/email for any player**: scout_players 295 rows (SDLL S2) and sccl_s6_players
+  766 (SARDA S6) both have email=0/phone=0. Photos/CricHeroes/age are well filled; batting/bowling style
+  are filled for SDLL only. So a returning player can't be verified against the DB yet.
+- Contact data lives in Nikhil's **Excel files across seasons** (only one is on this Mac:
+  `~/Downloads/Faltu/For_owners_final_auction_list_7th_Aug.xlsx` → sheet "SSCL6 Registrations", 521 rows
+  with fullName, email, phone, age, cricHeroesProfile, linkedinProfile + full bat/bowl/field stats;
+  also "Team Owners" sheet: team, group, owners, retained players). The other seasons' files must be
+  copied over. Plan: merge every file into one **player master** keyed on phone, then CricHeroes id,
+  so returning players verify with an OTP sent to the phone/email on file before their profile is prefilled.
+- **LinkedIn 500+ can't be checked automatically** (no API for connection counts; scraping is blocked
+  and against LinkedIn's terms). Proposal: player uploads a LinkedIn screenshot showing "500+
+  connections"; anyone without a verified one lands in "under review" until an admin ticks it.
+- Owner logins already exist: `/admin/owners` creates a username/password per team
+  (`src/lib/owner-auth.ts`, `@owners.sdll` internal emails) → the 12 accounts are data entry, not new code.
+- `jersey_sizes` (19 rows) / `sccl_s6_jersey_sizes` (17) already hold kit data; the new form writes the same shape.
+
 **Build plan (for discussion)**
 1. `/register` (public, no account) → `scout_players` with a pending status + admin approve queue;
    Aadhaar goes to a PRIVATE Supabase Storage bucket (admin-only). Resolve the anantanity

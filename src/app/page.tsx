@@ -20,6 +20,7 @@ import g11 from "./brand/gallery/g11.jpg";
 import g12 from "./brand/gallery/g12.jpg";
 import Season1Gallery, { type Slide } from "./Season1Gallery";
 import { TITLE_SPONSOR, PRESENTED_BY, PARTNERS, logoSize } from "./sponsors";
+import { DEMO_MODE, PORTAL_PAGES } from "./site-config";
 
 // Public front door of the league (no login — see PUBLIC_PATHS in proxy.ts).
 // Season 1 honours lead the page: ACCI (champions) and Goan Monks (runners-up).
@@ -229,6 +230,38 @@ export default async function Home() {
           </p>
         </div>
       </section>
+
+      {/* ---------- portal directory (demo only) ---------- */}
+      {DEMO_MODE && (
+        <section className="mx-auto w-full max-w-[1200px] px-4 pt-16 sm:px-7">
+          <p className="eyebrow">Explore the portal</p>
+          <h2 className="mt-2 text-3xl sm:text-4xl">Every page</h2>
+          <p className="mt-2 max-w-2xl text-sm text-muted">
+            Pages marked with a lock ask you to sign in first.
+          </p>
+          <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {PORTAL_PAGES.map((pg) => (
+              <li key={pg.href}>
+                <Link
+                  href={pg.href}
+                  className="flex h-full flex-col gap-1.5 rounded-[12px] border border-line bg-surface p-4 transition hover:border-red"
+                >
+                  <span className="flex items-center justify-between gap-2">
+                    <span className="font-display text-lg uppercase leading-tight">{pg.label}</span>
+                    <span
+                      className={`badge shrink-0 ${pg.access === "Public" ? "bg-wash text-up" : "bg-wash text-muted"}`}
+                    >
+                      {pg.access === "Public" ? "Open" : `🔒 ${pg.access}`}
+                    </span>
+                  </span>
+                  <span className="text-sm text-muted">{pg.what}</span>
+                  <span className="num mt-auto pt-1 text-[0.688rem] text-faint">/spartansscout{pg.href}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* ---------- sponsors ---------- */}
       <section className="mx-auto w-full max-w-[1200px] px-4 py-16 sm:px-7">

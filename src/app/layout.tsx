@@ -9,6 +9,8 @@ import { signOut } from "@/app/login/actions";
 import Nav, { type NavItem } from "./Nav";
 import crest from "./brand/crest.png";
 import SponsorBar from "./SponsorBar";
+import Crumbs from "./Crumbs";
+import { DEMO_MODE } from "./site-config";
 
 // Brand book (p.5) specifies Kaneda Gothic Bold + Brooklyn — both commercial.
 // Oswald stands in for Kaneda (condensed heavy grotesque) and Jost for Brooklyn
@@ -81,26 +83,37 @@ export default async function RootLayout({
   // Only the two public routes are advertised to a signed-out visitor —
   // everything else redirects to /login (see proxy.ts), so linking to it from
   // the masthead would just bounce them.
-  const items: NavItem[] = [
-    { href: "/auction", label: "Live Board" },
-    // Player registration is for the public, not for signed-in owners/admins.
-    ...(profile ? [] : [{ href: "/register", label: "Register" }]),
-    // The Squads showcase is the single Gurugram Spartans team page — hidden
-    // from owners, who have their own My Squad instead.
-    ...(profile?.role === "owner" ? [] : [{ href: "/squad", label: "Squads" }]),
-    ...(profile ? [{ href: "/schedule", label: "Schedule" }] : []),
-    ...(profile?.role === "owner"
-      ? [
-          { href: "/my-team", label: "My Squad" },
-          { href: "/my-team/targets", label: "Targets" },
-        ]
-      : []),
-    ...(profile?.role === "admin" ? [{ href: "/scout", label: "Pool" }] : []),
-    { href: "https://www.ndpms.in/spartans", label: "Ball Library", external: true },
-    ...(profile?.role === "admin"
-      ? [{ href: "/admin/auction", label: "Admin" }]
-      : []),
-  ];
+  const LIBRARY: NavItem = { href: "https://www.ndpms.in/spartans", label: "Ball Library", external: true };
+  const items: NavItem[] = DEMO_MODE
+    ? // Demo: every major page for everyone (locked pages bounce to Sign in).
+      [
+        { href: "/register", label: "Register" },
+        { href: "/auction", label: "Live Board" },
+        { href: "/squad", label: "Squads" },
+        { href: "/schedule", label: "Schedule" },
+        { href: "/my-team", label: "My Squad" },
+        { href: "/scout", label: "Pool" },
+        { href: "/admin/auction", label: "Admin" },
+        LIBRARY,
+      ]
+    : [
+        { href: "/auction", label: "Live Board" },
+        // Player registration is for the public, not for signed-in owners/admins.
+        ...(profile ? [] : [{ href: "/register", label: "Register" }]),
+        // The Squads showcase is the single Gurugram Spartans team page — hidden
+        // from owners, who have their own My Squad instead.
+        ...(profile?.role === "owner" ? [] : [{ href: "/squad", label: "Squads" }]),
+        ...(profile ? [{ href: "/schedule", label: "Schedule" }] : []),
+        ...(profile?.role === "owner"
+          ? [
+              { href: "/my-team", label: "My Squad" },
+              { href: "/my-team/targets", label: "Targets" },
+            ]
+          : []),
+        ...(profile?.role === "admin" ? [{ href: "/scout", label: "Pool" }] : []),
+        LIBRARY,
+        ...(profile?.role === "admin" ? [{ href: "/admin/auction", label: "Admin" }] : []),
+      ];
 
   return (
     <html
@@ -175,6 +188,7 @@ export default async function RootLayout({
           </div>
         </header>
         <SponsorBar />
+        <Crumbs />
         <div className="flex flex-1 flex-col">{children}</div>
       </body>
     </html>

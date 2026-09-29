@@ -119,6 +119,9 @@ export default function RegisterForm() {
   const [err, setErr] = useState<string | null>(null);
 
   const [phone, setPhone] = useState("");
+  // True once the number was checked on the first screen; a player who came in
+  // by name (or straight to "new player") types it in the form instead.
+  const [phoneFixed, setPhoneFixed] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [matchedBy, setMatchedBy] = useState<"phone" | "name" | null>(null);
   const [nameQ, setNameQ] = useState("");
@@ -153,6 +156,7 @@ export default function RegisterForm() {
     if ("error" in res) return setErr(res.error);
     if (res.alreadyRegistered)
       return setErr("This number is already registered for Season 2. Contact the league to change your details.");
+    setPhoneFixed(true);
     if (res.found) {
       setProfile(res.profile);
       setMatchedBy("phone");
@@ -211,6 +215,7 @@ export default function RegisterForm() {
     setErr(null);
     const tooBig = checkFile(photo, "Your photo") ?? checkFile(aadhaar, "The Aadhaar file");
     if (tooBig) return setErr(tooBig);
+    if (!normalizePhone(phone)) return setErr("Please enter your 10-digit mobile number.");
     if (!returning) {
       const age = dob ? ageOn(dob) : null;
       if (age == null) return setErr("Please enter your date of birth.");
@@ -282,6 +287,53 @@ export default function RegisterForm() {
     </p>
   );
 
+  // Name search, shown on the first screen beside the mobile lookup and again
+  // when a number isn't on file.
+  const searchBox = (
+    <div className="space-y-4">
+      <form onSubmit={runSearch} className="space-y-4">
+        <Field label="Your name">
+          <input
+            id="reg-search"
+            className="input"
+            placeholder="e.g. Kanishk Sheel"
+            value={nameQ}
+            onChange={(e) => setNameQ(e.target.value)}
+            autoComplete="name"
+          />
+        </Field>
+        <button type="submit" className="btn-primary" disabled={busy}>
+          {busy ? "Searching…" : "Search"}
+        </button>
+      </form>
+      {results && results.length === 0 && (
+        <p className="text-sm text-muted">No one by that name. Try your surname only, or register as new.</p>
+      )}
+      {results && results.length > 0 && (
+        <ul className="grid gap-3">
+          {results.map((r) => (
+            <li key={r.id}>
+              <button
+                type="button"
+                onClick={() => pick(r)}
+                className="flex w-full items-center gap-4 rounded-[12px] border border-line bg-surface p-3 text-left transition hover:border-red"
+              >
+                <PlayerPhoto src={r.photo_url} name={r.full_name} className="h-20 w-16 shrink-0 rounded-[8px]" sizes="64px" />
+                <span className="min-w-0 flex-1">
+                  <span className="block font-display text-xl uppercase leading-tight">{r.full_name}</span>
+                  <span className="mt-1 block text-sm text-muted">
+                    {[r.is_owner ? "Team owner" : null, r.last_team, prettyRole(r.primary_role)].filter(Boolean).join(" · ")}
+                  </span>
+                </span>
+                <span className="label-mono shrink-0 text-red">That&apos;s me →</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+
   if (stage === "done") {
     return (
       <div className="card p-8 text-center">
@@ -297,31 +349,46 @@ export default function RegisterForm() {
 
   if (stage === "phone") {
     return (
-      <form onSubmit={findProfile} className="card space-y-5 p-6 sm:p-8">
+      <div className="space-y-5">
         <div>
-          <p className="eyebrow">Step 1</p>
-          <h2 className="mt-2 text-2xl sm:text-3xl">Your mobile number</h2>
+          <p className="eyebrow">Step 1 · Find your profile</p>
+          <h2 className="mt-2 text-2xl sm:text-3xl">Played with us before?</h2>
           <p className="mt-2 text-sm text-muted">
-            Played in a Shanti Devi or SARDA season before? We&apos;ll find your profile so you
-            don&apos;t have to type it again.
+            Use your mobile number or search your name. Your profile, photo and stats come up
+            ready, so you only add your kit details.
           </p>
         </div>
-        <Field label="Mobile number">
-          <input
-            id="reg-phone"
-            className="input"
-            inputMode="numeric"
-            autoComplete="tel-national"
-            placeholder="10-digit mobile"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
-        </Field>
         {error}
-        <button type="submit" className="btn-primary" disabled={busy}>
-          {busy ? "Looking up…" : "Continue"}
-        </button>
-      </form>
+        <div className="grid gap-5 lg:grid-cols-2">
+          <form onSubmit={findProfile} className="card space-y-4 p-6">
+            <h3 className="text-xl">By mobile number</h3>
+            <Field label="Mobile number">
+              <input
+                id="reg-phone"
+                className="input"
+                inputMode="numeric"
+                autoComplete="tel-national"
+                placeholder="10-digit mobile"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </Field>
+            <button type="submit" className="btn-primary" disabled={busy}>
+              {busy ? "Looking up…" : "Continue"}
+            </button>
+          </form>
+          <div className="card space-y-4 p-6">
+            <h3 className="text-xl">By name</h3>
+            {searchBox}
+          </div>
+        </div>
+        <p className="text-sm text-muted">
+          First time with the league?{" "}
+          <button type="button" className="font-medium text-red underline" onClick={newPlayer}>
+            Register as a new player
+          </button>
+        </p>
+      </div>
     );
   }
 
@@ -336,45 +403,8 @@ export default function RegisterForm() {
             profile, or register as a new player.
           </p>
         </div>
-        <form onSubmit={runSearch} className="flex flex-col gap-3 sm:flex-row">
-          <input
-            id="reg-search"
-            className="input"
-            placeholder="Your name, e.g. Kanishk Sheel"
-            value={nameQ}
-            onChange={(e) => setNameQ(e.target.value)}
-            autoComplete="name"
-          />
-          <button type="submit" className="btn-primary shrink-0" disabled={busy}>
-            {busy ? "Searching…" : "Search"}
-          </button>
-        </form>
+        {searchBox}
         {error}
-        {results && results.length === 0 && (
-          <p className="text-sm text-muted">No one by that name. Try your surname only, or register as new.</p>
-        )}
-        {results && results.length > 0 && (
-          <ul className="grid gap-3">
-            {results.map((r) => (
-              <li key={r.id}>
-                <button
-                  type="button"
-                  onClick={() => pick(r)}
-                  className="flex w-full items-center gap-4 rounded-[12px] border border-line bg-surface p-3 text-left transition hover:border-red"
-                >
-                  <PlayerPhoto src={r.photo_url} name={r.full_name} className="h-20 w-16 shrink-0 rounded-[8px]" sizes="64px" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block font-display text-xl uppercase leading-tight">{r.full_name}</span>
-                    <span className="mt-1 block text-sm text-muted">
-                      {[r.is_owner ? "Team owner" : null, r.last_team, prettyRole(r.primary_role)].filter(Boolean).join(" · ")}
-                    </span>
-                  </span>
-                  <span className="label-mono shrink-0 text-red">That&apos;s me →</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
         <div className="border-t border-line pt-5">
           <button type="button" className="btn-ghost" onClick={newPlayer}>
             I&apos;m new. Register as a new player
@@ -414,6 +444,22 @@ export default function RegisterForm() {
             : "Fill this once. Every field is needed for the auction pool."}
         </p>
       </div>
+
+      {!phoneFixed && (
+        <section className="grid gap-5 sm:grid-cols-2">
+          <Field label="Mobile number" hint="We contact you on this number about your registration.">
+            <input
+              id="reg-phone2"
+              className="input"
+              inputMode="numeric"
+              autoComplete="tel-national"
+              placeholder="10-digit mobile"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </Field>
+        </section>
+      )}
 
       {!returning && (
         <section className="grid gap-5 sm:grid-cols-2">
@@ -527,7 +573,7 @@ export default function RegisterForm() {
         <button type="submit" className="btn-primary" disabled={busy || !feeAck}>
           {busy ? "Submitting…" : "Submit registration"}
         </button>
-        <button type="button" className="btn-ghost" onClick={() => { setStage("phone"); setProfile(null); setMatchedBy(null); setResults(null); setErr(null); }}>
+        <button type="button" className="btn-ghost" onClick={() => { setStage("phone"); setProfile(null); setMatchedBy(null); setResults(null); setPhoneFixed(false); setErr(null); }}>
           Start over
         </button>
       </div>

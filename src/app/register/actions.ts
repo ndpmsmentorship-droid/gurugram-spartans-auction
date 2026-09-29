@@ -144,13 +144,16 @@ export async function submitRegistration(
   // "returning player" claim: it must belong to this phone number.
   // A phone match must really be this number's row. A name match may be any
   // row (the number wasn't on file); admins see it flagged "matched by name".
-  let master: { id: string; full_name: string } | null = null;
-  const matchedBy = input.matchedBy === "name" ? "name" : "phone";
+  let master: { id: string; full_name: string; phone: string | null } | null = null;
+  let matchedBy: "phone" | "name" = input.matchedBy === "name" ? "name" : "phone";
   if (input.masterId) {
-    let q = sb.from("player_master").select("id, full_name").eq("id", input.masterId);
+    let q = sb.from("player_master").select("id, full_name, phone").eq("id", input.masterId);
     if (matchedBy === "phone") q = q.eq("phone", phone);
     const { data } = await q.maybeSingle();
     master = data ?? null;
+    // Found by name but typed the number we already hold for them: that's as
+    // good as a phone match, so don't flag it for a manual check.
+    if (master && matchedBy === "name" && master.phone === phone) matchedBy = "phone";
   }
   const returning = !!master;
   if (master) {

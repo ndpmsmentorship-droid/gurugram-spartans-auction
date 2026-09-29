@@ -316,3 +316,16 @@ h3,
 @media (prefers-reduced-motion: reduce) {
   .honour-sheen { animation: none; background: none; }
 }
+
+/* ---- touch responsiveness ------------------------------------------ */
+/* Treat taps as taps immediately (no double-tap-zoom wait) and show a
+   clear pressed state, so phones register links on the first touch. */
+a,
+button,
+[role="button"],
+label,
+select,
+summary {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: color-mix(in srgb, var(--red) 18%, transparent);
+}

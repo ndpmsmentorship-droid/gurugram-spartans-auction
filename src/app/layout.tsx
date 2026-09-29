@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { Oswald, Jost, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { getCurrentProfile } from "@/lib/auth";
 import { isAuctionLive } from "@/lib/auction/state";
@@ -10,26 +10,30 @@ import Nav, { type NavItem } from "./Nav";
 import crest from "./brand/crest.png";
 import SponsorBar from "./SponsorBar";
 import Crumbs from "./Crumbs";
+import NavProgress from "./NavProgress";
 import { DEMO_MODE } from "./site-config";
 
 // Brand book (p.5) specifies Kaneda Gothic Bold + Brooklyn — both commercial.
 // Oswald stands in for Kaneda (condensed heavy grotesque) and Jost for Brooklyn
 // (geometric sans). JetBrains Mono carries every number and label.
-const oswald = Oswald({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+// Self-hosted variable fonts (latin subset, from Google Fonts): next/font/google
+// downloads them at build time and that download intermittently failed the
+// Vercel build ("next/font/google queries have exactly one entry").
+const oswald = localFont({
+  src: "./fonts/oswald.woff2",
+  weight: "200 700",
   variable: "--font-oswald",
   display: "swap",
 });
-const jost = Jost({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+const jost = localFont({
+  src: "./fonts/jost.woff2",
+  weight: "100 900",
   variable: "--font-jost",
   display: "swap",
 });
-const jetbrains = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
+const jetbrains = localFont({
+  src: "./fonts/jetbrainsmono.woff2",
+  weight: "100 800",
   variable: "--font-jetbrains",
   display: "swap",
 });
@@ -77,8 +81,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const profile = await getCurrentProfile();
-  const auctionLive = await isAuctionLive();
+  // In parallel: these were sequential Supabase round-trips on every request.
+  const [profile, auctionLive] = await Promise.all([getCurrentProfile(), isAuctionLive()]);
 
   // Only the two public routes are advertised to a signed-out visitor —
   // everything else redirects to /login (see proxy.ts), so linking to it from
@@ -121,6 +125,7 @@ export default async function RootLayout({
       className={`h-full antialiased ${oswald.variable} ${jost.variable} ${jetbrains.variable}`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <NavProgress />
         {/* Auto-sync disabled post-auction — squad is curated manually now.
             Re-enable <AuctionSync /> if the live mirror is needed again. */}
         <header

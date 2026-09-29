@@ -1,8 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-// ALLOWLIST, not a denylist: only the live board and the squad display are
-// public. Everything else — schedule, pool, jersey form, player profiles, the
+// ALLOWLIST, not a denylist: only the landing page ("/", exact), the live
+// board and the squad display are public. Everything else — schedule, pool, jersey form, player profiles, the
 // league record, my-team, admin — needs a login. Inverted deliberately, so a
 // new route is private by default rather than public by accident.
 //
@@ -14,6 +14,9 @@ const PUBLIC_PATHS = [
 ];
 
 function isPublic(pathname: string): boolean {
+  // The landing page is public, but only as an exact match: "/" as a prefix
+  // would make every route public.
+  if (pathname === "/") return true;
   return PUBLIC_PATHS.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`)
   );

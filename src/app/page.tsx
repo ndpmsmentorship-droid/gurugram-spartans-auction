@@ -1,86 +1,251 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getCurrentProfile } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
-import SpartansStars from "./SpartansStars";
+import crest from "./brand/crest.png";
+import acciChampions from "./brand/season1/acci-champions.jpg";
+import goanRunnersUp from "./brand/season1/goan-monks-runners-up.jpg";
+import acciLogo from "./brand/season1/acci-logo.png";
+import goanLogo from "./brand/season1/goan-monks-logo.png";
+import g01 from "./brand/gallery/g01.jpg";
+import g02 from "./brand/gallery/g02.jpg";
+import g03 from "./brand/gallery/g03.jpg";
+import g04 from "./brand/gallery/g04.jpg";
+import g05 from "./brand/gallery/g05.jpg";
+import g06 from "./brand/gallery/g06.jpg";
+import g07 from "./brand/gallery/g07.jpg";
+import g08 from "./brand/gallery/g08.jpg";
+import g09 from "./brand/gallery/g09.jpg";
+import g10 from "./brand/gallery/g10.jpg";
+import g11 from "./brand/gallery/g11.jpg";
+import g12 from "./brand/gallery/g12.jpg";
+import Season1Gallery, { type Slide } from "./Season1Gallery";
+import { TITLE_SPONSOR, PRESENTED_BY, PARTNERS } from "./sponsors";
+
+// Public front door of the league (no login — see PUBLIC_PATHS in proxy.ts).
+// Season 1 honours lead the page: ACCI (champions) and Goan Monks (runners-up).
+// Photos come from the league's Drive (SLL'26 Repository › FINALS DATA ›
+// MOM & FOM), resized for the web.
+const SLIDES: Slide[] = [
+  { src: g01, caption: "Match awards · Lucknow Strikers v ACCI · 4 Apr 2026" },
+  { src: g02, caption: "Match awards · Chennai Thalaivas v ACCI · 5 Apr 2026" },
+  { src: g03, caption: "Match awards · ACCI v Patna Panthers · 19 Apr 2026" },
+  { src: g04, caption: "Match awards · Jaipur Royals v Goan Monks · 12 Apr 2026" },
+  { src: g05, caption: "Match awards · Goan Monks v Gurugram Spartans · 18 Apr 2026" },
+  { src: g06, caption: "Match awards · Bengal Tigers v Goan Monks · 19 Apr 2026" },
+  { src: g07, caption: "Match awards · Bengal Tigers v Uttarakhand Yoddhas · 4 Apr 2026" },
+  { src: g08, caption: "Match awards · NCR Turbo Chargers v Patna Panthers · 5 Apr 2026" },
+  { src: g09, caption: "Match awards · Opening weekend · 14 Mar 2026" },
+  { src: g10, caption: "Match awards · Opening weekend · 15 Mar 2026" },
+  { src: g11, caption: "Match awards · Bengal Tigers v Punjab Royals · 18 Apr 2026" },
+  { src: g12, caption: "Match awards · Lucknow Strikers v Chennai Thalaivas · 22 Mar 2026" },
+];
+
+const STEPS = [
+  {
+    title: "Register",
+    body: "Played with us before? Enter your phone number and your profile comes up ready. New players fill one short form.",
+  },
+  {
+    title: "Review",
+    body: "The league checks every registration before the auction pool is published.",
+  },
+  {
+    title: "Auction",
+    body: "Twelve franchises bid live for their squads. Selected players pay the ₹3,000 registration fee.",
+  },
+];
 
 export default async function Home() {
   const profile = await getCurrentProfile();
 
-  let poolCount = 0;
-  let boughtCount = 0;
-  if (profile) {
-    const supabase = await createClient();
-    const [{ count: total }, { count: bought }] = await Promise.all([
-      supabase.from("scout_players").select("id", { count: "exact", head: true }),
-      supabase
-        .from("scout_players")
-        .select("id", { count: "exact", head: true })
-        .eq("is_bought", true),
-    ]);
-    poolCount = total ?? 0;
-    boughtCount = bought ?? 0;
-  }
+  const portal =
+    profile?.role === "admin"
+      ? [
+          { href: "/admin/auction", label: "Auction console" },
+          { href: "/scout", label: "Player pool" },
+          { href: "/admin/owners", label: "Team owners" },
+          { href: "/schedule", label: "Schedule" },
+        ]
+      : profile?.role === "owner"
+        ? [
+            { href: "/my-team", label: "My squad" },
+            { href: "/my-team/targets", label: "Targets" },
+            { href: "/auction", label: "Live board" },
+            { href: "/schedule", label: "Schedule" },
+          ]
+        : null;
 
   return (
     <main className="flex flex-1 flex-col">
-      {/* hero */}
-      <section className="mx-auto w-full max-w-3xl px-6 pt-24 pb-16 text-center">
-        <p className="eyebrow inline-flex items-center gap-1.5">
-          Gurugram Spartans <SpartansStars />
-        </p>
-        <h1 className="mt-3 text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
-          Scout smarter.
-          <br />
-          Build the squad.
-        </h1>
-        <p className="mx-auto mt-5 max-w-xl text-lg text-muted sm:text-xl">
-          Upload the auction pool, rank every player on form-weighted batting,
-          bowling, fielding and keeping — and buy with conviction.
-        </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link href="/auction" className="btn-primary">
-            Live auction board
-          </Link>
-          {profile ? (
-            <>
-              <Link href="/scout" className="btn-ghost">
-                Scout pool
+      {/* ---------- hero ---------- */}
+      <section className="band relative overflow-hidden text-white">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-24 -top-24 h-[420px] w-[420px] rounded-full opacity-[0.07]"
+          style={{ background: "radial-gradient(circle, #fff 0%, transparent 70%)" }}
+        />
+        <div className="relative mx-auto grid max-w-[1200px] items-center gap-8 px-4 py-12 sm:px-7 md:grid-cols-[auto_1fr] md:py-16">
+          <Image
+            src={crest}
+            alt="Shanti Devi Legend's League crest"
+            className="mx-auto h-40 w-auto drop-shadow-[0_18px_30px_rgba(0,0,0,0.45)] md:h-56"
+            loading="eager"
+            fetchPriority="high"
+            sizes="220px"
+          />
+          <div className="text-center md:text-left">
+            <p className="font-mono text-[0.688rem] uppercase tracking-[0.24em] text-white/60">
+              {TITLE_SPONSOR.name.replace(" Development Centre", "")} presents · Season 2
+            </p>
+            <h1 className="mt-3 text-[2.6rem] leading-[0.95] sm:text-6xl">
+              Shanti Devi
+              <br />
+              Legend&apos;s League
+            </h1>
+            <p className="mx-auto mt-4 max-w-xl text-white/75 md:mx-0">
+              Twelve franchises, one ground at SportsCube, Gurugram, and a live auction
+              that builds every squad. Presented by {PRESENTED_BY.name}.
+            </p>
+            <div className="mt-7 flex flex-wrap justify-center gap-3 md:justify-start">
+              <a href="#register" className="btn-accent">
+                Register for Season 2
+              </a>
+              <Link
+                href="/auction"
+                className="rounded-full border border-white/30 px-6 py-2.5 text-[0.813rem] font-medium text-white transition hover:border-white"
+              >
+                Live auction board
               </Link>
-              <Link href="/squad" className="btn-ghost">
-                Squad
-              </Link>
-              {profile.role === "admin" && (
-                <Link href="/admin/auction" className="btn-ghost">
-                  Admin console
-                </Link>
-              )}
-              <Link href="/scout/import" className="btn-ghost">
-                Import players
-              </Link>
-            </>
-          ) : (
-            <Link href="/login" className="btn-ghost">
-              Sign in
-            </Link>
-          )}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* stat tiles */}
-      {profile && (
-        <section className="mx-auto grid w-full max-w-3xl grid-cols-2 gap-4 px-6 pb-24">
-          <div className="rounded-[18px] bg-wash p-8 text-center">
-            <p className="text-5xl font-semibold tracking-tight">{poolCount}</p>
-            <p className="mt-2 text-sm text-muted">Players in the pool</p>
-          </div>
-          <div className="rounded-[18px] bg-wash p-8 text-center">
-            <p className="text-5xl font-semibold tracking-tight text-accent-text">
-              {boughtCount}
-            </p>
-            <p className="mt-2 text-sm text-muted">Bought</p>
+      {portal && (
+        <section className="border-b border-line bg-wash">
+          <div className="mx-auto flex max-w-[1200px] flex-wrap items-center gap-3 px-4 py-4 sm:px-7">
+            <span className="label-mono">Signed in · your pages</span>
+            {portal.map((p) => (
+              <Link key={p.href} href={p.href} className="pill">
+                {p.label}
+              </Link>
+            ))}
           </div>
         </section>
       )}
+
+      {/* ---------- Season 1 honours ---------- */}
+      <section className="mx-auto w-full max-w-[1200px] px-4 pt-14 sm:px-7">
+        <p className="eyebrow">Season 1 · 2026 honours</p>
+        <h2 className="mt-2 text-4xl sm:text-5xl">The teams to beat</h2>
+
+        <div className="mt-8">
+          <div className="mb-4 flex items-center gap-4">
+            <Image src={acciLogo} alt="" className="h-14 w-auto sm:h-16" sizes="64px" />
+            <div>
+              <p className="font-mono text-[0.688rem] uppercase tracking-[0.2em] text-gold">
+                ★ Champions
+              </p>
+              <h3 className="mt-1 text-2xl sm:text-3xl">American Cricket Club of India</h3>
+            </div>
+          </div>
+          <div className="honour-frame">
+            <div className="honour-inner">
+              <Image
+                src={acciChampions}
+                alt="The ACCI squad, Season 1 champions"
+                className="h-auto w-full"
+                sizes="(max-width: 1200px) 100vw, 1150px"
+                loading="eager"
+              />
+            </div>
+            <span className="honour-sheen" aria-hidden />
+          </div>
+        </div>
+
+        <div className="mt-12 grid items-center gap-6 md:grid-cols-[1.6fr_1fr]">
+          <div className="honour-frame silver">
+            <div className="honour-inner">
+              <Image
+                src={goanRunnersUp}
+                alt="Goan Monks, Season 1 runners-up"
+                className="h-auto w-full"
+                sizes="(max-width: 768px) 100vw, 720px"
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-4 md:block">
+            <Image src={goanLogo} alt="" className="h-14 w-auto md:h-20" sizes="80px" />
+            <div className="md:mt-4">
+              <p className="font-mono text-[0.688rem] uppercase tracking-[0.2em] text-muted">
+                Runners-up
+              </p>
+              <h3 className="mt-1 text-2xl sm:text-3xl">Goan Monks</h3>
+              <p className="mt-2 hidden max-w-xs text-sm text-muted md:block">
+                Reached the Season 1 final against ACCI.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ---------- gallery ---------- */}
+      <section className="mx-auto w-full max-w-[1200px] px-4 pt-16 sm:px-7">
+        <p className="eyebrow">Season 1 in pictures</p>
+        <h2 className="mt-2 mb-6 text-3xl sm:text-4xl">Match-day awards</h2>
+        <Season1Gallery slides={SLIDES} />
+      </section>
+
+      {/* ---------- registration ---------- */}
+      <section id="register" className="mx-auto w-full max-w-[1200px] scroll-mt-32 px-4 pt-16 sm:px-7">
+        <div className="card p-6 sm:p-8">
+          <p className="eyebrow">Player registration · Season 2</p>
+          <h2 className="mt-2 text-3xl sm:text-4xl">Enter the pool</h2>
+          <p className="mt-3 max-w-2xl text-muted">
+            Registration opens here shortly. Returning players won&apos;t need to fill
+            anything twice: your profile, stats and photo are already with us.
+          </p>
+          <ol className="mt-7 grid gap-4 md:grid-cols-3">
+            {STEPS.map((s, k) => (
+              <li key={s.title} className="tile p-5">
+                <p className="label-mono">Step {k + 1}</p>
+                <h3 className="mt-2 text-xl">{s.title}</h3>
+                <p className="mt-2 text-sm text-muted">{s.body}</p>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-6 rounded-[10px] border border-gold-line bg-gold-fill px-4 py-3 text-sm text-gold">
+            A mandatory registration fee of ₹3,000 applies only if you are selected in
+            the auction. Registering does not guarantee selection.
+          </p>
+        </div>
+      </section>
+
+      {/* ---------- sponsors ---------- */}
+      <section className="mx-auto w-full max-w-[1200px] px-4 py-16 sm:px-7">
+        <p className="eyebrow">Our sponsors &amp; partners</p>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          {[TITLE_SPONSOR, PRESENTED_BY].map((s) => (
+            <div key={s.name} className="card flex items-center gap-5">
+              <Image src={s.logo} alt={s.name} className="h-16 w-auto" sizes="200px" />
+              <div>
+                <p className="label-mono">{s.role}</p>
+                <p className="mt-1 font-medium">{s.name}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <ul className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
+          {PARTNERS.map((s) => (
+            <li key={s.name} className="tile flex flex-col items-center gap-3 p-4 text-center">
+              <div className="flex h-14 items-center">
+                <Image src={s.logo} alt={s.name} className="max-h-14 w-auto" sizes="160px" />
+              </div>
+              <p className="label-mono">{s.role}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
     </main>
   );
 }

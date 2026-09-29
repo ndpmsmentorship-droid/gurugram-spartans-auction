@@ -8,6 +8,7 @@ import { isAuctionLive } from "@/lib/auction/state";
 import { signOut } from "@/app/login/actions";
 import Nav, { type NavItem } from "./Nav";
 import crest from "./brand/crest.png";
+import SponsorBar from "./SponsorBar";
 
 // Brand book (p.5) specifies Kaneda Gothic Bold + Brooklyn — both commercial.
 // Oswald stands in for Kaneda (condensed heavy grotesque) and Jost for Brooklyn
@@ -171,6 +172,7 @@ export default async function RootLayout({
             </div>
           </div>
         </header>
+        <SponsorBar />
         <div className="flex flex-1 flex-col">{children}</div>
       </body>
     </html>

@@ -191,17 +191,19 @@ Bandhwari, Gurugram; read from Nikhil's screenshots because WebFetch was blocked
   `scripts/import-sdll.mts` overwrites these** with the platform's broken URLs, so re-apply afterwards. 32 players
   still have no reachable photo and show initials.
 
-## PENDING ON BRANCH `player-card` (not live — needs SQL first)
+## PLAYER CARD + NAME SEARCH — LIVE 2026-09-29 (merge abad035; the SQL addendum was run)
 - Player card after the phone lookup (big photo, ★ Team owner badge, category, role, S1 stats), name-search fallback
   for numbers not on file ("matched by name" flag), S1 export import + archive enrich (adds phoneless players,
   e.g. Kanishk Sheel / Nikhil Dhingra of the Gurugram Spartans SARDA squad).
-- **Blocker:** run the "2026-09-29 addendum" at the bottom of `supabase/registration_schema.sql` (phone nullable,
+- DONE: ran the "2026-09-29 addendum" at the bottom of `supabase/registration_schema.sql` (phone nullable,
   is_owner/category/sold_amount/stats, registrations.matched_by). Then:
   `node scripts/import-master.mts "SDLL S1=<Drive: Player registered and owners/FINAL Post Auction Summary - SSL Season 1.xlsx>" "SARDA S6=<For_owners_final_auction_list_7th_Aug.xlsx>" --write`
   → `node scripts/enrich-master.mts` → e2e test → merge. Dry run: 711 players with a mobile (293 S1 + 521 SARDA,
   101 overlap), 36 owners. (Sheet "Post Auction Export"; the xlsx lib reads it only through openpyxl-safe paths.
   Node's xlsx reads the SARDA sheet fine.)
-- Home carousel: Nikhil wants ONLY photos of Kanishk bhaiya presenting awards. He's picking the numbers from
+- player_master = **899** (711 with a phone incl. 36 owners, plus 188 phoneless from the archive). Master photos were repaired from the pool (64).
+- Home carousel: DONE with Nikhil's picks 20,21,22,42,57,58 (`brand/gallery/k01–k06`). Candidates he may add: 23, 43, 44–56, 59–62.
+- (old note) Home carousel: Nikhil wants ONLY photos of Kanishk bhaiya presenting awards. He's picking the numbers from
   https://claude.ai/artifact/J37YaFbzen4xBKHeSoeBzX (63 photos from Drive `FINALS DATA/MOM & FOM`). Don't guess by face.
 
 ## PLAYER REGISTRATION — LIVE 2026-09-29 (merge db41545)

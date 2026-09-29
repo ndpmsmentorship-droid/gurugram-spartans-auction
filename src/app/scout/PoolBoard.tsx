@@ -37,6 +37,9 @@ export type PoolPlayer = RankedPlayer<{
   runs: number | null;
   wickets: number | null;
   economy: number | null;
+  // Set for SARDA archive rows, whose profile lives at /players/[id].
+  href?: string;
+  source?: "SDLL" | "SARDA";
 }> & {
   archetype: string;
   vor: number;
@@ -433,7 +436,7 @@ function Row({
             ) : null;
           })()}
           <Link
-            href={`/scout/${p.id}`}
+            href={p.href ?? `/scout/${p.id}`}
             className="min-w-0 truncate text-[0.938rem] font-normal text-ink transition hover:text-red"
           >
             {p.full_name}

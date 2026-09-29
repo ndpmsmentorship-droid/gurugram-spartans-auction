@@ -30,7 +30,27 @@ function rankMetric(
   return m;
 }
 
-export default async function ScoutPage() {
+// Which players the board covers. The SDLL pool (scout_players) is the one the
+// auction draws from; the SARDA S6 archive (sccl_s6_players, same columns) is
+// shown alongside for scouting. "all" merges them, dropping SARDA rows for
+// people already in the SDLL pool (same CricHeroes id or name).
+const SOURCES = [
+  { key: "all", label: "All players" },
+  { key: "sdll", label: "SDLL pool" },
+  { key: "sarda", label: "SARDA S6" },
+] as const;
+type SourceKey = (typeof SOURCES)[number]["key"];
+
+const chId = (l: string | null) => l?.match(/player-profile\/(\d+)/)?.[1] ?? null;
+const nameKey = (n: string | null) => (n ?? "").toLowerCase().replace(/\s+/g, " ").trim();
+
+export default async function ScoutPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ src?: string }>;
+}) {
+  const { src: rawSrc } = await searchParams;
+  const src: SourceKey = SOURCES.some((x) => x.key === rawSrc) ? (rawSrc as SourceKey) : "all";
   // Admin client (page is login-gated by the proxy) — the reliable path used by
   // /auction & /squad. Retry a couple of times: it's a ~1.2 MB pull and Supabase
   // can throw a transient 522 on the Vercel→origin hop.
@@ -39,12 +59,29 @@ export default async function ScoutPage() {
   let data: any[] | null = null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let error: any = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const res = await supabase.from("scout_players").select("*");
-    data = res.data;
-    error = res.error;
-    if (!error) break;
-    if (attempt < 2) await new Promise((r) => setTimeout(r, 500));
+  async function load(table: string) {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const res = await supabase.from(table as "scout_players").select("*");
+      if (!res.error) return { rows: res.data ?? [], error: null };
+      if (attempt < 2) await new Promise((r) => setTimeout(r, 500));
+      else return { rows: null, error: res.error };
+    }
+    return { rows: null, error: null };
+  }
+  const [sdll, sarda] = await Promise.all([
+    src === "sarda" ? { rows: [], error: null } : load("scout_players"),
+    src === "sdll" ? { rows: [], error: null } : load("sccl_s6_players"),
+  ]);
+  error = sdll.error ?? sarda.error;
+  if (!error) {
+    const sdllRows = (sdll.rows ?? []).map((r) => ({ ...r, source: "SDLL" }));
+    const seenCh = new Set(sdllRows.map((r) => chId(r.cricheroes_link)).filter(Boolean));
+    const seenName = new Set(sdllRows.map((r) => nameKey(r.full_name)));
+    const sardaRows = (sarda.rows ?? [])
+      .filter((r) => src === "sarda" || !(seenCh.has(chId(r.cricheroes_link)) || seenName.has(nameKey(r.full_name))))
+      // A SARDA sale isn't an SDLL sale: never show archive rows as bought here.
+      .map((r) => ({ ...r, source: "SARDA", href: `/players/${r.id}`, team_id: null, is_bought: false }));
+    data = [...sdllRows, ...sardaRows];
   }
 
   if (error) {
@@ -143,6 +180,13 @@ export default async function ScoutPage() {
           <h1 className="mt-3 font-display text-[2.75rem] leading-[0.95]">
             {pool.length} Players
           </h1>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {SOURCES.map((x) => (
+              <Link key={x.key} href={`/scout?src=${x.key}`} className="pill" data-active={src === x.key}>
+                {x.label}
+              </Link>
+            ))}
+          </div>
         </div>
         <div className="flex gap-2.5">
           <Link href="/scout/compare" className="btn-ghost">

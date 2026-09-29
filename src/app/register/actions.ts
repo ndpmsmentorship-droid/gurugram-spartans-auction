@@ -1,7 +1,7 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { SEASON, BUCKET, normalizePhone } from "./shared";
+import { SEASON, BUCKET, MIN_AGE, ageOn, normalizePhone } from "./shared";
 
 // Public registration (/register). Everything goes through the service role:
 // player_master and registrations have RLS on with no policies, so the anon
@@ -150,6 +150,9 @@ export async function submitRegistration(
 
   if (!returning) {
     if (!input.dob) return { error: "Please enter your date of birth." };
+    const age = ageOn(input.dob);
+    if (age == null || age > 90) return { error: "Please check your date of birth." };
+    if (age < MIN_AGE) return { error: `The league is open to players aged ${MIN_AGE} and above.` };
     if (!clean(input.email)) return { error: "Please enter your email." };
     if (!clean(input.cricheroes_link)) return { error: "Please add your CricHeroes profile link." };
     if (!input.batting_hand && !input.bowling_type && !input.allrounder && !input.is_keeper)

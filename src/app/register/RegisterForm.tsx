@@ -6,6 +6,8 @@ import { lookupPlayer, prepareUploads, submitRegistration, type LookupResult } f
 import {
   BUCKET,
   MAX_FILE_BYTES,
+  MIN_AGE,
+  ageOn,
   SIZES,
   BATTING,
   BOWLING,
@@ -14,6 +16,13 @@ import {
 } from "./shared";
 
 type Profile = Extract<LookupResult, { found: true }>["profile"];
+
+// Source sheets spell roles "ALL_ROUNDER", "Batsman", "wicket keeper"…
+function prettyRole(r: string | null): string | null {
+  if (!r) return null;
+  const t = r.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+  return t === "All Rounder" ? "All-rounder" : t;
+}
 type Stage = "phone" | "confirm" | "form" | "done";
 
 function Field({
@@ -167,7 +176,12 @@ export default function RegisterForm() {
     setErr(null);
     const tooBig = checkFile(photo, "Your photo") ?? checkFile(aadhaar, "The Aadhaar file");
     if (tooBig) return setErr(tooBig);
-    if (!returning && (!photo || !aadhaar)) return setErr("Please add your photo and your Aadhaar card.");
+    if (!returning) {
+      const age = dob ? ageOn(dob) : null;
+      if (age == null) return setErr("Please enter your date of birth.");
+      if (age < MIN_AGE) return setErr(`The league is open to players aged ${MIN_AGE} and above.`);
+      if (!photo || !aadhaar) return setErr("Please add your photo and your Aadhaar card.");
+    }
     if (!feeAck) return setErr("Please tick the registration fee declaration.");
 
     setBusy(true);
@@ -298,7 +312,7 @@ export default function RegisterForm() {
           <div>
             <h2 className="text-2xl sm:text-3xl">{profile.full_name}</h2>
             <p className="mt-1 text-sm text-muted">
-              {[profile.primary_role, profile.last_team, profile.last_season].filter(Boolean).join(" · ")}
+              {[prettyRole(profile.primary_role), profile.last_team, profile.last_season].filter(Boolean).join(" · ")}
             </p>
           </div>
         </div>
@@ -333,7 +347,7 @@ export default function RegisterForm() {
           <Field label="Full name">
             <input id="reg-name" className="input" value={fullName} onChange={(e) => setFullName(e.target.value)} autoComplete="name" />
           </Field>
-          <Field label="Date of birth">
+          <Field label="Date of birth" hint={`Open to players aged ${MIN_AGE} and above.`}>
             <input id="reg-dob" type="date" className="input" value={dob} onChange={(e) => setDob(e.target.value)} />
           </Field>
           <Field label="Email">

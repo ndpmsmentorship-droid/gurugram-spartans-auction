@@ -19,7 +19,7 @@ import g10 from "./brand/gallery/g10.jpg";
 import g11 from "./brand/gallery/g11.jpg";
 import g12 from "./brand/gallery/g12.jpg";
 import Season1Gallery, { type Slide } from "./Season1Gallery";
-import { TITLE_SPONSOR, PRESENTED_BY, PARTNERS } from "./sponsors";
+import { TITLE_SPONSOR, PRESENTED_BY, PARTNERS, logoSize } from "./sponsors";
 
 // Public front door of the league (no login — see PUBLIC_PATHS in proxy.ts).
 // Season 1 honours lead the page: ACCI (champions) and Goan Monks (runners-up).
@@ -236,7 +236,9 @@ export default async function Home() {
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           {[TITLE_SPONSOR, PRESENTED_BY].map((s) => (
             <div key={s.name} className="card flex items-center gap-5">
-              <Image src={s.logo} alt={s.name} className="h-16 w-auto" sizes="200px" />
+              <div className="flex h-20 w-40 shrink-0 items-center justify-center">
+                <Image src={s.logo} alt={s.name} style={logoSize(s.logo, 9000, 76)} sizes="200px" />
+              </div>
               <div>
                 <p className="label-mono">{s.role}</p>
                 <p className="mt-1 font-medium">{s.name}</p>
@@ -246,9 +248,9 @@ export default async function Home() {
         </div>
         <ul className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
           {PARTNERS.map((s) => (
-            <li key={s.name} className="tile flex flex-col items-center gap-3 p-4 text-center">
-              <div className="flex h-14 items-center">
-                <Image src={s.logo} alt={s.name} className="max-h-14 w-auto" sizes="160px" />
+            <li key={s.name} className="flex flex-col items-center gap-3 rounded-[10px] border border-line bg-surface p-4 text-center">
+              <div className="flex h-16 items-center">
+                <Image src={s.logo} alt={s.name} style={logoSize(s.logo, 5200, 60)} sizes="200px" />
               </div>
               <p className="label-mono">{s.role}</p>
             </li>

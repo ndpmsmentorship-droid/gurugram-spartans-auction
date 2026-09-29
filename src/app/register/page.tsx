@@ -18,8 +18,8 @@ export default function RegisterPage() {
           </p>
           <h1 className="mt-3 text-4xl sm:text-5xl">Enter the pool</h1>
           <p className="mt-3 max-w-xl text-white/75">
-            Register for the Shanti Devi Legend&apos;s League auction. Returning players only add
-            their kit details. Registering does not guarantee selection.
+            Register for the Shanti Devi Legend&apos;s League auction, open to players aged 30 and
+            above. Returning players only add their kit details. Registering does not guarantee selection.
           </p>
         </div>
       </section>

@@ -170,6 +170,30 @@ Bandhwari, Gurugram; read from Nikhil's screenshots because WebFetch was blocked
 3. **Squad tracker** `/my-team` per owner: purse, category caps, role mix, pace/spin + L/R arm, L/R bat,
    16–25 squad gaps, "fill this gap" suggestions (via the AI chat), live via Realtime.
 
+## SPEED, NAVIGATION, BUILD — 2026-09-29 (live)
+- **Functions run in Mumbai** (`vercel.json` → `"regions": ["bom1"]`). They ran in iad1 (Washington) while Supabase
+  answers from India, so pages took 2–4.5 s. Now 0.25–0.7 s. Don't remove it.
+- **Fonts are self-hosted** (`src/app/fonts/*.woff2` via next/font/local). next/font/google's build-time download
+  intermittently FAILED the Vercel production build ("next/font/google queries have exactly one entry").
+- Tap feedback: root `loading.tsx` + `NavProgress.tsx` (red top bar on every internal link tap), touch-action CSS,
+  layout reads profile + auction state in parallel, and the proxy skips Supabase auth on public paths.
+- `DEMO_MODE` in `src/app/site-config.ts` (currently true): the header lists every major page for everyone, and the
+  landing page has an "Every page" directory (`PORTAL_PAGES`). Flip to false at launch → Register + Sign in only.
+- `Crumbs.tsx`: ← Back + breadcrumbs under the sponsor bar on every page except Home.
+
+## PENDING ON BRANCH `player-card` (not live — needs SQL first)
+- Player card after the phone lookup (big photo, ★ Team owner badge, category, role, S1 stats), name-search fallback
+  for numbers not on file ("matched by name" flag), S1 export import + archive enrich (adds phoneless players,
+  e.g. Kanishk Sheel / Nikhil Dhingra of the Gurugram Spartans SARDA squad).
+- **Blocker:** run the "2026-09-29 addendum" at the bottom of `supabase/registration_schema.sql` (phone nullable,
+  is_owner/category/sold_amount/stats, registrations.matched_by). Then:
+  `node scripts/import-master.mts "SDLL S1=<Drive: Player registered and owners/FINAL Post Auction Summary - SSL Season 1.xlsx>" "SARDA S6=<For_owners_final_auction_list_7th_Aug.xlsx>" --write`
+  → `node scripts/enrich-master.mts` → e2e test → merge. Dry run: 711 players with a mobile (293 S1 + 521 SARDA,
+  101 overlap), 36 owners. (Sheet "Post Auction Export"; the xlsx lib reads it only through openpyxl-safe paths.
+  Node's xlsx reads the SARDA sheet fine.)
+- Home carousel: Nikhil wants ONLY photos of Kanishk bhaiya presenting awards. He's picking the numbers from
+  https://claude.ai/artifact/J37YaFbzen4xBKHeSoeBzX (63 photos from Drive `FINALS DATA/MOM & FOM`). Don't guess by face.
+
 ## PLAYER REGISTRATION — LIVE 2026-09-29 (merge db41545)
 - `/register` (public): mobile → lookup in `player_master` → returning player confirms ("This is me") + kit +
   LinkedIn + ₹3,000 fee tick; new player fills name, DOB (**min age 30**, enforced client + server), email,

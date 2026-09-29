@@ -98,6 +98,42 @@ Until it runs, `/schedule` renders its empty state rather than erroring.
 - Dev fixture (`SPARTANS_DEV_FIXTURE=1`) now covers all 12 teams and a generated season, so both
   pages can be designed against real-shaped data with no DB.
 
+## PLANNED 2026-09-29 — registration + AI scout chat + owner squad tracker (NOT STARTED, no code yet)
+Requested by Nikhil; discussion stage. Nothing built or deployed yet.
+
+**Decisions made**
+- **Owner logins: 12 accounts, one per team** — each owner sees only their own squad in the tracker.
+- **Registration: combine the best of the USCL and SARDA forms.** The landing page + form design still
+  needs a discussion with Nikhil before building.
+
+**USCL reference form** (urbansportsstudio.in/register — Urban Sports Champions League S2, Champions Den,
+Bandhwari, Gurugram; read from Nikhil's screenshots because WebFetch was blocked):
+- Landing: logo, "Player Registration · Season 2 / ENTER THE POOL", "No account needed", age 30+,
+  "Already registered? Add your Aadhaar card" link, 3 step cards (Register → Review → Auction).
+- Personal: Full name · DOB (hint "Open to players aged 30+") · Contact number (10-digit) · Email ·
+  Company · Work email ("prefer company email, personal is fine") · CricHeroes profile link ("Reviewers
+  open this…") · LinkedIn profile link · Player photo (JPG/PNG/WEBP ≤5 MB) · Aadhaar (JPG/PNG/WEBP/PDF
+  ≤5 MB, "visible only to league admins"). All required.
+- Playing profile, one radio per group, can combine across groups: Batting (Left Hand / Right Hand
+  Batsman) · Bowling (Left Arm Pacer / Left Arm Spinner / Right Arm Pacer / Right Arm Spin) · All
+  Rounder (Batting / Bowling) · Wicket Keeper (WK Keeper Batsman).
+- Career stats, all required, "NA" allowed: Matches, Runs, Bat avg, Bat SR, Wickets, Bowl SR, Economy.
+- Kit & jersey: T-shirt size, Lower size (dropdowns), Jersey number, Name on jersey.
+- Consent checkbox: ₹3,000 mandatory fee **only if selected at auction**; details accurate; OK to contact.
+  Button "Submit Registration". Footer repeats the fee note.
+
+**Build plan (for discussion)**
+1. `/register` (public, no account) → `scout_players` with a pending status + admin approve queue;
+   Aadhaar goes to a PRIVATE Supabase Storage bucket (admin-only). Resolve the anantanity
+   `import-sdll.mts` overlap first (dedupe on phone/CricHeroes link) so the importer can't clobber or
+   duplicate our sign-ups. SARDA form fields not compared yet — pull them from
+   `scripts/import-from-api.mts` / `sccl_s6_jersey_sizes`.
+2. **AI scout chat** (owner asks e.g. "best left-arm spin options"): a server route filters the pool
+   (bowling_style/role/category/unsold) → Claude ranks and comments only on those rows. Needs an
+   `ANTHROPIC_API_KEY` Vercel env var. Many SDLL stats/indices are null → the commentary must say so.
+3. **Squad tracker** `/my-team` per owner: purse, category caps, role mix, pace/spin + L/R arm, L/R bat,
+   16–25 squad gaps, "fill this gap" suggestions (via the AI chat), live via Realtime.
+
 ## Pending / next
 1. **Projector mode** view for the public board (venue screen).
 2. Restyle secondary pages to the SDLL brand (`/login`, `/my-team`, `/players`, `/team`, `/jersey`, `/scout/compare`, `/scout/import`).

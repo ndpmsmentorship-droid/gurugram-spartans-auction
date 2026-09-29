@@ -6,40 +6,29 @@ import acciChampions from "./brand/season1/acci-champions.jpg";
 import goanRunnersUp from "./brand/season1/goan-monks-runners-up.jpg";
 import acciLogo from "./brand/season1/acci-logo.png";
 import goanLogo from "./brand/season1/goan-monks-logo.png";
-import g01 from "./brand/gallery/g01.jpg";
-import g02 from "./brand/gallery/g02.jpg";
-import g03 from "./brand/gallery/g03.jpg";
-import g04 from "./brand/gallery/g04.jpg";
-import g05 from "./brand/gallery/g05.jpg";
-import g06 from "./brand/gallery/g06.jpg";
-import g07 from "./brand/gallery/g07.jpg";
-import g08 from "./brand/gallery/g08.jpg";
-import g09 from "./brand/gallery/g09.jpg";
-import g10 from "./brand/gallery/g10.jpg";
-import g11 from "./brand/gallery/g11.jpg";
-import g12 from "./brand/gallery/g12.jpg";
+import k01 from "./brand/gallery/k01.jpg";
+import k02 from "./brand/gallery/k02.jpg";
+import k03 from "./brand/gallery/k03.jpg";
+import k04 from "./brand/gallery/k04.jpg";
+import k05 from "./brand/gallery/k05.jpg";
+import k06 from "./brand/gallery/k06.jpg";
 import Season1Gallery, { type Slide } from "./Season1Gallery";
 import { TITLE_SPONSOR, PRESENTED_BY, PARTNERS, logoSize } from "./sponsors";
 import { DEMO_MODE, PORTAL_PAGES } from "./site-config";
 
 // Public front door of the league (no login — see PUBLIC_PATHS in proxy.ts).
 // Season 1 honours lead the page: ACCI (champions) and Goan Monks (runners-up).
-// Photos come from the league's Drive (SLL'26 Repository › FINALS DATA ›
-// MOM & FOM), resized for the web.
+// Carousel: the award photos Nikhil picked (Kanishk presenting), from the
+// league's Drive (SLL'26 Repository › FINALS DATA › MOM & FOM), resized.
+// Picked by number from the 63-photo sheet; add more the same way.
 const SLIDES: Slide[] = [
-  { src: g01, caption: "Match awards · Lucknow Strikers v ACCI · 4 Apr 2026" },
-  { src: g02, caption: "Match awards · Chennai Thalaivas v ACCI · 5 Apr 2026" },
-  { src: g03, caption: "Match awards · ACCI v Patna Panthers · 19 Apr 2026" },
-  { src: g04, caption: "Match awards · Jaipur Royals v Goan Monks · 12 Apr 2026" },
-  { src: g05, caption: "Match awards · Goan Monks v Gurugram Spartans · 18 Apr 2026" },
-  { src: g06, caption: "Match awards · Bengal Tigers v Goan Monks · 19 Apr 2026" },
-  { src: g07, caption: "Match awards · Bengal Tigers v Uttarakhand Yoddhas · 4 Apr 2026" },
-  { src: g08, caption: "Match awards · NCR Turbo Chargers v Patna Panthers · 5 Apr 2026" },
-  { src: g09, caption: "Match awards · Opening weekend · 14 Mar 2026" },
-  { src: g10, caption: "Match awards · Opening weekend · 15 Mar 2026" },
-  { src: g11, caption: "Match awards · Bengal Tigers v Punjab Royals · 18 Apr 2026" },
-  { src: g12, caption: "Match awards · Lucknow Strikers v Chennai Thalaivas · 22 Mar 2026" },
-];
+  { src: k01, caption: "Match awards · Opening day · 14 Mar 2026" },
+  { src: k02, caption: "Match awards · Opening day · 14 Mar 2026" },
+  { src: k03, caption: "Match awards · 15 Mar 2026" },
+  { src: k04, caption: "Match awards · 22 Mar 2026" },
+  { src: k05, caption: "Match awards · Season 1" },
+  { src: k06, caption: "Match awards · Season 1" },
+]
 
 // Identical blocks so the two finalists line up; only the frame (gold vs
 // silver) and the sheen mark the champions.

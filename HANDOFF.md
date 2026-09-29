@@ -148,6 +148,16 @@ Bandhwari, Gurugram; read from Nikhil's screenshots because WebFetch was blocked
   (`src/lib/owner-auth.ts`, `@owners.sdll` internal emails) → the 12 accounts are data entry, not new code.
 - `jersey_sizes` (19 rows) / `sccl_s6_jersey_sizes` (17) already hold kit data; the new form writes the same shape.
 
+**Decided 2026-09-29 (supersedes the OTP/screenshot proposals above) — keep the flow simple, few steps**
+- Nikhil will supply ONE detailed master database of players (all seasons merged), with names + phone numbers.
+  It gets imported as the lookup source.
+- Returning players **look up their profile by phone number** → confirm it's them → add jersey/kit + fee tick → submit.
+  No OTP. The lookup shows only name, photo, role and stats. Never echo email/Aadhaar/other PII, and every submission
+  still lands in the admin queue, so a wrong claim gets caught there.
+- New players (number not found) → full form + Aadhaar upload.
+- LinkedIn 500+: **manual admin check** — a single tick in the review queue. No screenshot upload, no extra player step.
+- Nikhil will upload the winners' photos (landing page) + carousel photos.
+
 **Build plan (for discussion)**
 1. `/register` (public, no account) → `scout_players` with a pending status + admin approve queue;
    Aadhaar goes to a PRIVATE Supabase Storage bucket (admin-only). Resolve the anantanity

@@ -170,7 +170,7 @@ Bandhwari, Gurugram; read from Nikhil's screenshots because WebFetch was blocked
 3. **Squad tracker** `/my-team` per owner: purse, category caps, role mix, pace/spin + L/R arm, L/R bat,
    16–25 squad gaps, "fill this gap" suggestions (via the AI chat), live via Realtime.
 
-## LANDING PAGE + SPONSOR BAR — built 2026-09-29 (commit 0d4b724), NOT YET DEPLOYED
+## LANDING PAGE + SPONSOR BAR — LIVE 2026-09-29 (commit 0d4b724)
 - `/` is now the **public** league landing page (proxy allows "/" as an exact match only). It shows Season 1
   honours (ACCI champions in a gold frame, Goan Monks runners-up in silver), a 12-photo award carousel
   (`Season1Gallery.tsx`), registration steps + the ₹3,000 fee note, and the sponsor wall. Signed-in users get quick links.
@@ -180,8 +180,14 @@ Bandhwari, Gurugram; read from Nikhil's screenshots because WebFetch was blocked
   the logos were cut from `Grounds PRINTABLES/SPONSOR STRIP (1).png`, the honours from `Final AVs/Stills/*.pdf`, and the
   photos from `FINALS DATA/MOM & FOM` (full-size downloads get rate-limited, so they're fetched via
   `drive.google.com/thumbnail?id=…&sz=w1600`). Everything is in `src/app/brand/{sponsors,season1,gallery}`.
-- **Deploy blocker:** this Mac has no Vercel login. Run `npx vercel login`, then
-  `npx vercel link --yes --project gurugram-spartans-auction` and `npx vercel deploy --prod --yes`.
+- ⚠️ **DEPLOYS NOW HAPPEN ON EVERY PUSH TO `main`.** The Vercel project has GitHub integration (alias
+  `gurugram-spartans-auction-git-main-…vercel.app`), so pushing 0d4b724 put the landing page live without a CLI deploy.
+  Everything below saying "no Git integration / CLI only" is out of date. Treat every push to main as a production
+  release; use a branch for work in progress (branch pushes get preview URLs).
+- The Vercel **Preview** environment has NO Supabase env vars (only Production does). A CLI preview needs them passed
+  per deploy: `-b NEXT_PUBLIC_SUPABASE_URL=… -b NEXT_PUBLIC_SUPABASE_ANON_KEY=… -e (same two) -e SUPABASE_SERVICE_ROLE_KEY=…`.
+- `vercel link` rewrites `.env.local` from the Development env: the Supabase keys survive, but the SDLL_EMAIL/PASSWORD
+  lines get dropped. Re-add them afterwards.
 - Next up: the `/register` form (phone lookup against Nikhil's master player file) + the admin review queue.
 
 ## STATUS AUDIT 2026-09-29 — fix before SDLL auction day

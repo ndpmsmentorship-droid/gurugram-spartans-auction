@@ -181,6 +181,16 @@ Bandhwari, Gurugram; read from Nikhil's screenshots because WebFetch was blocked
   landing page has an "Every page" directory (`PORTAL_PAGES`). Flip to false at launch → Register + Sign in only.
 - `Crumbs.tsx`: ← Back + breadcrumbs under the sponsor bar on every page except Home.
 
+## POOL + PHOTOS — 2026-09-29 (live)
+- `/scout` has tabs **All players (890, default) / SDLL pool (295) / SARDA S6 (766)**. SARDA rows are deduped
+  against the SDLL pool (CricHeroes id or name), link to `/players/[id]`, and are never shown as sold. The
+  auction still draws ONLY from `scout_players`.
+- Photos: 96 of 295 SDLL pool photos were broken (28 junk CDN-speed-test URLs from the platform import, and the rest
+  CricHeroes' own resizer returning 502). 64 were replaced in `scout_players.photo_url` (58 from the SARDA archive,
+  6 from CricHeroes profile og:image); the old URLs are backed up in the session scratchpad only. **Re-running
+  `scripts/import-sdll.mts` overwrites these** with the platform's broken URLs, so re-apply afterwards. 32 players
+  still have no reachable photo and show initials.
+
 ## PENDING ON BRANCH `player-card` (not live — needs SQL first)
 - Player card after the phone lookup (big photo, ★ Team owner badge, category, role, S1 stats), name-search fallback
   for numbers not on file ("matched by name" flag), S1 export import + archive enrich (adds phoneless players,

@@ -526,8 +526,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ---------- portal directory (demo only) ---------- */}
-      {DEMO_MODE && (
+      {/* ---------- portal directory (demo only, admins only) ---------- */}
+      {DEMO_MODE && profile?.role === "admin" && (
         <section className="mx-auto w-full max-w-[1200px] px-4 pt-20 sm:px-7">
           <Heading kicker="Explore the portal" lead="Every" accent="page" />
           <p className="mt-2 max-w-2xl text-sm text-muted">Pages marked with a lock ask you to sign in first.</p>

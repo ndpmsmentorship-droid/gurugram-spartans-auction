@@ -23,12 +23,22 @@ Last updated: 2026-09-30
 - [ ] Invoice the 40% advance (₹4,00,000 + GST)
 
 ## Portal — before the Season 2 auction
-- [ ] Approved registrations flow into the auction pool
-- [ ] Remove the mock teams from the board; add Lucknow and Bhojpuri
-- [ ] Link the 12 team owner logins
+- [ ] Check the live board shows exactly the 12 SDLL teams (Lucknow and Bhojpuri are in the DB)
+- [ ] Header shows "AUCTION LIVE" because a lot was left live on 29 Sep — pass/withdraw it before demos
+- [ ] Link the 12 team owner logins (2 done: ACCI, Bengal Tigers) — need the other 10 owners' emails
 - [ ] Set DEMO_MODE = false at launch (src/app/site-config.ts)
 - [ ] 32 players still show initials instead of a photo
 - [ ] More Kanishk award photos for the carousel (candidates on the picker: 23, 43, 44–56, 59–62)
+
+## Ideas (suggested, not yet agreed)
+- [ ] Share card after registering: "I'm in SDLL Season 2" image for WhatsApp/Instagram — free marketing
+- [ ] Registration status check by mobile number (fewer calls to organisers)
+- [ ] Excel export for admins: registrations list + kit order sheet (jersey name, number, sizes) for the vendor
+- [ ] Auction countdown on the landing page; "Auction live" only when a lot is really live
+- [ ] "SOLD" moment on the live board (stamp animation + sound) and a projector view
+- [ ] Post-auction team sheets: one shareable page/PDF per team
+- [ ] Sponsor report: page views and logo impressions per sponsor — helps sell Season 3 sponsorships
+- [ ] Public player profile pages linking to their Ball Library clips
 
 ## Paid add-ons (Phase 2, only if ordered)
 - [ ] AI scout chat
@@ -39,4 +49,5 @@ Last updated: 2026-09-30
 - [ ] Revoke the Vercel token that was pasted in chat (Vercel → Account Settings → Tokens)
 
 ## Done
+- [x] Approved registrations → auction pool (Add to pool / Add all / Remove, category picker) — 30 Sep
 - [x] Quotation with the Launch Partner Package (₹10L + GST), in the name of Foundary Tek, for Playful Ventures — 30 Sep

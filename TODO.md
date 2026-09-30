@@ -31,17 +31,15 @@ Last updated: 2026-09-30
 - [ ] More Kanishk award photos for the carousel (candidates on the picker: 23, 43, 44–56, 59–62)
 
 ## Client feedback — registration form (30 Sep)
-- [x] 1. Declaration: "my information is true" (checkbox) — built, waiting on the SQL below
-- [x] 2. Consent: "I will share important documents if asked" (checkbox) — built, waiting on the SQL below
-- [x] 3. Veg / non-veg — built, waiting on the SQL below
-- [x] 4. Food allergies — built, waiting on the SQL below
-- [ ] Run the 2026-09-30 addendum in supabase/registration_schema.sql, then deploy the form
+- [x] 1. Declaration: "my information is true" (checkbox) — live
+- [x] 2. Consent: "I will share important documents if asked" (checkbox) — live
+- [x] 3. Veg / non-veg — live
+- [x] 4. Food allergies — live
 - [ ] 5. "Only Shanti Devi … other leagues" — clarify: a declaration to play only SDLL this season, or a question listing other leagues played?
 - [ ] 6. "Attire professional" — clarify: profile photo in professional attire (guidance on the photo upload), or a dress code for the auction night?
 - [ ] 7. Animated manual video — short explainer on how to register (script + animation), embed on /register
 
 ## Landing page — content needed from the league
-- [ ] Hero photo: Manoj Tiwari with Kanishk — not in the Drive; need the file from the league
 - [ ] A message from Kanishk / the league director (quote + photo) for the About section
 - [ ] Promo or highlights video link (YouTube) for a "Watch" section
 - [ ] Sponsorship contact (email / phone) for a "Become a sponsor" button
@@ -71,6 +69,8 @@ Last updated: 2026-09-30
 - [ ] Revoke the Vercel token that was pasted in chat (Vercel → Account Settings → Tokens)
 
 ## Done
+- [x] Registration: declarations, veg/non-veg, food allergies live (SQL run, tested end to end) — 30 Sep
+- [x] Landing: Manoj Tiwari + Kanishk hero, countdown, road to Season 2, owners in franchise cards, mosaic gallery, live-now bar — 30 Sep
 - [x] Landing page redesigned on SARDA lines in the SDLL brand kit (hero, stats, about, honours, franchises, owners, gallery, sponsors, opportunities, footer) — 30 Sep
 - [x] Master admin login `sdlladmin` created (full admin; password shared in chat, not stored in files) — 30 Sep
 - [x] Approved registrations → auction pool (Add to pool / Add all / Remove, category picker) — 30 Sep

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SEASON, BUCKET } from "@/app/register/shared";
-import { markLinkedin, setStatus } from "./actions";
+import { markLinkedin, setStatus, addToPool, addAllApprovedToPool, removeFromPool } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +20,11 @@ const STATUS_STYLE: Record<string, string> = {
   approved: "bg-[color-mix(in_srgb,var(--up)_12%,transparent)] text-up",
   rejected: "bg-[color-mix(in_srgb,var(--red)_10%,transparent)] text-red-deep",
 };
+
+const CATEGORIES = ["A+", "A", "B", "Special"];
+const chId = (link: string | null | undefined) =>
+  link?.match(/player-profile\/(\d+)/)?.[1] ?? link?.match(/\/(\d{4,})(?:\/|$)/)?.[1] ?? null;
+const nameKey = (n: string | null | undefined) => (n ?? "").toLowerCase().replace(/\s+/g, " ").trim();
 
 function age(dob: string | null): string | null {
   if (!dob) return null;
@@ -68,6 +73,21 @@ export default async function RegistrationsPage({
     (data ?? []).forEach((d: any) => d.signedUrl && signed.set(d.path, d.signedUrl));
   }
 
+  // Where each approved player stands in the auction pool: their own row
+  // ("reg:<id>"), or already there from the league platform list.
+  const poolOf = new Map<string, { own: boolean; category: string | null; sold: boolean }>();
+  if (tab === "approved" && shown.length) {
+    const { data: pool } = await sb.from("scout_players").select("source_id, full_name, cricheroes_link, auction_category, team_id");
+    for (const r of shown) {
+      const ch = chId(r.cricheroes_link);
+      const own = (pool ?? []).find((p: any) => p.source_id === `reg:${r.id}`);
+      const other = own ? null : (pool ?? []).find((p: any) => (ch && chId(p.cricheroes_link) === ch) || nameKey(p.full_name) === nameKey(r.full_name));
+      const hit = own ?? other;
+      if (hit) poolOf.set(r.id, { own: !!own, category: hit.auction_category, sold: !!hit.team_id });
+    }
+  }
+  const waiting = tab === "approved" ? shown.filter((r) => !poolOf.has(r.id)).length : 0;
+
   return (
     <div>
       <p className="eyebrow">Admin</p>
@@ -84,6 +104,15 @@ export default async function RegistrationsPage({
           </Link>
         ))}
       </div>
+
+      {tab === "approved" && waiting > 0 && (
+        <form action={addAllApprovedToPool} className="mt-5 flex flex-wrap items-center gap-3 rounded-[12px] border border-line bg-wash px-4 py-3">
+          <p className="text-sm">
+            <strong className="num">{waiting}</strong> approved {waiting === 1 ? "player isn't" : "players aren't"} in the auction pool yet.
+          </p>
+          <button className="btn-primary !py-2">Add all to pool</button>
+        </form>
+      )}
 
       <ul className="mt-6 space-y-4">
         {shown.length === 0 && <li className="text-sm text-muted">Nobody here yet.</li>}
@@ -139,6 +168,42 @@ export default async function RegistrationsPage({
                   </div>
                 </div>
               </div>
+
+              {r.status === "approved" && (() => {
+                const inPool = poolOf.get(r.id);
+                return (
+                  <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-4">
+                    <span className="label-mono mr-1">Auction pool:</span>
+                    {inPool ? (
+                      <span className="badge bg-[color-mix(in_srgb,var(--up)_12%,transparent)] text-up">
+                        {inPool.sold ? "Sold" : "In pool"}
+                        {inPool.category ? ` · Category ${inPool.category}` : " · no category"}
+                        {!inPool.own && " · from league list"}
+                      </span>
+                    ) : (
+                      <span className="badge bg-wash">Not yet</span>
+                    )}
+                    {(!inPool || inPool.own) && !inPool?.sold && (
+                      <form action={addToPool} className="flex items-center gap-2">
+                        <input type="hidden" name="id" value={r.id} />
+                        <select name="category" defaultValue={inPool?.category ?? ""} className="input !w-auto !py-1.5 text-sm" aria-label="Auction category">
+                          <option value="">Category…</option>
+                          {CATEGORIES.map((c) => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                        </select>
+                        <button className="btn-primary !py-2">{inPool ? "Update" : "Add to pool"}</button>
+                      </form>
+                    )}
+                    {inPool?.own && !inPool.sold && (
+                      <form action={removeFromPool}>
+                        <input type="hidden" name="id" value={r.id} />
+                        <button className="btn-ghost !py-2">Remove</button>
+                      </form>
+                    )}
+                  </div>
+                );
+              })()}
 
               <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-4">
                 <span className="label-mono mr-1">

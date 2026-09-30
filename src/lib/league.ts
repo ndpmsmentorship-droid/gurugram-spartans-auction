@@ -7,7 +7,7 @@
 //   "uscl" — Urban Sports Champions League Season 2, run as a live demo for
 //            Gurugram Spartans (A+ / A / B / Legend, ₹3,00,000 purse)
 export type League = "sdll" | "uscl";
-export const LEAGUE: League = "sdll";
+export const LEAGUE: League = "uscl";
 
 export const LEAGUE_NAME: Record<League, string> = {
   sdll: "Shanti Devi Legend's League · Season 2",

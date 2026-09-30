@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { viaProxy } from "@/app/register/PlayerCard";
 
 const GOLD = "#E3A81B";
 const GOLD_HI = "#F6CB49";
@@ -57,7 +58,7 @@ export default function Avatar({
     // eslint-disable-next-line @next/next/no-img-element
     <img
       ref={ref}
-      src={src}
+      src={viaProxy(src, size > 64 ? 256 : 128) ?? src}
       alt=""
       onError={() => setFailed(true)}
       className="shrink-0 rounded-full object-cover"

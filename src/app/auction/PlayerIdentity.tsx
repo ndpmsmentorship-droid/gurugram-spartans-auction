@@ -1,5 +1,7 @@
 "use client";
 
+import { PlayerPhoto } from "@/app/register/PlayerCard";
+
 // The full identity of whoever is on the block — photo, our rank/ID, and a
 // compact career stat strip — so the auctioneer and the room see the SAME
 // player's details automatically the moment a lot goes up. Shared by the
@@ -27,10 +29,6 @@ export type LotPlayerDetail = {
 const n = (v: number | null | undefined, d = 0) =>
   v == null ? "—" : (Math.round(v * 10 ** d) / 10 ** d).toLocaleString("en-IN");
 
-function initials(name: string) {
-  return name.split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
-}
-
 // Our ranking assigns every player a rank; shown as a zero-padded ID badge.
 export function rankId(rank: number | null): string {
   return rank == null ? "—" : "#" + String(rank).padStart(3, "0");
@@ -49,23 +47,14 @@ export default function PlayerIdentity({
   return (
     <div className="flex items-start gap-4">
       {/* photo */}
-      <div
-        className={`${photo} shrink-0 overflow-hidden rounded-[12px] border border-line bg-wash`}
-      >
-        {player.photo_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={player.photo_url}
-            alt=""
-            className="h-full w-full object-cover"
-            loading="eager"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center font-display text-xl text-faint">
-            {initials(player.full_name)}
-          </div>
-        )}
-      </div>
+      {/* photo: SARDA-hosted photos block direct embedding, so PlayerPhoto
+          routes them through next/image and falls back to initials. */}
+      <PlayerPhoto
+        src={player.photo_url}
+        name={player.full_name}
+        className={`${photo} shrink-0 rounded-[12px] border border-line`}
+        sizes={size === "lg" ? "96px" : "64px"}
+      />
 
       <div className="min-w-0">
         {/* our rank / id */}

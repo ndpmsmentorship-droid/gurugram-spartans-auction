@@ -9,6 +9,18 @@ import type { CardProfile } from "./actions";
 // next/image; anything else falls back to a plain <img>.
 const PROXIED = ["sarda-corporate-league.anantanity.com", "res.cloudinary.com", "media.cricheroes.in"];
 
+// For plain <img> tags: send hotlink-blocked hosts through the next/image
+// optimiser (same-origin). `w` must be one of Next's image sizes (e.g. 128).
+export function viaProxy(src: string | null, w = 128): string | null {
+  if (!src) return null;
+  try {
+    if (!PROXIED.includes(new URL(src).hostname)) return src;
+  } catch {
+    return src;
+  }
+  return `/spartansscout/_next/image?url=${encodeURIComponent(src)}&w=${w}&q=75`;
+}
+
 export function prettyRole(r: string | null): string | null {
   if (!r) return null;
   const t = r.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());

@@ -96,7 +96,7 @@ export default function AuctionConsole({
     if (!teamId) return setMsg({ text: "Pick a team.", bad: true });
     const amt = Number(price);
     if (!Number.isFinite(amt) || amt < 0) return setMsg({ text: "Enter a valid price.", bad: true });
-    if (amt > 100000) return setMsg({ text: "Max bid is ₹1,00,000 (sealed-tender ceiling).", bad: true });
+    if (amt > DEFAULT_RULES.maxBid) return setMsg({ text: `Max bid is ${inr(DEFAULT_RULES.maxBid)}.`, bad: true });
     run(() => assignPlayer(picked.id, teamId, amt), `${picked.full_name} → ${selectedTeam?.name} at ${inr(amt)}`);
     setPicked(null);
     setQuery("");

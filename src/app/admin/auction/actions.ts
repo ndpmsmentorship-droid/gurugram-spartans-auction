@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentProfile } from "@/lib/auth";
+import { DEFAULT_RULES } from "@/lib/auction/rules";
 
 // The auction is admin-run: the admin records each purchase (player -> team @ price)
 // on the live scout_players pool. team_id / sold_price / acquired are set here;
@@ -43,8 +44,9 @@ export async function assignPlayer(playerId: string, teamId: string, price: numb
   if (!playerId || !teamId) return { error: "Pick a player and a team." };
   const amount = Math.round(Number(price));
   if (!Number.isFinite(amount) || amount < 0) return { error: "Enter a valid price." };
-  // Rules: max bid ₹65,000; a tie-breaker sealed tender may go up to ₹1,00,000.
-  if (amount > 100000) return { error: "Max bid is ₹1,00,000 (sealed-tender ceiling)." };
+  // Ceiling from the active league's rules (SDLL ₹4,00,000 · USCL ₹3,00,000).
+  if (amount > DEFAULT_RULES.maxBid)
+    return { error: `Max bid is ₹${DEFAULT_RULES.maxBid.toLocaleString("en-IN")}.` };
 
   const supabase = createAdminClient();
   const sb = supabase as unknown as LooseClient;

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { getCurrentProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import crest from "./brand/crest.png";
+// Instagram, @shantidevilegendsleague, 29 Mar 2026 (Fighter of the Match).
+import heroPhoto from "./brand/hero-manoj-kanishk.jpg";
 import acciChampions from "./brand/season1/acci-champions.jpg";
 import goanRunnersUp from "./brand/season1/goan-monks-runners-up.jpg";
 import acciLogo from "./brand/season1/acci-logo.png";
@@ -14,6 +16,9 @@ import k04 from "./brand/gallery/k04.jpg";
 import k05 from "./brand/gallery/k05.jpg";
 import k06 from "./brand/gallery/k06.jpg";
 import PhotoGallery, { type Photo } from "./home/PhotoGallery";
+import Countdown from "./home/Countdown";
+import { getAuctionSeasonId } from "@/lib/auction/target";
+import { readLiveLot } from "@/lib/auction/read";
 import { PlayerPhoto } from "./register/PlayerCard";
 import { FRANCHISES, findFranchise } from "./franchises";
 import { TITLE_SPONSOR, PRESENTED_BY, PARTNERS, logoSize } from "./sponsors";
@@ -43,6 +48,16 @@ const STATS = [
   { value: "6", label: "Weekends" },
   { value: "30+", label: "Age to play" },
 ];
+
+// Where the season stands. `now` marks the current step.
+const ROAD = [
+  { when: "Open now", what: "Player registration", note: "Returning players in two taps", now: true },
+  { when: "Date to be announced", what: "Live auction", note: "12 owners, one room, one purse each" },
+  { when: "20 Feb 2027", what: "Season opener", note: "Three matches, 8 AM to 4 PM" },
+  { when: "27–28 Mar 2027", what: "Knockout weekend", note: "Semi-finals, third place and the final" },
+];
+
+const OPENER = "2027-02-20T08:00:00+05:30";
 
 const AT_A_GLANCE = [
   { k: "Season window", v: "20 Feb – 28 Mar 2027" },
@@ -150,6 +165,21 @@ async function getOwners(): Promise<Owner[]> {
   }
 }
 
+// The player on the block right now, if a lot is live.
+async function getLiveNow(): Promise<{ name: string; photo: string | null; bid: number | null } | null> {
+  try {
+    const lot = await readLiveLot(await getAuctionSeasonId());
+    if (lot.status !== "live" || !lot.player_id) return null;
+    const sb = createAdminClient() as unknown as {
+      from: (t: string) => { select: (c: string) => { eq: (k: string, v: string) => { maybeSingle: () => Promise<{ data: { full_name: string; photo_url: string | null } | null }> } } };
+    };
+    const { data } = await sb.from("scout_players").select("full_name, photo_url").eq("id", lot.player_id).maybeSingle();
+    return data ? { name: data.full_name, photo: data.photo_url, bid: lot.current_bid ?? lot.base_price } : null;
+  } catch {
+    return null;
+  }
+}
+
 function Heading({ kicker, lead, accent }: { kicker: string; lead: string; accent: string }) {
   return (
     <>
@@ -162,7 +192,8 @@ function Heading({ kicker, lead, accent }: { kicker: string; lead: string; accen
 }
 
 export default async function Home() {
-  const [profile, owners] = await Promise.all([getCurrentProfile(), getOwners()]);
+  const [profile, owners, live] = await Promise.all([getCurrentProfile(), getOwners(), getLiveNow()]);
+  const ownersOf = (team: string) => owners.filter((o) => o.team === team);
 
   const portal =
     profile?.role === "admin"
@@ -215,21 +246,26 @@ export default async function Home() {
               <p className="mt-4 font-display text-lg uppercase tracking-[0.06em] text-white/85 sm:text-xl">
                 Gurugram&apos;s 30+ T20 league
               </p>
+              <div className="mt-5">
+                <Countdown to={OPENER} label="To the Season 2 opener" />
+              </div>
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-[520px] lg:mx-0 lg:justify-self-end">
+          <div className="relative mx-auto w-full max-w-[440px] lg:mx-0 lg:justify-self-end">
             <div className="rotate-[1.5deg] rounded-[18px] bg-white/10 p-2 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)] ring-1 ring-white/15">
               <Image
-                src={k01}
-                alt="Season 1 match awards"
+                src={heroPhoto}
+                alt="Manoj Tiwari and Kanishk Sheel presenting the Fighter of the Match award"
                 className="h-auto w-full rounded-[12px]"
-                sizes="(max-width: 1024px) 90vw, 520px"
+                sizes="(max-width: 1024px) 90vw, 440px"
                 loading="eager"
+                fetchPriority="high"
+                placeholder="blur"
               />
             </div>
             <span className="absolute -bottom-3 left-4 rounded-full bg-[var(--red)] px-4 py-1.5 font-mono text-[0.625rem] uppercase tracking-[0.2em] text-white shadow-lg">
-              Season 1 · 2026
+              Fighter of the Match · 29 Mar 2026
             </span>
           </div>
         </div>
@@ -260,6 +296,28 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* ---------- live now (only while a lot is on the block) ---------- */}
+      {live && (
+        <Link
+          href="/auction"
+          className="group order-first flex items-center gap-4 bg-[var(--red)] px-4 py-2.5 text-white sm:px-7"
+        >
+          <span className="relative flex h-2.5 w-2.5 shrink-0">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/80" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white" />
+          </span>
+          <PlayerPhoto src={live.photo} name={live.name} className="h-10 w-10 shrink-0 rounded-full" sizes="40px" />
+          <span className="min-w-0 flex-1">
+            <span className="block font-mono text-[0.594rem] uppercase tracking-[0.2em] text-white/75">Auction live · on the block</span>
+            <span className="block truncate font-display text-xl uppercase leading-tight">{live.name}</span>
+          </span>
+          {live.bid != null && (
+            <span className="font-display text-2xl">₹{live.bid.toLocaleString("en-IN")}</span>
+          )}
+          <span className="hidden text-sm underline-offset-4 group-hover:underline sm:inline">Watch live →</span>
+        </Link>
+      )}
+
       {/* ---------- stats strip ---------- */}
       <section className="relative z-10 mx-auto -mt-14 w-full max-w-[1100px] px-4 sm:px-7">
         <ul className="grid grid-cols-2 overflow-hidden rounded-[16px] border border-line bg-surface shadow-[var(--elev)] sm:grid-cols-5">
@@ -275,6 +333,37 @@ export default async function Home() {
             </li>
           ))}
         </ul>
+      </section>
+
+      {/* ---------- road to season 2 ---------- */}
+      <section className="mx-auto w-full max-w-[1200px] px-4 pt-14 sm:px-7">
+        <p className="eyebrow">Road to Season 2</p>
+        <ol className="relative mt-6 grid gap-6 md:grid-cols-4 md:gap-4">
+          <span aria-hidden className="absolute left-[11px] top-3 bottom-3 w-px bg-line md:left-3 md:right-3 md:top-[11px] md:bottom-auto md:h-px md:w-auto" />
+          {ROAD.map((r) => (
+            <li key={r.what} className="relative flex gap-4 md:flex-col md:gap-3">
+              <span
+                className={`relative z-10 mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 ${
+                  r.now ? "border-red bg-red" : "border-line2 bg-surface"
+                }`}
+              >
+                {r.now && <span className="h-2 w-2 animate-pulse rounded-full bg-white" />}
+              </span>
+              <div>
+                <p className={`font-mono text-[0.625rem] uppercase tracking-[0.16em] ${r.now ? "text-red" : "text-muted"}`}>
+                  {r.when}
+                </p>
+                <p className="mt-1 font-display text-xl uppercase leading-tight">{r.what}</p>
+                <p className="mt-1 text-sm text-muted">{r.note}</p>
+                {r.now && (
+                  <Link href="/register" className="mt-2 inline-block text-sm font-medium text-red underline underline-offset-4">
+                    Register →
+                  </Link>
+                )}
+              </div>
+            </li>
+          ))}
+        </ol>
       </section>
 
       {portal && (
@@ -373,52 +462,57 @@ export default async function Home() {
       {/* ---------- franchises ---------- */}
       <section className="mt-20 bg-wash py-16">
         <div className="mx-auto w-full max-w-[1200px] px-4 sm:px-7">
-          <Heading kicker="Season 2" lead="The twelve" accent="franchises" />
+          <Heading kicker="Season 2 · owners" lead="The twelve" accent="franchises" />
+          <p className="mt-3 max-w-2xl text-muted">Each franchise and the owners who will be bidding for it at the auction.</p>
           {(["A", "B"] as const).map((g) => (
             <div key={g} className="mt-8">
               <p className="label-mono">Group {g}</p>
               <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-                {FRANCHISES.filter((f) => f.group === g).map((f) => (
-                  <li
-                    key={f.name}
-                    className="flex flex-col items-center gap-3 rounded-[14px] border border-line bg-surface p-4 text-center shadow-[var(--elev-sm)] transition hover:-translate-y-0.5 hover:shadow-[var(--elev)]"
-                  >
-                    <Image src={f.logo} alt="" className="h-24 w-24 object-contain" sizes="96px" />
-                    <p className="font-display text-sm uppercase leading-tight">{f.name}</p>
-                  </li>
-                ))}
+                {FRANCHISES.filter((f) => f.group === g).map((f) => {
+                  const own = ownersOf(f.name);
+                  const champs = f.name === "ACCI" ? "★ S1 champions" : f.name === "Goan Monks" ? "S1 runners-up" : null;
+                  return (
+                    <li
+                      key={f.name}
+                      className="group relative flex flex-col overflow-hidden rounded-[16px] border border-line bg-surface shadow-[var(--elev-sm)] transition hover:-translate-y-1 hover:shadow-[var(--elev)]"
+                    >
+                      <div className="relative flex items-center justify-center bg-gradient-to-b from-[var(--blush-b)] to-[var(--blush-a)] px-4 pb-3 pt-5">
+                        {champs && (
+                          <span className="absolute left-2 top-2 rounded-full bg-gold-fill px-2 py-0.5 font-mono text-[0.531rem] uppercase tracking-[0.12em] text-gold ring-1 ring-gold-line">
+                            {champs}
+                          </span>
+                        )}
+                        <Image src={f.logo} alt="" className="h-24 w-24 object-contain transition duration-500 group-hover:scale-110" sizes="96px" />
+                      </div>
+                      <div className="flex flex-1 flex-col gap-2 p-3">
+                        <p className="font-display text-base uppercase leading-tight">{f.name}</p>
+                        {own.length > 0 && (
+                          <div className="mt-auto flex items-center gap-2">
+                            <span className="flex -space-x-2">
+                              {own.slice(0, 3).map((o) => (
+                                <PlayerPhoto
+                                  key={o.name}
+                                  src={o.photo}
+                                  name={o.name}
+                                  className="h-7 w-7 shrink-0 rounded-full ring-2 ring-surface [&_span]:!text-[0.6rem]"
+                                  sizes="28px"
+                                />
+                              ))}
+                            </span>
+                            <span className="min-w-0 truncate text-[0.688rem] text-muted" title={own.map((o) => o.name).join(", ")}>
+                              {own.map((o) => o.name.split(" ")[0]).join(", ")}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
         </div>
       </section>
-
-      {/* ---------- owners ---------- */}
-      {owners.length > 0 && (
-        <section className="mx-auto w-full max-w-[1200px] px-4 pt-16 sm:px-7">
-          <Heading kicker="Season 1 owners" lead="Meet our" accent="team owners" />
-          <ul className="-mx-4 mt-8 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-4 sm:-mx-7 sm:scroll-px-7 sm:px-7">
-            {owners.map((o) => {
-              const f = findFranchise(o.team);
-              return (
-                <li
-                  key={`${o.team}-${o.name}`}
-                  className="w-[160px] shrink-0 snap-start overflow-hidden rounded-[14px] border border-line bg-surface shadow-[var(--elev-sm)]"
-                >
-                  <PlayerPhoto src={o.photo} name={o.name} className="aspect-[4/5] w-full" sizes="160px" />
-                  <div className="p-3 text-center">
-                    <p className="font-display text-[0.95rem] uppercase leading-tight">{o.name}</p>
-                    <p className="mt-1.5 flex items-center justify-center gap-1.5 text-[0.75rem] text-red">
-                      {f && <Image src={f.logo} alt="" className="h-4 w-4 object-contain" sizes="16px" />}
-                      {o.team}
-                    </p>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      )}
 
       {/* ---------- gallery ---------- */}
       <section className="mx-auto w-full max-w-[1200px] px-4 pt-16 sm:px-7">

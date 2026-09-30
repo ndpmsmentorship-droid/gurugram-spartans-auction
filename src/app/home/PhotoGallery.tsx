@@ -29,20 +29,21 @@ export default function PhotoGallery({ photos }: { photos: Photo[] }) {
 
   return (
     <>
-      <ul className="grid grid-cols-2 gap-3 md:grid-cols-3">
+      {/* Mosaic: the first photo is the feature tile. */}
+      <ul className="grid auto-rows-[1fr] grid-cols-2 gap-3 md:grid-cols-3">
         {photos.map((p, i) => (
-          <li key={i}>
+          <li key={i} className={i === 0 ? "col-span-2 row-span-2" : ""}>
             <button
               type="button"
               onClick={() => setOpen(i)}
-              className="group relative block aspect-[3/2] w-full overflow-hidden rounded-[12px] border border-line"
+              className="group relative block h-full min-h-full w-full overflow-hidden rounded-[12px] border border-line aspect-[3/2]"
               aria-label={`Open photo: ${p.caption}`}
             >
               <Image
                 src={p.src}
                 alt={p.caption}
                 fill
-                sizes="(max-width: 768px) 50vw, 380px"
+                sizes={i === 0 ? "(max-width: 768px) 100vw, 760px" : "(max-width: 768px) 50vw, 380px"}
                 className="object-cover transition duration-500 group-hover:scale-[1.04]"
               />
               <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 pb-2 pt-8 text-left text-[0.75rem] text-white opacity-0 transition group-hover:opacity-100">

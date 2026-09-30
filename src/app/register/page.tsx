@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import RegisterForm from "./RegisterForm";
+import Faq from "./Faq";
 
 export const metadata: Metadata = {
   title: "Register · Shanti Devi Legend League",
@@ -25,6 +26,7 @@ export default function RegisterPage() {
       </section>
       <div className="mx-auto w-full max-w-[760px] px-4 py-10 sm:px-7">
         <RegisterForm />
+        <Faq />
       </div>
     </main>
   );

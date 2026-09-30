@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
   lookupPlayer,
@@ -127,6 +127,10 @@ export default function RegisterForm() {
   const [matchedBy, setMatchedBy] = useState<"phone" | "name" | null>(null);
   const [nameQ, setNameQ] = useState("");
   const [results, setResults] = useState<Profile[] | null>(null);
+  const [searching, setSearching] = useState(false);
+  // Last number looked up automatically, so editing around a valid number
+  // doesn't fire the same lookup again.
+  const lookedUp = useRef<string | null>(null);
 
   const [fullName, setFullName] = useState("");
   const [dob, setDob] = useState("");
@@ -151,12 +155,53 @@ export default function RegisterForm() {
 
   const returning = !!profile;
 
+  // Suggestions as the player types their name (3+ letters, 300 ms debounce).
+  useEffect(() => {
+    const q = nameQ.trim();
+    if (q.length < 3) return;
+    let live = true;
+    const t = setTimeout(async () => {
+      setSearching(true);
+      const res = await searchByName(q);
+      if (!live) return;
+      setSearching(false);
+      if (!res.error) setResults(res.results ?? []);
+    }, 300);
+    return () => {
+      live = false;
+      clearTimeout(t);
+    };
+  }, [nameQ]);
+
+  function onNameInput(v: string) {
+    setNameQ(v);
+    if (v.trim().length < 3) {
+      setResults(null);
+      setSearching(false);
+    }
+  }
+
+  // The number is looked up as soon as it's complete. Partial numbers never
+  // suggest anyone: that would let a visitor fish for other players' mobiles.
+  function onPhoneInput(v: string) {
+    setPhone(v);
+    const n = normalizePhone(v);
+    if (n && v.replace(/\D/g, "").length >= 10 && lookedUp.current !== n && !busy) {
+      lookedUp.current = n;
+      void lookup(v);
+    }
+  }
+
   async function findProfile(e: React.FormEvent) {
     e.preventDefault();
+    await lookup(phone);
+  }
+
+  async function lookup(value: string) {
     setErr(null);
-    if (!normalizePhone(phone)) return setErr("Enter a 10-digit mobile number.");
+    if (!normalizePhone(value)) return setErr("Enter a 10-digit mobile number.");
     setBusy(true);
-    const res = await lookupPlayer(phone);
+    const res = await lookupPlayer(value);
     setBusy(false);
     if ("error" in res) return setErr(res.error);
     if (res.alreadyRegistered)
@@ -177,9 +222,9 @@ export default function RegisterForm() {
   async function runSearch(e: React.FormEvent) {
     e.preventDefault();
     setErr(null);
-    setBusy(true);
+    setSearching(true);
     const res = await searchByName(nameQ);
-    setBusy(false);
+    setSearching(false);
     if (res.error) return setErr(res.error);
     setResults(res.results ?? []);
   }
@@ -306,17 +351,23 @@ export default function RegisterForm() {
           <input
             id="reg-search"
             className="input"
-            placeholder="e.g. Kanishk Sheel"
+            placeholder="Start typing, e.g. Kanishk"
             value={nameQ}
-            onChange={(e) => setNameQ(e.target.value)}
-            autoComplete="name"
+            onChange={(e) => onNameInput(e.target.value)}
+            autoComplete="off"
+            aria-describedby="reg-search-hint"
           />
         </Field>
-        <button type="submit" className="btn-primary" disabled={busy}>
-          {busy ? "Searching…" : "Search"}
-        </button>
+        <p id="reg-search-hint" className="-mt-2 text-xs text-muted">
+          {searching ? "Searching…" : "Matching players appear as you type."}
+        </p>
       </form>
-      {results && results.length === 0 && (
+      {results && results.length > 0 && (
+        <p className="label-mono">
+          {results.length === 8 ? "Top 8 matches · keep typing to narrow" : `${results.length} match${results.length === 1 ? "" : "es"}`}
+        </p>
+      )}
+      {results && results.length === 0 && !searching && (
         <p className="text-sm text-muted">No one by that name. Try your surname only, or register as new.</p>
       )}
       {results && results.length > 0 && (
@@ -326,12 +377,12 @@ export default function RegisterForm() {
               <button
                 type="button"
                 onClick={() => pick(r)}
-                className="flex w-full items-center gap-4 rounded-[12px] border border-line bg-surface p-3 text-left transition hover:border-red"
+                className="flex w-full items-center gap-3 rounded-[12px] border border-line bg-surface p-2.5 text-left transition hover:border-red"
               >
-                <PlayerPhoto src={r.photo_url} name={r.full_name} className="h-20 w-16 shrink-0 rounded-[8px]" sizes="64px" />
+                <PlayerPhoto src={r.photo_url} name={r.full_name} className="h-14 w-12 shrink-0 rounded-[8px]" sizes="48px" />
                 <span className="min-w-0 flex-1">
-                  <span className="block font-display text-xl uppercase leading-tight">{r.full_name}</span>
-                  <span className="mt-1 block text-sm text-muted">
+                  <span className="block font-display text-lg uppercase leading-tight">{r.full_name}</span>
+                  <span className="mt-0.5 block truncate text-[0.813rem] text-muted">
                     {[r.is_owner ? "Team owner" : null, r.last_team, prettyRole(r.primary_role)].filter(Boolean).join(" · ")}
                   </span>
                 </span>
@@ -380,7 +431,7 @@ export default function RegisterForm() {
                 autoComplete="tel-national"
                 placeholder="10-digit mobile"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => onPhoneInput(e.target.value)}
               />
             </Field>
             <button type="submit" className="btn-primary" disabled={busy}>

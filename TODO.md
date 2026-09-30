@@ -50,6 +50,8 @@ Last updated: 2026-09-30
 - [ ] Put the 12 team logos on the teams table so the live board, squads and schedule show them too
 
 ## Ideas (suggested, not yet agreed)
+- [ ] Owner self-serve "Change password" (USCL franchise portal has it; ours doesn't)
+- [ ] One-screen owner home in the USCL style: purse left / spent / squad / wishlist tiles, then pool with one-tap wishlist
 - [ ] Share card after registering: "I'm in SDLL Season 2" image for WhatsApp/Instagram — free marketing
 - [ ] Registration status check by mobile number (fewer calls to organisers)
 - [ ] Excel export for admins: registrations list + kit order sheet (jersey name, number, sizes) for the vendor
@@ -69,6 +71,8 @@ Last updated: 2026-09-30
 - [ ] Revoke the Vercel token that was pasted in chat (Vercel → Account Settings → Tokens)
 
 ## Done
+- [x] Registration: live name suggestions, auto lookup on a full mobile, FAQ — 30 Sep
+- [x] USCL S2 pool (319) merged into player_master: 204 matched + gap-filled, 115 new (photos copied, no phones) — master 1014 — 30 Sep
 - [x] Registration: declarations, veg/non-veg, food allergies live (SQL run, tested end to end) — 30 Sep
 - [x] Landing: Manoj Tiwari + Kanishk hero, countdown, road to Season 2, owners in franchise cards, mosaic gallery, live-now bar — 30 Sep
 - [x] Landing page redesigned on SARDA lines in the SDLL brand kit (hero, stats, about, honours, franchises, owners, gallery, sponsors, opportunities, footer) — 30 Sep

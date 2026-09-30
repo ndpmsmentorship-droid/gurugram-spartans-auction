@@ -30,6 +30,16 @@ Last updated: 2026-09-30
 - [ ] 32 players still show initials instead of a photo
 - [ ] More Kanishk award photos for the carousel (candidates on the picker: 23, 43, 44–56, 59–62)
 
+## USCL auction — Sat 3 Oct (demo for Gurugram Spartans)
+- [x] USCL season, 14 franchises, ₹3L purses, deck rules, 318-player pool + Spartans' 5 staged and switched in
+- [x] War Room (/war-room): max safe bid, category slots, gaps + top-5 fits, on-the-block card, rivals, alternatives
+- [x] ★ Death / ★ Powerplay stars from 26 SARDA S6 + USCL E1 matches; bowling tags; ▶ clips links (99 players)
+- [x] Playful Ventures logo on CricVideos
+- [ ] Friday: Nikhil + helper dry run (owner login on phone, helper on the console)
+- [ ] Other 13 teams' owner/retention spends (so rival purses are exact)
+- [ ] USCL section on the CricVideos page linking the USCL players' clips
+- [ ] After the auction: `node scripts/league-switch.mts sdll`, set LEAGUE = "sdll", push
+
 ## Client feedback — registration form (30 Sep)
 - [x] 1. Declaration: "my information is true" (checkbox) — live
 - [x] 2. Consent: "I will share important documents if asked" (checkbox) — live

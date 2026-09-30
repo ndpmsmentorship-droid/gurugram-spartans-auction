@@ -2,6 +2,21 @@
 
 _Local Claude memory does not transfer across machines — this file is the source of truth. Last updated 2026-09-30._
 
+## ⚠️ USCL DEMO IS SWITCHED IN (since 1 Oct 2026) — read before anything else
+The auction side (board, console, pool, owner pages, War Room) is running **USCL Season 2** data with the
+SDLL look, for Gurugram Spartans at the USCL auction on **Sat 3 Oct**. `src/lib/league.ts` has
+`LEAGUE = "uscl"`; the active season is "Urban Sports Champions League — Season 2"; the SDLL pool (295 + 19
+jersey rows) is archived in `league_pool_archive` (league `sdll`). While USCL is in: /auction and /squad need a
+login, the landing hides the live bar, registrations can't be added to the pool (they still register fine).
+**Switch back after the auction:** `node scripts/league-switch.mts sdll`, then set `LEAGUE = "sdll"`, commit,
+push. Logins: owner `gurugramspartans`, admin `sdlladmin` (passwords with Nikhil, not in the repo).
+Setup is `scripts/uscl-setup.mts <cards.json>` (re-runnable while staged). Owner screen: **/war-room**
+(purse, max safe bid, category slots per the USCL deck, gaps + best fits, on-the-block card with phase stars,
+clips, who can still bid, alternatives). Phase stars: `src/data/phase-stats.json` from 26 trusted CricVideos
+matches (`scripts/build-phase-stats.py`); clips map `src/data/cv-map.json` (`scripts/build-cv-map.py`).
+Known gap: other USCL teams' owner/retention spends aren't loaded (all at ₹3,00,000) — rival purses are
+approximate until the helper adjusts purses in the console.
+
 ## ▶ LATEST — 2026-09-30 (read this first)
 Main is at the "TODO: registration feedback 1-4 live" commit. Every push to `main` deploys production (GitHub
 integration); older notes below saying "CLI only / no Git integration" are wrong. The running to-do list is

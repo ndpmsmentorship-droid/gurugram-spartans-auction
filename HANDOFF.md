@@ -257,6 +257,10 @@ Site map + status page: https://claude.ai/artifact/Lbv7FNUzAKaXoe6AijMZyo (priva
 - A stale SARDA-season `auction_lot` row has been `status='live'` since 14 Aug. Harmless: `isAuctionLive()` reads only the SDLL season.
 
 ## Pending / next
+0. **PARKED (2026-09-30): mobile app.** Plan if revived: (1) PWA first — manifest + icons + minimal service
+   worker, installable on Android/iOS, no store; optional push ("Auction is live"). (2) Play Store via Trusted Web
+   Activity (Bubblewrap) — needs a Google Play dev account ($25 one-time). (3) iOS App Store is not advised
+   (Apple rejects thin web wrappers; $99/yr).
 1. **Projector mode** view for the public board (venue screen).
 2. Restyle secondary pages to the SDLL brand (`/login`, `/my-team`, `/players`, `/team`, `/jersey`, `/scout/compare`, `/scout/import`).
 3. Purse **top-up control** for organizers (₹50k/₹1L increments — currently manual SQL on `teams.purse_total/purse_remaining`).

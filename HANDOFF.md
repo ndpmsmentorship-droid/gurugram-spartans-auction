@@ -1,6 +1,55 @@
 # Handoff — Shanti Devi Legend League Auction App
 
-_Local Claude memory does not transfer across machines — this file is the source of truth. Last updated 2026-08-14._
+_Local Claude memory does not transfer across machines — this file is the source of truth. Last updated 2026-09-30._
+
+## ▶ LATEST — 2026-09-30 (read this first)
+Main is at the "TODO: registration feedback 1-4 live" commit. Every push to `main` deploys production (GitHub
+integration); older notes below saying "CLI only / no Git integration" are wrong. The running to-do list is
+**`TODO.md`** in the repo root — keep adding to it.
+
+**Shipped today (all live, all tested end to end with Playwright, test data cleaned up):**
+- **Approved registrations → auction pool** (`src/app/admin/registrations/actions.ts`): per-player *Add to pool* with a
+  category picker (A+/A/B/Special), *Add all to pool*, *Remove* while unsold. Rows are keyed
+  `scout_players.source_id = "reg:<registration id>"`; players already in the league-platform pool are matched by
+  CricHeroes id or name, never duplicated. New players' photos are copied from the private `registrations` bucket
+  to a public `player-photos` bucket. Old SARDA roles ("ALL_ROUNDER") are normalised; `.pdf` photo URLs are skipped.
+  Indices recompute after every change.
+- **Registration form — client feedback 1–4:** Food section (Veg/Non-veg required, allergies optional) and a
+  Declarations box (information true · share documents if asked · ₹3,000 fee) — Submit stays disabled until all three
+  are ticked. DB columns `info_declared, docs_consent, meal_pref, food_allergies` (addendum 2026-09-30 in
+  `supabase/registration_schema.sql`, **already run**). Admin queue shows meal + allergies.
+- **Broken photos fixed** on the auction console, live board and squads: SARDA-hosted photos send
+  `Cross-Origin-Resource-Policy: same-origin`, so raw `<img>` was blocked. `PlayerIdentity` now uses `PlayerPhoto`
+  (next/image proxy + initials fallback); `squad/Avatar.tsx` uses `viaProxy()` from `register/PlayerCard.tsx`.
+- **Landing page redesigned** (`src/app/page.tsx`, `src/app/home/{Countdown,PhotoGallery}.tsx`, `src/app/franchises.ts`):
+  floodlit maroon hero with the **Manoj Tiwari + Kanishk** Fighter-of-the-Match photo (Instagram, 29 Mar 2026 →
+  `brand/hero-manoj-kanishk.jpg`), boxed countdown to the 20 Feb 2027 8 AM opener, stats strip, Road to Season 2
+  timeline, About + Season 2 at a glance, S1 honours, the **12 franchise cards with their owners inside**
+  (logos from Drive `Team Logos/` → `brand/teams/*.png`; owners = `player_master.is_owner`), mosaic gallery with a
+  full-screen viewer, tiered sponsors, sponsorship opportunities (from the partnership deck, no prices), venue footer.
+  A red **"on the block" bar** appears above the hero only while a lot is live. The "Every page" directory now shows
+  only to signed-in admins. `Season1Gallery.tsx` was deleted.
+- **Master admin login** created: username `sdlladmin` (→ `sdlladmin@owners.sdll`, role admin). Password was given
+  to Nikhil in chat only — not stored anywhere in the repo. Suggest a separate admin login for the client.
+
+**Open questions for Nikhil / the league (also in TODO.md):**
+- Client feedback 5 ("Only Shanti Devi … other leagues" — exclusivity declaration or list other leagues?),
+  6 ("Attire professional" — photo guidance or auction dress code?), 7 (animated how-to-register video).
+- Auction date (for a second countdown + the Road timeline), director/Kanishk message, promo video, sponsor
+  contact, social links, S1 reach numbers, owners' titles/companies.
+- **14 teams on the console:** UP Warriors + Japani Tsunami (`is_mock`) still show; Gurugram Spartans purse ₹4L vs ₹3L.
+  Nikhil hasn't confirmed removing/fixing them.
+- Owner logins: only ACCI + Bengal Tigers linked; need the other 10 owners' emails.
+- Offered, not done: put the 12 team logos into `teams.logo_url` so board/squads/schedule show them.
+
+**Commercial (not code):** quotation doc https://claude.ai/code/artifact/f30af4a4-4d06-4640-bdb6-522bc5b35f25 —
+from **Foundary Tek Private Ltd** to **Playful Ventures Pvt Ltd**; Launch Partner Package ₹10L + GST (40/40/20),
+₹2.5L/season from S3, Foundary Tek keeps IP, non-exclusive. PDF: `~/Downloads/SDLL-Portal-Quotation-Foundary-Tek.pdf`.
+Next: confirm the "Foundary" spelling, add GSTIN/CIN, draft MSA + SOW. Playful Ventures may host the portal on its
+own domain (playfulventures.com/.in are on GoDaddy) — avoid "playfulauction" (unrelated adult site).
+
+**Security:** a Vercel token was pasted in chat on 29 Sep — Nikhil should revoke it (Vercel → Account → Tokens).
+
 
 ## What this is
 Next.js 16 app, now the **Shanti Devi Legend's League (SDLL) Season 2** live-auction site — rebranded and
@@ -226,8 +275,8 @@ Bandhwari, Gurugram; read from Nikhil's screenshots because WebFetch was blocked
 
 ## LANDING PAGE + SPONSOR BAR — LIVE 2026-09-29 (commit 0d4b724)
 - `/` is now the **public** league landing page (proxy allows "/" as an exact match only). It shows Season 1
-  honours (ACCI champions in a gold frame, Goan Monks runners-up in silver), a 12-photo award carousel
-  (`Season1Gallery.tsx`), registration steps + the ₹3,000 fee note, and the sponsor wall. Signed-in users get quick links.
+  honours (ACCI champions in a gold frame, Goan Monks runners-up in silver), an award-photo carousel
+  (replaced 2026-09-30 — see LATEST), registration steps + the ₹3,000 fee note, and the sponsor wall. Signed-in users get quick links.
 - `SponsorBar.tsx` sits under the masthead on **every** page: title sponsor PlayfulNeuro + "Presented by"
   Playful Ventures fixed, 9 partners in a marquee. Sponsors and their roles live in `src/app/sponsors.ts`.
 - Assets come from the league Drive "SLL'26 - Repository" (public link, folder id 1QVhk_CVlXpVctdO3VKJnjw5Y5OouOJ4S):

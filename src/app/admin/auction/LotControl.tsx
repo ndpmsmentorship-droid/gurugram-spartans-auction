@@ -11,7 +11,7 @@ import {
   undoLastSale,
 } from "./live-actions";
 import { DEFAULT_RULES, blockReason, inr, raiseSteps } from "@/lib/auction/rules";
-import { normCategory } from "@/lib/scout/tier";
+import { normCategory, catLabel } from "@/lib/scout/tier";
 import PlayerIdentity, { type LotPlayerDetail } from "@/app/auction/PlayerIdentity";
 
 export type LotTeam = {
@@ -140,7 +140,7 @@ export default function LotControl({
                     >
                       <span className="truncate">{p.full_name}</span>
                       <span className="num shrink-0 text-[0.688rem] text-faint">
-                        {p.auction_category}
+                        {catLabel(p.auction_category)}
                         {p.overall_rank != null ? ` · #${p.overall_rank}` : ""}
                       </span>
                     </button>

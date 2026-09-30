@@ -1,5 +1,6 @@
 "use client";
 
+import { catLabel } from "@/lib/scout/tier";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { setSquadSlot } from "./slot-actions";
@@ -92,7 +93,7 @@ export default function PositionTargets({
                 {p.acquired === "retained" && <span className="ml-1.5 text-[10px] uppercase text-highlight-ink">R</span>}
                 {p.acquired === "owner" && <span className="ml-1.5 text-[10px] uppercase text-accent-text">O</span>}
                 <span className="ml-2 text-xs text-muted">
-                  {[p.auction_category, p.primary_role].filter(Boolean).join(" · ")}
+                  {[catLabel(p.auction_category), p.primary_role].filter(Boolean).join(" · ")}
                 </span>
               </span>
               <span className="flex shrink-0 items-center gap-2">

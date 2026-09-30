@@ -11,6 +11,8 @@
 // accepts the platform's long names ("A+ Category", "Special Status") so raw
 // API strings render correctly wherever they leak through.
 
+import { LEAGUE } from "@/lib/league";
+
 export type AuctionCategory = "A+" | "A" | "B" | "Special";
 export const CATEGORIES: AuctionCategory[] = ["A+", "A", "B", "Special"];
 
@@ -18,10 +20,18 @@ export function normCategory(c: string | null | undefined): AuctionCategory | nu
   const t = (c ?? "").trim().toUpperCase();
   if (!t) return null;
   if (t.startsWith("A+")) return "A+";
-  if (t.startsWith("SPECIAL") || t === "SS") return "Special";
+  if (t.startsWith("SPECIAL") || t === "SS" || t.startsWith("LEGEND")) return "Special";
   if (t.startsWith("A")) return "A";
   if (t.startsWith("B")) return "B";
   return null;
+}
+
+// Display name for a category. USCL calls the top veterans' slot "Legend";
+// the data and every rule keep the key "Special".
+export function catLabel(c: string | null | undefined): string {
+  const n = normCategory(c);
+  if (!n) return c ?? "";
+  return n === "Special" && LEAGUE === "uscl" ? "Legend" : n;
 }
 
 // "Premium" = the two U35 marquee categories. Kept under the old name because

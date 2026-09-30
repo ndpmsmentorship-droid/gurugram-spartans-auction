@@ -15,7 +15,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * (see supabase/team_source_schema.sql and ./roster.ts). The SARDA data is
  * never modified — Gurugram Spartans are still playing that season.
  */
-export const AUCTION_DIVISIONS = ["Group A", "Group B"];
+// "USCL" = the Urban Sports Champions League franchises (one group of 14).
+export const AUCTION_DIVISIONS = ["Group A", "Group B", "USCL"];
 
 export async function getAuctionSeasonId(): Promise<string | null> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

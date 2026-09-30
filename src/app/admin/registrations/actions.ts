@@ -5,6 +5,7 @@ import { getCurrentProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { recomputeAllIndices } from "@/lib/scout/recompute";
 import { SEASON, BUCKET } from "@/app/register/shared";
+import { LEAGUE } from "@/lib/league";
 
 // Review actions for /admin/registrations. Server actions are callable
 // directly, so each one re-checks the admin role instead of relying on the
@@ -109,6 +110,9 @@ async function publicPhoto(sb: ReturnType<typeof createAdminClient>, path: strin
 }
 
 async function addOne(regId: string, category: string | null): Promise<void> {
+  // SDLL registrations belong in the SDLL pool only; while another league is
+  // switched in (USCL demo), scout_players holds that league's pool.
+  if (LEAGUE !== "sdll") return;
   const sb = createAdminClient();
   const t = db();
   const { data: r } = await t.from("registrations").select("*").eq("id", regId).maybeSingle();
@@ -200,7 +204,7 @@ export async function addAllApprovedToPool() {
 
 // Undo, only while the player is unsold.
 export async function removeFromPool(form: FormData) {
-  if (!(await adminId())) return;
+  if (!(await adminId()) || LEAGUE !== "sdll") return;
   const id = String(form.get("id") || "");
   await db().from("scout_players").delete().eq("source_id", `reg:${id}`).is("team_id", null);
   await afterPoolChange();

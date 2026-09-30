@@ -7,6 +7,7 @@
 // min_increment 500 — Season 1 cleared at ₹500 steps (…372,500 / …431,500).
 
 import { normCategory, type AuctionCategory } from "@/lib/scout/tier";
+import { LEAGUE } from "@/lib/league";
 
 export type Rules = {
   squadMin: number;
@@ -17,7 +18,7 @@ export type Rules = {
   cap: Record<AuctionCategory, number>;
 };
 
-export const DEFAULT_RULES: Rules = {
+const SDLL_RULES: Rules = {
   squadMin: 16,
   squadMax: 25,
   maxBid: 400000,
@@ -25,6 +26,24 @@ export const DEFAULT_RULES: Rules = {
   base: { "A+": 30000, A: 20000, B: 10000, Special: 5000 },
   cap: { "A+": 3, A: 8, B: 13, Special: 3 },
 };
+
+// USCL Season 2 "Owners & Retention Rules" deck: owner prices A+ 20K, A 10K,
+// B/Legend 3K; at most 2 A+, 6 A (5 with one A+, 3 with two), 1 Legend;
+// playing 12 + 1 Legend. ₹1,75,000 purse + ₹1,25,000 top-up = ₹3,00,000.
+// Mirrors auction_rules for the USCL season (scripts/uscl-setup.mts).
+const USCL_RULES: Rules = {
+  squadMin: 13,
+  squadMax: 22,
+  maxBid: 300000,
+  minIncrement: 1000,
+  base: { "A+": 20000, A: 10000, B: 3000, Special: 3000 },
+  cap: { "A+": 2, A: 6, B: 22, Special: 1 },
+};
+
+export const DEFAULT_RULES: Rules = LEAGUE === "uscl" ? USCL_RULES : SDLL_RULES;
+
+/** USCL: how many A players a squad may hold given its A+ count (deck p.4). */
+export const usclACap = (aPlus: number) => (aPlus >= 2 ? 3 : aPlus === 1 ? 5 : 6);
 
 export const basePriceFor = (c: string | null | undefined, r: Rules = DEFAULT_RULES) =>
   r.base[normCategory(c) ?? "B"];

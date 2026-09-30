@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { catLabel } from "@/lib/scout/tier";
 
 export const dynamic = "force-dynamic";
 
@@ -59,7 +60,7 @@ export default async function SquadPlayerPage({
           <Headshot name={player.full_name} url={player.photo_url} />
           <dl className="flex flex-col gap-3 border-t border-line px-4 py-4 text-[0.813rem]">
             <BioRow k="Rank ID" v={rankId} accent />
-            <BioRow k="Auction tier" v={player.auction_category ?? "—"} />
+            <BioRow k="Auction tier" v={player.auction_category ? catLabel(player.auction_category) : "—"} />
             <BioRow k="Age" v={player.age != null ? String(player.age) : "—"} />
             {player.cricheroes_link ? (
               <div className="flex items-baseline justify-between gap-3">
@@ -92,7 +93,7 @@ export default async function SquadPlayerPage({
             <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0 sm:flex-1">
                 <p className="eyebrow">
-                  {[player.primary_role, player.auction_category].filter(Boolean).join(" · ") || "Player"}
+                  {[player.primary_role, catLabel(player.auction_category)].filter(Boolean).join(" · ") || "Player"}
                 </p>
                 <h1
                   className="mt-3 font-display font-bold"

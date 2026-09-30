@@ -19,6 +19,7 @@ import PhotoGallery, { type Photo } from "./home/PhotoGallery";
 import Countdown from "./home/Countdown";
 import { getAuctionSeasonId } from "@/lib/auction/target";
 import { readLiveLot } from "@/lib/auction/read";
+import { LEAGUE } from "@/lib/league";
 import { PlayerPhoto } from "./register/PlayerCard";
 import { FRANCHISES, findFranchise } from "./franchises";
 import { TITLE_SPONSOR, PRESENTED_BY, PARTNERS, logoSize } from "./sponsors";
@@ -167,6 +168,8 @@ async function getOwners(): Promise<Owner[]> {
 
 // The player on the block right now, if a lot is live.
 async function getLiveNow(): Promise<{ name: string; photo: string | null; bid: number | null } | null> {
+  // The USCL demo auction is private; never surface its lot on the SDLL page.
+  if (LEAGUE !== "sdll") return null;
   try {
     const lot = await readLiveLot(await getAuctionSeasonId());
     if (lot.status !== "live" || !lot.player_id) return null;

@@ -1,5 +1,6 @@
 "use client";
 
+import { catLabel } from "@/lib/scout/tier";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import MarkButton from "../MarkButton";
@@ -200,7 +201,7 @@ export default function TargetsList({ players }: { players: PoolPlayer[] }) {
                         {p.sold && <span className="ml-1.5 text-[0.6rem] uppercase text-muted">sold</span>}
                       </Link>
                       <span className="num block truncate text-[0.7rem] text-muted">
-                        {[p.auction_category, p.primary_role].filter(Boolean).join(" · ")}
+                        {[catLabel(p.auction_category), p.primary_role].filter(Boolean).join(" · ")}
                       </span>
                     </span>
                   </div>

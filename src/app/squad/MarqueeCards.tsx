@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Avatar from "./Avatar";
-import { tierStyle, handSkill } from "@/lib/scout/tier";
+import { tierStyle, handSkill, catLabel } from "@/lib/scout/tier";
 
 const GOLD = "#E3A81B";
 const GOLD_INK = "#7a5a06";
@@ -58,7 +58,7 @@ export default function MarqueeCards({ players }: { players: MarqueePlayer[] }) 
                       style={{ background: ts.bg, color: ts.fg }}
                       title="Organizers' auction category"
                     >
-                      {p.auction_category}
+                      {catLabel(p.auction_category)}
                     </span>
                   ) : null;
                 })()}

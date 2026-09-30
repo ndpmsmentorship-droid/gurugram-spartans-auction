@@ -1,3 +1,4 @@
+import { catLabel } from "@/lib/scout/tier";
 import Link from "next/link";
 import { getCurrentProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -209,7 +210,7 @@ export default async function MyTeamPage() {
                     )}
                   </Link>
                   <span className="num block text-[0.7rem] text-muted">
-                    {[p.auction_category, p.primary_role].filter(Boolean).join(" · ")}
+                    {[catLabel(p.auction_category), p.primary_role].filter(Boolean).join(" · ")}
                   </span>
                 </span>
                 <MarkButton playerId={p.id} marked={true} />
@@ -250,7 +251,7 @@ export default async function MyTeamPage() {
                     {p.is_marquee && <span className="ml-1.5 text-[0.6rem] uppercase text-red">★</span>}
                   </td>
                   <td className="text-muted">{p.primary_role ?? "—"}</td>
-                  <td className="num text-muted">{p.auction_category ?? "—"}</td>
+                  <td className="num text-muted">{p.auction_category ? catLabel(p.auction_category) : "—"}</td>
                   <td className="num text-right">{p.runs ?? "—"}</td>
                   <td className="num text-right">{p.wickets ?? "—"}</td>
                   <td className="num text-right font-semibold">{n1(p.overall_index)}</td>

@@ -13,6 +13,7 @@ const LABELS: Record<string, string> = {
   "/schedule": "Schedule",
   "/my-team": "My Squad",
   "/my-team/targets": "Targets",
+  "/war-room": "War Room",
   "/scout": "Player Pool",
   "/scout/compare": "Compare",
   "/scout/import": "Import",

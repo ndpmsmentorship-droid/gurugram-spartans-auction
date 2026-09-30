@@ -5,7 +5,7 @@ import { useMemo, useState, useTransition } from "react";
 import type { RankedPlayer } from "@/lib/scout/ranks";
 import type { RiskFlag } from "@/lib/scout/analytics";
 import { CATEGORIES, type Category } from "@/lib/scout/category";
-import { tierStyle, normCategory, CATEGORIES as AUCTION_CATEGORIES, type AuctionCategory } from "@/lib/scout/tier";
+import { tierStyle, normCategory, CATEGORIES as AUCTION_CATEGORIES, type AuctionCategory, catLabel } from "@/lib/scout/tier";
 import {
   setMarquee,
   setRegStatus,
@@ -431,7 +431,7 @@ function Row({
                 style={{ background: ts.bg, color: ts.fg }}
                 title="Organizers' auction category"
               >
-                {p.auction_category}
+                {catLabel(p.auction_category)}
               </span>
             ) : null;
           })()}

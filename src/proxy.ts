@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { LEAGUE } from "@/lib/league";
 
 // ALLOWLIST, not a denylist: only the landing page ("/", exact), the live
 // board and the squad display are public. Everything else — schedule, pool, jersey form, player profiles, the
@@ -7,11 +8,12 @@ import { NextResponse, type NextRequest } from "next/server";
 // new route is private by default rather than public by accident.
 //
 // /admin/* additionally requires the admin role, enforced in admin/layout.tsx.
+// While the USCL demo runs (src/lib/league.ts) the board and squads are for
+// signed-in users only — Gurugram Spartans' private war room.
 const PUBLIC_PATHS = [
   "/login",
   "/register", // player registration form
-  "/auction", // live board
-  "/squad", // squad display
+  ...(LEAGUE === "uscl" ? [] : ["/auction", "/squad"]), // live board, squad display
 ];
 
 function isPublic(pathname: string): boolean {

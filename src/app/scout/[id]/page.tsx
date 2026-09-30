@@ -8,7 +8,7 @@ import PlayerSearch from "./PlayerSearch";
 import { rankPlayers } from "@/lib/scout/ranks";
 import { computeAnalytics, type AnalyticsInput } from "@/lib/scout/analytics";
 import { deriveMetrics, percentileColumn, type RawStats } from "@/lib/scout/rankings";
-import { tierStyle, handSkill, normCategory } from "@/lib/scout/tier";
+import { tierStyle, handSkill, normCategory, catLabel } from "@/lib/scout/tier";
 import { basePriceFor } from "@/lib/auction/rules";
 import type { ScoutPlayerRow } from "@/lib/supabase/types";
 import PlayerWorkshop from "./PlayerWorkshop";
@@ -111,7 +111,7 @@ export default async function PlayerDetailPage({
           <Headshot name={player.full_name} url={player.photo_url} />
           <dl className="flex flex-col gap-3 border-t border-line px-4 py-4 text-[0.813rem]">
             <BioRow k="Base price" v={basePrice} />
-            <BioRow k="Auction tier" v={player.auction_category ?? "—"} />
+            <BioRow k="Auction tier" v={player.auction_category ? catLabel(player.auction_category) : "—"} />
             <BioRow
               k="Status"
               v={soldPrice != null ? `Sold · ${inr(soldPrice)}` : "Unsold"}
@@ -170,7 +170,7 @@ export default async function PlayerDetailPage({
                     style={{ background: ts.bg, color: ts.fg }}
                     title="Organizers' auction category"
                   >
-                    {player.auction_category}
+                    {catLabel(player.auction_category)}
                   </span>
                 ) : null;
               })()}

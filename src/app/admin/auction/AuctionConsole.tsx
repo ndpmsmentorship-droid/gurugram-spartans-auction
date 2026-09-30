@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { assignPlayer, unassignPlayer, setPurse } from "./actions";
-import { normCategory } from "@/lib/scout/tier";
+import { normCategory, catLabel } from "@/lib/scout/tier";
 import { DEFAULT_RULES, basePriceFor } from "@/lib/auction/rules";
 
 export type ConsoleTeam = {
@@ -130,7 +130,7 @@ export default function AuctionConsole({
               <div className="flex items-center justify-between rounded-lg border border-accent/40 bg-wash px-3 py-2 text-sm">
                 <span className="font-medium">
                   {picked.full_name}
-                  {picked.auction_category ? <span className="ml-2 text-xs text-muted">{picked.auction_category}</span> : null}
+                  {picked.auction_category ? <span className="ml-2 text-xs text-muted">{catLabel(picked.auction_category)}</span> : null}
                 </span>
                 <button type="button" className="text-muted hover:text-ink" onClick={() => setPicked(null)}>✕</button>
               </div>
@@ -153,7 +153,7 @@ export default function AuctionConsole({
                         >
                           <span>{p.full_name}</span>
                           <span className="text-xs text-muted">
-                            {[p.auction_category, p.primary_role].filter(Boolean).join(" · ")}
+                            {[catLabel(p.auction_category), p.primary_role].filter(Boolean).join(" · ")}
                           </span>
                         </button>
                       </li>
@@ -251,7 +251,7 @@ export default function AuctionConsole({
                   label={`A+/A: ${aCount}/${DEFAULT_RULES.cap["A+"] + DEFAULT_RULES.cap.A}`}
                   warn={aCount > DEFAULT_RULES.cap["A+"] + DEFAULT_RULES.cap.A}
                 />
-                <Chip label={hasLegend ? "Special ✓" : "Special —"} warn={false} />
+                <Chip label={hasLegend ? `${catLabel("Special")} ✓` : `${catLabel("Special")} —`} warn={false} />
               </div>
               {canExtend ? (
                 <TopUp

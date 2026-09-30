@@ -46,8 +46,10 @@ Last updated: 2026-09-30
 - [ ] Mobile app (parked): installable web app first, then Play Store
 
 ## Security
+- [ ] Give the client their own admin login instead of sharing `sdlladmin`, so access can be removed per person
 - [ ] Revoke the Vercel token that was pasted in chat (Vercel → Account Settings → Tokens)
 
 ## Done
+- [x] Master admin login `sdlladmin` created (full admin; password shared in chat, not stored in files) — 30 Sep
 - [x] Approved registrations → auction pool (Add to pool / Add all / Remove, category picker) — 30 Sep
 - [x] Quotation with the Launch Partner Package (₹10L + GST), in the name of Foundary Tek, for Playful Ventures — 30 Sep

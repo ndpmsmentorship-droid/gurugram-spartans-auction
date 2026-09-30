@@ -19,6 +19,7 @@ import {
   BATTING,
   BOWLING,
   ALLROUNDER,
+  MEALS,
   normalizePhone,
 } from "./shared";
 
@@ -143,6 +144,10 @@ export default function RegisterForm() {
   const [jerseyNo, setJerseyNo] = useState("");
   const [jerseyName, setJerseyName] = useState("");
   const [feeAck, setFeeAck] = useState(false);
+  const [infoDeclared, setInfoDeclared] = useState(false);
+  const [docsConsent, setDocsConsent] = useState(false);
+  const [meal, setMeal] = useState("");
+  const [allergies, setAllergies] = useState("");
 
   const returning = !!profile;
 
@@ -222,7 +227,8 @@ export default function RegisterForm() {
       if (age < MIN_AGE) return setErr(`The league is open to players aged ${MIN_AGE} and above.`);
       if (!photo || !aadhaar) return setErr("Please add your photo and your Aadhaar card.");
     }
-    if (!feeAck) return setErr("Please tick the registration fee declaration.");
+    if (!meal) return setErr("Please choose veg or non-veg.");
+    if (!infoDeclared || !docsConsent || !feeAck) return setErr("Please tick all three declarations.");
 
     setBusy(true);
     try {
@@ -270,6 +276,10 @@ export default function RegisterForm() {
         jersey_number: jerseyNo,
         jersey_name: jerseyName,
         fee_ack: feeAck,
+        info_declared: infoDeclared,
+        docs_consent: docsConsent,
+        meal_pref: meal,
+        food_allergies: allergies,
       });
       if (res.error) throw new Error(res.error);
       setStage("done");
@@ -552,25 +562,60 @@ export default function RegisterForm() {
         </div>
       </section>
 
-      <label className="flex cursor-pointer gap-3 rounded-[12px] border border-gold-line bg-gold-fill p-4 text-sm text-ink">
-        <input
-          id="reg-fee"
-          type="checkbox"
-          className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--red-deep)]"
-          checked={feeAck}
-          onChange={(e) => setFeeAck(e.target.checked)}
-        />
-        <span>
-          I understand that if I am selected in the auction, I must pay a{" "}
-          <strong>mandatory registration fee of ₹3,000</strong>. I confirm the details above are
-          accurate and agree to be contacted about my registration.
-        </span>
-      </label>
+      <section className="space-y-4">
+        <h3 className="text-xl">Food</h3>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Choice legend="Meal preference" options={MEALS} value={meal} onChange={setMeal} />
+          <Field label="Food allergies (if any)">
+            <input id="reg-allergies" className="input" placeholder="e.g. peanuts, or leave blank" value={allergies} onChange={(e) => setAllergies(e.target.value)} maxLength={200} />
+          </Field>
+        </div>
+      </section>
+
+      <fieldset className="space-y-3 rounded-[12px] border border-gold-line bg-gold-fill p-4 text-sm text-ink">
+        <legend className="label-mono px-1">Declarations · tick all three</legend>
+        {[
+          {
+            id: "reg-true",
+            checked: infoDeclared,
+            set: setInfoDeclared,
+            text: <>I declare that all the information I have given is <strong>true and correct</strong>.</>,
+          },
+          {
+            id: "reg-docs",
+            checked: docsConsent,
+            set: setDocsConsent,
+            text: <>I agree to <strong>share important documents</strong> (such as ID or age proof) with the league if asked.</>,
+          },
+          {
+            id: "reg-fee",
+            checked: feeAck,
+            set: setFeeAck,
+            text: (
+              <>
+                I understand that if I am selected in the auction, I must pay a{" "}
+                <strong>mandatory registration fee of ₹3,000</strong>, and I agree to be contacted about my registration.
+              </>
+            ),
+          },
+        ].map((d) => (
+          <label key={d.id} className="flex cursor-pointer gap-3">
+            <input
+              id={d.id}
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--red-deep)]"
+              checked={d.checked}
+              onChange={(e) => d.set(e.target.checked)}
+            />
+            <span>{d.text}</span>
+          </label>
+        ))}
+      </fieldset>
 
       {error}
 
       <div className="flex flex-wrap items-center gap-3">
-        <button type="submit" className="btn-primary" disabled={busy || !feeAck}>
+        <button type="submit" className="btn-primary" disabled={busy || !feeAck || !infoDeclared || !docsConsent}>
           {busy ? "Submitting…" : "Submit registration"}
         </button>
         <button type="button" className="btn-ghost" onClick={() => { setStage("phone"); setProfile(null); setMatchedBy(null); setResults(null); setPhoneFixed(false); setErr(null); }}>

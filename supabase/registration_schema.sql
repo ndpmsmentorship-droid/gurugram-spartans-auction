@@ -98,3 +98,10 @@ alter table player_master
 -- 'phone' when the lookup matched the number, 'name' when the player picked
 -- their profile from the name search (admin should double-check those).
 alter table registrations add column if not exists matched_by text;
+
+-- ---- 2026-09-30 addendum: client feedback (declarations + food) ----------
+alter table registrations
+  add column if not exists info_declared boolean not null default false,  -- "my information is true"
+  add column if not exists docs_consent  boolean not null default false,  -- "will share documents if asked"
+  add column if not exists meal_pref     text,                            -- 'Veg' | 'Non-veg'
+  add column if not exists food_allergies text;

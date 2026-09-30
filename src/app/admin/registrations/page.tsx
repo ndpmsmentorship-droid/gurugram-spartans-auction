@@ -149,6 +149,12 @@ export default async function RegistrationsPage({
                   <p className="mt-1 text-sm text-muted">
                     Kit: <strong className="text-ink">{r.jersey_name ?? "—"} #{r.jersey_number ?? "—"}</strong> · T-shirt {r.tshirt_size ?? "—"} · Lower {r.lower_size ?? "—"}
                   </p>
+                  {(r.meal_pref || r.food_allergies) && (
+                    <p className="mt-1 text-sm text-muted">
+                      Food: <strong className="text-ink">{r.meal_pref ?? "—"}</strong>
+                      {r.food_allergies ? ` · Allergies: ${r.food_allergies}` : ""}
+                    </p>
+                  )}
                   <div className="mt-2 flex flex-wrap gap-3 text-sm">
                     {r.linkedin_link && (
                       <a className="text-accent-text underline" href={/^https?:/.test(r.linkedin_link) ? r.linkedin_link : `https://${r.linkedin_link}`} target="_blank" rel="noopener noreferrer">

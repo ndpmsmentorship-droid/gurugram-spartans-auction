@@ -26,3 +26,5 @@ export const SIZES = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"];
 export const BATTING = ["Left Hand Batsman", "Right Hand Batsman"];
 export const BOWLING = ["Left Arm Pacer", "Left Arm Spinner", "Right Arm Pacer", "Right Arm Spin"];
 export const ALLROUNDER = ["Batting All Rounder", "Bowling All Rounder"];
+
+export const MEALS = ["Veg", "Non-veg"];

@@ -1,7 +1,7 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { SEASON, BUCKET, MIN_AGE, ageOn, normalizePhone } from "./shared";
+import { SEASON, BUCKET, MIN_AGE, MEALS, ageOn, normalizePhone } from "./shared";
 
 // Public registration (/register). Everything goes through the service role:
 // player_master and registrations have RLS on with no policies, so the anon
@@ -124,6 +124,10 @@ export type RegistrationInput = {
   jersey_number: string;
   jersey_name: string;
   fee_ack: boolean;
+  info_declared: boolean;
+  docs_consent: boolean;
+  meal_pref: string;
+  food_allergies: string;
 };
 
 const clean = (s: string | null | undefined) => {
@@ -137,6 +141,9 @@ export async function submitRegistration(
   const phone = normalizePhone(input.phone);
   if (!phone) return { error: "Enter a 10-digit mobile number." };
   if (!input.fee_ack) return { error: "Please tick the registration fee declaration." };
+  if (!input.info_declared) return { error: "Please confirm that your information is true." };
+  if (!input.docs_consent) return { error: "Please agree to share documents if the league asks." };
+  if (!MEALS.includes(input.meal_pref)) return { error: "Please choose veg or non-veg." };
 
   const sb = db();
 
@@ -215,6 +222,10 @@ export async function submitRegistration(
     jersey_number: clean(input.jersey_number),
     jersey_name: clean(input.jersey_name),
     fee_ack: true,
+    info_declared: true,
+    docs_consent: true,
+    meal_pref: input.meal_pref,
+    food_allergies: clean(input.food_allergies),
   });
 
   if (error) {

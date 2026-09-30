@@ -30,6 +30,16 @@ Last updated: 2026-09-30
 - [ ] 32 players still show initials instead of a photo
 - [ ] More Kanishk award photos for the carousel (candidates on the picker: 23, 43, 44–56, 59–62)
 
+## Landing page — content needed from the league
+- [ ] A message from Kanishk / the league director (quote + photo) for the About section
+- [ ] Promo or highlights video link (YouTube) for a "Watch" section
+- [ ] Sponsorship contact (email / phone) for a "Become a sponsor" button
+- [ ] Social links (Instagram, YouTube, Facebook) for the footer
+- [ ] Season 1 reach numbers (views, followers, registrations) — only verified figures
+- [ ] Owners' titles and companies for the owner cards (SARDA-style)
+- [ ] More gallery photos (auction night, finals, team shots)
+- [ ] Put the 12 team logos on the teams table so the live board, squads and schedule show them too
+
 ## Ideas (suggested, not yet agreed)
 - [ ] Share card after registering: "I'm in SDLL Season 2" image for WhatsApp/Instagram — free marketing
 - [ ] Registration status check by mobile number (fewer calls to organisers)
@@ -50,6 +60,7 @@ Last updated: 2026-09-30
 - [ ] Revoke the Vercel token that was pasted in chat (Vercel → Account Settings → Tokens)
 
 ## Done
+- [x] Landing page redesigned on SARDA lines in the SDLL brand kit (hero, stats, about, honours, franchises, owners, gallery, sponsors, opportunities, footer) — 30 Sep
 - [x] Master admin login `sdlladmin` created (full admin; password shared in chat, not stored in files) — 30 Sep
 - [x] Approved registrations → auction pool (Add to pool / Add all / Remove, category picker) — 30 Sep
 - [x] Quotation with the Launch Partner Package (₹10L + GST), in the name of Foundary Tek, for Playful Ventures — 30 Sep

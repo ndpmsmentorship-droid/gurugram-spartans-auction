@@ -1,6 +1,8 @@
 "use client";
 
 import { PlayerPhoto } from "@/app/register/PlayerCard";
+import { catLabel } from "@/lib/scout/tier";
+import { clipsUrl } from "@/lib/scout/clips";
 
 // The full identity of whoever is on the block — photo, our rank/ID, and a
 // compact career stat strip — so the auctioneer and the room see the SAME
@@ -74,7 +76,7 @@ export default function PlayerIdentity({
 
         <p className="num mt-2 text-[0.75rem] uppercase tracking-[0.1em] text-muted">
           {[
-            player.auction_category,
+            player.auction_category ? catLabel(player.auction_category) : null,
             player.primary_role,
             player.age != null ? `Age ${player.age}` : null,
           ]
@@ -94,6 +96,17 @@ export default function PlayerIdentity({
           <Stat label="Bowl idx" value={n(player.bowl_index, 1)} accent />
           <Stat label="Overall" value={n(player.overall_index, 1)} accent />
         </div>
+
+        {clipsUrl(player.full_name) && (
+          <a
+            href={clipsUrl(player.full_name)!}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-red px-3.5 py-1.5 text-[0.8rem] font-semibold text-white hover:opacity-90"
+          >
+            ▶ Watch clips
+          </a>
+        )}
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ import { DEFAULT_RULES, inr, usclACap } from "@/lib/auction/rules";
 import type { League } from "@/lib/league";
 import phaseData from "@/data/phase-stats.json";
 import cvMap from "@/data/cv-map.json";
+import { clipsUrl } from "@/lib/scout/clips";
 import { rtmState, rtmThreats, RTM_MAX_AGAINST } from "@/lib/auction/rtm";
 
 export type WRTeam = { id: string; name: string; purse_total: number };
@@ -78,7 +79,6 @@ function enrich(p: WRPlayer): Enriched {
   const starDeath = !!lib?.bowler && PHASES.top.death.includes(lib.bowler);
   const starPP = !!lib?.bowler && PHASES.top.pp.includes(lib.bowler);
   const d = phase?.death, pp = phase?.pp;
-  const kind = lib?.bowler ? "bowler" : lib?.batter ? "batter" : null;
   return {
     ...p,
     cat: normCategory(p.auction_category) ?? "B",
@@ -89,7 +89,7 @@ function enrich(p: WRPlayer): Enriched {
     starPP,
     deathSpec: starDeath || (!!d && d.balls >= 12 && (d.econ ?? 99) <= 8.5),
     ppSpec: starPP || (!!pp && pp.balls >= 18 && (pp.econ ?? 99) <= 7),
-    clips: kind ? `https://www.ndpms.in/spartans/?p=${kind}-${encodeURIComponent(lib![kind]!)}` : null,
+    clips: clipsUrl(p.full_name),
   };
 }
 

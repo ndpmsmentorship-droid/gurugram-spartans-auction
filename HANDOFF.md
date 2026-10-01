@@ -15,9 +15,59 @@ Setup is `scripts/uscl-setup.mts <cards.json>` (re-runnable while staged). Owner
 clips, who can still bid, alternatives). Phase stars: `src/data/phase-stats.json` from 26 trusted CricVideos
 matches (`scripts/build-phase-stats.py`); clips map `src/data/cv-map.json` (`scripts/build-cv-map.py`).
 Known gap: other USCL teams' owner/retention spends aren't loaded (all at ₹3,00,000) — rival purses are
-approximate until the helper adjusts purses in the console.
+approximate until Nikhil records them (he is sending a screenshot). **No helper on the day:** Nikhil runs the
+War Room **auction pad** alone (see LATEST 2026-10-01).
 
-## ▶ LATEST — 2026-09-30 (read this first)
+## ▶ LATEST — 2026-10-01 (read this first)
+Everything below is pushed to `main` and live (last commit "War Room: tap any squad player…"). Running list:
+**`TODO.md`**. Tests were Playwright against the local dev server (which talks to the live DB); every test
+sale was undone and checked in the database.
+
+**USCL auction (Sat 3 Oct) — how Nikhil runs it, alone, on his phone**
+- **One login for everything:** `sdlladmin` (admin). Opens every portal page incl. the War Room + pad, and — new
+  today — the **ball library** too (an admin row in `spartans_passes`, LMS Supabase `zbximdxghhjpopiwdzhi`,
+  expires Sep 2028). Same password on both; it lives in chat only. The owner login `gurugramspartans` still works.
+  If the client gets the master login, they also get library admin — offer them a separate login.
+- **Auction pad** (top of `/war-room`, `WarRoom.tsx`): type 2–3 letters → player goes on the block (full card)
+  → *Us* / *Other team* + price (−1K/+1K/+5K/+10K) → **Sold**; *Unsold / clear*; *Undo last*; *RTM: X matched*.
+  Optimistic UI. Recording is allowed for admins, and for owners only while `LEAGUE === "uscl"`
+  (`ensureRecorder()` in `admin/auction/actions.ts`); purse top-ups stay admin-only.
+- **Pad mirrors the live board:** calling up a player runs `withdrawLot()` + `putUpLot()` (admin login only;
+  silently skipped for owners), sold/clear withdraws. `useLotSync` now also refreshes on `scout_players` UPDATE,
+  so sales show on `/auction` at once. The big price on the War Room follows the pad price, never a stale lot.
+- **RTM** (`src/lib/auction/rtm.ts`, SQL `supabase/uscl_rtm.sql` — **run, SUCCESS**): six existing franchises =
+  Bengal Tigers, Chennai Thalaiva, Delhi Devil, Lucknow Lagers, Punjab Royals, Royal Challengers Gurgaon, one RTM
+  each, max 2 against any team. **Spartans hold none.** A matched RTM sets `acquired='rtm'` + `rtm_against`.
+  Admin console has an RTM panel; War Room shows RTM risk on the block card + an RTM-watch section.
+  Open: does a *declined* RTM use up the RTM? (built: only matched counts).
+- **Spartans squad = 6, ₹50,000** — matches the USCL franchise portal (read-only check 1 Oct): Kuldeep Negi A+
+  25K retained, Prateek Suneja A 10K owner, Nikhil B 6K retained, **Tushar Khattar B 3K owner (added today)**,
+  Gaurav Verma B 3K owner, Kanishk Sheel Legend 3K. Portal shows ₹1.75L purse; ours is ₹3L incl. the top-up.
+- **Squad rules (deck p.2):** 0 A+ → max 6 A, 6+ B · 1 A+ → max 5 A, 6+ B · 2 A+ → max 3 A, 7+ B · Legend ≤1
+  (must be 40+), "Playing Squad 12 + 1 Legend". War Room applies it to the whole squad (stricter) — ask the
+  organisers whether it is playing-XII only. **No under-35 rule exists** in any USCL material.
+- **War Room card restyle:** brand fonts only (no mono numerals), stat tiles with colour-coded Avg/SR/Econ and
+  PP/Middle/Death economy tiles, red "Age N" chip, price row on phones. **Profile sheet:** tap any squad player or
+  pool name. **▶ Watch clips** also on the live board + console block card (`src/lib/scout/clips.ts`), and
+  Legend no longer shows as "Special" there.
+- **CricVideos (LMS repo):** `ndpms.in/spartans/?league=uscl` has a "Season 2 auction pool · on film" section
+  — 96 pool players by category with Bat/Bowl links (LMS commit ddf20b2).
+- **USCL owners list:** the "Meet the franchises" cards show one owner per card on tap; only
+  "Yogesh Pushkarna" captured so far. Their site was down (Vercel 402) for part of the day, back by afternoon.
+
+**Landing + mobile**
+- Hero is now the **ACCI (S1 champions) floodlit team photo** (`brand/hero-acci-champions.jpg`, a frame from the
+  league's "ACCI First" AV, Drive `Final AVs/Champions_Runnersup/`). Honours cards: ACCI daylight team photo,
+  Goan Monks floodlit huddle (from "Goa 2nd" AV). Manoj Tiwari + Kanishk photo moved into the gallery.
+- iPhone "zoomed in, pinch out" fix: form fields are 16px on phones (Safari auto-zooms smaller ones);
+  `html { overflow-x: clip }`. Nikhil to confirm on his phone.
+
+**Before Saturday:** Friday solo dry run (pad on phone + live board on a laptop); load the other 13 teams'
+owner/retention players when Nikhil sends the screenshot; ask organisers the A+/playing-XII and declined-RTM
+questions. **After the auction:** `node scripts/league-switch.mts sdll`, set `LEAGUE = "sdll"`, push.
+Known pre-existing lint error: `src/app/auction/useLotSync.ts:21` (ref written during render) — not new.
+
+## PREVIOUS — 2026-09-30
 Main is at the "TODO: registration feedback 1-4 live" commit. Every push to `main` deploys production (GitHub
 integration); older notes below saying "CLI only / no Git integration" are wrong. The running to-do list is
 **`TODO.md`** in the repo root — keep adding to it.

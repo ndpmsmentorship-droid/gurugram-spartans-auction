@@ -33,6 +33,13 @@ export function useLotSync(pollMs = 5000) {
           { event: "*", schema: "public", table: "auction_lot" },
           () => refresh.current()
         )
+        // a sale recorded straight onto a player (War Room pad, console) —
+        // without this it would wait for the 5 s poll
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "scout_players" },
+          () => refresh.current()
+        )
         .subscribe();
       cleanup = () => {
         supabase.removeChannel(channel);

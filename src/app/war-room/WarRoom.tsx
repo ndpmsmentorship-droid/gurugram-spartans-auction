@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { assignPlayer, unassignPlayer, rtmPlayer } from "@/app/admin/auction/actions";
+import { putUpLot, withdrawLot } from "@/app/admin/auction/live-actions";
 import { createClient } from "@/lib/supabase/client";
 import { PlayerPhoto } from "@/app/register/PlayerCard";
 import { catLabel, normCategory, type AuctionCategory } from "@/lib/scout/tier";
@@ -224,7 +225,13 @@ export default function WarRoom(props: {
   const teamName = (id: string | null | undefined) => props.teams.find((t) => t.id === id)?.name ?? "—";
   const patch = (id: string, v: Partial<WRPlayer>) => setPlayers((ps) => ps.map((p) => (p.id === id ? { ...p, ...v } : p)));
 
+  // Mirror the pad onto the live board's "on the block" (auctioneer logins only;
+  // for anyone else these quietly fail and the pad works on its own).
+  const boardShow = (id: string) => void withdrawLot().then(() => putUpLot(id)).catch(() => {});
+  const boardClear = () => void withdrawLot().catch(() => {});
+
   function callUp(p: Enriched) {
+    boardShow(p.id);
     setPadId(p.id);
     setPadQ("");
     setPadTeam(myTeamId);
@@ -238,6 +245,7 @@ export default function WarRoom(props: {
     const prev = { team_id: p.team_id, sold_price: p.sold_price, acquired: p.acquired };
     patch(p.id, { team_id: teamId, sold_price: price, acquired: "auction" });
     setPadId(null);
+    boardClear();
     startSave(async () => {
       const r = await assignPlayer(p.id, teamId, price);
       if (r?.error) {
@@ -383,7 +391,7 @@ export default function WarRoom(props: {
             <div className="mt-2 space-y-2">
               <div className="flex items-baseline justify-between gap-2">
                 <p className="truncate text-lg font-semibold">{byId.get(padId)?.full_name}</p>
-                <button type="button" className="shrink-0 text-sm text-muted underline" onClick={() => setPadId(null)}>Unsold / clear</button>
+                <button type="button" className="shrink-0 text-sm text-muted underline" onClick={() => { setPadId(null); boardClear(); }}>Unsold / clear</button>
               </div>
               <div className="flex gap-1.5">
                 <button type="button" className="pill shrink-0 !px-4 !py-2.5" data-active={padTeam === myTeamId} onClick={() => setPadTeam(myTeamId)}>

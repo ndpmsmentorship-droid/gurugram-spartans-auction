@@ -21,7 +21,7 @@ export default async function AdminAuctionPage() {
   const supabase = createAdminClient();
   const sb = supabase as unknown as { from: (t: string) => any }; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-  const [{ data: teams }, { data: players }, { data: ranking }] = await Promise.all([
+  const [{ data: teams }, { data: players }, { data: ranking }, { data: lastSell }] = await Promise.all([
     sb
       .from("teams")
       .select("id, name, division, purse_total, purse_max")
@@ -31,13 +31,15 @@ export default async function AdminAuctionPage() {
     sb
       .from("scout_players")
       .select(
-        "id, full_name, auction_category, primary_role, is_keeper, age, team_id, sold_price, acquired, is_marquee, " +
+        "id, full_name, auction_category, primary_role, is_keeper, age, team_id, sold_price, acquired, rtm_against, is_marquee, " +
           "photo_url, bat_matches, runs, bat_avg, bat_sr, wickets, economy, bat_index, bowl_index, overall_index"
       )
       .order("full_name"),
     // full rows, so the lot control can show each player's overall rank —
     // the auctioneer needs to know if the next lot is a #3 or a #300
     sb.from("scout_players").select("*"),
+    // the RTM panel preselects the latest sale
+    sb.from("auction_event").select("player_id").eq("season_id", seasonId).eq("kind", "sell").order("id", { ascending: false }).limit(1).maybeSingle(),
   ]);
 
   const rows = (players ?? []) as (ConsolePlayer & { is_marquee: boolean })[];
@@ -114,6 +116,7 @@ export default async function AdminAuctionPage() {
       <AuctionConsole
         teams={(teams ?? []) as ConsoleTeam[]}
         players={rows as ConsolePlayer[]}
+        lastSoldId={lastSell?.player_id ?? null}
       />
     </div>
   );

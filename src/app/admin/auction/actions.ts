@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentProfile } from "@/lib/auth";
 import { DEFAULT_RULES } from "@/lib/auction/rules";
+import { RTM_FRANCHISES, RTM_MAX_AGAINST } from "@/lib/auction/rtm";
 
 // The auction is admin-run: the admin records each purchase (player -> team @ price)
 // on the live scout_players pool. team_id / sold_price / acquired are set here;
@@ -72,6 +73,47 @@ export async function assignPlayer(playerId: string, teamId: string, price: numb
   return { ok: true };
 }
 
+// USCL Right to Match, after the hammer: the player was sold to the winning
+// team (at its revised bid, if it revised). `rtmTeamId` matched, so he moves to
+// them at `price`. Enforces one RTM per existing franchise and at most two
+// against any single team.
+export async function rtmPlayer(playerId: string, rtmTeamId: string, price: number): Promise<Result> {
+  const denied = await ensureAdmin();
+  if (denied) return denied;
+  const amount = Math.round(Number(price));
+  if (!Number.isFinite(amount) || amount <= 0) return { error: "Enter the matched price." };
+  if (amount > DEFAULT_RULES.maxBid) return { error: `Max bid is ₹${DEFAULT_RULES.maxBid.toLocaleString("en-IN")}.` };
+
+  const supabase = createAdminClient();
+  const sb = supabase as unknown as LooseClient;
+  const [{ data: player }, { data: rtmTeam }] = await Promise.all([
+    sb.from("scout_players").select("full_name, team_id, acquired").eq("id", playerId).single(),
+    sb.from("teams").select("name, purse_total").eq("id", rtmTeamId).single(),
+  ]);
+  if (!player || !rtmTeam) return { error: "Player or team not found." };
+  if (!RTM_FRANCHISES.includes(rtmTeam.name)) return { error: `${rtmTeam.name} isn't an existing franchise — no RTM.` };
+  if (!player.team_id || player.acquired !== "auction") return { error: `${player.full_name} isn't an auction sale — sell him first.` };
+  if (player.team_id === rtmTeamId) return { error: `${player.full_name} is already with ${rtmTeam.name}.` };
+
+  const { data: rtms } = await sb.from("scout_players").select("full_name, team_id, rtm_against").eq("acquired", "rtm");
+  const used = (rtms ?? []).find((r: { team_id: string }) => r.team_id === rtmTeamId);
+  if (used) return { error: `${rtmTeam.name} already used its RTM (on ${used.full_name}).` };
+  const against = (rtms ?? []).filter((r: { rtm_against: string }) => r.rtm_against === player.team_id).length;
+  if (against >= RTM_MAX_AGAINST) return { error: `Already ${RTM_MAX_AGAINST} RTMs against that team — no more allowed.` };
+
+  const remaining = Number(rtmTeam.purse_total) - (await teamSpent(sb, rtmTeamId));
+  if (amount > remaining) return { error: `${rtmTeam.name} has only ₹${remaining.toLocaleString("en-IN")} left.` };
+
+  const { error } = await sb
+    .from("scout_players")
+    .update({ team_id: rtmTeamId, sold_price: amount, acquired: "rtm", rtm_against: player.team_id })
+    .eq("id", playerId)
+    .eq("team_id", player.team_id);
+  if (error) return { error: error.message };
+  revalidate();
+  return { ok: true };
+}
+
 export async function unassignPlayer(playerId: string): Promise<Result> {
   const denied = await ensureAdmin();
   if (denied) return denied;
@@ -79,7 +121,7 @@ export async function unassignPlayer(playerId: string): Promise<Result> {
   const sb = supabase as unknown as LooseClient;
   const { error } = await sb
     .from("scout_players")
-    .update({ team_id: null, sold_price: null, acquired: null })
+    .update({ team_id: null, sold_price: null, acquired: null, rtm_against: null })
     .eq("id", playerId);
   if (error) return { error: error.message };
   revalidate();

@@ -37,7 +37,8 @@ Last updated: 2026-09-30
 - [x] Playful Ventures logo on CricVideos
 - [ ] Friday 2 Oct: Nikhil + helper dry run (owner login on phone, helper on the console) — agreed
 - [ ] Other 13 teams' owner/retention spends (so rival purses are exact) — Nikhil sending a screenshot
-- [ ] RTM tracker: Nikhil marking the 6 Season 1 franchises from the 14-team list
+- [x] RTM: 6 existing franchises = Bengal Tigers, Chennai Thalaiva, Delhi Devil, Lucknow Lagers, Punjab Royals, Royal Challengers Gurgaon (Spartans hold none). Admin RTM panel + War Room RTM watch — 1 Oct (needs supabase/uscl_rtm.sql)
+- [ ] Ask USCL: does a declined RTM still use up that franchise's RTM? (built as: only a matched RTM counts)
 - [x] USCL section on the CricVideos page (?league=uscl): 96 pool players on film, by category, Bat/Bowl links — 1 Oct
 - [ ] After the auction: `node scripts/league-switch.mts sdll`, set LEAGUE = "sdll", push
 

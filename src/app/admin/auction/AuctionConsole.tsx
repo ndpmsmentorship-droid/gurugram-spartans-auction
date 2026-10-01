@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { assignPlayer, unassignPlayer, setPurse } from "./actions";
 import { normCategory, catLabel } from "@/lib/scout/tier";
 import { DEFAULT_RULES, basePriceFor } from "@/lib/auction/rules";
+import { LEAGUE } from "@/lib/league";
+import RtmPanel from "./RtmPanel";
 
 export type ConsoleTeam = {
   id: string;
@@ -23,6 +25,7 @@ export type ConsolePlayer = {
   team_id: string | null;
   sold_price: number | null;
   acquired: string | null;
+  rtm_against?: string | null;
 };
 
 const inr = (n: number) => "₹" + Math.round(n || 0).toLocaleString("en-IN");
@@ -41,9 +44,11 @@ const SQUAD_MAX = DEFAULT_RULES.squadMax;
 export default function AuctionConsole({
   teams,
   players,
+  lastSoldId = null,
 }: {
   teams: ConsoleTeam[];
   players: ConsolePlayer[];
+  lastSoldId?: string | null;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -103,7 +108,7 @@ export default function AuctionConsole({
     setPrice("");
   }
 
-  const byDivision = ["Elite", "Challengers", "Fighters"];
+  const byDivision = [...new Set(teams.map((t) => t.division ?? ""))];
   const soldCount = players.length - available.length;
 
   return (
@@ -115,9 +120,11 @@ export default function AuctionConsole({
         </p>
       </div>
       <p className="rounded-lg border border-border bg-wash px-3 py-2 text-xs leading-relaxed text-muted">
-        Squad {SQUAD_MIN}–{SQUAD_MAX} (incl. owners, retained &amp; legend) · max 4 aged 30–35 · ≥1 legend ·
-        base ₹15K (A) / ₹5K (B) · max bid {inr(MAX_BID)} (₹1L in tie-breaker)
+        Squad {SQUAD_MIN}–{SQUAD_MAX} (incl. owners &amp; retained) · base{" "}
+        {(["A+", "A", "B", "Special"] as const).map((c) => `${catLabel(c)} ${inr(DEFAULT_RULES.base[c])}`).join(" / ")} · max bid {inr(MAX_BID)}
       </p>
+
+      {LEAGUE === "uscl" && <RtmPanel teams={teams} players={players} lastSoldId={lastSoldId} />}
 
       {/* Assign */}
       <div className="rounded-xl border border-border bg-surface p-5">
@@ -270,6 +277,7 @@ export default function AuctionConsole({
                         {p.full_name}
                         {p.acquired === "retained" && <span className="ml-2 text-[10px] uppercase text-highlight">retained</span>}
                         {p.acquired === "owner" && <span className="ml-2 text-[10px] uppercase text-accent-text">owner</span>}
+                        {p.acquired === "rtm" && <span className="ml-2 text-[10px] uppercase text-accent-text">RTM</span>}
                       </span>
                       <span className="flex shrink-0 items-center gap-2">
                         <span className="tabular-nums text-muted">{inr(Number(p.sold_price) || 0)}</span>

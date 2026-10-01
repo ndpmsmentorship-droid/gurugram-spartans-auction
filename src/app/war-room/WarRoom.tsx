@@ -8,6 +8,7 @@ import { DEFAULT_RULES, inr, usclACap } from "@/lib/auction/rules";
 import type { League } from "@/lib/league";
 import phaseData from "@/data/phase-stats.json";
 import cvMap from "@/data/cv-map.json";
+import { rtmState, rtmThreats, RTM_MAX_AGAINST } from "@/lib/auction/rtm";
 
 export type WRTeam = { id: string; name: string; purse_total: number };
 export type WRPlayer = {
@@ -33,6 +34,7 @@ export type WRPlayer = {
   team_id: string | null;
   sold_price: number | null;
   acquired: string | null;
+  rtm_against: string | null;
   is_rejected: boolean | null;
 };
 type Lot = { player_id: string | null; current_bid: number | null; base_price: number | null; leading_team_id: string | null };
@@ -128,18 +130,17 @@ export default function WarRoom(props: {
     let alive = true;
     const pull = async () => {
       const [sold, lotRow] = await Promise.all([
-        sb.from("scout_players").select("id, team_id, sold_price, acquired").not("team_id", "is", null),
+        sb.from("scout_players").select("id, team_id, sold_price, acquired, rtm_against").not("team_id", "is", null),
         sb.from("auction_lot").select("player_id, status, current_bid, base_price, leading_team_id").eq("season_id", props.seasonId).maybeSingle(),
       ]);
       if (!alive) return;
       if (sold.data) {
-        const m = new Map((sold.data as unknown as { id: string; team_id: string; sold_price: number; acquired: string }[]).map((r) => [r.id, r]));
+        const m = new Map((sold.data as unknown as { id: string; team_id: string; sold_price: number; acquired: string; rtm_against: string | null }[]).map((r) => [r.id, r]));
         setPlayers((ps) =>
           ps.map((p) => {
             const s = m.get(p.id);
-            const team_id = s?.team_id ?? null;
-            const sold_price = s?.sold_price ?? null;
-            return p.team_id === team_id && p.sold_price === sold_price ? p : { ...p, team_id, sold_price, acquired: s?.acquired ?? p.acquired };
+            const next = { team_id: s?.team_id ?? null, sold_price: s?.sold_price ?? null, acquired: s?.acquired ?? null, rtm_against: s?.rtm_against ?? null };
+            return p.team_id === next.team_id && p.sold_price === next.sold_price && p.acquired === next.acquired && p.rtm_against === next.rtm_against ? p : { ...p, ...next };
           })
         );
       }
@@ -221,6 +222,14 @@ export default function WarRoom(props: {
         .sort(byIdx("overall_index"))
         .slice(0, 3)
     : [];
+  // USCL Right to Match: who can still take a player off us after the hammer.
+  const rtm = useMemo(() => rtmState(props.teams, all), [props.teams, all]);
+  const rtmAgainstUs = rtm.against.get(myTeamId) ?? 0;
+  const iHoldRtm = rtm.holders.has(myTeamId) && !rtm.holders.get(myTeamId);
+  const threats = rtmThreats(rtm, myTeamId)
+    .map((id) => ({ t: props.teams.find((t) => t.id === id)!, left: (props.teams.find((t) => t.id === id)?.purse_total ?? 0) - (teamState.get(id)?.spent ?? 0) }))
+    .sort((a, b) => b.left - a.left);
+  const lostToRtm = all.filter((p) => p.rtm_against === myTeamId && p.acquired === "rtm");
   const fills = onBlock ? needs.filter((n) => n.have < n.target && n.test(onBlock)).map((n) => n.label) : [];
 
   // ---- pool browser state ----
@@ -319,6 +328,18 @@ export default function WarRoom(props: {
                 </p>
               )}
 
+              {props.league === "uscl" && threats.length > 0 && (
+                <div className="mt-3 rounded-[10px] border border-line px-3 py-2 text-sm">
+                  <p>
+                    <strong>RTM risk:</strong> if we win him, {threats.filter((x) => x.left >= bid).length} franchise{threats.filter((x) => x.left >= bid).length === 1 ? "" : "s"} can still take him by RTM.
+                    We get one revised bid — a franchise can&apos;t match beyond its purse.
+                  </p>
+                  <p className="num mt-1 text-[0.78rem] text-muted">
+                    {threats.map((x) => `${x.t.name} ${inr(x.left)}`).join(" · ")}
+                  </p>
+                </div>
+              )}
+
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 <div>
                   <p className="label-mono">Can still bid ({rivals.length})</p>
@@ -380,6 +401,29 @@ export default function WarRoom(props: {
         </section>
       </div>
 
+      {props.league === "uscl" && (
+        <section className="mt-5 rounded-[16px] border border-line bg-surface p-4 shadow-[var(--elev-sm)]">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <p className="eyebrow">RTM watch</p>
+            <p className={`num text-sm ${rtmAgainstUs >= RTM_MAX_AGAINST ? "text-up" : "text-muted"}`}>
+              RTMs against us {rtmAgainstUs}/{RTM_MAX_AGAINST}
+              {rtmAgainstUs >= RTM_MAX_AGAINST ? " · our buys are now RTM-proof" : ""}
+              {iHoldRtm ? " · we hold 1 RTM" : rtm.holders.has(myTeamId) ? " · our RTM is used" : " · we have no RTM"}
+            </p>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {[...rtm.holders].map(([id, used]) => (
+              <span key={id} className={`badge ${used ? "bg-wash text-muted line-through" : "bg-gold-fill text-gold"}`} title={used ? `Used on ${used.full_name}` : "Still holds its RTM"}>
+                {props.teams.find((t) => t.id === id)?.name}{used ? ` · ${used.full_name}` : " · RTM"}
+              </span>
+            ))}
+          </div>
+          {lostToRtm.length > 0 && (
+            <p className="mt-2 text-sm text-red-deep">Lost to RTM: {lostToRtm.map((p) => `${p.full_name} (${props.teams.find((t) => t.id === p.team_id)?.name}, ${inr(p.sold_price)})`).join(" · ")}</p>
+          )}
+        </section>
+      )}
+
       {/* our squad */}
       <section className="mt-5 rounded-[16px] border border-line bg-surface p-4 shadow-[var(--elev-sm)]">
         <div className="flex items-baseline justify-between">
@@ -394,7 +438,7 @@ export default function WarRoom(props: {
                 <PlayerPhoto src={p.photo_url} name={p.full_name} className="h-10 w-10 shrink-0 rounded-full" sizes="40px" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{p.full_name}</p>
-                  <p className="truncate text-[0.72rem] text-muted">{[catLabel(p.cat), p.tag, p.acquired === "owner" ? "Owner" : p.acquired === "retained" ? "Retained" : null].filter(Boolean).join(" · ")}</p>
+                  <p className="truncate text-[0.72rem] text-muted">{[catLabel(p.cat), p.tag, p.acquired === "owner" ? "Owner" : p.acquired === "retained" ? "Retained" : p.acquired === "rtm" ? "RTM" : null].filter(Boolean).join(" · ")}</p>
                 </div>
                 <span className="num text-sm">{inr(p.sold_price)}</span>
               </li>

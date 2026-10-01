@@ -25,7 +25,7 @@ export default async function WarRoomPage({ searchParams }: { searchParams: Prom
   const [{ data: teams }, { data: pool }, lot] = await Promise.all([
     sb.from("teams").select("id, name, purse_total, owner_profile_id").eq("season_id", seasonId).in("division", AUCTION_DIVISIONS).order("name"),
     sb.from("scout_players")
-      .select("id, full_name, photo_url, age, primary_role, batting_style, bowling_style, is_keeper, auction_category, bat_matches, runs, bat_avg, bat_sr, wickets, economy, bowl_sr, bat_index, bowl_index, overall_index, team_id, sold_price, acquired, is_rejected")
+      .select("id, full_name, photo_url, age, primary_role, batting_style, bowling_style, is_keeper, auction_category, bat_matches, runs, bat_avg, bat_sr, wickets, economy, bowl_sr, bat_index, bowl_index, overall_index, team_id, sold_price, acquired, rtm_against, is_rejected")
       .limit(2000),
     readLiveLot(seasonId),
   ]);

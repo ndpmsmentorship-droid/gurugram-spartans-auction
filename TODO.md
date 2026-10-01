@@ -35,9 +35,10 @@ Last updated: 2026-09-30
 - [x] War Room (/war-room): max safe bid, category slots, gaps + top-5 fits, on-the-block card, rivals, alternatives
 - [x] ★ Death / ★ Powerplay stars from 26 SARDA S6 + USCL E1 matches; bowling tags; ▶ clips links (99 players)
 - [x] Playful Ventures logo on CricVideos
-- [ ] Friday: Nikhil + helper dry run (owner login on phone, helper on the console)
-- [ ] Other 13 teams' owner/retention spends (so rival purses are exact)
-- [ ] USCL section on the CricVideos page linking the USCL players' clips
+- [ ] Friday 2 Oct: Nikhil + helper dry run (owner login on phone, helper on the console) — agreed
+- [ ] Other 13 teams' owner/retention spends (so rival purses are exact) — Nikhil sending a screenshot
+- [ ] RTM tracker: Nikhil marking the 6 Season 1 franchises from the 14-team list
+- [x] USCL section on the CricVideos page (?league=uscl): 96 pool players on film, by category, Bat/Bowl links — 1 Oct
 - [ ] After the auction: `node scripts/league-switch.mts sdll`, set LEAGUE = "sdll", push
 
 ## Client feedback — registration form (30 Sep)

@@ -103,12 +103,25 @@ html {
   color-scheme: light;
 }
 
+html {
+  overflow-x: clip;
+}
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
   font-weight: 400;
   overflow-x: hidden;
+}
+/* iPhone Safari zooms into any field whose text is under 16px when it is
+   tapped, and stays zoomed (people had to pinch out to fit the page). 16px on
+   phones stops that; desktop keeps the smaller type. */
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
 }
 
 h1,

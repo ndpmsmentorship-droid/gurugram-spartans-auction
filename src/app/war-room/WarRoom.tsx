@@ -287,8 +287,13 @@ export default function WarRoom(props: {
   }
 
   const onBlock = (padId ? byId.get(padId) ?? null : null) ?? (lot.player_id ? byId.get(lot.player_id) ?? null : null);
-  const bid = lot.current_bid ?? lot.base_price ?? (onBlock ? R.base[onBlock.cat] : 0);
-  const nextBid = lot.current_bid != null ? lot.current_bid + R.minIncrement : bid;
+  // The big number: the pad's running price while Nikhil works the pad; else the
+  // live lot, but only if the lot is this same player (it can be stale).
+  const lotIsThis = !!onBlock && lot.player_id === onBlock.id;
+  const padLive = !!onBlock && padId === onBlock.id;
+  const bidIsBase = padLive ? padPrice <= R.base[onBlock!.cat] : !(lotIsThis && lot.current_bid != null);
+  const bid = !onBlock ? 0 : padLive ? padPrice || R.base[onBlock.cat] : lotIsThis ? lot.current_bid ?? lot.base_price ?? R.base[onBlock.cat] : R.base[onBlock.cat];
+  const nextBid = padLive || bidIsBase ? bid : bid + R.minIncrement;
   const rivals = onBlock
     ? props.teams
         .filter((t) => t.id !== myTeamId)
@@ -380,7 +385,7 @@ export default function WarRoom(props: {
                     <li key={p.id}>
                       <button type="button" onClick={() => callUp(p)} className="flex w-full items-center justify-between gap-2 px-3 py-3 text-left hover:bg-wash">
                         <span className="font-medium">{p.full_name}{p.starDeath ? " ★D" : ""}{p.starPP ? " ★P" : ""}</span>
-                        <span className="num shrink-0 text-xs text-muted">{catLabel(p.cat)} · {p.primary_role ?? ""}</span>
+                        <span className="tabular-nums shrink-0 text-xs text-muted">{catLabel(p.cat)} · {p.primary_role ?? ""}</span>
                       </button>
                     </li>
                   ))}
@@ -462,27 +467,28 @@ export default function WarRoom(props: {
             <p className="mt-3 text-sm text-muted">Nobody yet. The next player appears here the moment they&apos;re put up.</p>
           ) : (
             <div className="mt-3">
-              <div className="flex gap-4">
-                <PlayerPhoto src={onBlock.photo_url} name={onBlock.full_name} className="h-28 w-24 shrink-0 rounded-[10px]" sizes="96px" />
+              <div className="flex flex-wrap gap-x-4 gap-y-3">
+                <PlayerPhoto src={onBlock.photo_url} name={onBlock.full_name} className="h-24 w-20 shrink-0 rounded-[10px] sm:h-28 sm:w-24" sizes="96px" />
                 <div className="min-w-0 flex-1">
                   <h2 className="text-2xl leading-tight sm:text-3xl">{onBlock.full_name}</h2>
                   <Chips p={onBlock} />
-                  <p className="num mt-2 text-sm text-muted">{statLine(onBlock)}</p>
-                  <PhaseLine p={onBlock} />
                   {onBlock.clips && (
                     <a href={onBlock.clips} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm font-medium text-red underline underline-offset-4">
                       ▶ Watch clips
                     </a>
                   )}
                 </div>
-                <div className="shrink-0 text-right">
-                  <p className="label-mono">{lot.current_bid != null ? "Current bid" : "Base"}</p>
-                  <p className="font-display text-4xl text-red">{inr(bid)}</p>
+                {/* phones: its own full-width row under the name; wider: right column */}
+                <div className="flex w-full items-baseline justify-between gap-3 rounded-[10px] bg-wash px-3 py-2 sm:block sm:w-auto sm:shrink-0 sm:bg-transparent sm:p-0 sm:text-right">
+                  <p className="label-mono">{bidIsBase ? "Base" : "Current bid"}</p>
+                  <p className="font-display text-3xl text-red sm:text-4xl">{inr(bid)}</p>
                   <p className={`mt-1 text-sm font-medium ${nextBid <= maxSafe ? "text-up" : "text-red"}`}>
                     {nextBid <= maxSafe ? `We can go to ${inr(maxSafe)}` : "Beyond our safe limit"}
                   </p>
                 </div>
               </div>
+
+              <StatGrid p={onBlock} />
 
               {fills.length > 0 && (
                 <p className="mt-3 rounded-[10px] bg-[color-mix(in_srgb,var(--up)_10%,transparent)] px-3 py-2 text-sm text-up">
@@ -498,10 +504,10 @@ export default function WarRoom(props: {
               {props.league === "uscl" && threats.length > 0 && (
                 <div className="mt-3 rounded-[10px] border border-line px-3 py-2 text-sm">
                   <p>
-                    <strong>RTM risk:</strong> if we win him, {threats.filter((x) => x.left >= bid).length} franchise{threats.filter((x) => x.left >= bid).length === 1 ? "" : "s"} can still take him by RTM.
+                    <strong>RTM risk:</strong> if we win him, {threats.filter((x) => x.left >= bid).length} franchise{threats.filter((x) => x.left >= bid).length === 1 ? "" : "s"} can still take him by RTM.{" "}
                     We get one revised bid — a franchise can&apos;t match beyond its purse.
                   </p>
-                  <p className="num mt-1 text-[0.78rem] text-muted">
+                  <p className="tabular-nums mt-1 text-[0.78rem] text-muted">
                     {threats.map((x) => `${x.t.name} ${inr(x.left)}`).join(" · ")}
                   </p>
                 </div>
@@ -514,7 +520,7 @@ export default function WarRoom(props: {
                     {rivals.slice(0, 6).map(({ t, s }) => (
                       <li key={t.id} className="flex justify-between gap-2">
                         <span className="truncate">{t.name}</span>
-                        <span className="num text-muted">{inr(t.purse_total - s.spent)}</span>
+                        <span className="tabular-nums text-muted">{inr(t.purse_total - s.spent)}</span>
                       </li>
                     ))}
                     {rivals.length === 0 && <li className="text-muted">No other team can afford the next bid.</li>}
@@ -526,7 +532,7 @@ export default function WarRoom(props: {
                     {alternatives.map((p) => (
                       <li key={p.id} className="flex items-center justify-between gap-2">
                         <span className="truncate">{p.full_name}</span>
-                        <span className="num shrink-0 text-muted">{catLabel(p.cat)} · {num(p.overall_index)}</span>
+                        <span className="tabular-nums shrink-0 text-muted">{catLabel(p.cat)} · {num(p.overall_index)}</span>
                       </li>
                     ))}
                     {alternatives.length === 0 && <li className="text-muted">No similar player left that we can afford.</li>}
@@ -545,7 +551,7 @@ export default function WarRoom(props: {
               <li key={n.key} className="py-2.5">
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-medium">{n.label}</span>
-                  <span className={`num text-sm ${n.have >= n.target ? "text-up" : "text-red"}`}>
+                  <span className={`tabular-nums text-sm ${n.have >= n.target ? "text-up" : "text-red"}`}>
                     {n.have}/{n.target} {n.have >= n.target ? "✓" : ""}
                   </span>
                 </div>
@@ -554,7 +560,7 @@ export default function WarRoom(props: {
                     {n.picks.map((p, i) => (
                       <span key={p.id}>
                         {i > 0 && " · "}
-                        <span className="text-ink">{p.full_name}</span> <span className="num">({catLabel(p.cat)}{phaseHint(p, n.key)})</span>
+                        <span className="text-ink">{p.full_name}</span> <span className="tabular-nums">({catLabel(p.cat)}{phaseHint(p, n.key)})</span>
                       </span>
                     ))}
                   </p>
@@ -572,7 +578,7 @@ export default function WarRoom(props: {
         <section className="mt-5 rounded-[16px] border border-line bg-surface p-4 shadow-[var(--elev-sm)]">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <p className="eyebrow">RTM watch</p>
-            <p className={`num text-sm ${rtmAgainstUs >= RTM_MAX_AGAINST ? "text-up" : "text-muted"}`}>
+            <p className={`tabular-nums text-sm ${rtmAgainstUs >= RTM_MAX_AGAINST ? "text-up" : "text-muted"}`}>
               RTMs against us {rtmAgainstUs}/{RTM_MAX_AGAINST}
               {rtmAgainstUs >= RTM_MAX_AGAINST ? " · our buys are now RTM-proof" : ""}
               {iHoldRtm ? " · we hold 1 RTM" : rtm.holders.has(myTeamId) ? " · our RTM is used" : " · we have no RTM"}
@@ -595,7 +601,7 @@ export default function WarRoom(props: {
       <section className="mt-5 rounded-[16px] border border-line bg-surface p-4 shadow-[var(--elev-sm)]">
         <div className="flex items-baseline justify-between">
           <p className="eyebrow">Our squad · {mine.length}</p>
-          <p className="num text-sm text-muted">spent {inr(me.spent)}</p>
+          <p className="tabular-nums text-sm text-muted">spent {inr(me.spent)}</p>
         </div>
         <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {mine
@@ -607,7 +613,7 @@ export default function WarRoom(props: {
                   <p className="truncate font-medium">{p.full_name}</p>
                   <p className="truncate text-[0.72rem] text-muted">{[catLabel(p.cat), p.tag, p.acquired === "owner" ? "Owner" : p.acquired === "retained" ? "Retained" : p.acquired === "rtm" ? "RTM" : null].filter(Boolean).join(" · ")}</p>
                 </div>
-                <span className="num text-sm">{inr(p.sold_price)}</span>
+                <span className="tabular-nums text-sm">{inr(p.sold_price)}</span>
               </li>
             ))}
         </ul>
@@ -621,7 +627,7 @@ export default function WarRoom(props: {
           <label className="flex items-center gap-1.5 text-xs text-muted">
             <input type="checkbox" checked={onlyAvail} onChange={(e) => setOnlyAvail(e.target.checked)} className="accent-[var(--red-deep)]" /> available only
           </label>
-          <span className="num ml-auto text-xs text-muted">{shown.length} players</span>
+          <span className="tabular-nums ml-auto text-xs text-muted">{shown.length} players</span>
         </div>
         <div className="mt-3 flex flex-wrap gap-1.5">
           {[["", "All"], ["death", "★ Death"], ["pp", "★ Powerplay"], ...BOWL_TAGS.map((t) => [t, t]), ["wk", "Keepers"], ["clips", "▶ Has clips"]].map(([k, l]) => (
@@ -656,15 +662,15 @@ export default function WarRoom(props: {
                   </td>
                   <td className="px-2">{catLabel(p.cat)}</td>
                   <td className="px-2 text-muted">{p.tag ?? "—"}{p.is_keeper ? " · WK" : ""}</td>
-                  <td className="num px-2">{num(p.bat_matches)}</td>
-                  <td className="num px-2">{num(p.runs)}</td>
-                  <td className="num px-2">{num(p.bat_avg)}</td>
-                  <td className="num px-2">{num(p.bat_sr)}</td>
-                  <td className="num px-2">{num(p.wickets)}</td>
-                  <td className="num px-2">{num(p.economy)}</td>
-                  <td className="num px-2">{p.phase?.pp.balls ? `${p.phase.pp.econ} (${p.phase.pp.balls}b)` : "—"}</td>
-                  <td className="num px-2">{p.phase?.death.balls ? `${p.phase.death.econ} (${p.phase.death.balls}b)` : "—"}</td>
-                  <td className="num px-2 font-medium">{num(p.overall_index)}</td>
+                  <td className="tabular-nums px-2">{num(p.bat_matches)}</td>
+                  <td className="tabular-nums px-2">{num(p.runs)}</td>
+                  <td className="tabular-nums px-2">{num(p.bat_avg)}</td>
+                  <td className="tabular-nums px-2">{num(p.bat_sr)}</td>
+                  <td className="tabular-nums px-2">{num(p.wickets)}</td>
+                  <td className="tabular-nums px-2">{num(p.economy)}</td>
+                  <td className="tabular-nums px-2">{p.phase?.pp.balls ? `${p.phase.pp.econ} (${p.phase.pp.balls}b)` : "—"}</td>
+                  <td className="tabular-nums px-2">{p.phase?.death.balls ? `${p.phase.death.econ} (${p.phase.death.balls}b)` : "—"}</td>
+                  <td className="tabular-nums px-2 font-medium">{num(p.overall_index)}</td>
                   <td className="px-2">{p.clips && <a href={p.clips} target="_blank" rel="noopener noreferrer" className="text-red" title="Watch clips">▶</a>}</td>
                 </tr>
               ))}
@@ -682,10 +688,6 @@ export default function WarRoom(props: {
 }
 
 const num = (v: number | null | undefined) => (v == null ? "—" : String(Math.round(v * 10) / 10));
-const statLine = (p: Enriched) =>
-  [p.bat_matches != null && `${p.bat_matches} mat`, p.runs != null && `${p.runs} runs`, p.bat_sr != null && `SR ${num(p.bat_sr)}`, p.wickets != null && `${p.wickets} wkts`, p.economy != null && `econ ${num(p.economy)}`]
-    .filter(Boolean)
-    .join(" · ");
 const phaseHint = (p: Enriched, key: string) =>
   key === "death" && p.phase?.death.econ != null ? ` · ${p.phase.death.econ}` : key === "pp" && p.phase?.pp.econ != null ? ` · ${p.phase.pp.econ}` : "";
 
@@ -700,21 +702,69 @@ function Tile({ k, v, sub, strong, warn }: { k: string; v: string; sub?: string;
 }
 
 function Chips({ p }: { p: Enriched }) {
-  const chips = [catLabel(p.cat), p.primary_role, p.tag, p.is_keeper ? "Keeper" : null, p.lhb ? "Left-hand bat" : null, p.age ? `${p.age} yrs` : null].filter(Boolean);
+  const chips = [catLabel(p.cat), p.primary_role, p.tag, p.is_keeper ? "Keeper" : null, p.lhb ? "Left-hand bat" : null].filter(Boolean);
+  // brand sans, not the mono badge face, so the chips sit with the rest of the card
+  const chip = "whitespace-nowrap rounded-full px-3 py-1 text-[0.8rem] font-medium";
   return (
-    <div className="mt-1.5 flex flex-wrap gap-1.5">
+    <div className="mt-2 flex flex-wrap items-center gap-1.5">
+      {p.age && (
+        <span className={`${chip} bg-[var(--red)] font-semibold text-white`}>Age {p.age}</span>
+      )}
       {chips.map((c) => (
-        <span key={c as string} className="badge bg-wash text-ink">{c}</span>
+        <span key={c as string} className={`${chip} bg-wash text-ink`}>{c}</span>
       ))}
-      {p.starDeath && <span className="badge bg-gold-fill text-gold">★ Top-10 death</span>}
-      {p.starPP && <span className="badge bg-gold-fill text-gold">★ Top-10 powerplay</span>}
+      {p.starDeath && <span className={`${chip} bg-gold-fill text-gold`}>★ Top-10 death</span>}
+      {p.starPP && <span className={`${chip} bg-gold-fill text-gold`}>★ Top-10 powerplay</span>}
     </div>
   );
 }
 
-function PhaseLine({ p }: { p: Enriched }) {
-  if (!p.phase) return null;
-  const f = (label: string, s: Phase) => (s.balls ? `${label} ${s.econ} econ · ${s.wkts}w in ${s.balls}b` : null);
-  const parts = [f("PP", p.phase.pp), f("Middle", p.phase.mid), f("Death", p.phase.death)].filter(Boolean);
-  return parts.length ? <p className="num mt-1 text-[0.78rem] text-muted">SARDA/USCL phases: {parts.join(" · ")}</p> : null;
+// Good / middling / poor for a 30+ T20 league — the colour is the read at a glance.
+type Tone = "good" | "ok" | "poor";
+const toneCls: Record<Tone, string> = { good: "text-up", ok: "text-[#b7791f]", poor: "text-red" };
+const hi = (v: number | null | undefined, good: number, ok: number): Tone | null => (v == null ? null : v >= good ? "good" : v >= ok ? "ok" : "poor");
+const lo = (v: number | null | undefined, good: number, ok: number): Tone | null => (v == null ? null : v <= good ? "good" : v <= ok ? "ok" : "poor");
+
+function StatGrid({ p }: { p: Enriched }) {
+  const ph = p.phase;
+  const cells: { k: string; v: string; tone?: Tone | null; key?: boolean }[] = [
+    { k: "Mat", v: num(p.bat_matches) },
+    { k: "Runs", v: num(p.runs) },
+    { k: "Avg", v: num(p.bat_avg), tone: hi(p.bat_avg, 30, 20), key: true },
+    { k: "SR", v: num(p.bat_sr), tone: hi(p.bat_sr, 150, 125), key: true },
+    { k: "Wkts", v: num(p.wickets) },
+    { k: "Econ", v: num(p.economy), tone: lo(p.economy, 7, 8.5), key: true },
+  ];
+  const phases = ph
+    ? ([
+        ["PP econ", ph.pp, 7.5, 9],
+        ["Middle econ", ph.mid, 7, 8.5],
+        ["Death econ", ph.death, 9, 11],
+      ] as const)
+        .filter(([, s]) => s.balls > 0)
+        .map(([k, s, g, o]) => ({ k, v: String(s.econ ?? "—"), sub: `${s.wkts}w · ${s.balls}b`, tone: lo(s.econ, g, o) }))
+    : [];
+  return (
+    <div className="mt-4 space-y-2">
+      <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-6">
+        {cells.map((c) => (
+          <div key={c.k} className={`rounded-[10px] px-2 py-1.5 text-center ${c.key ? "bg-wash" : ""}`}>
+            <p className="label-mono">{c.k}</p>
+            <p className={`font-display leading-tight tabular-nums ${c.key ? "text-2xl font-bold" : "text-xl"} ${c.tone ? toneCls[c.tone] : "text-ink"}`}>{c.v}</p>
+          </div>
+        ))}
+      </div>
+      {phases.length > 0 && (
+        <div className="grid grid-cols-3 gap-1.5">
+          {phases.map((c) => (
+            <div key={c.k} className="rounded-[10px] border border-line px-2 py-1.5 text-center">
+              <p className="label-mono">{c.k}</p>
+              <p className={`font-display text-xl font-bold leading-tight tabular-nums ${c.tone ? toneCls[c.tone] : "text-ink"}`}>{c.v}</p>
+              <p className="text-[0.68rem] text-muted tabular-nums">{c.sub}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }

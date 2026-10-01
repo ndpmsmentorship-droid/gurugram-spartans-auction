@@ -52,6 +52,7 @@ export function PlayerPhoto({
   return (
     <div
       className={`relative overflow-hidden bg-gradient-to-b from-[#4d1310] to-[#250201] ${className}`}
+      style={{ containerType: "inline-size" }}
     >
       {src && !broken ? (
         PROXIED.includes(host) ? (
@@ -61,7 +62,9 @@ export function PlayerPhoto({
           <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover object-top" onError={() => setBroken(true)} />
         )
       ) : (
-        <span className="absolute inset-0 grid place-items-center font-display text-4xl text-white/80">
+        // initials scale with the box (container units), so a 40px avatar
+        // doesn't spill "GV" past its edges
+        <span className="absolute inset-0 grid place-items-center font-display leading-none text-white/80" style={{ fontSize: "38cqw" }}>
           {initials}
         </span>
       )}

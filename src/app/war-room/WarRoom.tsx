@@ -346,7 +346,10 @@ export default function WarRoom(props: {
       {/* header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="eyebrow">War room · {props.leagueName}</p>
+          <p className="eyebrow">
+            War room · <span className="sm:hidden">{props.league === "uscl" ? "USCL Season 2" : "SDLL Season 2"}</span>
+            <span className="hidden sm:inline">{props.leagueName}</span>
+          </p>
           <h1 className="mt-1 text-3xl sm:text-4xl">{myTeam.name}</h1>
         </div>
         <div className="flex items-center gap-2 text-xs text-muted">
@@ -451,13 +454,18 @@ export default function WarRoom(props: {
       )}
 
       {/* tiles */}
-      <section className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
-        <Tile k="Purse left" v={inr(purseLeft)} sub={`of ${inr(myTeam.purse_total)}`} strong />
-        <Tile k="Max safe bid" v={inr(maxSafe)} sub={`keeps ${Math.max(0, stillNeed - 1)} slots at ${inr(R.base.B)}`} strong />
-        <Tile k="Squad" v={`${me.size}`} sub={`need ${R.squadMin}–${R.squadMax}`} />
-        {catRow.map(([c, rule]) => (
-          <Tile key={c} k={catLabel(c)} v={`${me.cats[c]}`} sub={rule} warn={!catRoom(me, c) && c !== "B"} />
-        ))}
+      {/* money first (two big tiles), then squad + the four category slots in one compact row */}
+      <section className="mt-4 grid gap-2 lg:grid-cols-[2fr_5fr]">
+        <div className="grid grid-cols-2 gap-2">
+          <Tile k="Purse left" v={inr(purseLeft)} sub={`of ${inr(myTeam.purse_total)}`} strong />
+          <Tile k="Max safe bid" v={inr(maxSafe)} sub={`keeps ${Math.max(0, stillNeed - 1)} slots at ${inr(R.base.B)}`} strong />
+        </div>
+        <div className="grid grid-cols-5 gap-2">
+          <Tile k="Squad" v={`${me.size}`} sub={`${R.squadMin}–${R.squadMax}`} compact />
+          {catRow.map(([c, rule]) => (
+            <Tile key={c} k={catLabel(c)} v={`${me.cats[c]}`} sub={rule} warn={!catRoom(me, c) && c !== "B"} compact />
+          ))}
+        </div>
       </section>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_1fr]">
@@ -480,10 +488,12 @@ export default function WarRoom(props: {
                   )}
                 </div>
                 {/* phones: its own full-width row under the name; wider: right column */}
-                <div className="flex w-full items-baseline justify-between gap-3 rounded-[10px] bg-wash px-3 py-2 sm:block sm:w-auto sm:shrink-0 sm:bg-transparent sm:p-0 sm:text-right">
-                  <p className="label-mono">{bidIsBase ? "Base" : "Current bid"}</p>
-                  <p className="font-display text-3xl text-red sm:text-4xl">{inr(bid)}</p>
-                  <p className={`mt-1 text-sm font-medium ${nextBid <= maxSafe ? "text-up" : "text-red"}`}>
+                <div className="flex w-full items-end justify-between gap-3 rounded-[10px] bg-wash px-3.5 py-2.5 sm:block sm:w-auto sm:shrink-0 sm:bg-transparent sm:p-0 sm:text-right">
+                  <div>
+                    <p className="label-mono">{bidIsBase ? "Base" : "Current bid"}</p>
+                    <p className="mt-1 font-display text-3xl leading-none text-red sm:text-4xl">{inr(bid)}</p>
+                  </div>
+                  <p className={`text-right text-sm font-medium leading-snug sm:mt-1.5 ${nextBid <= maxSafe ? "text-up" : "text-red"}`}>
                     {nextBid <= maxSafe ? `We can go to ${inr(maxSafe)}` : "Beyond our safe limit"}
                   </p>
                 </div>
@@ -646,7 +656,33 @@ export default function WarRoom(props: {
             </button>
           ))}
         </div>
-        <div className="mt-3 overflow-x-auto">
+        {/* phones: one card per player — the full table is too wide to read */}
+        <ul className="mt-3 divide-y divide-line sm:hidden">
+          {shown.slice(0, limit).map((p) => (
+            <li key={p.id} className={`${p.id === lot.player_id ? "bg-[color-mix(in_srgb,var(--red)_7%,transparent)]" : ""} ${p.team_id ? "opacity-50" : ""}`}>
+              <button type="button" onClick={() => setViewId(p.id)} className="flex w-full items-center gap-3 py-2.5 text-left">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium">
+                    {p.full_name}
+                    {p.starDeath && <span className="ml-1 text-gold">★D</span>}
+                    {p.starPP && <span className="ml-1 text-gold">★P</span>}
+                  </p>
+                  <p className="truncate text-[0.75rem] text-muted">
+                    {[catLabel(p.cat), p.tag, p.is_keeper ? "WK" : null, p.team_id ? `${props.teams.find((t) => t.id === p.team_id)?.name} ${inr(p.sold_price)}` : null].filter(Boolean).join(" · ")}
+                  </p>
+                  <p className="mt-0.5 text-[0.75rem] tabular-nums text-ink">
+                    SR <b>{num(p.bat_sr)}</b> · Avg <b>{num(p.bat_avg)}</b> · Econ <b>{num(p.economy)}</b>
+                  </p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="font-display text-xl leading-none">{num(p.overall_index)}</p>
+                  <p className="label-mono mt-1">Index</p>
+                </div>
+              </button>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-3 hidden overflow-x-auto sm:block">
           <table className="w-full min-w-[760px] text-sm">
             <thead>
               <tr className="text-left">
@@ -659,7 +695,7 @@ export default function WarRoom(props: {
               {shown.slice(0, limit).map((p) => (
                 <tr key={p.id} className={`border-b border-line ${p.id === lot.player_id ? "bg-[color-mix(in_srgb,var(--red)_7%,transparent)]" : ""} ${p.team_id ? "opacity-50" : ""}`}>
                   <td className="px-2 py-1.5">
-                    <button type="button" onClick={() => setViewId(p.id)} className="font-medium underline-offset-4 hover:text-red hover:underline">{p.full_name}</button>
+                    <button type="button" onClick={() => setViewId(p.id)} className="text-left font-medium underline-offset-4 hover:text-red hover:underline">{p.full_name}</button>
                     {p.starDeath && <span className="ml-1 text-gold" title="Top 10 death bowler">★D</span>}
                     {p.starPP && <span className="ml-1 text-gold" title="Top 10 powerplay bowler">★P</span>}
                     {p.team_id && <span className="ml-1 text-[0.7rem] text-muted">· {props.teams.find((t) => t.id === p.team_id)?.name} {inr(p.sold_price)}</span>}
@@ -742,12 +778,21 @@ const num = (v: number | null | undefined) => (v == null ? "—" : String(Math.r
 const phaseHint = (p: Enriched, key: string) =>
   key === "death" && p.phase?.death.econ != null ? ` · ${p.phase.death.econ}` : key === "pp" && p.phase?.pp.econ != null ? ` · ${p.phase.pp.econ}` : "";
 
-function Tile({ k, v, sub, strong, warn }: { k: string; v: string; sub?: string; strong?: boolean; warn?: boolean }) {
+function Tile({ k, v, sub, strong, warn, compact }: { k: string; v: string; sub?: string; strong?: boolean; warn?: boolean; compact?: boolean }) {
+  const frame = warn ? "border-red/50 bg-[color-mix(in_srgb,var(--red)_6%,transparent)]" : "border-line bg-surface";
+  if (compact)
+    return (
+      <div className={`flex flex-col items-center justify-center rounded-[12px] border px-1 py-2.5 text-center ${frame}`}>
+        <p className="label-mono !tracking-[0.08em]">{k}</p>
+        <p className="mt-1 font-display text-2xl leading-none">{v}</p>
+        {sub && <p className="mt-1.5 text-[0.65rem] leading-tight text-muted">{sub}</p>}
+      </div>
+    );
   return (
-    <div className={`rounded-[12px] border px-3 py-2.5 ${warn ? "border-red/50 bg-[color-mix(in_srgb,var(--red)_6%,transparent)]" : "border-line bg-surface"}`}>
+    <div className={`flex flex-col rounded-[12px] border px-3.5 py-3 sm:px-4 ${frame}`}>
       <p className="label-mono">{k}</p>
-      <p className={`mt-1 font-display ${strong ? "text-2xl text-red" : "text-xl"}`}>{v}</p>
-      {sub && <p className="text-[0.68rem] text-muted">{sub}</p>}
+      <p className={`mt-2 font-display leading-none tabular-nums ${strong ? "text-[1.7rem] text-red sm:text-3xl" : "text-xl"}`}>{v}</p>
+      {sub && <p className="mt-2 text-[0.72rem] leading-snug text-muted">{sub}</p>}
     </div>
   );
 }

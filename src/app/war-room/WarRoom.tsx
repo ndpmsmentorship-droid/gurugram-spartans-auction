@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { assignPlayer, unassignPlayer, rtmPlayer } from "@/app/admin/auction/actions";
 import { createClient } from "@/lib/supabase/client";
 import { PlayerPhoto } from "@/app/register/PlayerCard";
 import { catLabel, normCategory, type AuctionCategory } from "@/lib/scout/tier";
@@ -115,6 +116,7 @@ export default function WarRoom(props: {
   seasonId: string;
   myTeamId: string;
   canSwitch: boolean;
+  canRecord?: boolean;
   teams: WRTeam[];
   players: WRPlayer[];
   initialLot: Lot;
@@ -206,7 +208,77 @@ export default function WarRoom(props: {
     return { ...n, have, picks };
   });
 
-  const onBlock = lot.player_id ? byId.get(lot.player_id) ?? null : null;
+  // ---- auction pad: one person calls up the player and records the sale ----
+  const [padId, setPadId] = useState<string | null>(null);
+  const [padQ, setPadQ] = useState("");
+  const [padTeam, setPadTeam] = useState(props.myTeamId);
+  const [padPrice, setPadPrice] = useState(0);
+  const [padMsg, setPadMsg] = useState<{ text: string; bad?: boolean } | null>(null);
+  const [lastSale, setLastSale] = useState<{ id: string; name: string; teamId: string; price: number } | null>(null);
+  const [saving, startSave] = useTransition();
+  const padMatches = useMemo(() => {
+    const words = padQ.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    if (!words.length) return [];
+    return available.filter((p) => words.every((w) => p.full_name.toLowerCase().includes(w))).sort(byIdx("overall_index")).slice(0, 6);
+  }, [padQ, available]);
+  const teamName = (id: string | null | undefined) => props.teams.find((t) => t.id === id)?.name ?? "—";
+  const patch = (id: string, v: Partial<WRPlayer>) => setPlayers((ps) => ps.map((p) => (p.id === id ? { ...p, ...v } : p)));
+
+  function callUp(p: Enriched) {
+    setPadId(p.id);
+    setPadQ("");
+    setPadTeam(myTeamId);
+    setPadPrice(R.base[p.cat]);
+    setPadMsg(null);
+  }
+  function sell() {
+    const p = padId ? byId.get(padId) : null;
+    if (!p) return;
+    const price = padPrice, teamId = padTeam;
+    const prev = { team_id: p.team_id, sold_price: p.sold_price, acquired: p.acquired };
+    patch(p.id, { team_id: teamId, sold_price: price, acquired: "auction" });
+    setPadId(null);
+    startSave(async () => {
+      const r = await assignPlayer(p.id, teamId, price);
+      if (r?.error) {
+        patch(p.id, prev);
+        setPadId(p.id);
+        setPadMsg({ text: r.error, bad: true });
+      } else {
+        setLastSale({ id: p.id, name: p.full_name, teamId, price });
+        setPadMsg({ text: `${p.full_name} → ${teamName(teamId)} · ${inr(price)}` });
+      }
+    });
+  }
+  function undoLast() {
+    const s = lastSale;
+    if (!s) return;
+    patch(s.id, { team_id: null, sold_price: null, acquired: null, rtm_against: null });
+    startSave(async () => {
+      const r = await unassignPlayer(s.id);
+      if (r?.error) setPadMsg({ text: r.error, bad: true });
+      else {
+        setLastSale(null);
+        setPadId(s.id);
+        setPadMsg({ text: `Undone — ${s.name} is back on the block` });
+      }
+    });
+  }
+  function rtmLast(fid: string) {
+    const s = lastSale;
+    if (!s) return;
+    startSave(async () => {
+      const r = await rtmPlayer(s.id, fid, s.price);
+      if (r?.error) setPadMsg({ text: r.error, bad: true });
+      else {
+        patch(s.id, { team_id: fid, acquired: "rtm", rtm_against: s.teamId });
+        setLastSale(null);
+        setPadMsg({ text: `RTM: ${s.name} → ${teamName(fid)} · ${inr(s.price)}` });
+      }
+    });
+  }
+
+  const onBlock = (padId ? byId.get(padId) ?? null : null) ?? (lot.player_id ? byId.get(lot.player_id) ?? null : null);
   const bid = lot.current_bid ?? lot.base_price ?? (onBlock ? R.base[onBlock.cat] : 0);
   const nextBid = lot.current_bid != null ? lot.current_bid + R.minIncrement : bid;
   const rivals = onBlock
@@ -276,6 +348,93 @@ export default function WarRoom(props: {
           </span>
         </div>
       </div>
+
+      {props.canRecord && (
+        <section className="mt-4 rounded-[16px] border-2 border-red/40 bg-surface p-3 shadow-[var(--elev-sm)] sm:p-4">
+          <div className="flex items-center justify-between gap-2">
+            <p className="eyebrow">Auction pad</p>
+            {saving && <span className="text-xs text-muted">saving…</span>}
+          </div>
+          {!padId ? (
+            <div className="relative mt-2">
+              <input
+                className="input !py-3 text-base"
+                placeholder="Who's up? Type 2–3 letters of the name"
+                value={padQ}
+                onChange={(e) => setPadQ(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" && padMatches[0]) callUp(padMatches[0]); }}
+                autoComplete="off"
+                enterKeyHint="go"
+              />
+              {padMatches.length > 0 && (
+                <ul className="absolute z-30 mt-1 w-full overflow-hidden rounded-[12px] border border-line bg-surface shadow-lg">
+                  {padMatches.map((p) => (
+                    <li key={p.id}>
+                      <button type="button" onClick={() => callUp(p)} className="flex w-full items-center justify-between gap-2 px-3 py-3 text-left hover:bg-wash">
+                        <span className="font-medium">{p.full_name}{p.starDeath ? " ★D" : ""}{p.starPP ? " ★P" : ""}</span>
+                        <span className="num shrink-0 text-xs text-muted">{catLabel(p.cat)} · {p.primary_role ?? ""}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ) : (
+            <div className="mt-2 space-y-2">
+              <div className="flex items-baseline justify-between gap-2">
+                <p className="truncate text-lg font-semibold">{byId.get(padId)?.full_name}</p>
+                <button type="button" className="shrink-0 text-sm text-muted underline" onClick={() => setPadId(null)}>Unsold / clear</button>
+              </div>
+              <div className="flex gap-1.5">
+                <button type="button" className="pill shrink-0 !px-4 !py-2.5" data-active={padTeam === myTeamId} onClick={() => setPadTeam(myTeamId)}>
+                  Us
+                </button>
+                <select
+                  className="input !py-2.5"
+                  value={padTeam === myTeamId ? "" : padTeam}
+                  onChange={(e) => setPadTeam(e.target.value || myTeamId)}
+                  aria-label="Other team"
+                >
+                  <option value="">Other team…</option>
+                  {props.teams.filter((t) => t.id !== myTeamId).map((t) => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  className="input !w-32 !py-2.5 font-semibold"
+                  value={padPrice || ""}
+                  onChange={(e) => setPadPrice(Number(e.target.value) || 0)}
+                  aria-label="Price"
+                />
+                {[-1000, 1000, 5000, 10000].map((d) => (
+                  <button key={d} type="button" className="pill !px-3 !py-2" onClick={() => setPadPrice((v) => Math.max(0, v + d))}>
+                    {d > 0 ? "+" : "−"}{Math.abs(d) / 1000}K
+                  </button>
+                ))}
+              </div>
+              <button type="button" disabled={saving || !padPrice} onClick={sell} className="btn-accent w-full !py-3 text-base disabled:opacity-60">
+                Sold to {teamName(padTeam)} · {inr(padPrice)}
+              </button>
+            </div>
+          )}
+          {padMsg && <p className={`mt-2 text-sm ${padMsg.bad ? "text-red" : "text-up"}`}>{padMsg.text}</p>}
+          {lastSale && !padId && (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5 text-sm">
+              <button type="button" disabled={saving} onClick={undoLast} className="pill !px-3 !py-1.5">↶ Undo last</button>
+              {props.league === "uscl" &&
+                rtmThreats(rtm, lastSale.teamId).map((fid) => (
+                  <button key={fid} type="button" disabled={saving} onClick={() => rtmLast(fid)} className="pill !px-3 !py-1.5" title="This franchise used its RTM and matched">
+                    RTM: {teamName(fid)} matched
+                  </button>
+                ))}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* tiles */}
       <section className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">

@@ -35,7 +35,8 @@ Last updated: 2026-09-30
 - [x] War Room (/war-room): max safe bid, category slots, gaps + top-5 fits, on-the-block card, rivals, alternatives
 - [x] ★ Death / ★ Powerplay stars from 26 SARDA S6 + USCL E1 matches; bowling tags; ▶ clips links (99 players)
 - [x] Playful Ventures logo on CricVideos
-- [ ] Friday 2 Oct: Nikhil + helper dry run (owner login on phone, helper on the console) — agreed
+- [x] No helper: War Room auction pad — Nikhil calls up each player and records sold/unsold/undo/RTM himself on the owner login (USCL only) — 1 Oct
+- [ ] Friday 2 Oct: Nikhil solo dry run of the auction pad on his phone
 - [ ] Other 13 teams' owner/retention spends (so rival purses are exact) — Nikhil sending a screenshot
 - [x] RTM: 6 existing franchises = Bengal Tigers, Chennai Thalaiva, Delhi Devil, Lucknow Lagers, Punjab Royals, Royal Challengers Gurgaon (Spartans hold none). Admin RTM panel + War Room RTM watch — 1 Oct (needs supabase/uscl_rtm.sql)
 - [ ] Ask USCL: does a declined RTM still use up that franchise's RTM? (built as: only a matched RTM counts)

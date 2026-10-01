@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentProfile } from "@/lib/auth";
 import { DEFAULT_RULES } from "@/lib/auction/rules";
 import { RTM_FRANCHISES, RTM_MAX_AGAINST } from "@/lib/auction/rtm";
+import { LEAGUE } from "@/lib/league";
 
 // The auction is admin-run: the admin records each purchase (player -> team @ price)
 // on the live scout_players pool. team_id / sold_price / acquired are set here;
@@ -21,6 +22,15 @@ async function ensureAdmin(): Promise<Result | null> {
   const profile = await getCurrentProfile();
   if (!profile || profile.role !== "admin") return { error: "Admins only." };
   return null;
+}
+
+// Recording sales (and undoing them, and RTMs). For the USCL demo Nikhil runs
+// the auction pad alone from the War Room on his owner login, so owners may
+// record there; on SDLL it stays admin-only. Purse top-ups stay admin-only.
+async function ensureRecorder(): Promise<Result | null> {
+  const profile = await getCurrentProfile();
+  if (profile?.role === "admin" || (profile?.role === "owner" && LEAGUE === "uscl")) return null;
+  return { error: "Admins only." };
 }
 
 function revalidate() {
@@ -40,7 +50,7 @@ async function teamSpent(sb: LooseClient, teamId: string, exceptPlayerId?: strin
 }
 
 export async function assignPlayer(playerId: string, teamId: string, price: number): Promise<Result> {
-  const denied = await ensureAdmin();
+  const denied = await ensureRecorder();
   if (denied) return denied;
   if (!playerId || !teamId) return { error: "Pick a player and a team." };
   const amount = Math.round(Number(price));
@@ -78,7 +88,7 @@ export async function assignPlayer(playerId: string, teamId: string, price: numb
 // them at `price`. Enforces one RTM per existing franchise and at most two
 // against any single team.
 export async function rtmPlayer(playerId: string, rtmTeamId: string, price: number): Promise<Result> {
-  const denied = await ensureAdmin();
+  const denied = await ensureRecorder();
   if (denied) return denied;
   const amount = Math.round(Number(price));
   if (!Number.isFinite(amount) || amount <= 0) return { error: "Enter the matched price." };
@@ -115,7 +125,7 @@ export async function rtmPlayer(playerId: string, rtmTeamId: string, price: numb
 }
 
 export async function unassignPlayer(playerId: string): Promise<Result> {
-  const denied = await ensureAdmin();
+  const denied = await ensureRecorder();
   if (denied) return denied;
   const supabase = createAdminClient();
   const sb = supabase as unknown as LooseClient;

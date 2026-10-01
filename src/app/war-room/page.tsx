@@ -49,6 +49,7 @@ export default async function WarRoomPage({ searchParams }: { searchParams: Prom
       seasonId={seasonId ?? ""}
       myTeamId={mine.id}
       canSwitch={profile.role === "admin"}
+      canRecord={profile.role === "admin" || (profile.role === "owner" && LEAGUE === "uscl")}
       teams={list.map(({ id, name, purse_total }) => ({ id, name, purse_total }))}
       players={((pool ?? []) as WRPlayer[]).filter((p) => !p.is_rejected)}
       initialLot={{ player_id: lot.status === "live" ? lot.player_id : null, current_bid: lot.current_bid, base_price: lot.base_price, leading_team_id: lot.leading_team_id }}

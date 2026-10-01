@@ -4,7 +4,8 @@ import { getCurrentProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import crest from "./brand/crest.png";
 // Instagram, @shantidevilegendsleague, 29 Mar 2026 (Fighter of the Match).
-import heroPhoto from "./brand/hero-manoj-kanishk.jpg";
+import heroPhoto from "./brand/hero-acci-champions.jpg";
+import manojKanishk from "./brand/hero-manoj-kanishk.jpg";
 import acciChampions from "./brand/season1/acci-champions.jpg";
 import goanRunnersUp from "./brand/season1/goan-monks-runners-up.jpg";
 import acciLogo from "./brand/season1/acci-logo.png";
@@ -30,9 +31,11 @@ import { DEMO_MODE, PORTAL_PAGES } from "./site-config";
 // honours, franchises, owners, gallery, sponsors, opportunities) in the SDLL
 // brand kit: maroon bands, brand red, Oswald display type.
 
-// Award photos Nikhil picked (Kanishk presenting), from the league's Drive
+// Hero: ACCI (S1 champions) team photo, a frame from the league's "ACCI First"
+// final AV. Award photos Nikhil picked (Kanishk presenting), from the league's Drive
 // (SLL'26 Repository › FINALS DATA › MOM & FOM), resized.
 const PHOTOS: Photo[] = [
+  { src: manojKanishk, caption: "Manoj Tiwari & Kanishk Sheel · Fighter of the Match · 29 Mar 2026" },
   { src: k01, caption: "Match awards · Opening day · 14 Mar 2026" },
   { src: k02, caption: "Match awards · Opening day · 14 Mar 2026" },
   { src: k03, caption: "Match awards · 15 Mar 2026" },
@@ -228,7 +231,7 @@ export default async function Home() {
               "radial-gradient(40% 55% at 12% 0%, rgba(255,255,255,0.13), transparent 70%), radial-gradient(35% 50% at 88% 0%, rgba(255,255,255,0.1), transparent 70%), radial-gradient(60% 60% at 70% 110%, rgba(177,37,32,0.45), transparent 70%)",
           }}
         />
-        <div className="relative mx-auto grid max-w-[1200px] items-center gap-10 px-4 py-12 sm:px-7 md:py-16 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="relative mx-auto grid max-w-[1200px] items-center gap-10 px-4 py-12 sm:px-7 md:py-16 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-center sm:text-left">
             <Image
               src={crest}
@@ -255,20 +258,20 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-[440px] lg:mx-0 lg:justify-self-end">
+          <div className="relative mx-auto w-full max-w-[600px] lg:mx-0 lg:justify-self-end">
             <div className="rotate-[1.5deg] rounded-[18px] bg-white/10 p-2 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)] ring-1 ring-white/15">
               <Image
                 src={heroPhoto}
-                alt="Manoj Tiwari and Kanishk Sheel presenting the Fighter of the Match award"
+                alt="ACCI, Season 1 champions, under the floodlights at SportsCube"
                 className="h-auto w-full rounded-[12px]"
-                sizes="(max-width: 1024px) 90vw, 440px"
+                sizes="(max-width: 1024px) 90vw, 600px"
                 loading="eager"
                 fetchPriority="high"
                 placeholder="blur"
               />
             </div>
             <span className="absolute -bottom-3 left-4 rounded-full bg-[var(--red)] px-4 py-1.5 font-mono text-[0.625rem] uppercase tracking-[0.2em] text-white shadow-lg">
-              Fighter of the Match · 29 Mar 2026
+              ★ Season 1 champions · ACCI
             </span>
           </div>
         </div>

@@ -210,6 +210,7 @@ export default function WarRoom(props: {
   });
 
   // ---- auction pad: one person calls up the player and records the sale ----
+  const [viewId, setViewId] = useState<string | null>(null); // profile sheet
   const [padId, setPadId] = useState<string | null>(null);
   const [padQ, setPadQ] = useState("");
   const [padTeam, setPadTeam] = useState(props.myTeamId);
@@ -586,7 +587,7 @@ export default function WarRoom(props: {
           </div>
           <div className="mt-3 flex flex-wrap gap-1.5">
             {[...rtm.holders].map(([id, used]) => (
-              <span key={id} className={`badge ${used ? "bg-wash text-muted line-through" : "bg-gold-fill text-gold"}`} title={used ? `Used on ${used.full_name}` : "Still holds its RTM"}>
+              <span key={id} className={`whitespace-nowrap rounded-full px-3 py-1 text-[0.8rem] font-medium ${used ? "bg-wash text-muted line-through" : "bg-gold-fill text-gold"}`} title={used ? `Used on ${used.full_name}` : "Still holds its RTM"}>
                 {props.teams.find((t) => t.id === id)?.name}{used ? ` · ${used.full_name}` : " · RTM"}
               </span>
             ))}
@@ -603,17 +604,20 @@ export default function WarRoom(props: {
           <p className="eyebrow">Our squad · {mine.length}</p>
           <p className="tabular-nums text-sm text-muted">spent {inr(me.spent)}</p>
         </div>
+        <p className="mt-1 text-xs text-muted">Tap a player for his full profile.</p>
         <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {mine
             .sort((a, b) => (b.sold_price ?? 0) - (a.sold_price ?? 0))
             .map((p) => (
-              <li key={p.id} className="flex items-center gap-3 rounded-[10px] border border-line p-2">
+              <li key={p.id}>
+                <button type="button" onClick={() => setViewId(p.id)} className="flex w-full items-center gap-3 rounded-[10px] border border-line p-2 text-left transition hover:border-red/40 hover:bg-wash">
                 <PlayerPhoto src={p.photo_url} name={p.full_name} className="h-10 w-10 shrink-0 rounded-full" sizes="40px" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{p.full_name}</p>
                   <p className="truncate text-[0.72rem] text-muted">{[catLabel(p.cat), p.tag, p.acquired === "owner" ? "Owner" : p.acquired === "retained" ? "Retained" : p.acquired === "rtm" ? "RTM" : null].filter(Boolean).join(" · ")}</p>
                 </div>
                 <span className="tabular-nums text-sm">{inr(p.sold_price)}</span>
+                </button>
               </li>
             ))}
         </ul>
@@ -655,7 +659,7 @@ export default function WarRoom(props: {
               {shown.slice(0, limit).map((p) => (
                 <tr key={p.id} className={`border-b border-line ${p.id === lot.player_id ? "bg-[color-mix(in_srgb,var(--red)_7%,transparent)]" : ""} ${p.team_id ? "opacity-50" : ""}`}>
                   <td className="px-2 py-1.5">
-                    <span className="font-medium">{p.full_name}</span>
+                    <button type="button" onClick={() => setViewId(p.id)} className="font-medium underline-offset-4 hover:text-red hover:underline">{p.full_name}</button>
                     {p.starDeath && <span className="ml-1 text-gold" title="Top 10 death bowler">★D</span>}
                     {p.starPP && <span className="ml-1 text-gold" title="Top 10 powerplay bowler">★P</span>}
                     {p.team_id && <span className="ml-1 text-[0.7rem] text-muted">· {props.teams.find((t) => t.id === p.team_id)?.name} {inr(p.sold_price)}</span>}
@@ -683,7 +687,54 @@ export default function WarRoom(props: {
           </button>
         )}
       </section>
+      {viewId && byId.get(viewId) && (
+        <ProfileSheet
+          p={byId.get(viewId)!}
+          teamName={teamName(byId.get(viewId)!.team_id)}
+          ours={byId.get(viewId)!.team_id === myTeamId}
+          onClose={() => setViewId(null)}
+        />
+      )}
     </main>
+  );
+}
+
+// A player's full War Room profile without putting him on the block — for our
+// own squad, and any name in the pool table.
+function ProfileSheet({ p, teamName, ours, onClose }: { p: Enriched; teamName: string; ours: boolean; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  const how = p.acquired === "owner" ? "Owner pick" : p.acquired === "retained" ? "Retained" : p.acquired === "rtm" ? "Won by RTM" : p.acquired === "auction" ? "Bought at auction" : null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center sm:p-4" onClick={onClose} role="dialog" aria-modal="true" aria-label={p.full_name}>
+      <div className="max-h-[92vh] w-full max-w-[640px] overflow-y-auto rounded-t-[18px] bg-surface p-4 shadow-2xl sm:rounded-[18px] sm:p-5" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between gap-3">
+          <p className="eyebrow">{ours ? "Our squad" : p.team_id ? teamName : "In the pool"}</p>
+          <button type="button" onClick={onClose} className="-mr-1 -mt-1 rounded-full px-3 py-1 text-xl leading-none text-muted hover:bg-wash hover:text-ink" aria-label="Close">×</button>
+        </div>
+        <div className="mt-2 flex gap-4">
+          <PlayerPhoto src={p.photo_url} name={p.full_name} className="h-24 w-20 shrink-0 rounded-[10px] sm:h-28 sm:w-24" sizes="96px" />
+          <div className="min-w-0 flex-1">
+            <h2 className="text-2xl leading-tight sm:text-3xl">{p.full_name}</h2>
+            <Chips p={p} />
+            {p.team_id && (
+              <p className="mt-2 text-sm text-muted">
+                {[how, inr(p.sold_price)].filter(Boolean).join(" · ")}
+              </p>
+            )}
+          </div>
+        </div>
+        <StatGrid p={p} />
+        {p.clips && (
+          <a href={p.clips} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-red px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
+            ▶ Watch clips
+          </a>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -702,7 +753,7 @@ function Tile({ k, v, sub, strong, warn }: { k: string; v: string; sub?: string;
 }
 
 function Chips({ p }: { p: Enriched }) {
-  const chips = [catLabel(p.cat), p.primary_role, p.tag, p.is_keeper ? "Keeper" : null, p.lhb ? "Left-hand bat" : null].filter(Boolean);
+  const chips = [catLabel(p.cat), p.primary_role, p.tag, p.is_keeper && !/keep/i.test(p.primary_role ?? "") ? "Keeper" : null, p.lhb ? "Left-hand bat" : null].filter(Boolean);
   // brand sans, not the mono badge face, so the chips sit with the rest of the card
   const chip = "whitespace-nowrap rounded-full px-3 py-1 text-[0.8rem] font-medium";
   return (

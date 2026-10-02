@@ -100,7 +100,12 @@ Last updated: 2026-09-30
 - [x] Ball Library: 14 USCL owner logins (same as auction, watch-only, expire 12 am Sun 4 Oct IST); "Back to USCL Auction" pill
 - [x] RTM per rulebook: revised bid → matched / declined (pad)
 - [x] Smart pool search + clickable "What we need next"
-- [ ] Library stats / pitch map / wagon wheel / clips inside the block card — needs Nikhil's call:
-      allow same-site framing (next.config.ts headers in LMS) OR build natively from the gated library JSON
+- [x] Ball Library panel (clips, phases, pitch map, wagon wheel) in the block card + profiles — library ?embed=1,
+      LMS next.config.ts framing relaxed to SAMEORIGIN / frame-ancestors 'self' (Nikhil approved, TEMPORARY)
+- [x] ⚠ self-reported flag on doubtful USCL stats (block card chip, pool, suggestions)
+- [x] USCL auto switch-off at 12 am Sun 4 Oct IST (src/lib/league.ts USCL_CLOSES_AT): owners signed out + refused,
+      admin only; ndpms.in USCL band + library back-pill hide themselves; owner library passes expire
+- [ ] AFTER THE AUCTION (4 Oct): LMS next.config.ts → X-Frame-Options DENY + frame-ancestors 'none' (security back)
+- [ ] AFTER THE AUCTION: `node scripts/league-switch.mts sdll`, LEAGUE = "sdll", push; remove USCL band code from cricvideos-home.tsx
 - [ ] Check Shubhendu Kaushik's stats (500 mat / 20000 runs / SR 190 / econ 4 look like test values)
 - [ ] 44 USCL pool players have doubtful self-entered stats (e.g. Shubhendu Kaushik 500 M / 20000 runs / SR 190 / econ 4; Vishal Tiwari avg 4668) — copied as-is from the USCL site

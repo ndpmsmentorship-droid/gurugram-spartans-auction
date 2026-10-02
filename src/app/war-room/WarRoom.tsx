@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { assignPlayer, unassignPlayer, rtmPlayer } from "@/app/admin/auction/actions";
+import { assignPlayer, unassignPlayer, rtmPlayer, setPurse } from "@/app/admin/auction/actions";
 import { putUpLot, withdrawLot } from "@/app/admin/auction/live-actions";
 import { createClient } from "@/lib/supabase/client";
 import { PlayerPhoto } from "@/app/register/PlayerCard";
@@ -125,6 +125,9 @@ export default function WarRoom(props: {
   initialLot: Lot;
 }) {
   const [players, setPlayers] = useState(props.players);
+  // purses change mid-auction (top-ups), so teams are live state too
+  const [teams, setTeams] = useState(props.teams);
+  const teamIds = useMemo(() => props.teams.map((t) => t.id), [props.teams]);
   const [lot, setLot] = useState<Lot>(props.initialLot);
   const [myTeamId, setMyTeamId] = useState(props.myTeamId);
   const [synced, setSynced] = useState<number | null>(null);
@@ -134,11 +137,20 @@ export default function WarRoom(props: {
     const sb = createClient();
     let alive = true;
     const pull = async () => {
-      const [sold, lotRow] = await Promise.all([
+      const ids = teamIds;
+      const [sold, lotRow, purses] = await Promise.all([
         sb.from("scout_players").select("id, team_id, sold_price, acquired, rtm_against").not("team_id", "is", null),
         sb.from("auction_lot").select("player_id, status, current_bid, base_price, leading_team_id").eq("season_id", props.seasonId).maybeSingle(),
+        sb.from("teams").select("id, purse_total, purse_max").in("id", ids),
       ]);
       if (!alive) return;
+      if (purses.data) {
+        const pm = new Map((purses.data as unknown as { id: string; purse_total: number; purse_max: number | null }[]).map((r) => [r.id, r]));
+        setTeams((ts) => ts.map((t) => {
+          const r = pm.get(t.id);
+          return r && (Number(r.purse_total) !== t.purse_total || r.purse_max !== t.purse_max) ? { ...t, purse_total: Number(r.purse_total), purse_max: r.purse_max } : t;
+        }));
+      }
       if (sold.data) {
         const m = new Map((sold.data as unknown as { id: string; team_id: string; sold_price: number; acquired: string; rtm_against: string | null }[]).map((r) => [r.id, r]));
         setPlayers((ps) =>
@@ -158,13 +170,14 @@ export default function WarRoom(props: {
       .channel("war-room")
       .on("postgres_changes", { event: "*", schema: "public", table: "auction_lot" }, () => pull())
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "scout_players" }, () => pull())
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "teams" }, () => pull())
       .subscribe();
     return () => {
       alive = false;
       clearInterval(id);
       sb.removeChannel(ch);
     };
-  }, [props.seasonId]);
+  }, [props.seasonId, teamIds]);
 
   const all = useMemo(() => players.map(enrich), [players]);
   const byId = useMemo(() => new Map(all.map((p) => [p.id, p])), [all]);
@@ -173,7 +186,7 @@ export default function WarRoom(props: {
   // Every team's purse and category counts — powers "who can still bid".
   const teamState = useMemo(() => {
     const m = new Map<string, { spent: number; size: number; band: number; cats: Record<AuctionCategory, number> }>();
-    for (const t of props.teams) m.set(t.id, { spent: 0, size: 0, band: 0, cats: { "A+": 0, A: 0, B: 0, Special: 0 } });
+    for (const t of teams) m.set(t.id, { spent: 0, size: 0, band: 0, cats: { "A+": 0, A: 0, B: 0, Special: 0 } });
     for (const p of all) {
       const s = p.team_id ? m.get(p.team_id) : null;
       if (!s) continue;
@@ -183,9 +196,9 @@ export default function WarRoom(props: {
       s.cats[p.cat] += 1;
     }
     return m;
-  }, [all, props.teams]);
+  }, [all, teams]);
 
-  const myTeam = props.teams.find((t) => t.id === myTeamId)!;
+  const myTeam = teams.find((t) => t.id === myTeamId)!;
   const mine = all.filter((p) => p.team_id === myTeamId);
   const me = teamState.get(myTeamId)!;
   const purseLeft = myTeam.purse_total - me.spent;
@@ -275,7 +288,7 @@ export default function WarRoom(props: {
     if (!words.length) return [];
     return available.filter((p) => words.every((w) => p.full_name.toLowerCase().includes(w))).sort(byIdx("overall_index")).slice(0, 6);
   }, [padQ, available]);
-  const teamName = (id: string | null | undefined) => props.teams.find((t) => t.id === id)?.name ?? "—";
+  const teamName = (id: string | null | undefined) => teams.find((t) => t.id === id)?.name ?? "—";
   const patch = (id: string, v: Partial<WRPlayer>) => setPlayers((ps) => ps.map((p) => (p.id === id ? { ...p, ...v } : p)));
 
   // Mirror the pad onto the live board's "on the block" (auctioneer logins only;
@@ -312,6 +325,22 @@ export default function WarRoom(props: {
       }
     });
   }
+  // Purse top-up (rulebook: optional ₹50,000 and ₹25,000 during the auction).
+  const [topTeam, setTopTeam] = useState(props.myTeamId);
+  function topUp(teamId: string, amount: number) {
+    const t = teams.find((x) => x.id === teamId);
+    if (!t) return;
+    const total = Math.min(t.purse_max ?? t.purse_total, t.purse_total + amount);
+    setTeams((ts) => ts.map((x) => (x.id === teamId ? { ...x, purse_total: total } : x)));
+    startSave(async () => {
+      const r = await setPurse(teamId, total);
+      if (r?.error) {
+        setTeams((ts) => ts.map((x) => (x.id === teamId ? { ...x, purse_total: t.purse_total } : x)));
+        setPadMsg({ text: r.error, bad: true });
+      } else setPadMsg({ text: `${t.name} topped up ${inr(amount)} → purse ${inr(total)}` });
+    });
+  }
+
   function undoLast() {
     const s = lastSale;
     if (!s) return;
@@ -349,7 +378,7 @@ export default function WarRoom(props: {
   const bid = !onBlock ? 0 : padLive ? padPrice || R.base[onBlock.cat] : lotIsThis ? lot.current_bid ?? lot.base_price ?? R.base[onBlock.cat] : R.base[onBlock.cat];
   const nextBid = padLive || bidIsBase ? bid : bid + bidStep(onBlock?.cat);
   const rivals = onBlock
-    ? props.teams
+    ? teams
         .filter((t) => t.id !== myTeamId)
         .map((t) => ({ t, s: teamState.get(t.id)! }))
         .filter(({ t, s }) => t.purse_total - s.spent >= nextBid && catRoom(s, onBlock.cat, onBlock.age))
@@ -362,11 +391,11 @@ export default function WarRoom(props: {
         .slice(0, 3)
     : [];
   // USCL Right to Match: who can still take a player off us after the hammer.
-  const rtm = useMemo(() => rtmState(props.teams, all), [props.teams, all]);
+  const rtm = useMemo(() => rtmState(teams, all), [teams, all]);
   const rtmAgainstUs = rtm.against.get(myTeamId) ?? 0;
   const iHoldRtm = rtm.holders.has(myTeamId) && !rtm.holders.get(myTeamId);
   const threats = rtmThreats(rtm, myTeamId)
-    .map((id) => ({ t: props.teams.find((t) => t.id === id)!, left: (props.teams.find((t) => t.id === id)?.purse_total ?? 0) - (teamState.get(id)?.spent ?? 0) }))
+    .map((id) => ({ t: teams.find((t) => t.id === id)!, left: (teams.find((t) => t.id === id)?.purse_total ?? 0) - (teamState.get(id)?.spent ?? 0) }))
     .sort((a, b) => b.left - a.left);
   const lostToRtm = all.filter((p) => p.rtm_against === myTeamId && p.acquired === "rtm");
   const fills = onBlock ? needs.filter((n) => n.have < n.target && n.test(onBlock)).map((n) => n.label) : [];
@@ -417,7 +446,7 @@ export default function WarRoom(props: {
         <div className="flex items-center gap-2 text-xs text-muted">
           {props.canSwitch && (
             <select className="input !w-auto !py-1.5 text-sm" value={myTeamId} onChange={(e) => setMyTeamId(e.target.value)} aria-label="Team">
-              {props.teams.map((t) => (
+              {teams.map((t) => (
                 <option key={t.id} value={t.id}>{t.name}</option>
               ))}
             </select>
@@ -494,7 +523,7 @@ export default function WarRoom(props: {
                   aria-label="Other team"
                 >
                   <option value="">Other team…</option>
-                  {props.teams.filter((t) => t.id !== myTeamId).map((t) => (
+                  {teams.filter((t) => t.id !== myTeamId).map((t) => (
                     <option key={t.id} value={t.id}>{t.name}</option>
                   ))}
                 </select>
@@ -520,6 +549,26 @@ export default function WarRoom(props: {
             </div>
           )}
           {padMsg && <p className={`mt-2 text-sm ${padMsg.bad ? "text-red" : "text-up"}`}>{padMsg.text}</p>}
+          {!padId && props.league === "uscl" && (() => {
+            const t = teams.find((x) => x.id === topTeam) ?? myTeam;
+            const left = Math.max(0, (t.purse_max ?? t.purse_total) - t.purse_total);
+            return (
+              <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-line pt-3 text-sm">
+                <span className="text-muted">Top-up:</span>
+                <select className="input !w-auto !py-1.5 text-sm" value={topTeam} onChange={(e) => setTopTeam(e.target.value)} aria-label="Top-up team">
+                  {teams.map((x) => (
+                    <option key={x.id} value={x.id}>{x.id === myTeamId ? `Us · ${x.name}` : x.name}</option>
+                  ))}
+                </select>
+                {[50000, 25000].filter((a) => a <= left).map((a) => (
+                  <button key={a} type="button" disabled={saving} className="pill !px-3 !py-1.5" onClick={() => topUp(t.id, a)}>
+                    +{inr(a)}
+                  </button>
+                ))}
+                <span className="text-xs text-muted">purse {inr(t.purse_total)}{left ? ` · ${inr(left)} top-up left` : " · all top-ups taken"}</span>
+              </div>
+            );
+          })()}
           {lastSale && !padId && (
             <div className="mt-2 flex flex-wrap items-center gap-1.5 text-sm">
               <button type="button" disabled={saving} onClick={undoLast} className="pill !px-3 !py-1.5">↶ Undo last</button>
@@ -690,12 +739,12 @@ export default function WarRoom(props: {
           <div className="mt-3 flex flex-wrap gap-1.5">
             {[...rtm.holders].map(([id, used]) => (
               <span key={id} className={`whitespace-nowrap rounded-full px-3 py-1 text-[0.8rem] font-medium ${used ? "bg-wash text-muted line-through" : "bg-gold-fill text-gold"}`} title={used ? `Used on ${used.full_name}` : "Still holds its RTM"}>
-                {props.teams.find((t) => t.id === id)?.name}{used ? ` · ${used.full_name}` : " · RTM"}
+                {teams.find((t) => t.id === id)?.name}{used ? ` · ${used.full_name}` : " · RTM"}
               </span>
             ))}
           </div>
           {lostToRtm.length > 0 && (
-            <p className="mt-2 text-sm text-red-deep">Lost to RTM: {lostToRtm.map((p) => `${p.full_name} (${props.teams.find((t) => t.id === p.team_id)?.name}, ${inr(p.sold_price)})`).join(" · ")}</p>
+            <p className="mt-2 text-sm text-red-deep">Lost to RTM: {lostToRtm.map((p) => `${p.full_name} (${teams.find((t) => t.id === p.team_id)?.name}, ${inr(p.sold_price)})`).join(" · ")}</p>
           )}
         </section>
       )}
@@ -792,7 +841,7 @@ export default function WarRoom(props: {
                     {p.starPP && <span className="ml-1 text-gold">★P</span>}
                   </p>
                   <p className="truncate text-[0.75rem] text-muted">
-                    {[catLabel(p.cat), p.tag, p.is_keeper ? "WK" : null, p.team_id ? `${props.teams.find((t) => t.id === p.team_id)?.name} ${inr(p.sold_price)}` : null].filter(Boolean).join(" · ")}
+                    {[catLabel(p.cat), p.tag, p.is_keeper ? "WK" : null, p.team_id ? `${teams.find((t) => t.id === p.team_id)?.name} ${inr(p.sold_price)}` : null].filter(Boolean).join(" · ")}
                   </p>
                   <p className="mt-0.5 text-[0.75rem] tabular-nums text-ink">
                     SR <b>{num(p.bat_sr)}</b> · Avg <b>{num(p.bat_avg)}</b> · Econ <b>{num(p.economy)}</b>
@@ -823,7 +872,7 @@ export default function WarRoom(props: {
                     <button type="button" onClick={() => setViewId(p.id)} className="text-left font-medium underline-offset-4 hover:text-red hover:underline">{p.full_name}</button>
                     {p.starDeath && <span className="ml-1 text-gold" title="Top 10 death bowler">★D</span>}
                     {p.starPP && <span className="ml-1 text-gold" title="Top 10 powerplay bowler">★P</span>}
-                    {p.team_id && <span className="ml-1 text-[0.7rem] text-muted">· {props.teams.find((t) => t.id === p.team_id)?.name} {inr(p.sold_price)}</span>}
+                    {p.team_id && <span className="ml-1 text-[0.7rem] text-muted">· {teams.find((t) => t.id === p.team_id)?.name} {inr(p.sold_price)}</span>}
                   </td>
                   <td className="px-2">{catLabel(p.cat)}</td>
                   <td className="px-2 text-muted">{p.tag ?? "—"}{p.is_keeper ? " · WK" : ""}</td>

@@ -1,26 +1,33 @@
 {
 "AMIT SINGH":{
-"bowler":"Amit Singh"
+"bowler":"Amit Singh",
+"team":"UP Warriors"
 },
 "Aakash Sharma":{
-"bowler":"Aakash Sharma"
+"bowler":"Aakash Sharma",
+"team":"Jaipur Royals"
 },
 "Aakash balyan":{
-"batter":"Aakash Balyan"
+"batter":"Aakash Balyan",
+"team":"UP Warriors"
 },
 "Abhilash Nair":{
 "batter":"Abhilash N",
+"team":"Japani Tsunami",
 "bowler":"Abhilash N"
 },
 "Abhinav Chaturvedi":{
-"bowler":"Abhinav Chaturvedi"
+"bowler":"Abhinav Chaturvedi",
+"team":"Uttarakhand Yoddhas Cricket Club"
 },
 "Abhishek Wadhwa":{
 "bowler":"Abhishek Wadhwa",
+"team":"TDI PHOENIX GIANTS",
 "batter":"Abhishek Wadhwa"
 },
 "Adesh Sharma":{
 "bowler":"Adesh Sharma",
+"team":"Patna Panthers (SCCL)",
 "batter":"Adesh Sharma"
 },
 "Adil Siddiqui":{
@@ -29,60 +36,76 @@
 },
 "Aditya Sharma":{
 "bowler":"Aditya Sharma",
+"team":"Goan Monks",
 "batter":"Aditya Sharma"
 },
 "Ajay Yadav":{
-"bowler":"Ajay YADAV"
+"bowler":"Ajay YADAV",
+"team":"BT"
 },
 "Akhil Sethi":{
 "bowler":"akhil sethi",
+"team":"Punjab Royals",
 "batter":"akhil sethi"
 },
 "Aman Raj":{
-"bowler":"Aman Raj"
+"bowler":"Aman Raj",
+"team":"Mumbai Titans"
 },
 "Amit Chahal":{
-"bowler":"Amit Chahal"
+"bowler":"Amit Chahal",
+"team":"Japani Tsunami"
 },
 "Amit Kumar":{
-"batter":"Amit Kumar"
+"batter":"Amit Kumar",
+"team":"Delhi Knights"
 },
 "Amit Kumar Yadav":{
 "batter":"Amit Yadav (AY 13)",
+"team":"Haryana Titans",
 "bowler":"Amit Yadav (AY 13)"
 },
 "Amit Sehrawat":{
 "batter":"Amit Sehrawat",
-"bowler":"Amit Sehrawat"
+"bowler":"Amit Sehrawat",
+"team":"Jaipur Royals"
 },
 "Amit Thakkar":{
 "bowler":"Amit Thakkar",
+"team":"Haryana Titans",
 "batter":"Amit Thakkar"
 },
 "Amit Yadav (AY13)":{
 "batter":"Amit Yadav (AY 13)",
+"team":"Haryana Titans",
 "bowler":"Amit Yadav (AY 13)"
 },
 "Amit kumar":{
-"batter":"Amit Kumar"
+"batter":"Amit Kumar",
+"team":"Delhi Knights"
 },
 "Amrinder Singh":{
 "batter":"Amrinder Singh",
+"team":"ACCI",
 "bowler":"Amrinder Singh"
 },
 "Aneesh Gautam":{
 "batter":"Aneesh Gautam",
+"team":"Mumbai Titans",
 "bowler":"Aneesh Gautam"
 },
 "Anil Khatri":{
-"batter":"Anil Khatri"
+"batter":"Anil Khatri",
+"team":"Uttarakhand Yoddhas Cricket Club"
 },
 "Ankit Bajpai":{
 "batter":"Ankit Bajpai",
+"team":"Gurugram Spartans",
 "bowler":"Ankit Bajpai"
 },
 "Ankit Bhargava":{
 "batter":"Ankit Bhargava (AB)",
+"team":"Delhi Knights",
 "bowler":"Ankit Bhargava (AB)"
 },
 "Ankit Golash":{
@@ -90,6 +113,7 @@
 },
 "Ankush Bhargava":{
 "batter":"Ankush Bhargava",
+"team":"Chennai Thalaiva",
 "bowler":"Ankush Bhargava"
 },
 "Arun Kundu":{
@@ -97,95 +121,114 @@
 "bowler":"Arun Kundu"
 },
 "Ashwani Kumar":{
-"bowler":"Ashwani Kumar"
+"bowler":"Ashwani Kumar",
+"team":"Jaipur Royals"
 },
 "Atinderpal Singh":{
 "bowler":"Atinderpal Singh",
+"team":"Haryana Titans",
 "batter":"Atinderpal Singh"
 },
 "Atul Sharma":{
-"batter":"Atul Sharma"
+"batter":"Atul Sharma",
+"team":"Uttarakhand Yoddhas Cricket Club"
 },
 "Ayush Jagga":{
-"batter":"Ayush Jagga"
+"batter":"Ayush Jagga",
+"team":"Chennai Thalaiva"
 },
 "Ayush Soni":{
-"batter":"Ayush Soni"
+"batter":"Ayush Soni",
+"team":"American Cricket Club of India"
 },
 "Bawa Mamik":{
-"batter":"Bawa Mamik"
-},
-"Chetan Sharma":{
-"batter":"Chetan Sharma"
+"batter":"Bawa Mamik",
+"team":"Bangalore KS Blasters"
 },
 "Devender Maan":{
 "batter":"Devender Maan",
 "bowler":"Devender Maan"
 },
 "Dhananjay Rai":{
-"bowler":"Dhananjay Rai"
+"bowler":"Dhananjay Rai",
+"team":"Haryana Titans"
 },
 "Dr.Shobhit Sharma":{
 "batter":"Dr.Shobhit Sharma"
 },
 "Faizul Mufti":{
-"bowler":"Faizul Mufti"
+"bowler":"Faizul Mufti",
+"team":"Chandigarh Lions"
 },
 "Gaganpreet Singh":{
-"batter":"Gaganpreet Singh"
+"batter":"Gaganpreet Singh",
+"team":"Chandigarh Lions"
 },
 "Ganesh Singh":{
 "batter":"Ganesh Singh",
 "bowler":"Ganesh Singh"
 },
 "Gaurav Gopal":{
-"bowler":"Gaurav Gopal"
+"bowler":"Gaurav Gopal",
+"team":"Haryana Titans"
 },
 "Gaurav Kapoor":{
 "bowler":"Gaurav Kapoor",
+"team":"UP Warriors",
 "batter":"Gaurav Kapoor"
 },
 "Harchit sanan":{
 "bowler":"Harchit Sanan (harry)",
+"team":"Goan Monks Cricket Club",
 "batter":"Harchit Sanan (harry)"
 },
 "Harinder Shergill":{
 "batter":"Shergill Harinder"
 },
 "Harsh Dahiya":{
-"bowler":"Harsh Dahiya"
+"bowler":"Harsh Dahiya",
+"team":"Jaipur Royals"
 },
 "Hemant Balyan":{
 "batter":"Hemant Balyan",
+"team":"Jaipur Royals",
 "bowler":"Hemant Balyan"
 },
 "Himanshu":{
 "batter":"Himanshu 57",
+"team":"Japani Tsunami",
 "bowler":"Himanshu (Lala)"
 },
 "Himanshu Gulati":{
 "batter":"Himanshu Gulati",
+"team":"Bangalore KS Blasters",
 "bowler":"Himanshu Gulati"
 },
 "Ishal Sharma":{
-"batter":"Ishal Sharma"
+"batter":"Ishal Sharma",
+"team":"Bengal Tigers"
 },
 "Ishan Pasrija":{
-"batter":"Ishann Pasrija"
+"batter":"Ishann Pasrija",
+"team":"Punjab Royals"
 },
 "Ishneet Singh":{
 "batter":"Ishneet Singh",
+"team":"BKB",
 "bowler":"Ishneet Singh"
 },
 "Joginder Shokeen":{
-"batter":"Joginder Shokeen"
+"batter":"Joginder Shokeen",
+"team":"Chennai Thalaiva"
 },
 "K RAJ B":{
 "bowler":"K Raj B",
-"batter":"K Raj B"
+"batter":"K Raj B",
+"team":"Bengal Tigers"
 },
 "Kanishk Sheel":{
 "batter":"Kanishk Sheel",
+"team":"Gurugram Spartans",
 "bowler":"Kanishk Sheel"
 },
 "Kapil Mehta":{
@@ -194,73 +237,93 @@
 },
 "Karamvir Singh Lall":{
 "batter":"Karamvir Singh Lall",
+"team":"ACCI",
 "bowler":"Karamvir Singh Lall"
 },
 "Karan Jorasia":{
-"batter":"Karan Jorasia"
+"batter":"Karan Jorasia",
+"team":"Jaipur Royals"
 },
 "Karan Kalra":{
-"batter":"Karan Kalra"
+"batter":"Karan Kalra",
+"team":"Uttarakhand Yoddhas Cricket Club"
 },
 "Karan wali":{
-"batter":"Karan Wali"
+"batter":"Karan Wali",
+"team":"Texas Holdem"
 },
 "Krishan Rohilla":{
 "batter":"Krishan Rohillaa",
+"team":"UP Warriors",
 "bowler":"Krishan Rohillaa"
 },
 "Kuldeep Negi":{
 "bowler":"Kuldeep Negi",
+"team":"Uttarakhand Yoddhas Cricket Club",
 "batter":"Kuldeep Negi"
 },
 "Lohit Sharma":{
 "batter":"Lohit Sharma",
+"team":"NCR Turbo Chargers",
 "bowler":"Lohit Sharma"
 },
 "Lokesh Dahiya":{
 "bowler":"Lokesh Dahiya",
+"team":"Punjab Royals",
 "batter":"Lokesh Dahiya"
 },
 "Manas Gulati":{
-"batter":"Manas Gulati"
+"batter":"Manas Gulati",
+"team":"Jaipur Royals"
 },
 "Maneesh Deshwal":{
-"batter":"Maneesh Deshwal"
+"batter":"Maneesh Deshwal",
+"team":"BT"
 },
 "Mihir Dhawan":{
 "bowler":"Mihir Dhawan",
+"team":"Chandigarh Lions",
 "batter":"Mihir Dhawan"
 },
 "Mukesh Sain":{
 "batter":"Mukesh Sain",
+"team":"Haryana Titans",
 "bowler":"Mukesh Sain"
 },
 "Mukesh Uniyal":{
 "batter":"Mukesh Uniyal",
+"team":"Chennai Thalaiva",
 "bowler":"Mukesh Uniyal"
 },
 "Neeraj Puri":{
-"bowler":"Neeraj Puri"
+"bowler":"Neeraj Puri",
+"team":"Goan Monks Cricket Club"
 },
 "Nikhil Dhingra":{
-"batter":"Nikhil Dhingra"
+"batter":"Nikhil Dhingra",
+"team":"Gurugram Spartans"
 },
 "Nikhil Jhingon":{
-"batter":"Nikhil Jhingon"
+"batter":"Nikhil Jhingon",
+"team":"Bengal Tigers"
 },
 "Nikhil Raina":{
 "bowler":"Nikhil Raina",
+"team":"Jaipur Royals",
 "batter":"Nikhil Raina"
 },
 "Nikhil Tandan":{
-"batter":"Nikhil Tandan"
+"batter":"Nikhil Tandan",
+"team":"Goan Monks Cricket Club"
 },
 "Nitesh Kataria":{
 "bowler":"Nitesh Kataria",
+"team":"Uttarakhand Yoddhas Cricket Club",
 "batter":"Nitesh Kataria"
 },
 "Nitin Ruhela":{
-"batter":"Nitin Ruhela"
+"batter":"Nitin Ruhela",
+"team":"NCR Turbo Chargers"
 },
 "Nitin Sareen":{
 "bowler":"Nitin Sareen"
@@ -270,28 +333,35 @@
 "batter":"Nitin Tyagi"
 },
 "Nitin singh chauhan":{
-"bowler":"Nitin Chauhan"
+"bowler":"Nitin Chauhan",
+"team":"Punjab Royals"
 },
 "Nitish Sharma":{
 "bowler":"Nitish Sharma",
+"team":"Punjab Royals",
 "batter":"Nitish Sharma"
 },
 "Paaras Sareen":{
-"batter":"Paaras Sareen"
+"batter":"Paaras Sareen",
+"team":"Chennai Thalaiva"
 },
 "Parwinder Singh":{
-"batter":"Parwinder Singh"
+"batter":"Parwinder Singh",
+"team":"Punjab Royals"
 },
 "Piyush Arora":{
 "batter":"Piyush Arora",
+"team":"Bengal Tigers",
 "bowler":"Piyush Arora"
 },
 "Prabhjot Singh":{
 "batter":"Prabhjot Singh",
+"team":"BKB",
 "bowler":"Prabhjot Singh"
 },
 "Pradeep Mahlawat":{
 "batter":"Pradeep Mahlawat",
+"team":"ACCI",
 "bowler":"Pradeep Mahlawat"
 },
 "Prakhar Singhal":{
@@ -299,66 +369,83 @@
 },
 "Prashant Chand":{
 "bowler":"Prashant Chand",
+"team":"Haryana Titans",
 "batter":"Prashant Chand"
 },
 "Prashant kumar singh":{
-"bowler":"Prashant Singh"
+"bowler":"Prashant Singh",
+"team":"Chennai Thalaiva"
 },
 "Prateek Malhotra":{
-"batter":"Prateek Malhotra"
+"batter":"Prateek Malhotra",
+"team":"Mumbai Titans"
 },
 "Prateek Suneja":{
 "batter":"Prateek Suneja",
+"team":"Patna Panthers (SCCL)",
 "bowler":"Prateek Suneja"
 },
 "Prateek Taneja":{
 "batter":"Prateek Taneja",
+"team":"Bangalore KS Blasters",
 "bowler":"Prateek Taneja"
 },
 "Pritam Kataria":{
-"batter":"Pritam Kataria"
+"batter":"Pritam Kataria",
+"team":"ACCI"
 },
 "Rahul Rathi":{
-"batter":"Rahul Rathi RR19"
+"batter":"Rahul Rathi RR19",
+"team":"Bengal Tigers"
 },
 "Rahul Sharma":{
 "bowler":"Rahul Kumar Sharma",
+"team":"NCR Turbo Chargers",
 "batter":"Rahul Kumar Sharma"
 },
 "Rajiv Bose":{
-"batter":"Rajiv Bose"
+"batter":"Rajiv Bose",
+"team":"Chennai Thalaiva"
 },
 "Ramit gill":{
 "batter":"Ramit Gill",
+"team":"Goan Monks Cricket Club",
 "bowler":"Ramit Gill"
 },
 "Ravi Kumar":{
 "bowler":"Ravi Kumar",
+"team":"KEI INDIA WARRIORS",
 "batter":"Ravi Kumar"
 },
 "Ravi singh":{
-"batter":"Ravi Singh"
+"batter":"Ravi Singh",
+"team":"J&K Homelanders"
 },
 "Rohit Rathi":{
 "bowler":"Rohit Rathi",
+"team":"Haryana Titans",
 "batter":"Rohit Rathi"
 },
 "Rohit Rohilla":{
-"batter":"Rohit Rohilla"
+"batter":"Rohit Rohilla",
+"team":"Bengal Tigers"
 },
 "Ronit Soni":{
 "batter":"Ronit Soni"
 },
 "SACHIN TYAGI":{
 "bowler":"Sachin Tyagi",
+"team":"Texas Holdem",
 "batter":"Sachin Tyagi"
 },
 "Sachin Jangra":{
 "batter":"Sachin Jangra",
+"team":"Bengal Tigers",
 "bowler":"Sachin Jangra"
 },
 "Sagar Bhatia":{
 "batter":"Sagar Bhatia",
+"team":"Bangalore KS Blasters",
 "bowler":"Sagar Bhatia"
 },
 "Sagar Dahiya":{
@@ -366,126 +453,160 @@
 },
 "Sagar Sehrawat":{
 "bowler":"Sagar Sehrawat",
+"team":"Mumbai Titans",
 "batter":"Sagar Sehrawat"
 },
 "Sahil Kumar":{
 "batter":"Sahil Kumar",
+"team":"Delhi Knights",
 "bowler":"Sahil Kumar"
 },
 "Sajal Sharma":{
 "bowler":"Sajal Sharma",
+"team":"Patna Panthers (SCCL)",
 "batter":"Sajal Sharma"
 },
 "Sanchit Tanwar":{
 "batter":"Sanchit Tanwar",
+"team":"Japani Tsunami",
 "bowler":"Sanchit Tanwar"
 },
 "Sandeep Adlakha":{
-"batter":"Sandeep Adlakha"
+"batter":"Sandeep Adlakha",
+"team":"Mumbai Titans"
 },
 "Sandeep Angurala":{
-"bowler":"Sandeep Angurala"
+"bowler":"Sandeep Angurala",
+"team":"Mumbai Titans"
 },
 "Sandeep Atri":{
 "batter":"Sandeep Atri",
+"team":"BT",
 "bowler":"Sandeep Atri"
 },
 "Sandeep Koul":{
 "batter":"Sandeep Koul",
+"team":"Japani Tsunami",
 "bowler":"Sandeep Koul"
 },
 "Sanju":{
 "bowler":"Sanju",
+"team":"Goan Monks Cricket Club",
 "batter":"Sanju"
 },
 "Sathya Ram":{
-"batter":"Sathya Ram"
+"batter":"Sathya Ram",
+"team":"Chennai Thalaiva"
 },
 "Saurabh Tokas":{
 "batter":"Saurabh Tokas",
+"team":"BKB",
 "bowler":"Saurabh Tokas"
 },
 "Sharad Singh":{
-"bowler":"Sharad Singh"
+"bowler":"Sharad Singh",
+"team":"Punjab Royals Legends"
 },
 "Shashank Verma":{
-"batter":"Shashank v3"
+"batter":"Shashank v3",
+"team":"Japani Tsunami"
 },
 "Siddharth Juneja":{
-"batter":"Siddharth Juneja"
+"batter":"Siddharth Juneja",
+"team":"Jaipur Royals"
 },
 "Siddharth Tiwari":{
 "batter":"Siddharth Tiwari",
+"team":"Jaipur Royals",
 "bowler":"Siddharth Tiwari"
 },
 "Simranjeet singh":{
 "batter":"Simranjeet Singh",
+"team":"Chennai Thalaiva",
 "bowler":"Simranjeet Singh"
 },
 "Sumit Bhat":{
-"bowler":"sumit bhat"
+"bowler":"sumit bhat",
+"team":"J&K Homelanders"
 },
 "Sumit Kumar Shah":{
-"batter":"Sumit Shah"
+"batter":"Sumit Shah",
+"team":"Haryana Titans"
 },
 "Sunil Chauhan":{
-"bowler":"Sunil Singh Chauhan"
+"bowler":"Sunil Singh Chauhan",
+"team":"Punjab Royals"
 },
 "Surjeet Singh":{
-"bowler":"Surjeet Singh"
+"bowler":"Surjeet Singh",
+"team":"Uttarakhand Yoddhas Cricket Club"
 },
 "Tarun Singh Chhonker":{
 "bowler":"Tarun Singh Chhonker",
+"team":"Patna Panthers (SCCL)",
 "batter":"Tarun Singh Chhonker"
 },
 "Tarun Yadav":{
 "bowler":"Tarun Yadav",
+"team":"Texas Holdem",
 "batter":"Tarun Yadav"
 },
 "Tushar Gaur":{
 "bowler":"Tushar Gaur",
+"team":"Uttarakhand Yoddhas Cricket Club",
 "batter":"Tushar Gaur"
 },
 "Tushar Khattar":{
 "batter":"Tushar Khattar",
+"team":"Jaipur Royals",
 "bowler":"Tushar Khattar"
 },
 "Vikram Singh Dahiya":{
-"bowler":"Vikram Singh Dahiya"
+"bowler":"Vikram Singh Dahiya",
+"team":"Goan Monks Cricket Club"
 },
 "Vikrant Kataria":{
-"batter":"Vikrant Kataria"
+"batter":"Vikrant Kataria",
+"team":"NCR Turbo Chargers"
 },
 "Vinesh Thakur":{
 "bowler":"Vinesh Thakur",
+"team":"ACCI",
 "batter":"Vinesh Thakur"
 },
 "Vipul Sharma":{
 "batter":"Vipul Sharma",
+"team":"Jaipur Royals",
 "bowler":"Vipul Sharma"
 },
 "Vishal Sharma":{
 "bowler":"Vishal Sharma",
+"team":"ACCI",
 "batter":"Vishal Sharma"
 },
 "Vishal Tiwari":{
-"batter":"Vishal Tiwari"
+"batter":"Vishal Tiwari",
+"team":"Texas Holdem"
 },
 "Vishal sharma":{
 "bowler":"Vishal Sharma",
+"team":"ACCI",
 "batter":"Vishal Sharma"
 },
 "Yatin Narang":{
 "bowler":"Yatin Narang",
+"team":"Punjab Royals",
 "batter":"Yatin Narang"
 },
 "naveen pratap":{
-"batter":"Naveen Pratap"
+"batter":"Naveen Pratap",
+"team":"Chennai Thalaiva"
 },
 "shubhendu Kaushik":{
 "batter":"Shubhendu Kaushik"
 },
 "vikram Singh":{
-"bowler":"Vikram Jeet Singh"
+"bowler":"Vikram Jeet Singh",
+"team":"Texas Holdem"
 }
 }

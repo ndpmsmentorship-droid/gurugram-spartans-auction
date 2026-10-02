@@ -3,8 +3,14 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import cvMap from "@/data/cv-map.json";
 
-const CV = cvMap as Record<string, { batter?: string; bowler?: string }>;
+const CV = cvMap as Record<string, { batter?: string; bowler?: string; team?: string }>;
 const OPEN_KEY = "wr-library-open";
+// "Not him": same name, different person. Hidden on this device straight away;
+// tell Claude so it goes into NOT_SAME in scripts/build-cv-map.py for everyone.
+const NOT_KEY = "wr-library-not-him";
+const readNot = (): string[] => {
+  try { return JSON.parse(localStorage.getItem(NOT_KEY) || "[]"); } catch { return []; }
+};
 
 // The player's CricVideos Ball Library page (clips, spells & phases, pitch map,
 // wagon wheel, season stats) shown inside the War Room. The library runs an
@@ -12,7 +18,14 @@ const OPEN_KEY = "wr-library-open";
 // Same-origin only: this works on ndpms.in, where both apps are served.
 // Owners sign in to the library once (same username/password as the auction).
 export default function LibraryPanel({ name, defaultOpen }: { name: string; defaultOpen?: boolean }) {
-  const lib = CV[name];
+  const notList = useSyncExternalStore(
+    () => () => {},
+    () => (typeof window === "undefined" ? "[]" : localStorage.getItem(NOT_KEY) || "[]"),
+    () => "[]",
+  );
+  const [notHim, setNotHim] = useState(false);
+  const hidden = notHim || (JSON.parse(notList) as string[]).includes(name);
+  const lib = hidden ? undefined : CV[name];
   const kinds = ([lib?.bowler ? "bowler" : null, lib?.batter ? "batter" : null].filter(Boolean)) as ("bowler" | "batter")[];
   const [kind, setKind] = useState<"bowler" | "batter" | null>(kinds[0] ?? null);
   // remembered per device: once opened, the block card keeps it open for the next player
@@ -61,7 +74,10 @@ export default function LibraryPanel({ name, defaultOpen }: { name: string; defa
       <div className="flex flex-wrap items-center gap-2 bg-wash px-3 py-2">
         <button type="button" onClick={toggle} className="flex min-w-0 flex-1 items-center gap-2 text-left text-sm font-semibold" aria-expanded={open}>
           <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-ink text-[0.7rem] text-[#FF7A00]">▶</span>
-          <span className="truncate">Ball Library · clips, pitch map &amp; wagon wheel</span>
+          <span className="min-w-0 truncate">
+            Ball Library · <span className="font-normal text-muted">on film as</span> {libName}
+            {lib.team ? <span className="font-normal text-muted"> · {lib.team}</span> : null}
+          </span>
           <span className="ml-auto text-muted">{open ? "▴" : "▾"}</span>
         </button>
         {open && kinds.length > 1 && (
@@ -73,6 +89,17 @@ export default function LibraryPanel({ name, defaultOpen }: { name: string; defa
             ))}
           </div>
         )}
+        <button
+          type="button"
+          className="text-[0.75rem] text-muted underline underline-offset-2 hover:text-red"
+          title="Same name, different player — hide this library link"
+          onClick={() => {
+            try { localStorage.setItem(NOT_KEY, JSON.stringify([...new Set([...readNot(), name])])); } catch {}
+            setNotHim(true);
+          }}
+        >
+          Not him?
+        </button>
         {open && (
           <a href={full} target="_blank" rel="noopener noreferrer" className="text-[0.75rem] text-muted underline underline-offset-2 hover:text-ink">
             open full ↗

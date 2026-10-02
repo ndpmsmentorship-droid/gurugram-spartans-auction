@@ -9,7 +9,9 @@ only when the answer is unique:
   4. first + last word, ignoring middle names ("Karamvir Lall" ~ "Karamvir Singh Lall")
   5. the same after evening out spelling (doubled letters, ee/i, oo/u, silent h:
      "Shubhendu" ~ "Subhendu", "Mahalawat" ~ "Mahlawat")
-Writes src/data/cv-map.json: { poolName: { batter?: libName, bowler?: libName } }
+Writes src/data/cv-map.json: { poolName: { batter?: libName, bowler?: libName, team?: library team } }
+Same name is not the same person: NOT_SAME lists pool players whose library
+namesake is someone else (checked by Nikhil against the clips).
 
   python3 scripts/build-cv-map.py <manifest.json> <uscl cards.json>
 """
@@ -25,9 +27,13 @@ def norm(n):
     n = re.sub(r"[^a-z ]", " ", n)
     return " ".join(n.split())
 
-lib = collections.defaultdict(dict)  # norm -> kind -> name
+NOT_SAME = {"Chetan Sharma"}  # USCL's Chetan Sharma (WK, 31) is not SARDA's (Jaipur Royals) — 3 Oct
+
+lib = collections.defaultdict(dict)  # norm -> kind -> name (+ team)
 for p in man["players"]:
     lib[norm(p["name"])].setdefault(p["kind"], p["name"])
+    if p.get("team"):
+        lib[norm(p["name"])].setdefault("team", p.get("s6team") or p["team"])
 
 exact = {k: v for k, v in lib.items()}
 def spell(w):
@@ -58,6 +64,8 @@ for k in lib:
 
 out = {}
 for name in pool:
+    if name in NOT_SAME:
+        continue
     k = norm(name)
     hit = exact.get(k)
     if not hit:

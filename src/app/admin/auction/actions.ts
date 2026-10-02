@@ -5,7 +5,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentProfile } from "@/lib/auth";
 import { DEFAULT_RULES } from "@/lib/auction/rules";
 import { RTM_FRANCHISES, RTM_MAX_AGAINST } from "@/lib/auction/rtm";
-import { LEAGUE } from "@/lib/league";
 
 // The auction is admin-run: the admin records each purchase (player -> team @ price)
 // on the live scout_players pool. team_id / sold_price / acquired are set here;
@@ -24,12 +23,12 @@ async function ensureAdmin(): Promise<Result | null> {
   return null;
 }
 
-// Recording sales (and undoing them, and RTMs). For the USCL demo Nikhil runs
-// the auction pad alone from the War Room on his owner login, so owners may
-// record there; on SDLL it stays admin-only. Purse top-ups stay admin-only.
+// Recording sales (and undoing them, and RTMs) — admins only. Nikhil runs the
+// War Room auction pad on the admin login; every USCL franchise now has an
+// owner login (soft launch), so owners must never be able to record.
 async function ensureRecorder(): Promise<Result | null> {
   const profile = await getCurrentProfile();
-  if (profile?.role === "admin" || (profile?.role === "owner" && LEAGUE === "uscl")) return null;
+  if (profile?.role === "admin") return null;
   return { error: "Admins only." };
 }
 

@@ -49,22 +49,37 @@ const SITE_DESCRIPTION = USCL
   ? "Urban Sports Champions League Season 2 — live auction, squads and the franchise war room."
   : "Rank, analyse and buy players on auction day — Shanti Devi Legend League.";
 
+// Icons + share card live in public/brand/meta and are referenced by FULL path:
+// the app is served under /spartansscout on www.ndpms.in, and Next's file-based
+// icon/OG routes emitted "/icon", which on ndpms.in is the SMIFE site's icon.
+const META = `/spartansscout/brand/meta/${USCL ? "uscl" : "sdll"}`;
+const SHARE_TITLE = USCL ? SITE_NAME : `${SITE_NAME} — Auction`;
+const OG_IMAGE = {
+  url: `${META}-og.png`,
+  width: 1200,
+  height: 630,
+  alt: USCL ? "USCL Auction — Urban Sports Champions League Season 2" : "Gurugram Spartans",
+};
+
 export const metadata: Metadata = {
   // shared as www.ndpms.in/spartansscout — makes the OG/icon URLs absolute
   metadataBase: new URL("https://www.ndpms.in"),
   title: SITE_NAME,
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
+  icons: { icon: `${META}-icon.png`, apple: `${META}-apple-icon.png` },
   openGraph: {
-    title: `${SITE_NAME} — Auction`,
+    title: SHARE_TITLE,
     description: SITE_DESCRIPTION,
     siteName: SITE_NAME,
     type: "website",
+    images: [OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE_NAME} — Auction`,
+    title: SHARE_TITLE,
     description: SITE_DESCRIPTION,
+    images: [OG_IMAGE],
   },
 };
 

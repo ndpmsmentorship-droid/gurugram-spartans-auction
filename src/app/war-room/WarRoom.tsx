@@ -73,7 +73,22 @@ type Enriched = WRPlayer & {
   deathSpec: boolean;
   ppSpec: boolean;
   clips: string | null;
+  doubt: string[];
 };
+
+// USCL registrations carry career figures the players typed in themselves, and
+// some are clearly not real (500 matches / 20,000 runs / SR 190 / econ 4). These
+// checks flag them so the room doesn't overrate a made-up Index.
+function doubtful(p: WRPlayer): string[] {
+  const why: string[] = [];
+  const m = p.bat_matches ?? 0, runs = p.runs ?? 0;
+  if (m >= 100 && m % 100 === 0 && runs >= 1000 && runs % 1000 === 0) why.push(`round totals (${m} M, ${runs} runs)`);
+  if ((p.bat_sr ?? 0) >= 185 && runs >= 2000) why.push(`SR ${p.bat_sr}`);
+  if (p.economy != null && p.economy <= 4.5 && (p.wickets ?? 0) >= 20) why.push(`econ ${p.economy}`);
+  if ((p.bat_avg ?? 0) >= 45 && m >= 100) why.push(`avg ${p.bat_avg}`);
+  if (runs && m && runs / m > 60) why.push(`${Math.round(runs / m)} runs a match`);
+  return why;
+}
 
 function enrich(p: WRPlayer): Enriched {
   const lib = CV[p.full_name];
@@ -92,6 +107,7 @@ function enrich(p: WRPlayer): Enriched {
     deathSpec: starDeath || (!!d && d.balls >= 12 && (d.econ ?? 99) <= 8.5),
     ppSpec: starPP || (!!pp && pp.balls >= 18 && (pp.econ ?? 99) <= 7),
     clips: clipsUrl(p.full_name),
+    doubt: doubtful(p),
   };
 }
 
@@ -854,6 +870,7 @@ export default function WarRoom(props: {
                         <button key={p.id} type="button" onClick={() => setViewId(p.id)} className="rounded-full border border-line bg-surface px-2.5 py-1 text-[0.78rem] transition hover:border-red" title="Open profile">
                           {wish.has(p.id) && <span className="text-gold">★ </span>}
                           <span className="text-ink">{p.full_name}</span> <span className="tabular-nums text-muted">{catLabel(p.cat)}{phaseHint(p, n.key)}</span>
+                          {p.doubt.length > 0 && <span className="ml-1 text-[#b7791f]" title={`Self-reported, looks doubtful: ${p.doubt.join(", ")}`}>⚠</span>}
                         </button>
                       ))}
                       {n.canBuy > n.picks.length && (
@@ -1016,6 +1033,7 @@ export default function WarRoom(props: {
                     {p.full_name}
                     {p.starDeath && <span className="ml-1 text-gold">★D</span>}
                     {p.starPP && <span className="ml-1 text-gold">★P</span>}
+                    {p.doubt.length > 0 && <span className="ml-1 text-[#b7791f]" title={`Self-reported, looks doubtful: ${p.doubt.join(", ")}`}>⚠</span>}
                   </p>
                   <p className="truncate text-[0.75rem] text-muted">
                     {[catLabel(p.cat), p.tag, p.is_keeper ? "WK" : null, p.team_id ? `${teams.find((t) => t.id === p.team_id)?.name} ${inr(p.sold_price)}` : null].filter(Boolean).join(" · ")}
@@ -1049,6 +1067,7 @@ export default function WarRoom(props: {
                     <button type="button" onClick={() => setViewId(p.id)} className="text-left font-medium underline-offset-4 hover:text-red hover:underline">{p.full_name}</button>
                     {p.starDeath && <span className="ml-1 text-gold" title="Top 10 death bowler">★D</span>}
                     {p.starPP && <span className="ml-1 text-gold" title="Top 10 powerplay bowler">★P</span>}
+                    {p.doubt.length > 0 && <span className="ml-1 text-[#b7791f]" title={`Self-reported, looks doubtful: ${p.doubt.join(", ")}`}>⚠</span>}
                     {p.team_id && <span className="ml-1 text-[0.7rem] text-muted">· {teams.find((t) => t.id === p.team_id)?.name} {inr(p.sold_price)}</span>}
                   </td>
                   <td className="px-2">{catLabel(p.cat)}</td>
@@ -1159,6 +1178,11 @@ function Chips({ p }: { p: Enriched }) {
       ))}
       {p.starDeath && <span className={`${chip} bg-gold-fill text-gold`}>★ Top-10 death</span>}
       {p.starPP && <span className={`${chip} bg-gold-fill text-gold`}>★ Top-10 powerplay</span>}
+      {p.doubt.length > 0 && (
+        <span className={`${chip} whitespace-normal`} style={{ background: "#fff4e0", color: "#9a5b00" }} title="Self-reported on the USCL registration — check CricHeroes before trusting the stats or the Index">
+          ⚠ Self-reported stats: {p.doubt.join(", ")}
+        </span>
+      )}
     </div>
   );
 }

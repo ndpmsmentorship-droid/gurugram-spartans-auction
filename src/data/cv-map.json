@@ -19,9 +19,20 @@
 "bowler":"Abhishek Wadhwa",
 "batter":"Abhishek Wadhwa"
 },
+"Adesh Sharma":{
+"bowler":"Adesh Sharma",
+"batter":"Adesh Sharma"
+},
+"Adil Siddiqui":{
+"bowler":"Adil Siddiqui",
+"batter":"Adil Siddiqui"
+},
 "Aditya Sharma":{
 "bowler":"Aditya Sharma",
 "batter":"Aditya Sharma"
+},
+"Ajay Yadav":{
+"bowler":"Ajay YADAV"
 },
 "Akhil Sethi":{
 "bowler":"akhil sethi",
@@ -55,6 +66,10 @@
 "Amit kumar":{
 "batter":"Amit Kumar"
 },
+"Amrinder Singh":{
+"batter":"Amrinder Singh",
+"bowler":"Amrinder Singh"
+},
 "Aneesh Gautam":{
 "batter":"Aneesh Gautam",
 "bowler":"Aneesh Gautam"
@@ -73,6 +88,10 @@
 "Ankit Golash":{
 "batter":"Ankit Golash"
 },
+"Ankush Bhargava":{
+"batter":"Ankush Bhargava",
+"bowler":"Ankush Bhargava"
+},
 "Arun Kundu":{
 "batter":"Arun Kundu",
 "bowler":"Arun Kundu"
@@ -80,8 +99,18 @@
 "Ashwani Kumar":{
 "bowler":"Ashwani Kumar"
 },
+"Atinderpal Singh":{
+"bowler":"Atinderpal Singh",
+"batter":"Atinderpal Singh"
+},
 "Atul Sharma":{
 "batter":"Atul Sharma"
+},
+"Ayush Jagga":{
+"batter":"Ayush Jagga"
+},
+"Ayush Soni":{
+"batter":"Ayush Soni"
 },
 "Bawa Mamik":{
 "batter":"Bawa Mamik"
@@ -98,6 +127,9 @@
 },
 "Dr.Shobhit Sharma":{
 "batter":"Dr.Shobhit Sharma"
+},
+"Faizul Mufti":{
+"bowler":"Faizul Mufti"
 },
 "Gaganpreet Singh":{
 "batter":"Gaganpreet Singh"
@@ -117,8 +149,15 @@
 "bowler":"Harchit Sanan (harry)",
 "batter":"Harchit Sanan (harry)"
 },
+"Harinder Shergill":{
+"batter":"Shergill Harinder"
+},
 "Harsh Dahiya":{
 "bowler":"Harsh Dahiya"
+},
+"Hemant Balyan":{
+"batter":"Hemant Balyan",
+"bowler":"Hemant Balyan"
 },
 "Himanshu":{
 "batter":"Himanshu 57",
@@ -131,9 +170,15 @@
 "Ishal Sharma":{
 "batter":"Ishal Sharma"
 },
+"Ishan Pasrija":{
+"batter":"Ishann Pasrija"
+},
 "Ishneet Singh":{
 "batter":"Ishneet Singh",
 "bowler":"Ishneet Singh"
+},
+"Joginder Shokeen":{
+"batter":"Joginder Shokeen"
 },
 "K RAJ B":{
 "bowler":"K Raj B",
@@ -154,8 +199,15 @@
 "Karan Jorasia":{
 "batter":"Karan Jorasia"
 },
+"Karan Kalra":{
+"batter":"Karan Kalra"
+},
 "Karan wali":{
 "batter":"Karan Wali"
+},
+"Krishan Rohilla":{
+"batter":"Krishan Rohillaa",
+"bowler":"Krishan Rohillaa"
 },
 "Kuldeep Negi":{
 "bowler":"Kuldeep Negi",
@@ -164,6 +216,13 @@
 "Lohit Sharma":{
 "batter":"Lohit Sharma",
 "bowler":"Lohit Sharma"
+},
+"Lokesh Dahiya":{
+"bowler":"Lokesh Dahiya",
+"batter":"Lokesh Dahiya"
+},
+"Manas Gulati":{
+"batter":"Manas Gulati"
 },
 "Maneesh Deshwal":{
 "batter":"Maneesh Deshwal"
@@ -189,12 +248,19 @@
 "Nikhil Jhingon":{
 "batter":"Nikhil Jhingon"
 },
+"Nikhil Raina":{
+"bowler":"Nikhil Raina",
+"batter":"Nikhil Raina"
+},
 "Nikhil Tandan":{
 "batter":"Nikhil Tandan"
 },
 "Nitesh Kataria":{
 "bowler":"Nitesh Kataria",
 "batter":"Nitesh Kataria"
+},
+"Nitin Ruhela":{
+"batter":"Nitin Ruhela"
 },
 "Nitin Sareen":{
 "bowler":"Nitin Sareen"
@@ -206,15 +272,27 @@
 "Nitin singh chauhan":{
 "bowler":"Nitin Chauhan"
 },
+"Nitish Sharma":{
+"bowler":"Nitish Sharma",
+"batter":"Nitish Sharma"
+},
 "Paaras Sareen":{
 "batter":"Paaras Sareen"
 },
 "Parwinder Singh":{
 "batter":"Parwinder Singh"
 },
+"Piyush Arora":{
+"batter":"Piyush Arora",
+"bowler":"Piyush Arora"
+},
 "Prabhjot Singh":{
 "batter":"Prabhjot Singh",
 "bowler":"Prabhjot Singh"
+},
+"Pradeep Mahlawat":{
+"batter":"Pradeep Mahlawat",
+"bowler":"Pradeep Mahlawat"
 },
 "Prakhar Singhal":{
 "batter":"Prakhar Singhal"
@@ -240,9 +318,15 @@
 "Pritam Kataria":{
 "batter":"Pritam Kataria"
 },
+"Rahul Rathi":{
+"batter":"Rahul Rathi RR19"
+},
 "Rahul Sharma":{
 "bowler":"Rahul Kumar Sharma",
 "batter":"Rahul Kumar Sharma"
+},
+"Rajiv Bose":{
+"batter":"Rajiv Bose"
 },
 "Ramit gill":{
 "batter":"Ramit Gill",
@@ -254,6 +338,10 @@
 },
 "Ravi singh":{
 "batter":"Ravi Singh"
+},
+"Rohit Rathi":{
+"bowler":"Rohit Rathi",
+"batter":"Rohit Rathi"
 },
 "Rohit Rohilla":{
 "batter":"Rohit Rohilla"
@@ -273,9 +361,24 @@
 "batter":"Sagar Bhatia",
 "bowler":"Sagar Bhatia"
 },
+"Sagar Dahiya":{
+"batter":"Sagar Dahiya"
+},
+"Sagar Sehrawat":{
+"bowler":"Sagar Sehrawat",
+"batter":"Sagar Sehrawat"
+},
 "Sahil Kumar":{
 "batter":"Sahil Kumar",
 "bowler":"Sahil Kumar"
+},
+"Sajal Sharma":{
+"bowler":"Sajal Sharma",
+"batter":"Sajal Sharma"
+},
+"Sanchit Tanwar":{
+"batter":"Sanchit Tanwar",
+"bowler":"Sanchit Tanwar"
 },
 "Sandeep Adlakha":{
 "batter":"Sandeep Adlakha"
@@ -283,9 +386,20 @@
 "Sandeep Angurala":{
 "bowler":"Sandeep Angurala"
 },
+"Sandeep Atri":{
+"batter":"Sandeep Atri",
+"bowler":"Sandeep Atri"
+},
+"Sandeep Koul":{
+"batter":"Sandeep Koul",
+"bowler":"Sandeep Koul"
+},
 "Sanju":{
 "bowler":"Sanju",
 "batter":"Sanju"
+},
+"Sathya Ram":{
+"batter":"Sathya Ram"
 },
 "Saurabh Tokas":{
 "batter":"Saurabh Tokas",
@@ -293,6 +407,12 @@
 },
 "Sharad Singh":{
 "bowler":"Sharad Singh"
+},
+"Shashank Verma":{
+"batter":"Shashank v3"
+},
+"Siddharth Juneja":{
+"batter":"Siddharth Juneja"
 },
 "Siddharth Tiwari":{
 "batter":"Siddharth Tiwari",
@@ -311,9 +431,20 @@
 "Sunil Chauhan":{
 "bowler":"Sunil Singh Chauhan"
 },
+"Surjeet Singh":{
+"bowler":"Surjeet Singh"
+},
 "Tarun Singh Chhonker":{
 "bowler":"Tarun Singh Chhonker",
 "batter":"Tarun Singh Chhonker"
+},
+"Tarun Yadav":{
+"bowler":"Tarun Yadav",
+"batter":"Tarun Yadav"
+},
+"Tushar Gaur":{
+"bowler":"Tushar Gaur",
+"batter":"Tushar Gaur"
 },
 "Tushar Khattar":{
 "batter":"Tushar Khattar",
@@ -325,6 +456,14 @@
 "Vikrant Kataria":{
 "batter":"Vikrant Kataria"
 },
+"Vinesh Thakur":{
+"bowler":"Vinesh Thakur",
+"batter":"Vinesh Thakur"
+},
+"Vipul Sharma":{
+"batter":"Vipul Sharma",
+"bowler":"Vipul Sharma"
+},
 "Vishal Sharma":{
 "bowler":"Vishal Sharma",
 "batter":"Vishal Sharma"
@@ -335,6 +474,10 @@
 "Vishal sharma":{
 "bowler":"Vishal Sharma",
 "batter":"Vishal Sharma"
+},
+"Yatin Narang":{
+"bowler":"Yatin Narang",
+"batter":"Yatin Narang"
 },
 "naveen pratap":{
 "batter":"Naveen Pratap"

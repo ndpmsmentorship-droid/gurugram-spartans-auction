@@ -742,7 +742,7 @@ export default function WarRoom(props: {
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_1fr]">
         {/* on the block */}
-        <section className="rounded-[16px] border border-line bg-surface p-4 shadow-[var(--elev-sm)]">
+        <section className="order-1 rounded-[16px] border border-line bg-surface p-4 shadow-[var(--elev-sm)]">
           <p className="eyebrow">On the block</p>
           {!onBlock ? (
             <p className="mt-3 text-sm text-muted">Nobody yet. The next player appears here the moment they&apos;re put up.</p>
@@ -777,7 +777,6 @@ export default function WarRoom(props: {
               </div>
 
               <StatGrid p={onBlock} />
-              <LibraryPanel key={onBlock.id} name={onBlock.full_name} />
 
               {fills.length > 0 && (
                 <p className="mt-3 rounded-[10px] bg-[color-mix(in_srgb,var(--up)_10%,transparent)] px-3 py-2 text-sm text-up">
@@ -836,8 +835,16 @@ export default function WarRoom(props: {
           )}
         </section>
 
+        {/* Ball Library for the player on the block: right under the block card on
+            phones, its own full-width row on laptops (the library goes two-column there) */}
+        {onBlock && (
+          <div className="order-2 lg:order-3 lg:col-span-2 [&>div]:mt-0">
+            <LibraryPanel key={onBlock.id} name={onBlock.full_name} />
+          </div>
+        )}
+
         {/* needs */}
-        <section className="rounded-[16px] border border-line bg-surface p-4 shadow-[var(--elev-sm)]">
+        <section className="order-3 lg:order-2 rounded-[16px] border border-line bg-surface p-4 shadow-[var(--elev-sm)]">
           <div className="flex items-baseline justify-between gap-2">
             <p className="eyebrow">What we need next</p>
             <p className="text-[0.7rem] text-faint">tap a row for every option</p>

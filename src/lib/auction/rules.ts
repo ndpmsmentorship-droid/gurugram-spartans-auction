@@ -43,6 +43,10 @@ const USCL_RULES: Rules = {
 export const DEFAULT_RULES: Rules = LEAGUE === "uscl" ? USCL_RULES : SDLL_RULES;
 
 /** USCL: how many A players a squad may hold given its A+ count (deck p.4). */
+// USCL deck, "Owners & Retention Rules": owner picks cost the category base
+// (A+ 20K · A 10K · B/Legend 3K); retentions cost more.
+export const USCL_RETAIN: Record<AuctionCategory, number> = { "A+": 25000, A: 15000, B: 6000, Special: 3000 };
+
 export const usclACap = (aPlus: number) => (aPlus >= 2 ? 3 : aPlus === 1 ? 5 : 6);
 
 export const basePriceFor = (c: string | null | undefined, r: Rules = DEFAULT_RULES) =>

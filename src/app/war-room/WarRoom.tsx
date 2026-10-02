@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { PlayerPhoto } from "@/app/register/PlayerCard";
 import TeamCrest from "@/app/TeamCrest";
 import { catLabel, normCategory, type AuctionCategory } from "@/lib/scout/tier";
-import { DEFAULT_RULES, inr, usclACap } from "@/lib/auction/rules";
+import { DEFAULT_RULES, inr, usclACap, USCL_RETAIN } from "@/lib/auction/rules";
 import type { League } from "@/lib/league";
 import phaseData from "@/data/phase-stats.json";
 import cvMap from "@/data/cv-map.json";
@@ -265,8 +265,10 @@ export default function WarRoom(props: {
   const [padQ, setPadQ] = useState("");
   const [padTeam, setPadTeam] = useState(props.myTeamId);
   const [padPrice, setPadPrice] = useState(0);
+  // USCL owners can declare owner picks / retentions on the day, at fixed prices.
+  const [padKind, setPadKind] = useState<"auction" | "owner" | "retained">("auction");
   const [padMsg, setPadMsg] = useState<{ text: string; bad?: boolean } | null>(null);
-  const [lastSale, setLastSale] = useState<{ id: string; name: string; teamId: string; price: number } | null>(null);
+  const [lastSale, setLastSale] = useState<{ id: string; name: string; teamId: string; price: number; kind: "auction" | "owner" | "retained" } | null>(null);
   const [saving, startSave] = useTransition();
   const padMatches = useMemo(() => {
     const words = padQ.trim().toLowerCase().split(/\s+/).filter(Boolean);
@@ -287,25 +289,26 @@ export default function WarRoom(props: {
     setPadQ("");
     setPadTeam(myTeamId);
     setPadPrice(R.base[p.cat]);
+    setPadKind("auction");
     setPadMsg(null);
   }
   function sell() {
     const p = padId ? byId.get(padId) : null;
     if (!p) return;
-    const price = padPrice, teamId = padTeam;
+    const price = padPrice, teamId = padTeam, kind = padKind;
     const prev = { team_id: p.team_id, sold_price: p.sold_price, acquired: p.acquired };
-    patch(p.id, { team_id: teamId, sold_price: price, acquired: "auction" });
+    patch(p.id, { team_id: teamId, sold_price: price, acquired: kind });
     setPadId(null);
     boardClear();
     startSave(async () => {
-      const r = await assignPlayer(p.id, teamId, price);
+      const r = await assignPlayer(p.id, teamId, price, kind);
       if (r?.error) {
         patch(p.id, prev);
         setPadId(p.id);
         setPadMsg({ text: r.error, bad: true });
       } else {
-        setLastSale({ id: p.id, name: p.full_name, teamId, price });
-        setPadMsg({ text: `${p.full_name} → ${teamName(teamId)} · ${inr(price)}` });
+        setLastSale({ id: p.id, name: p.full_name, teamId, price, kind });
+        setPadMsg({ text: `${p.full_name} → ${teamName(teamId)} · ${inr(price)}${kind === "auction" ? "" : kind === "owner" ? " · owner pick" : " · retained"}` });
       }
     });
   }
@@ -456,6 +459,25 @@ export default function WarRoom(props: {
                 <p className="truncate text-lg font-semibold">{byId.get(padId)?.full_name}</p>
                 <button type="button" className="shrink-0 text-sm text-muted underline" onClick={() => { setPadId(null); boardClear(); }}>Unsold / clear</button>
               </div>
+              {props.league === "uscl" && (
+                <div className="flex gap-1.5">
+                  {(["auction", "owner", "retained"] as const).map((k) => (
+                    <button
+                      key={k}
+                      type="button"
+                      className="pill flex-1 !px-2 !py-2"
+                      data-active={padKind === k}
+                      onClick={() => {
+                        setPadKind(k);
+                        const c = byId.get(padId)!.cat;
+                        setPadPrice(k === "retained" ? USCL_RETAIN[c] : R.base[c]);
+                      }}
+                    >
+                      {k === "auction" ? "Auction sale" : k === "owner" ? "Owner pick" : "Retained"}
+                    </button>
+                  ))}
+                </div>
+              )}
               <div className="flex gap-1.5">
                 <button type="button" className="pill shrink-0 !px-4 !py-2.5" data-active={padTeam === myTeamId} onClick={() => setPadTeam(myTeamId)}>
                   Us
@@ -488,7 +510,7 @@ export default function WarRoom(props: {
                 ))}
               </div>
               <button type="button" disabled={saving || !padPrice} onClick={sell} className="btn-accent w-full !py-3 text-base disabled:opacity-60">
-                Sold to {teamName(padTeam)} · {inr(padPrice)}
+                {padKind === "auction" ? "Sold to" : padKind === "owner" ? "Owner pick for" : "Retained by"} {teamName(padTeam)} · {inr(padPrice)}
               </button>
             </div>
           )}
@@ -497,6 +519,7 @@ export default function WarRoom(props: {
             <div className="mt-2 flex flex-wrap items-center gap-1.5 text-sm">
               <button type="button" disabled={saving} onClick={undoLast} className="pill !px-3 !py-1.5">↶ Undo last</button>
               {props.league === "uscl" &&
+                lastSale.kind === "auction" &&
                 rtmThreats(rtm, lastSale.teamId).map((fid) => (
                   <button key={fid} type="button" disabled={saving} onClick={() => rtmLast(fid)} className="pill !px-3 !py-1.5" title="This franchise used its RTM and matched">
                     RTM: {teamName(fid)} matched

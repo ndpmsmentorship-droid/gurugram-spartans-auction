@@ -48,7 +48,12 @@ async function teamSpent(sb: LooseClient, teamId: string, exceptPlayerId?: strin
   );
 }
 
-export async function assignPlayer(playerId: string, teamId: string, price: number): Promise<Result> {
+export async function assignPlayer(
+  playerId: string,
+  teamId: string,
+  price: number,
+  acquired: "auction" | "owner" | "retained" = "auction",
+): Promise<Result> {
   const denied = await ensureRecorder();
   if (denied) return denied;
   if (!playerId || !teamId) return { error: "Pick a player and a team." };
@@ -74,7 +79,7 @@ export async function assignPlayer(playerId: string, teamId: string, price: numb
 
   const { error } = await sb
     .from("scout_players")
-    .update({ team_id: teamId, sold_price: amount, acquired: "auction" })
+    .update({ team_id: teamId, sold_price: amount, acquired: ["owner", "retained"].includes(acquired) ? acquired : "auction" })
     .eq("id", playerId);
   if (error) return { error: error.message };
 

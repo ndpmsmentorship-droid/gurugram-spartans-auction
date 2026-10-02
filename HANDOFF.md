@@ -39,6 +39,11 @@ War Room **auction pad** alone (see LATEST 2026-10-01).
   /auction, /players (everything else → /war-room).
 - **Favicon / share card:** `public/brand/meta/{uscl,sdll}-{icon,apple-icon,og}.png`, wired in `layout.tsx`
   metadata by full `/spartansscout/...` path (the old file-based `/icon` resolved to the SMIFE site's icon).
+- **Official pre-auction squads loaded (2 Oct, from the organisers' "Franchise Owners & Retentions" deck video):**
+  `scripts/data/uscl-pre-auction.json` (42 owners / 28 retained / 8 legends) applied with
+  `node scripts/uscl-sync.mts <cards.json> --apply`, which also re-syncs the pool with a fresh portal scrape
+  (12 added, 22 withdrawn → is_rejected, Aman Raj A→B). Tushar Khattar is MIRZAPUR's owner (not Spartans);
+  Spartans' 6th is Aakash Sharma (B owner). Spartans ₹50,000 spent. Re-run the script any time the portal changes.
 - ndpms.in (LMS repo) home has a "🏏 Owners login" button → /spartansscout/login.
 - Pad records **Auction sale / Owner pick / Retained** (deck prices prefilled); team logos in
   `public/brand/uscl-teams/` + `teams.logo_url`. Retention spreadsheet ignored on purpose (Nikhil waiting for the

@@ -23,7 +23,7 @@ export default async function WarRoomPage({ searchParams }: { searchParams: Prom
   const sb = createAdminClient() as unknown as { from: (t: string) => any }; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   const [{ data: teams }, { data: pool }, lot] = await Promise.all([
-    sb.from("teams").select("id, name, purse_total, owner_profile_id").eq("season_id", seasonId).in("division", AUCTION_DIVISIONS).order("name"),
+    sb.from("teams").select("id, name, purse_total, owner_profile_id, logo_url").eq("season_id", seasonId).in("division", AUCTION_DIVISIONS).order("name"),
     sb.from("scout_players")
       .select("id, full_name, photo_url, age, primary_role, batting_style, bowling_style, is_keeper, auction_category, bat_matches, runs, bat_avg, bat_sr, wickets, economy, bowl_sr, bat_index, bowl_index, overall_index, team_id, sold_price, acquired, rtm_against, is_rejected")
       .limit(2000),
@@ -51,7 +51,7 @@ export default async function WarRoomPage({ searchParams }: { searchParams: Prom
       canSwitch={profile.role === "admin"}
       profileId={profile.id}
       canRecord={profile.role === "admin"}
-      teams={list.map(({ id, name, purse_total }) => ({ id, name, purse_total }))}
+      teams={list.map(({ id, name, purse_total, logo_url }) => ({ id, name, purse_total, logo_url }))}
       players={((pool ?? []) as WRPlayer[]).filter((p) => !p.is_rejected)}
       initialLot={{ player_id: lot.status === "live" ? lot.player_id : null, current_bid: lot.current_bid, base_price: lot.base_price, leading_team_id: lot.leading_team_id }}
     />

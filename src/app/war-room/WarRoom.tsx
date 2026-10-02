@@ -5,6 +5,7 @@ import { assignPlayer, unassignPlayer, rtmPlayer } from "@/app/admin/auction/act
 import { putUpLot, withdrawLot } from "@/app/admin/auction/live-actions";
 import { createClient } from "@/lib/supabase/client";
 import { PlayerPhoto } from "@/app/register/PlayerCard";
+import TeamCrest from "@/app/TeamCrest";
 import { catLabel, normCategory, type AuctionCategory } from "@/lib/scout/tier";
 import { DEFAULT_RULES, inr, usclACap } from "@/lib/auction/rules";
 import type { League } from "@/lib/league";
@@ -13,7 +14,7 @@ import cvMap from "@/data/cv-map.json";
 import { clipsUrl } from "@/lib/scout/clips";
 import { rtmState, rtmThreats, RTM_MAX_AGAINST } from "@/lib/auction/rtm";
 
-export type WRTeam = { id: string; name: string; purse_total: number };
+export type WRTeam = { id: string; name: string; purse_total: number; logo_url?: string | null };
 export type WRPlayer = {
   id: string;
   full_name: string;
@@ -400,7 +401,10 @@ export default function WarRoom(props: {
             War room · <span className="sm:hidden">{props.league === "uscl" ? "USCL Season 2" : "SDLL Season 2"}</span>
             <span className="hidden sm:inline">{props.leagueName}</span>
           </p>
-          <h1 className="mt-1 text-3xl sm:text-4xl">{myTeam.name}</h1>
+          <h1 className="mt-1 flex items-center gap-3 text-3xl sm:text-4xl">
+            {myTeam.logo_url && <TeamCrest name={myTeam.name} logoUrl={myTeam.logo_url} size={52} />}
+            {myTeam.name}
+          </h1>
         </div>
         <div className="flex items-center gap-2 text-xs text-muted">
           {props.canSwitch && (

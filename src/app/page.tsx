@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import crest from "./brand/crest.png";
@@ -198,6 +199,10 @@ function Heading({ kicker, lead, accent }: { kicker: string; lead: string; accen
 }
 
 export default async function Home() {
+  // USCL soft launch: the SDLL marketing page would confuse USCL owners, so the
+  // home page sends them straight to their war room (or to sign in). Comes back
+  // when LEAGUE flips to "sdll".
+  if (LEAGUE === "uscl") redirect((await getCurrentProfile()) ? "/war-room" : "/login?next=/war-room");
   const [profile, owners, live] = await Promise.all([getCurrentProfile(), getOwners(), getLiveNow()]);
   const ownersOf = (team: string) => owners.filter((o) => o.team === team);
 

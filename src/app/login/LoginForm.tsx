@@ -5,7 +5,7 @@ import { signIn, type AuthActionState } from "./actions";
 
 // Login-only. Accounts are created by an admin (no public sign-up), so a few
 // trusted people can get in and nobody else.
-export default function LoginForm({ next }: { next: string }) {
+export default function LoginForm({ next, title = "Spartans Scout", subtitle = "Auction-day command" }: { next: string; title?: string; subtitle?: string }) {
   const [state, action, pending] = useActionState<AuthActionState, FormData>(
     signIn,
     null
@@ -14,9 +14,9 @@ export default function LoginForm({ next }: { next: string }) {
   return (
     <div className="card w-full max-w-sm p-8">
       <h1 className="font-display text-xl font-bold text-foreground">
-        Spartans Scout
+        {title}
       </h1>
-      <p className="mt-1 text-sm text-muted">Auction-day command</p>
+      <p className="mt-1 text-sm text-muted">{subtitle}</p>
 
       <form action={action} className="mt-6 space-y-4">
         <input type="hidden" name="next" value={next} />

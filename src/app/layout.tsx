@@ -7,7 +7,9 @@ import { getCurrentProfile } from "@/lib/auth";
 import { isAuctionLive } from "@/lib/auction/state";
 import { signOut } from "@/app/login/actions";
 import Nav, { type NavItem } from "./Nav";
-import crest from "./brand/crest.png";
+import sdllCrest from "./brand/crest.png";
+import usclCrest from "./brand/uscl-crest.png";
+import { LEAGUE } from "@/lib/league";
 import SponsorBar from "./SponsorBar";
 import Crumbs from "./Crumbs";
 import NavProgress from "./NavProgress";
@@ -38,24 +40,30 @@ const jetbrains = localFont({
   display: "swap",
 });
 
-const SITE_DESCRIPTION =
-  "Rank, analyse and buy players on auction day — Shanti Devi Legend League.";
+// The masthead follows the league the auction side is running (src/lib/league.ts):
+// USCL while its auction is switched in (soft launch), SDLL otherwise.
+const USCL = LEAGUE === "uscl";
+const SITE_NAME = USCL ? "USCL Auction" : "Shanti Devi Legend League";
+const crest = USCL ? usclCrest : sdllCrest;
+const SITE_DESCRIPTION = USCL
+  ? "Urban Sports Champions League Season 2 — live auction, squads and the franchise war room."
+  : "Rank, analyse and buy players on auction day — Shanti Devi Legend League.";
 
 export const metadata: Metadata = {
   // shared as www.ndpms.in/spartansscout — makes the OG/icon URLs absolute
   metadataBase: new URL("https://www.ndpms.in"),
-  title: "Shanti Devi Legend League",
+  title: SITE_NAME,
   description: SITE_DESCRIPTION,
-  applicationName: "Shanti Devi Legend League",
+  applicationName: SITE_NAME,
   openGraph: {
-    title: "Shanti Devi Legend League — Auction",
+    title: `${SITE_NAME} — Auction`,
     description: SITE_DESCRIPTION,
-    siteName: "Shanti Devi Legend League",
+    siteName: SITE_NAME,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Shanti Devi Legend League — Auction",
+    title: `${SITE_NAME} — Auction`,
     description: SITE_DESCRIPTION,
   },
 };
@@ -88,7 +96,15 @@ export default async function RootLayout({
   // everything else redirects to /login (see proxy.ts), so linking to it from
   // the masthead would just bounce them.
   const LIBRARY: NavItem = { href: "https://www.ndpms.in/spartans", label: "Ball Library", external: true };
-  const items: NavItem[] = DEMO_MODE
+  const items: NavItem[] = USCL
+    ? // USCL soft launch: only the pages that work for USCL owners.
+      [
+        ...(profile ? [{ href: "/war-room", label: "War Room" }] : []),
+        { href: "/auction", label: "Live Board" },
+        LIBRARY,
+        ...(profile?.role === "admin" ? [{ href: "/admin/auction", label: "Admin" }] : []),
+      ]
+    : DEMO_MODE
     ? // Demo: every major page for everyone (locked pages bounce to Sign in).
       [
         { href: "/register", label: "Register" },
@@ -146,11 +162,11 @@ export default async function RootLayout({
               />
               <span className="leading-none">
                 <span className="flex items-center font-display text-[1.125rem] font-bold tracking-[0.02em] text-white">
-                  Shanti Devi
-                  <Stars />
+                  {USCL ? <>USCL<span className="hidden sm:inline">&nbsp;Auction</span></> : "Shanti Devi"}
+                  {!USCL && <Stars />}
                 </span>
-                <span className="mt-[4px] block font-mono text-[0.563rem] uppercase tracking-[0.28em] text-white/55">
-                  Legend League
+                <span className={`mt-[4px] font-mono text-[0.563rem] uppercase tracking-[0.28em] text-white/55 ${USCL ? "hidden sm:block" : "block"}`}>
+                  {USCL ? "Champions League · S2" : "Legend League"}
                 </span>
               </span>
             </Link>
@@ -194,7 +210,8 @@ export default async function RootLayout({
             </div>
           </div>
         </header>
-        <SponsorBar />
+        {/* SDLL's partners — not USCL's, so hidden while USCL is switched in */}
+        {!USCL && <SponsorBar />}
         <Crumbs />
         <div className="flex flex-1 flex-col">{children}</div>
       </body>

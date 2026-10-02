@@ -18,6 +18,20 @@ Known gap: other USCL teams' owner/retention spends aren't loaded (all at ₹3,0
 approximate until Nikhil records them (he is sending a screenshot). **No helper on the day:** Nikhil runs the
 War Room **auction pad** alone (see LATEST 2026-10-01).
 
+## ▶ ADDENDUM — 2026-10-02 (USCL soft launch)
+- **Every USCL franchise has an owner login** — `scripts/uscl-owner-logins.mts` (re-runnable; only fills teams
+  without an owner) wrote usernames + passwords to `~/Downloads/uscl-owner-logins.csv` (never the repo).
+  Usernames: bengaltigers, chennaithalaiva, delhidevil, doondruks, dubaivipers, haryanabulls, jkbrocode,
+  japanitsunami, lucknowlagers, mirzapur, punjabroyals, rcgurgaon, texasgladiatorz (+ gurugramspartans).
+- **Recording sales is admin-only again** (`ensureRecorder()`), the pad shows only on the admin login.
+  Sales reach every owner's War Room via realtime + 5 s poll (tested with two logins).
+- **Per-owner wishlist** in the War Room: `player_marks` rows (RLS = own rows), ☆ on pool / profile / on-block,
+  a wishlist section (available vs gone), pool filter. Suggestions were already per team.
+- **USCL branding while `LEAGUE === "uscl"`:** masthead "USCL Auction" + USCL crest (`brand/uscl-crest.png`),
+  metadata, a USCL sign-in page (no Spartans panel), nav = War Room / Live Board / Ball Library (+ Admin),
+  SDLL sponsor bar hidden, and `/` redirects to `/war-room` (or sign-in). All revert with `LEAGUE = "sdll"`.
+- Seen in the DB, not made by Claude: Nikhil Tandan → Japani Tsunami ₹3,000 (auction) — ask Nikhil.
+
 ## ▶ LATEST — 2026-10-01 (read this first)
 Everything below is pushed to `main` and live (last commit "War Room: tap any squad player…"). Running list:
 **`TODO.md`**. Tests were Playwright against the local dev server (which talks to the live DB); every test

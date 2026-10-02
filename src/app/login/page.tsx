@@ -1,6 +1,9 @@
 import LoginForm from "./LoginForm";
 import HonoursInfographic from "../HonoursInfographic";
 import SpartansStars from "../SpartansStars";
+import Image from "next/image";
+import usclCrest from "../brand/uscl-crest.png";
+import { LEAGUE } from "@/lib/league";
 
 export default async function LoginPage({
   searchParams,
@@ -8,6 +11,29 @@ export default async function LoginPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const { next } = await searchParams;
+
+  // USCL soft launch: every franchise signs in here, so no Spartans branding —
+  // and the form comes first on phones.
+  if (LEAGUE === "uscl")
+    return (
+      <main className="grid flex-1 md:grid-cols-2">
+        <section className="order-2 flex flex-col justify-center gap-6 bg-[#1d1d1f] px-8 py-12 text-white sm:px-12 md:order-1">
+          <Image src={usclCrest} alt="USCL — Urban Sports Champions League" className="h-36 w-auto self-start drop-shadow-[0_14px_24px_rgba(0,0,0,0.45)]" sizes="120px" priority />
+          <div>
+            <p className="font-mono text-[0.688rem] uppercase tracking-[0.22em] text-white/60">Urban Sports Champions League · Season 2</p>
+            <h1 className="mt-3 text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">Your franchise war room.</h1>
+            <ul className="mt-5 space-y-2 text-[0.95rem] leading-relaxed text-white/75">
+              <li>• Purse, max safe bid and category slots — live as players are sold</li>
+              <li>• Every player&apos;s stats, phase economies and video clips</li>
+              <li>• Your own wishlist and squad suggestions — only you see them</li>
+            </ul>
+          </div>
+        </section>
+        <section className="order-1 flex items-center justify-center bg-background px-6 py-12 md:order-2 md:py-16">
+          <LoginForm next={next || "/war-room"} title="USCL Auction" subtitle="Franchise sign-in" />
+        </section>
+      </main>
+    );
 
   return (
     <main className="grid flex-1 md:grid-cols-2">

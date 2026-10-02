@@ -37,6 +37,8 @@ Last updated: 2026-09-30
 - [x] Playful Ventures logo on CricVideos
 - [x] No helper: War Room auction pad — Nikhil calls up each player and records sold/unsold/undo/RTM himself on the owner login (USCL only) — 1 Oct
 - [ ] Friday 2 Oct: Nikhil solo dry run of the auction pad on his phone
+- [x] USCL soft launch: owner login for all 14 franchises (`scripts/uscl-owner-logins.mts`, list in ~/Downloads/uscl-owner-logins.csv), per-owner wishlist, USCL masthead/login/nav, recording admin-only — 2 Oct
+- [ ] Nikhil Tandan → Japani Tsunami ₹3,000 recorded on 2 Oct (not by Claude) — confirm real or undo
 - [ ] Other 13 teams' owner/retention spends (so rival purses are exact) — Nikhil sending a screenshot
 - [x] RTM: 6 existing franchises = Bengal Tigers, Chennai Thalaiva, Delhi Devil, Lucknow Lagers, Punjab Royals, Royal Challengers Gurgaon (Spartans hold none). Admin RTM panel + War Room RTM watch — 1 Oct (needs supabase/uscl_rtm.sql)
 - [ ] Ask USCL: does a declined RTM still use up that franchise's RTM? (built as: only a matched RTM counts)

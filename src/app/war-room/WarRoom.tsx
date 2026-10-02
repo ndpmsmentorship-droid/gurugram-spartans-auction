@@ -535,11 +535,12 @@ export default function WarRoom(props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- affordable follows purse/squad, both in `all`
   }, [all, parsed, tagF, catF, onlyAvail, wish, maxSafe]);
 
-  // USCL: these are the match-day XII limits (1 A+·5 A·6 B or 2 A+·3 A·7 B, +1 Legend);
-  // the B count is the one that bites — you can't field a side without enough B.
+  // USCL: these are the match-day XII limits (0 A+·6 A·6 B, 1 A+·5 A·6 B or 2 A+·3 A·7 B,
+  // +1 Legend); the B count is the one that bites — you can't field a side without enough B.
+  const aPlus = me.cats["A+"];
   const catRow: [AuctionCategory, string][] =
     props.league === "uscl"
-      ? [["A+", "plays ≤2"], ["A", `plays ≤${me.cats["A+"] >= 2 ? 3 : 5}`], ["B", `need ${me.cats["A+"] >= 2 ? 7 : 6}+`], ["Special", "plays 1"]]
+      ? [["A+", "plays ≤2"], ["A", `plays ≤${aPlus >= 2 ? 3 : aPlus === 1 ? 5 : 6}`], ["B", `need ${aPlus >= 2 ? 7 : 6}+`], ["Special", "plays 1"]]
       : [["A+", `max ${R.cap["A+"]}`], ["A", `max ${R.cap.A}`], ["B", `max ${R.cap.B}`], ["Special", `max ${R.cap.Special}`]];
 
   return (

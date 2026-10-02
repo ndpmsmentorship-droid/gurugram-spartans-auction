@@ -34,7 +34,7 @@ const SDLL_RULES: Rules = {
 //  - purse ₹1,75,000 (after owner-player value) + optional top-ups ₹50,000 and
 //    ₹25,000 during the auction → ₹2,50,000 at most
 //  - squad 18–20 including owners; age above 30 and below 35: max 3 bought
-//  - category mixes (1 A+ · 5 A · 6 B, or 2 A+ · 3 A · 7 B, + 1 Legend) apply to
+//  - category mixes (0 A+ · 6 A · 6 B, 1 A+ · 5 A · 6 B, or 2 A+ · 3 A · 7 B, + 1 Legend) apply to
 //    the match-day XII, not to buying — so no category caps on purchase.
 // Mirrors auction_rules for the USCL season.
 const USCL_RULES: Rules = {

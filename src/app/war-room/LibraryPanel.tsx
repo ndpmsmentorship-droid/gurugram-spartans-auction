@@ -36,7 +36,13 @@ export default function LibraryPanel({ name, defaultOpen }: { name: string; defa
     return () => removeEventListener("message", on);
   }, []);
 
-  if (!lib || !kind) return null;
+  if (!lib || !kind)
+    return (
+      <div className="mt-4 flex items-center gap-2 rounded-[12px] border border-dashed border-line2 px-3 py-2.5 text-sm text-muted">
+        <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-wash text-[0.7rem]">▶</span>
+        <span>Ball Library: <strong className="font-medium text-ink">{name}</strong> isn&apos;t on film yet — no clips, pitch map or wagon wheel for him.</span>
+      </div>
+    );
   const libName = lib[kind]!;
   const src = `/spartans/?p=${kind}-${encodeURIComponent(libName)}&embed=1`;
   const full = `/spartans/?p=${kind}-${encodeURIComponent(libName)}&from=uscl`;

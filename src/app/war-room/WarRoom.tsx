@@ -118,6 +118,7 @@ export default function WarRoom(props: {
   myTeamId: string;
   canSwitch: boolean;
   canRecord?: boolean;
+  profileId: string;
   teams: WRTeam[];
   players: WRPlayer[];
   initialLot: Lot;
@@ -211,6 +212,54 @@ export default function WarRoom(props: {
 
   // ---- auction pad: one person calls up the player and records the sale ----
   const [viewId, setViewId] = useState<string | null>(null); // profile sheet
+
+  // ---- wishlist: this login's own marks (player_marks, RLS = own rows only) ----
+  const [wish, setWish] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    let alive = true;
+    createClient()
+      .from("player_marks")
+      .select("player_id")
+      .then(({ data }) => {
+        if (alive && data) setWish(new Set((data as { player_id: string }[]).map((r) => r.player_id)));
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+  function toggleWish(id: string) {
+    const on = !wish.has(id);
+    setWish((s) => {
+      const n = new Set(s);
+      if (on) n.add(id);
+      else n.delete(id);
+      return n;
+    });
+    const sb = createClient() as unknown as { from: (t: string) => any }; // eslint-disable-line @typescript-eslint/no-explicit-any
+    const q = on
+      ? sb.from("player_marks").insert({ marker_profile_id: props.profileId, player_id: id })
+      : sb.from("player_marks").delete().eq("marker_profile_id", props.profileId).eq("player_id", id);
+    q.then(({ error }: { error: unknown }) => {
+      if (error)
+        setWish((s) => {
+          const n = new Set(s);
+          if (on) n.delete(id);
+          else n.add(id);
+          return n;
+        });
+    });
+  }
+  const star = (id: string, className = "") => (
+    <button
+      type="button"
+      onClick={(e) => { e.stopPropagation(); toggleWish(id); }}
+      aria-label={wish.has(id) ? "Remove from wishlist" : "Add to wishlist"}
+      aria-pressed={wish.has(id)}
+      className={`shrink-0 text-xl leading-none transition ${wish.has(id) ? "text-gold" : "text-line2 hover:text-gold"} ${className}`}
+    >
+      {wish.has(id) ? "★" : "☆"}
+    </button>
+  );
   const [padId, setPadId] = useState<string | null>(null);
   const [padQ, setPadQ] = useState("");
   const [padTeam, setPadTeam] = useState(props.myTeamId);
@@ -334,10 +383,11 @@ export default function WarRoom(props: {
         : tagF === "pp" ? p.starPP || p.ppSpec
         : tagF === "wk" ? !!p.is_keeper
         : tagF === "clips" ? !!p.clips
+        : tagF === "wish" ? wish.has(p.id)
         : p.tag === tagF
       )
       .sort(byIdx("overall_index"));
-  }, [all, q, tagF, catF, onlyAvail]);
+  }, [all, q, tagF, catF, onlyAvail, wish]);
 
   const catRow: [AuctionCategory, string][] = [["A+", `max ${R.cap["A+"]}`], ["A", `max ${props.league === "uscl" ? usclACap(me.cats["A+"]) : R.cap.A}`], ["B", props.league === "uscl" ? `min ${me.cats["A+"] >= 2 ? 7 : 6}` : `max ${R.cap.B}`], ["Special", `max ${R.cap.Special}`]];
 
@@ -481,6 +531,9 @@ export default function WarRoom(props: {
                 <div className="min-w-0 flex-1">
                   <h2 className="text-2xl leading-tight sm:text-3xl">{onBlock.full_name}</h2>
                   <Chips p={onBlock} />
+                  <button type="button" onClick={() => toggleWish(onBlock.id)} className={`mt-2 text-sm font-medium ${wish.has(onBlock.id) ? "text-gold" : "text-muted hover:text-gold"}`}>
+                    {wish.has(onBlock.id) ? "★ On your wishlist" : "☆ Add to wishlist"}
+                  </button>
                   {onBlock.clips && (
                     <a href={onBlock.clips} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm font-medium text-red underline underline-offset-4">
                       ▶ Watch clips
@@ -608,6 +661,37 @@ export default function WarRoom(props: {
         </section>
       )}
 
+      {/* wishlist */}
+      <section className="mt-5 rounded-[16px] border border-line bg-surface p-4 shadow-[var(--elev-sm)]">
+        <div className="flex items-baseline justify-between gap-2">
+          <p className="eyebrow">Our wishlist · {wish.size}</p>
+          <p className="text-xs text-muted">Only you see this list</p>
+        </div>
+        {wish.size === 0 ? (
+          <p className="mt-2 text-sm text-muted">Tap ☆ next to any player (pool, profile or on the block) to shortlist him here.</p>
+        ) : (
+          <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {all
+              .filter((p) => wish.has(p.id))
+              .sort((a, b) => (a.team_id ? 1 : 0) - (b.team_id ? 1 : 0) || (b.overall_index ?? 0) - (a.overall_index ?? 0))
+              .map((p) => (
+                <li key={p.id} className={`flex items-center gap-2 rounded-[10px] border border-line p-2 ${p.team_id ? "opacity-55" : ""} ${p.id === onBlock?.id ? "border-red bg-[color-mix(in_srgb,var(--red)_7%,transparent)]" : ""}`}>
+                  {star(p.id)}
+                  <button type="button" onClick={() => setViewId(p.id)} className="min-w-0 flex-1 text-left">
+                    <p className="truncate font-medium">{p.full_name}</p>
+                    <p className="truncate text-[0.72rem] text-muted">
+                      {p.team_id
+                        ? `Gone · ${p.team_id === myTeamId ? "ours" : teamName(p.team_id)} ${inr(p.sold_price)}`
+                        : [catLabel(p.cat), p.tag, p.id === onBlock?.id ? "ON THE BLOCK" : affordable(p) ? null : "over our limit"].filter(Boolean).join(" · ")}
+                    </p>
+                  </button>
+                  <span className="shrink-0 font-display text-lg">{num(p.overall_index)}</span>
+                </li>
+              ))}
+          </ul>
+        )}
+      </section>
+
       {/* our squad */}
       <section className="mt-5 rounded-[16px] border border-line bg-surface p-4 shadow-[var(--elev-sm)]">
         <div className="flex items-baseline justify-between">
@@ -644,7 +728,7 @@ export default function WarRoom(props: {
           <span className="tabular-nums ml-auto text-xs text-muted">{shown.length} players</span>
         </div>
         <div className="mt-3 flex flex-wrap gap-1.5">
-          {[["", "All"], ["death", "★ Death"], ["pp", "★ Powerplay"], ...BOWL_TAGS.map((t) => [t, t]), ["wk", "Keepers"], ["clips", "▶ Has clips"]].map(([k, l]) => (
+          {[["", "All"], ["death", "★ Death"], ["pp", "★ Powerplay"], ...BOWL_TAGS.map((t) => [t, t]), ["wk", "Keepers"], ["clips", "▶ Has clips"], ["wish", `★ Wishlist (${wish.size})`]].map(([k, l]) => (
             <button key={k} type="button" className="pill !px-3 !py-1.5" data-active={tagF === k} onClick={() => { setTagF(k); setLimit(40); }}>
               {l}
             </button>
@@ -659,8 +743,9 @@ export default function WarRoom(props: {
         {/* phones: one card per player — the full table is too wide to read */}
         <ul className="mt-3 divide-y divide-line sm:hidden">
           {shown.slice(0, limit).map((p) => (
-            <li key={p.id} className={`${p.id === lot.player_id ? "bg-[color-mix(in_srgb,var(--red)_7%,transparent)]" : ""} ${p.team_id ? "opacity-50" : ""}`}>
-              <button type="button" onClick={() => setViewId(p.id)} className="flex w-full items-center gap-3 py-2.5 text-left">
+            <li key={p.id} className={`flex items-center gap-2 ${p.id === lot.player_id ? "bg-[color-mix(in_srgb,var(--red)_7%,transparent)]" : ""} ${p.team_id ? "opacity-50" : ""}`}>
+              {star(p.id, "px-1 py-2")}
+              <button type="button" onClick={() => setViewId(p.id)} className="flex min-w-0 flex-1 items-center gap-3 py-2.5 text-left">
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">
                     {p.full_name}
@@ -695,6 +780,7 @@ export default function WarRoom(props: {
               {shown.slice(0, limit).map((p) => (
                 <tr key={p.id} className={`border-b border-line ${p.id === lot.player_id ? "bg-[color-mix(in_srgb,var(--red)_7%,transparent)]" : ""} ${p.team_id ? "opacity-50" : ""}`}>
                   <td className="px-2 py-1.5">
+                    {star(p.id, "mr-1.5 align-middle !text-base")}
                     <button type="button" onClick={() => setViewId(p.id)} className="text-left font-medium underline-offset-4 hover:text-red hover:underline">{p.full_name}</button>
                     {p.starDeath && <span className="ml-1 text-gold" title="Top 10 death bowler">★D</span>}
                     {p.starPP && <span className="ml-1 text-gold" title="Top 10 powerplay bowler">★P</span>}
@@ -729,6 +815,7 @@ export default function WarRoom(props: {
           teamName={teamName(byId.get(viewId)!.team_id)}
           ours={byId.get(viewId)!.team_id === myTeamId}
           onClose={() => setViewId(null)}
+          star={star(viewId)}
         />
       )}
     </main>
@@ -737,7 +824,7 @@ export default function WarRoom(props: {
 
 // A player's full War Room profile without putting him on the block — for our
 // own squad, and any name in the pool table.
-function ProfileSheet({ p, teamName, ours, onClose }: { p: Enriched; teamName: string; ours: boolean; onClose: () => void }) {
+function ProfileSheet({ p, teamName, ours, onClose, star }: { p: Enriched; teamName: string; ours: boolean; onClose: () => void; star: React.ReactNode }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -754,7 +841,7 @@ function ProfileSheet({ p, teamName, ours, onClose }: { p: Enriched; teamName: s
         <div className="mt-2 flex gap-4">
           <PlayerPhoto src={p.photo_url} name={p.full_name} className="h-24 w-20 shrink-0 rounded-[10px] sm:h-28 sm:w-24" sizes="96px" />
           <div className="min-w-0 flex-1">
-            <h2 className="text-2xl leading-tight sm:text-3xl">{p.full_name}</h2>
+            <h2 className="flex items-center gap-2 text-2xl leading-tight sm:text-3xl">{p.full_name} {star}</h2>
             <Chips p={p} />
             {p.team_id && (
               <p className="mt-2 text-sm text-muted">

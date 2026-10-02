@@ -109,3 +109,5 @@ Last updated: 2026-09-30
 - [ ] AFTER THE AUCTION: `node scripts/league-switch.mts sdll`, LEAGUE = "sdll", push; remove USCL band code from cricvideos-home.tsx
 - [ ] Check Shubhendu Kaushik's stats (500 mat / 20000 runs / SR 190 / econ 4 look like test values)
 - [ ] 44 USCL pool players have doubtful self-entered stats (e.g. Shubhendu Kaushik 500 M / 20000 runs / SR 190 / econ 4; Vishal Tiwari avg 4668) — copied as-is from the USCL site
+- [x] Final check 3 Oct: 14 owner logins OK (own War Room, no pad, /admin blocked), DB squads = official deck, rules = rulebook, RLS/RPC lock verified, public pages OK
+- [ ] Library sign-in cap: 20 tries / hour per connection (LMS pass route `tooMany("pwlogin", ip, 20, 60)`) — owners on one venue Wi-Fi share it; raise for auction day only if Nikhil OKs

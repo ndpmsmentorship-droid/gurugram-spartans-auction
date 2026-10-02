@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { usernameToEmail } from "@/lib/owner-auth";
+import { usclClosed } from "@/lib/league";
 
 export type AuthActionState = { error: string } | null;
 
@@ -20,6 +21,14 @@ export async function signIn(
     error,
   } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { error: "Wrong username/email or password." };
+
+  if (usclClosed() && user) {
+    const { data: prof } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+    if (prof?.role !== "admin") {
+      await supabase.auth.signOut();
+      return { error: "The USCL auction has closed — owner access ended at midnight. Thank you for taking part." };
+    }
+  }
 
   // When the user came straight to /login (no deep-link), send owners to their
   // squad and everyone else to the pool.

@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { LEAGUE } from "@/lib/league";
+import { LEAGUE, usclClosed } from "@/lib/league";
 
 // ALLOWLIST, not a denylist: only the landing page ("/", exact), the live
 // board and the squad display are public. Everything else — schedule, pool, jersey form, player profiles, the
@@ -75,6 +75,20 @@ export async function proxy(request: NextRequest) {
   // is admin-only always; during the USCL soft launch the 14 franchise owners
   // get the war room, the live board and player pages — nothing else.
   const usclOwnerOk = ["/war-room", "/auction", "/players"].some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  // After the USCL cut-off nobody but the admin gets past the login page.
+  if (user && usclClosed()) {
+    const { data: prof } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+    if (prof?.role !== "admin") {
+      await supabase.auth.signOut();
+      const closed = request.nextUrl.clone();
+      closed.pathname = "/login";
+      closed.search = "?closed=1";
+      const out = NextResponse.redirect(closed);
+      for (const c of response.cookies.getAll()) out.cookies.set(c);
+      return out;
+    }
+    return response;
+  }
   if (user && (pathname.startsWith("/scout/import") || (LEAGUE === "uscl" && !usclOwnerOk))) {
     const { data: prof } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
     if (prof?.role !== "admin") {

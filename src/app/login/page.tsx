@@ -4,14 +4,15 @@ import SpartansStars from "../SpartansStars";
 import Image from "next/image";
 import usclCrest from "../brand/uscl-crest.png";
 import sdllCrest from "../brand/crest.png";
-import { LEAGUE } from "@/lib/league";
+import { LEAGUE, usclClosed } from "@/lib/league";
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; closed?: string }>;
 }) {
   const { next } = await searchParams;
+  const closed = usclClosed();
 
   // USCL soft launch: every franchise signs in here, so no Spartans branding —
   // and the form comes first on phones.
@@ -38,7 +39,14 @@ export default async function LoginPage({
           </div>
         </section>
         <section className="order-1 flex items-center justify-center bg-background px-6 py-12 md:order-2 md:py-16">
-          <LoginForm next={next || "/war-room"} title="USCL Auction" subtitle="Franchise sign-in" />
+          <div className="w-full max-w-sm">
+            {closed && (
+              <p className="mb-5 rounded-[12px] border border-line bg-wash px-4 py-3 text-sm leading-relaxed text-ink">
+                <strong>The USCL auction has closed.</strong> Owner access ended at midnight — thank you for taking part.
+              </p>
+            )}
+            <LoginForm next={next || "/war-room"} title="USCL Auction" subtitle={closed ? "Admin sign-in" : "Franchise sign-in"} />
+          </div>
         </section>
       </main>
     );

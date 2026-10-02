@@ -11,6 +11,7 @@ import { DEFAULT_RULES, inr, USCL_RETAIN, USCL_OWNER, USCL_AGE_BAND, inAgeBand, 
 import type { League } from "@/lib/league";
 import phaseData from "@/data/phase-stats.json";
 import cvMap from "@/data/cv-map.json";
+import LibraryPanel from "./LibraryPanel";
 import { clipsUrl } from "@/lib/scout/clips";
 import { rtmState, rtmThreats, RTM_MAX_AGAINST } from "@/lib/auction/rtm";
 
@@ -742,7 +743,7 @@ export default function WarRoom(props: {
                     </button>
                     {onBlock.clips && (
                       <a href={onBlock.clips} target="_blank" rel="noopener noreferrer" className="pill !border-red !px-3 !py-1.5 text-[0.8rem] !text-red">
-                        ▶ Clips, pitch map &amp; wagon wheel ↗
+                        ▶ Open in Ball Library ↗
                       </a>
                     )}
                   </div>
@@ -760,6 +761,7 @@ export default function WarRoom(props: {
               </div>
 
               <StatGrid p={onBlock} />
+              <LibraryPanel key={onBlock.id} name={onBlock.full_name} />
 
               {fills.length > 0 && (
                 <p className="mt-3 rounded-[10px] bg-[color-mix(in_srgb,var(--up)_10%,transparent)] px-3 py-2 text-sm text-up">
@@ -1114,11 +1116,7 @@ function ProfileSheet({ p, teamName, ours, onClose, star }: { p: Enriched; teamN
           </div>
         </div>
         <StatGrid p={p} />
-        {p.clips && (
-          <a href={p.clips} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-red px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
-            ▶ Watch clips
-          </a>
-        )}
+        <LibraryPanel key={p.id} name={p.full_name} defaultOpen />
       </div>
     </div>
   );

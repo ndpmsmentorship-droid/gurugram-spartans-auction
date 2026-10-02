@@ -95,20 +95,83 @@ function enrich(p: WRPlayer): Enriched {
 }
 
 // ---- squad needs -----------------------------------------------------------
-type Need = { key: string; label: string; target: number; test: (p: Enriched) => boolean; rank: (a: Enriched, b: Enriched) => number };
+type Need = { key: string; q: string; label: string; target: number; test: (p: Enriched) => boolean; rank: (a: Enriched, b: Enriched) => number };
 const byIdx = (k: "bat_index" | "bowl_index" | "overall_index") => (a: Enriched, b: Enriched) => (b[k] ?? -1) - (a[k] ?? -1);
 const byPhase = (ph: "death" | "pp") => (a: Enriched, b: Enriched) =>
   (a.phase?.[ph]?.econ ?? 99) - (b.phase?.[ph]?.econ ?? 99) || (b.bowl_index ?? -1) - (a.bowl_index ?? -1);
 const NEEDS: Need[] = [
-  { key: "death", label: "Death bowlers", target: 2, test: (p) => p.deathSpec, rank: byPhase("death") },
-  { key: "pp", label: "Powerplay bowlers", target: 2, test: (p) => p.ppSpec, rank: byPhase("pp") },
-  { key: "pace", label: "Pace bowlers", target: 4, test: (p) => isPace(p.tag), rank: byIdx("bowl_index") },
-  { key: "spin", label: "Spinners", target: 3, test: (p) => isSpin(p.tag), rank: byIdx("bowl_index") },
-  { key: "left", label: "Left-arm bowlers", target: 2, test: (p) => p.tag === "Left-arm pace" || p.tag === "Left-arm spin", rank: byIdx("bowl_index") },
-  { key: "wk", label: "Wicket-keepers", target: 2, test: (p) => !!p.is_keeper || /keep/i.test(p.primary_role ?? ""), rank: byIdx("bat_index") },
-  { key: "lhb", label: "Left-hand bats", target: 2, test: (p) => p.lhb, rank: byIdx("bat_index") },
-  { key: "hit", label: "Power hitters (SR 150+)", target: 3, test: (p) => (p.bat_sr ?? 0) >= 150 && (p.runs ?? 0) >= 1000, rank: (a, b) => (b.bat_sr ?? 0) - (a.bat_sr ?? 0) },
+  { key: "death", q: "death bowlers", label: "Death bowlers", target: 2, test: (p) => p.deathSpec, rank: byPhase("death") },
+  { key: "pp", q: "powerplay bowlers", label: "Powerplay bowlers", target: 2, test: (p) => p.ppSpec, rank: byPhase("pp") },
+  { key: "pace", q: "pacers", label: "Pace bowlers", target: 4, test: (p) => isPace(p.tag), rank: byIdx("bowl_index") },
+  { key: "spin", q: "spinners", label: "Spinners", target: 3, test: (p) => isSpin(p.tag), rank: byIdx("bowl_index") },
+  { key: "left", q: "left arm bowlers", label: "Left-arm bowlers", target: 2, test: (p) => p.tag === "Left-arm pace" || p.tag === "Left-arm spin", rank: byIdx("bowl_index") },
+  { key: "wk", q: "keepers", label: "Wicket-keepers", target: 2, test: (p) => !!p.is_keeper || /keep/i.test(p.primary_role ?? ""), rank: byIdx("bat_index") },
+  { key: "lhb", q: "left hand bats", label: "Left-hand bats", target: 2, test: (p) => p.lhb, rank: byIdx("bat_index") },
+  { key: "hit", q: "power hitters", label: "Power hitters (SR 150+)", target: 3, test: (p) => (p.bat_sr ?? 0) >= 150 && (p.runs ?? 0) >= 1000, rank: (a, b) => (b.bat_sr ?? 0) - (a.bat_sr ?? 0) },
 ];
+
+// ---- smart pool search ------------------------------------------------------
+// Plain words → filters: "left arm spinners", "keeper A under 32", "death econ<7",
+// "lefty bat sr 150+", "affordable B pacers". Whatever isn't understood is
+// matched against the name, so typing a name still works.
+type QF = { label: string; test: (p: Enriched) => boolean };
+const QUERY_RULES: [RegExp, QF][] = [
+  [/\b(left[- ]?arm|sla|lefty?)\s*(orthodox\s*)?(spin(ners?)?|spinner|slow|orthodox|chinaman)\b/, { label: "Left-arm spin", test: (p) => p.tag === "Left-arm spin" }],
+  [/\b(left[- ]?arm|lefty?)\s*(pace|pacers?|seam(ers?)?|fast|quicks?|medium)\b/, { label: "Left-arm pace", test: (p) => p.tag === "Left-arm pace" }],
+  [/\b(right[- ]?arm)\s*(pace|pacers?|seam(ers?)?|fast|quicks?|medium)\b/, { label: "Right-arm pace", test: (p) => p.tag === "Right-arm pace" }],
+  [/\b(off[- ]?spin(ners?)?|off[- ]?break|finger spin(ners?)?)\b/, { label: "Off-spin", test: (p) => p.tag === "Off-spin" }],
+  [/\b(leg[- ]?spin(ners?)?|leggies?|wrist[- ]?spin(ners?)?|googly)\b/, { label: "Leg-spin", test: (p) => p.tag === "Leg-spin" }],
+  [/\b(left[- ]?hand(ed)?|lhb|lefty|left)\s*(bat(ters?|sman|smen|s)?|hitters?|openers?)\b|\blhb\b/, { label: "Left-hand bat", test: (p) => p.lhb }],
+  [/\bleft[- ]?arm(ers?)?(\s*bowlers?)?\b/, { label: "Left-arm bowler", test: (p) => p.tag === "Left-arm pace" || p.tag === "Left-arm spin" }],
+  [/\b(pacers?|pace|seamers?|seam|fast bowlers?|quicks?|fast)\b/, { label: "Pace", test: (p) => isPace(p.tag) }],
+  [/\b(spinners?|spin)\b/, { label: "Spin", test: (p) => isSpin(p.tag) }],
+  [/\b(wicket[- ]?keepers?|keepers?|wk|wks|keeping)\b/, { label: "Keeper", test: (p) => !!p.is_keeper || /keep/i.test(p.primary_role ?? "") }],
+  [/\b(death( overs?| bowlers?)?|finisher bowlers?|end overs)\b/, { label: "Death", test: (p) => p.starDeath || p.deathSpec }],
+  [/\b(power ?play|pp|new[- ]ball|opening bowlers?)\b/, { label: "Powerplay", test: (p) => p.starPP || p.ppSpec }],
+  [/\b(power[- ]?hitters?|big hitters?|hitters?|finishers?|six hitters?)\b/, { label: "Power hitter", test: (p) => (p.bat_sr ?? 0) >= 150 && (p.runs ?? 0) >= 1000 }],
+  [/\b(all[- ]?rounders?|ar)\b/, { label: "All-rounder", test: (p) => /all/i.test(p.primary_role ?? "") }],
+  [/\b(bat(ters?|sman|smen)|batting)\b/, { label: "Batter", test: (p) => /bat/i.test(p.primary_role ?? "") || (p.runs ?? 0) >= 2000 }],
+  [/\b(bowlers?|bowling)\b/, { label: "Bowler", test: (p) => !!p.tag }],
+  [/\b(clips?|videos?|footage)\b/, { label: "Has clips", test: (p) => !!p.clips }],
+  [/\b(age[- ]?band|31[- ]?34)\b/, { label: "Age 31–34", test: (p) => inAgeBand(p.age) }],
+  [/\b(legends?|special)\b/, { label: "Legend", test: (p) => p.cat === "Special" }],
+  [/(^|\s)(a\+|a plus|aplus)(?=\s|$)/, { label: "A+", test: (p) => p.cat === "A+" }],
+  [/\b(cat(egory)?\s*a|a cat(egory)?)\b|(^|\s)a(?=\s|$)/, { label: "A", test: (p) => p.cat === "A" }],
+  [/\b(cat(egory)?\s*b|b cat(egory)?)\b|(^|\s)b(?=\s|$)/, { label: "B", test: (p) => p.cat === "B" }],
+];
+const STOP = /\b(show|me|all|the|any|players?|options?|remaining|available|left over|who|with|and|or|good|best|top|list|of|in|for|guys?|need|want|find|get|some|bowl(ers|ing)?|s)\b/g;
+const NUM_RULES: [RegExp, (n: number, op: string) => QF][] = [
+  [/\b(?:under|below|less than|<|u)\s*(\d{2})\b(?!\s*(sr|strike|avg|econ))|\bage\s*(<|under|below)\s*(\d{2})\b/, (n) => ({ label: `age < ${n}`, test: (p) => p.age != null && p.age < n })],
+  [/\b(?:over|above|older than)\s*(\d{2})\b|\bage\s*(>|over|above)\s*(\d{2})\b/, (n) => ({ label: `age > ${n}`, test: (p) => p.age != null && p.age > n })],
+  [/\b(?:econ(?:omy)?|eco|er)\s*(?:<|under|below|less than|upto|up to)?\s*(\d+(?:\.\d+)?)\b/, (n) => ({ label: `econ ≤ ${n}`, test: (p) => p.economy != null && p.economy <= n })],
+  [/\b(?:sr|strike ?rate)\s*(?:>|over|above|more than)?\s*(\d{2,3})\+?|(\d{2,3})\+?\s*(?:sr|strike ?rate)\b/, (n) => ({ label: `SR ≥ ${n}`, test: (p) => (p.bat_sr ?? 0) >= n })],
+  [/\b(?:avg|average)\s*(?:>|over|above|more than)?\s*(\d{1,3})\+?|(\d{1,3})\+?\s*(?:avg|average)\b/, (n) => ({ label: `avg ≥ ${n}`, test: (p) => (p.bat_avg ?? 0) >= n })],
+  [/\b(?:index|idx)\s*(?:>|over|above)?\s*(\d{1,3})\b/, (n) => ({ label: `index ≥ ${n}`, test: (p) => (p.overall_index ?? 0) >= n })],
+  [/\b(?:wkts?|wickets?)\s*(?:>|over|above)?\s*(\d{1,4})\+?|(\d{1,4})\+?\s*(?:wkts?|wickets?)\b/, (n) => ({ label: `wkts ≥ ${n}`, test: (p) => (p.wickets ?? 0) >= n })],
+];
+export function parsePoolQuery(raw: string): { filters: QF[]; name: string; afford: boolean; wish: boolean } {
+  let t = ` ${raw.toLowerCase().replace(/[’'`]/g, "").replace(/\s+/g, " ")} `;
+  const filters: QF[] = [];
+  let afford = false, wish = false;
+  if (/\b(affordable|can afford|within budget|in budget|cheap)\b/.test(t)) { afford = true; t = t.replace(/\b(affordable|can afford|within budget|in budget|cheap)\b/g, " "); }
+  if (/\b(wish ?list|shortlist(ed)?|starred)\b/.test(t)) { wish = true; t = t.replace(/\b(wish ?list|shortlist(ed)?|starred)\b/g, " "); }
+  for (const [re, make] of NUM_RULES) {
+    const m = t.match(re);
+    if (!m) continue;
+    const n = Number(m.slice(1).find((x) => x && /^\d/.test(x)));
+    if (Number.isFinite(n)) { filters.push(make(n, "")); t = t.replace(m[0], " "); }
+  }
+  for (const [re, f] of QUERY_RULES) {
+    const m = t.match(re);
+    if (!m) continue;
+    // "left arm spin" must not also count as "spin" / "left-arm bowler"
+    if (!filters.some((x) => x.label === f.label)) filters.push(f);
+    t = t.replace(m[0], " ");
+  }
+  const name = t.replace(STOP, " ").replace(/[^a-z .]/g, " ").replace(/\s+/g, " ").trim();
+  return { filters, name, afford, wish };
+}
+const SEARCH_EXAMPLES = ["left arm spinners", "death bowlers econ 7", "keeper under 32", "lefty bat sr 150", "affordable B pacers", "A+ all rounders"];
 
 const R = DEFAULT_RULES;
 
@@ -220,8 +283,10 @@ export default function WarRoom(props: {
 
   const needs = NEEDS.map((n) => {
     const have = mine.filter(n.test).length;
-    const picks = have >= n.target ? [] : available.filter((p) => n.test(p) && affordable(p)).sort(n.rank).slice(0, 5);
-    return { ...n, have, picks };
+    const fit = available.filter(n.test);
+    const canBuy = fit.filter(affordable);
+    const picks = have >= n.target ? [] : canBuy.slice().sort(n.rank).slice(0, 5);
+    return { ...n, have, picks, left: fit.length, canBuy: canBuy.length };
   });
 
   // ---- auction pad: one person calls up the player and records the sale ----
@@ -355,16 +420,36 @@ export default function WarRoom(props: {
       }
     });
   }
-  function rtmLast(fid: string) {
-    const s = lastSale;
-    if (!s) return;
+  // USCL RTM (Owners & Retention Rules, RTM 2.1–2.2): a franchise calls its RTM →
+  // the winning team may raise its bid once → the RTM team matches that revised
+  // bid (player moves to them) or declines (player stays with the winner at the
+  // revised bid). Only a match counts against the one RTM / the two-per-team cap.
+  const [rtmCall, setRtmCall] = useState<{ fid: string; price: number } | null>(null);
+  function rtmMatched() {
+    const s = lastSale, c = rtmCall;
+    if (!s || !c) return;
     startSave(async () => {
-      const r = await rtmPlayer(s.id, fid, s.price);
+      const r = await rtmPlayer(s.id, c.fid, c.price);
       if (r?.error) setPadMsg({ text: r.error, bad: true });
       else {
-        patch(s.id, { team_id: fid, acquired: "rtm", rtm_against: s.teamId });
+        patch(s.id, { team_id: c.fid, sold_price: c.price, acquired: "rtm", rtm_against: s.teamId });
         setLastSale(null);
-        setPadMsg({ text: `RTM: ${s.name} → ${teamName(fid)} · ${inr(s.price)}` });
+        setRtmCall(null);
+        setPadMsg({ text: `RTM matched: ${s.name} → ${teamName(c.fid)} · ${inr(c.price)}` });
+      }
+    });
+  }
+  function rtmDeclined() {
+    const s = lastSale, c = rtmCall;
+    if (!s || !c) return;
+    startSave(async () => {
+      const r = c.price === s.price ? null : await assignPlayer(s.id, s.teamId, c.price, "auction");
+      if (r?.error) setPadMsg({ text: r.error, bad: true });
+      else {
+        patch(s.id, { sold_price: c.price });
+        setLastSale({ ...s, price: c.price });
+        setRtmCall(null);
+        setPadMsg({ text: `RTM declined by ${teamName(c.fid)}: ${s.name} stays with ${teamName(s.teamId)} · ${inr(c.price)}` });
       }
     });
   }
@@ -406,10 +491,20 @@ export default function WarRoom(props: {
   const [catF, setCatF] = useState<string>("");
   const [onlyAvail, setOnlyAvail] = useState(true);
   const [limit, setLimit] = useState(40);
+  const parsed = useMemo(() => parsePoolQuery(q), [q]);
+  function askPool(text: string) {
+    setQ(text);
+    setTagF("");
+    setCatF("");
+    setOnlyAvail(true);
+    setLimit(40);
+    document.getElementById("pool")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
   const shown = useMemo(() => {
-    const t = q.trim().toLowerCase();
+    const t = parsed.name;
     return all
       .filter((p) => (!onlyAvail || !p.team_id) && (!catF || p.cat === catF) && (!t || p.full_name.toLowerCase().includes(t)))
+      .filter((p) => parsed.filters.every((f) => f.test(p)) && (!parsed.afford || affordable(p)) && (!parsed.wish || wish.has(p.id)))
       .filter((p) =>
         !tagF ? true
         : tagF === "death" ? p.starDeath || p.deathSpec
@@ -420,7 +515,8 @@ export default function WarRoom(props: {
         : p.tag === tagF
       )
       .sort(byIdx("overall_index"));
-  }, [all, q, tagF, catF, onlyAvail, wish]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- affordable follows purse/squad, both in `all`
+  }, [all, parsed, tagF, catF, onlyAvail, wish, maxSafe]);
 
   // USCL: these are the match-day XII limits (1 A+·5 A·6 B or 2 A+·3 A·7 B, +1 Legend);
   // the B count is the one that bites — you can't field a side without enough B.
@@ -499,7 +595,7 @@ export default function WarRoom(props: {
                     <button
                       key={k}
                       type="button"
-                      className="pill flex-1 !px-2 !py-2"
+                      className="pill h-11 flex-1 justify-center !px-2 !py-0 text-[0.8rem]"
                       data-active={padKind === k}
                       onClick={() => {
                         setPadKind(k);
@@ -512,38 +608,42 @@ export default function WarRoom(props: {
                   ))}
                 </div>
               )}
-              <div className="flex gap-1.5">
-                <button type="button" className="pill shrink-0 !px-4 !py-2.5" data-active={padTeam === myTeamId} onClick={() => setPadTeam(myTeamId)}>
-                  Us
+              <div className="grid grid-cols-2 gap-1.5">
+                <button type="button" className="pill h-11 min-w-0 justify-center !px-3 !py-0 text-[0.8rem]" data-active={padTeam === myTeamId} onClick={() => setPadTeam(myTeamId)}>
+                  <span className="truncate">Us · {teamName(myTeamId)}</span>
                 </button>
-                <select
-                  className="input !py-2.5"
-                  value={padTeam === myTeamId ? "" : padTeam}
-                  onChange={(e) => setPadTeam(e.target.value || myTeamId)}
-                  aria-label="Other team"
-                >
-                  <option value="">Other team…</option>
-                  {teams.filter((t) => t.id !== myTeamId).map((t) => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
-                  ))}
-                </select>
+                <div className="relative min-w-0">
+                  <select
+                    className="pill h-11 w-full min-w-0 appearance-none !py-0 !pl-4 !pr-9 text-[0.8rem] [&>option]:bg-white [&>option]:text-black"
+                    data-active={padTeam !== myTeamId}
+                    value={padTeam === myTeamId ? "" : padTeam}
+                    onChange={(e) => setPadTeam(e.target.value || myTeamId)}
+                    aria-label="Other team"
+                  >
+                    <option value="">Other team…</option>
+                    {teams.filter((t) => t.id !== myTeamId).map((t) => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                  </select>
+                  <span className={`pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-xs ${padTeam !== myTeamId ? "text-white" : "text-muted"}`}>▾</span>
+                </div>
               </div>
-              <div className="flex flex-wrap items-center gap-1.5">
+              <div className="grid grid-cols-[minmax(7rem,1.4fr)_repeat(4,minmax(0,1fr))] gap-1.5">
                 <input
                   type="number"
                   inputMode="numeric"
-                  className="input !w-32 !py-2.5 font-semibold"
+                  className="input h-11 !py-0 text-center font-semibold tabular-nums"
                   value={padPrice || ""}
                   onChange={(e) => setPadPrice(Number(e.target.value) || 0)}
                   aria-label="Price"
                 />
                 {(() => { const s = bidStep(byId.get(padId)?.cat); return [-s, s, 2 * s, 5 * s]; })().map((d) => (
-                  <button key={d} type="button" className="pill !px-3 !py-2" onClick={() => setPadPrice((v) => Math.max(0, v + d))}>
+                  <button key={d} type="button" className="pill h-11 justify-center !px-1 !py-0 text-[0.8rem] tabular-nums" onClick={() => setPadPrice((v) => Math.max(0, v + d))}>
                     {d > 0 ? "+" : "−"}{Math.abs(d) / 1000}K
                   </button>
                 ))}
               </div>
-              <button type="button" disabled={saving || !padPrice} onClick={sell} className="btn-accent w-full !py-3 text-base disabled:opacity-60">
+              <button type="button" disabled={saving || !padPrice} onClick={sell} className="btn-accent h-12 w-full justify-center !py-0 text-base disabled:opacity-60">
                 {padKind === "auction" ? "Sold to" : padKind === "owner" ? "Owner pick for" : "Retained by"} {teamName(padTeam)} · {inr(padPrice)}
               </button>
             </div>
@@ -574,11 +674,32 @@ export default function WarRoom(props: {
               <button type="button" disabled={saving} onClick={undoLast} className="pill !px-3 !py-1.5">↶ Undo last</button>
               {props.league === "uscl" &&
                 lastSale.kind === "auction" &&
+                !rtmCall &&
                 rtmThreats(rtm, lastSale.teamId).map((fid) => (
-                  <button key={fid} type="button" disabled={saving} onClick={() => rtmLast(fid)} className="pill !px-3 !py-1.5" title="This franchise used its RTM and matched">
-                    RTM: {teamName(fid)} matched
+                  <button key={fid} type="button" disabled={saving} onClick={() => setRtmCall({ fid, price: lastSale.price })} className="pill !px-3 !py-1.5" title="This franchise calls its Right to Match">
+                    RTM called: {teamName(fid)}
                   </button>
                 ))}
+              {rtmCall && (
+                <div className="mt-1 w-full rounded-[10px] border p-2.5" style={{ borderColor: "var(--gold-line)", background: "var(--gold-fill)" }}>
+                  <p className="text-[0.8rem] text-muted">
+                    <strong className="text-ink">{teamName(rtmCall.fid)}</strong> called RTM. {teamName(lastSale.teamId)} may raise its bid once — set the revised bid:
+                  </p>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                    <span className="num text-lg font-semibold tabular-nums">{inr(rtmCall.price)}</span>
+                    {(() => { const st = bidStep(byId.get(lastSale.id)?.cat); return [-st, st, 2 * st, 5 * st]; })().map((d) => (
+                      <button key={d} type="button" disabled={saving || rtmCall.price + d < lastSale.price} className="pill !px-2.5 !py-1" onClick={() => setRtmCall({ ...rtmCall, price: rtmCall.price + d })}>
+                        {d > 0 ? "+" : "−"}{inr(Math.abs(d))}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    <button type="button" disabled={saving} onClick={rtmMatched} className="btn-accent !px-3 !py-1.5 text-sm">Matched → {teamName(rtmCall.fid)}</button>
+                    <button type="button" disabled={saving} onClick={rtmDeclined} className="pill !px-3 !py-1.5">Declined → stays {teamName(lastSale.teamId)}</button>
+                    <button type="button" disabled={saving} onClick={() => setRtmCall(null)} className="pill !px-3 !py-1.5">Cancel</button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </section>
@@ -615,14 +736,16 @@ export default function WarRoom(props: {
                 <div className="min-w-0 flex-1">
                   <h2 className="text-2xl leading-tight sm:text-3xl">{onBlock.full_name}</h2>
                   <Chips p={onBlock} />
-                  <button type="button" onClick={() => toggleWish(onBlock.id)} className={`mt-2 text-sm font-medium ${wish.has(onBlock.id) ? "text-gold" : "text-muted hover:text-gold"}`}>
-                    {wish.has(onBlock.id) ? "★ On your wishlist" : "☆ Add to wishlist"}
-                  </button>
-                  {onBlock.clips && (
-                    <a href={onBlock.clips} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm font-medium text-red underline underline-offset-4">
-                      ▶ Watch clips
-                    </a>
-                  )}
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <button type="button" onClick={() => toggleWish(onBlock.id)} className={`pill !px-3 !py-1.5 text-[0.8rem] ${wish.has(onBlock.id) ? "!border-[var(--gold-line)] !text-gold" : ""}`}>
+                      {wish.has(onBlock.id) ? "★ On your wishlist" : "☆ Add to wishlist"}
+                    </button>
+                    {onBlock.clips && (
+                      <a href={onBlock.clips} target="_blank" rel="noopener noreferrer" className="pill !border-red !px-3 !py-1.5 text-[0.8rem] !text-red">
+                        ▶ Clips, pitch map &amp; wagon wheel ↗
+                      </a>
+                    )}
+                  </div>
                 </div>
                 {/* phones: its own full-width row under the name; wider: right column */}
                 <div className="flex w-full items-end justify-between gap-3 rounded-[10px] bg-wash px-3.5 py-2.5 sm:block sm:w-auto sm:shrink-0 sm:bg-transparent sm:p-0 sm:text-right">
@@ -697,28 +820,50 @@ export default function WarRoom(props: {
 
         {/* needs */}
         <section className="rounded-[16px] border border-line bg-surface p-4 shadow-[var(--elev-sm)]">
-          <p className="eyebrow">What we need next</p>
-          <ul className="mt-3 divide-y divide-line">
-            {needs.map((n) => (
-              <li key={n.key} className="py-2.5">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium">{n.label}</span>
-                  <span className={`tabular-nums text-sm ${n.have >= n.target ? "text-up" : "text-red"}`}>
-                    {n.have}/{n.target} {n.have >= n.target ? "✓" : ""}
-                  </span>
-                </div>
-                {n.picks.length > 0 && (
-                  <p className="mt-1 text-[0.8rem] leading-relaxed text-muted">
-                    {n.picks.map((p, i) => (
-                      <span key={p.id}>
-                        {i > 0 && " · "}
-                        <span className="text-ink">{p.full_name}</span> <span className="tabular-nums">({catLabel(p.cat)}{phaseHint(p, n.key)})</span>
+          <div className="flex items-baseline justify-between gap-2">
+            <p className="eyebrow">What we need next</p>
+            <p className="text-[0.7rem] text-faint">tap a row for every option</p>
+          </div>
+          <ul className="mt-2 divide-y divide-line">
+            {needs.map((n) => {
+              const done = n.have >= n.target;
+              return (
+                <li key={n.key} className="py-2">
+                  <button type="button" onClick={() => askPool(n.q)} className="group -mx-2 flex w-[calc(100%+1rem)] items-center justify-between gap-2 rounded-[10px] px-2 py-1 text-left transition hover:bg-wash">
+                    <span className="min-w-0">
+                      <span className="font-medium group-hover:text-red-deep">{n.label}</span>
+                      <span className="ml-2 text-[0.75rem] tabular-nums text-muted">
+                        {n.left} left{n.left ? ` · ${n.canBuy} we can afford` : ""}
                       </span>
-                    ))}
-                  </p>
-                )}
-              </li>
-            ))}
+                    </span>
+                    <span className="flex shrink-0 items-center gap-2">
+                      <span className="flex gap-0.5" aria-label={`${n.have} of ${n.target}`}>
+                        {Array.from({ length: n.target }, (_, i) => (
+                          <span key={i} className="h-2 w-2 rounded-full" style={{ background: i < n.have ? (done ? "var(--up)" : "var(--red)") : "var(--line2)" }} />
+                        ))}
+                      </span>
+                      <span className={`tabular-nums text-sm ${done ? "text-up" : "text-red"}`}>{n.have}/{n.target}{done ? " ✓" : ""}</span>
+                      <span className="text-muted group-hover:text-red-deep">›</span>
+                    </span>
+                  </button>
+                  {n.picks.length > 0 && (
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {n.picks.map((p) => (
+                        <button key={p.id} type="button" onClick={() => setViewId(p.id)} className="rounded-full border border-line bg-surface px-2.5 py-1 text-[0.78rem] transition hover:border-red" title="Open profile">
+                          {wish.has(p.id) && <span className="text-gold">★ </span>}
+                          <span className="text-ink">{p.full_name}</span> <span className="tabular-nums text-muted">{catLabel(p.cat)}{phaseHint(p, n.key)}</span>
+                        </button>
+                      ))}
+                      {n.canBuy > n.picks.length && (
+                        <button type="button" onClick={() => askPool(`affordable ${n.q}`)} className="rounded-full px-2.5 py-1 text-[0.78rem] text-red-deep hover:underline">
+                          +{n.canBuy - n.picks.length} more →
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
           <p className="mt-3 text-[0.7rem] text-faint">
             ★ phase stars: top 10 by economy in {PHASES.matches} SARDA S6 + USCL E1 matches (CricHeroes AI commentary). Suggestions are players still available that fit our category slots and our max safe bid.
@@ -806,15 +951,45 @@ export default function WarRoom(props: {
       </section>
 
       {/* pool */}
-      <section className="mt-5 rounded-[16px] border border-line bg-surface p-4 shadow-[var(--elev-sm)]">
+      <section id="pool" className="scroll-mt-4 mt-5 rounded-[16px] border border-line bg-surface p-4 shadow-[var(--elev-sm)]">
         <div className="flex flex-wrap items-center gap-2">
           <p className="eyebrow mr-2">Pool</p>
-          <input className="input !w-48 !py-1.5 text-sm" placeholder="Search name" value={q} onChange={(e) => { setQ(e.target.value); setLimit(40); }} />
+          <div className="relative w-full sm:w-[26rem]">
+            <input
+              className="input !py-2 !pr-8 text-sm"
+              placeholder={'Ask: "left arm spinners", "keeper under 32"…'}
+              value={q}
+              onChange={(e) => { setQ(e.target.value); setLimit(40); }}
+            />
+            {q && (
+              <button type="button" aria-label="Clear" onClick={() => setQ("")} className="absolute right-2 top-1/2 -translate-y-1/2 px-1 text-muted hover:text-ink">✕</button>
+            )}
+          </div>
           <label className="flex items-center gap-1.5 text-xs text-muted">
             <input type="checkbox" checked={onlyAvail} onChange={(e) => setOnlyAvail(e.target.checked)} className="accent-[var(--red-deep)]" /> available only
           </label>
           <span className="tabular-nums ml-auto text-xs text-muted">{shown.length} players</span>
         </div>
+        {q.trim() ? (
+          <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[0.78rem]">
+            <span className="text-muted">Showing</span>
+            {parsed.filters.map((f) => (
+              <span key={f.label} className="rounded-full bg-[color-mix(in_srgb,var(--red)_10%,transparent)] px-2.5 py-0.5 font-medium text-red-deep">{f.label}</span>
+            ))}
+            {parsed.afford && <span className="rounded-full bg-[color-mix(in_srgb,var(--up)_12%,transparent)] px-2.5 py-0.5 font-medium text-up">we can afford</span>}
+            {parsed.wish && <span className="rounded-full px-2.5 py-0.5 font-medium text-gold" style={{ background: "var(--gold-fill)" }}>★ wishlist</span>}
+            {parsed.name && <span className="rounded-full bg-wash px-2.5 py-0.5">name “{parsed.name}”</span>}
+            {!parsed.filters.length && !parsed.name && !parsed.afford && !parsed.wish && <span className="text-muted">everyone</span>}
+            <span className="text-muted">{onlyAvail ? "· still available" : "· incl. sold"}</span>
+          </div>
+        ) : (
+          <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[0.78rem]">
+            <span className="text-muted">Try</span>
+            {SEARCH_EXAMPLES.map((x) => (
+              <button key={x} type="button" onClick={() => { setQ(x); setLimit(40); }} className="rounded-full border border-dashed border-line2 px-2.5 py-0.5 text-muted hover:border-red hover:text-red-deep">{x}</button>
+            ))}
+          </div>
+        )}
         <div className="mt-3 flex flex-wrap gap-1.5">
           {[["", "All"], ["death", "★ Death"], ["pp", "★ Powerplay"], ...BOWL_TAGS.map((t) => [t, t]), ["wk", "Keepers"], ["clips", "▶ Has clips"], ["wish", `★ Wishlist (${wish.size})`]].map(([k, l]) => (
             <button key={k} type="button" className="pill !px-3 !py-1.5" data-active={tagF === k} onClick={() => { setTagF(k); setLimit(40); }}>

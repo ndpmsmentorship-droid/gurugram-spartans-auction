@@ -33,12 +33,12 @@ const DIVISIONS = ["Elite", "Challengers", "Fighters"];
 export default function SquadsBoard({
   teams,
   players,
-  poolSize,
+  poolLeft,
   block,
 }: {
   teams: BoardTeam[];
   players: BoardPlayer[];
-  poolSize?: number;
+  poolLeft?: number;
   block?: BlockState;
 }) {
   const [division, setDivision] = useState<string>("All");
@@ -85,9 +85,9 @@ export default function SquadsBoard({
         </div>
 
         <div className="grid shrink-0 grid-cols-2 gap-3 sm:grid-cols-4">
-          <Stat value={String(totalSold)} label="Players sold" />
+          <Stat value={String(totalSold)} label="Players signed" />
           <Stat
-            value={poolSize != null ? String(Math.max(0, poolSize - totalSold)) : "—"}
+            value={poolLeft != null ? String(poolLeft) : "—"}
             label="Still available"
           />
           <Stat value={inrL(totalSpend)} label="Total spend" accent />

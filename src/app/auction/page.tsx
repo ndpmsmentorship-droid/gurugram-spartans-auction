@@ -70,6 +70,13 @@ export default async function AuctionPage() {
     .sort((a: any, b: any) => b.overall_index - a.overall_index)
     .forEach((r: any, i: number) => poolRankMap.set(r.id, i + 1));
 
+  // players still in the pool: not on any team, not hidden from the auction
+  const { count: poolLeft } = await sb
+    .from("scout_players")
+    .select("id", { count: "exact", head: true })
+    .is("team_id", null)
+    .or("is_rejected.is.null,is_rejected.eq.false");
+
   const lot = await readLiveLot(seasonId);
   let block: BlockState = {
     status: lot.status,
@@ -99,7 +106,7 @@ export default async function AuctionPage() {
 
   return (
     <div className="mx-auto w-full max-w-[1400px] flex-1 px-5 py-8 sm:px-7">
-      <SquadsBoard teams={boardTeams as BoardTeam[]} players={players} block={block} />
+      <SquadsBoard teams={boardTeams as BoardTeam[]} players={players} poolLeft={poolLeft ?? undefined} block={block} />
     </div>
   );
 }

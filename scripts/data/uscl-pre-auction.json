@@ -1,7 +1,7 @@
 {
   "_source": "USCL Season 2 — Franchise Owners & Retentions (official deck, video received 2 Oct 2026). o = owner, r = retained, l = legend (owner if lo)",
   "Delhi Devil": [["Sagar Dahiya","B","o"],["Karan Kalra","A","o"],["Tushar Gaur","B","o"],["Surjeet Singh","B","r"],["Vipul Sharma","A","r"],["Arjoon Setia","Special","l"]],
-  "Chennai Thalaiva": [["Pradeep Mehlawat","B","o"],["Ankush Bhargava","B","o"],["Ayush Jagga","A+","o"],["Adil Siddiqui","A","r"],["Nitin Ruhela","B","r"],["Vasanth Kumar","Special","l"]],
+  "Chennai Thalaiva": [["Pradeep Mahlawat","B","o"],["Ankush Bhargava","B","o"],["Ayush Jagga","A+","o"],["Adil Siddiqui","A","r"],["Nitin Ruhela","B","r"],["Vasanth Kumar","Special","l"]],
   "Bengal Tigers": [["Dipak Kumar Singh","B","o"],["Harbir Basi (Sherry)","B","o"],["Piyush Arora","A+","o"],["Sajal Sharma","B","r"],["Rahul Rathi","A","r"]],
   "Lucknow Lagers": [["Shiva Jain","B","o"],["Atul Anand","B","o"],["Amar Bhardwaj","B","o"],["Alok Ranjan","A+","r"],["Faizul Mufti","A","r"]],
   "Punjab Royals": [["Sunil Bansal","B","o"],["Rohit Rathi","A+","o"],["Ravinder Nandal","B","o"],["Atinderpal Singh","B","r"],["Yatin Narang","A","r"]],
@@ -9,7 +9,7 @@
   "Doon Druks": [["Sazal Sharan","B","o"],["Ashish Jain","B","o"],["Siddhant Malhan","B","o"],["Bhunesh Kumar","B","r"],["Vibhanshu Chaturvedi","B","r"]],
   "Dubai Vipers": [["Abhishek Batra","A+","o"],["Harsh Nagpal","B","o"],["Karan Raj Seth","B","o"],["Ayush Soni","B","r"],["Sagar Sehrawat","A","r"]],
   "Haryana Bulls": [["Shikhar","B","o"],["Himanshu Bhardwaj","B","o"],["Rajiv Bose","A+","o"],["Manish Jajoria","B","r"],["Ajay Yadav","B","r"],["Sonal Tandon","Special","l"]],
-  "Gurugram Spartans": [["Aakash Sharma","B","o"],["Prateek Suneja","A","o"],["Gaurav Verma","B","o"],["Nikhil Dhingra","B","r"],["Kuldeep Negi","A+","r"],["Kanishk Sheel","Special","lo"]],
+  "Gurugram Spartans": [["Aakash Sharma","B","r"],["Prateek Suneja","A","o"],["Gaurav Verma","B","o"],["Nikhil Dhingra","B","o"],["Kuldeep Negi","A+","r"],["Kanishk Sheel","Special","lo"]],
   "J&K Brocode": [["Sandeep Atri","B","o"],["Tarun Yadav","A","o"],["Sahil Chrungu","B","o"],["Lokesh Yadav","A","r"],["Simranjeet Singh","B","r"],["Gaurav Bhasin","Special","l"]],
   "Japani Tsunami": [["Shashank Verma","B","o"],["Naitik Gupta","B","o"],["Dhrmender Singh","A","o"],["Sanchit Tanwar","B","r"],["Sandeep Koul","A+","r"],["Deepak Grover","Special","l"]],
   "Mirzapur Officer Choice": [["Tushar Khattar","B","o"],["Nikhil Raina","A+","o"],["Manas Gulati","B","o"],["Siddharth Juneja","A","r"],["Hemant Balyan","B","r"]],

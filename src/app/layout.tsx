@@ -175,6 +175,17 @@ export default async function RootLayout({
                 priority
                 className="h-[36px] w-auto"
               />
+              {/* USCL runs on the SDLL portal — the SDLL crest rides alongside as marketing */}
+              {USCL && (
+                <Image
+                  src={sdllCrest}
+                  alt="Shanti Devi Legend League"
+                  title="Powered by the Shanti Devi Legend League portal"
+                  width={34}
+                  height={46}
+                  className="-ml-1 h-[36px] w-auto"
+                />
+              )}
               <span className="leading-none">
                 <span className="flex items-center font-display text-[1.125rem] font-bold tracking-[0.02em] text-white">
                   {USCL ? <>USCL<span className="hidden sm:inline">&nbsp;Auction</span></> : "Shanti Devi"}

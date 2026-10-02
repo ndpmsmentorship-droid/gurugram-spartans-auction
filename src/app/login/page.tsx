@@ -3,6 +3,7 @@ import HonoursInfographic from "../HonoursInfographic";
 import SpartansStars from "../SpartansStars";
 import Image from "next/image";
 import usclCrest from "../brand/uscl-crest.png";
+import sdllCrest from "../brand/crest.png";
 import { LEAGUE } from "@/lib/league";
 
 export default async function LoginPage({
@@ -18,7 +19,14 @@ export default async function LoginPage({
     return (
       <main className="grid flex-1 md:grid-cols-2">
         <section className="order-2 flex flex-col justify-center gap-6 bg-[#1d1d1f] px-8 py-12 text-white sm:px-12 md:order-1">
-          <Image src={usclCrest} alt="USCL — Urban Sports Champions League" className="h-36 w-auto self-start drop-shadow-[0_14px_24px_rgba(0,0,0,0.45)]" sizes="120px" priority />
+          <div className="flex items-center gap-5">
+            <Image src={usclCrest} alt="USCL — Urban Sports Champions League" className="h-36 w-auto drop-shadow-[0_14px_24px_rgba(0,0,0,0.45)]" sizes="120px" priority />
+            <span className="h-24 w-px bg-white/20" aria-hidden />
+            <div className="flex flex-col items-center gap-2">
+              <Image src={sdllCrest} alt="Shanti Devi Legend League" className="h-24 w-auto drop-shadow-[0_14px_24px_rgba(0,0,0,0.45)]" sizes="80px" />
+              <span className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-white/55">Powered by SDLL</span>
+            </div>
+          </div>
           <div>
             <p className="font-mono text-[0.688rem] uppercase tracking-[0.22em] text-white/60">Urban Sports Champions League · Season 2</p>
             <h1 className="mt-3 text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">Your franchise war room.</h1>

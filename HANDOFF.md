@@ -50,6 +50,17 @@ War Room **auction pad** alone (see LATEST 2026-10-01).
   admin console's Top up buttons are 50K/25K); squad 18–20; age 31–34 max 3 per squad; category mixes are
   MATCH-DAY only (no purchase caps). DB auction_rules updated to match. Nikhil earlier said 1.75L + 1.25L = 3L —
   the rulebook says 1.75L + 75K = 2.5L; rulebook wins, flagged to him.
+- **Reconcile with the official USCL site (run any time, incl. during the auction):**
+  `U=… P=… <venv>/python scripts/uscl-fetch.py /tmp/official.json` (read-only: pool export xlsx at
+  /franchise/pool-export, Spartans' My Squad, public /franchises lists) then
+  `node scripts/uscl-reconcile.mts /tmp/official.json [--apply] [--hide-gone]`. The export = players still
+  AVAILABLE; a player who drops off is reported as "sold or withdrawn — record who bought him" (the site doesn't
+  say who). --hide-gone only before the auction. The 2 Oct scrape-based sync had missed 18 players (lazy list);
+  the export fixed it (15 un-hidden, 4 added, 3 withdrawn). USCL My Squad: Aakash Sharma RETAINED ₹6K, Nikhil
+  OWNER ₹3K (deck had them swapped) — applied.
+- SDLL crest shown beside the USCL crest in the masthead + sign-in ("Powered by SDLL") — Nikhil wants it as marketing.
+- The ndpms.in "Owners login" button is in the LMS repo's components/cricvideos-home.tsx (ndpms.in = CricVideos
+  home). app/page.tsx is the SMIFE home (smife.in) — a different business; keep auction links OFF it.
 - ndpms.in (LMS repo) home has a "🏏 Owners login" button → /spartansscout/login.
 - Pad records **Auction sale / Owner pick / Retained** (deck prices prefilled); team logos in
   `public/brand/uscl-teams/` + `teams.logo_url`. Retention spreadsheet ignored on purpose (Nikhil waiting for the

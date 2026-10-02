@@ -71,6 +71,20 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Role gate (one extra lookup, only on pages that need it). The pool import
+  // is admin-only always; during the USCL soft launch the 14 franchise owners
+  // get the war room, the live board and player pages — nothing else.
+  const usclOwnerOk = ["/war-room", "/auction", "/players"].some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  if (user && (pathname.startsWith("/scout/import") || (LEAGUE === "uscl" && !usclOwnerOk))) {
+    const { data: prof } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+    if (prof?.role !== "admin") {
+      const home = request.nextUrl.clone();
+      home.pathname = "/war-room";
+      home.search = "";
+      return NextResponse.redirect(home);
+    }
+  }
+
   return response;
 }
 

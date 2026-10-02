@@ -108,9 +108,12 @@ export default function ScheduleView({
               </option>
             ))}
           </select>
-          <a className="btn-ghost" href="/spartansscout/api/schedule/export">
-            Export .xlsx
-          </a>
+          {/* the export answers 404 until a schedule exists */}
+          {fixtures.length > 0 && (
+            <a className="btn-ghost" href="/spartansscout/api/schedule/export">
+              Export .xlsx
+            </a>
+          )}
         </div>
       </div>
 

@@ -31,6 +31,18 @@ War Room **auction pad** alone (see LATEST 2026-10-01).
   metadata, a USCL sign-in page (no Spartans panel), nav = War Room / Live Board / Ball Library (+ Admin),
   SDLL sponsor bar hidden, and `/` redirects to `/war-room` (or sign-in). All revert with `LEAGUE = "sdll"`.
 - Seen in the DB, not made by Claude: Nikhil Tandan → Japani Tsunami ₹3,000 (auction) — ask Nikhil.
+- **Security lockdown (audit, 2 Oct):** `scout_players` RLS let ANY signed-in user write, and the live-lot
+  RPCs (put_up/raise/hammer/pass/undo/withdraw) are SECURITY DEFINER with no role check and were executable by
+  anon/authenticated. `supabase/lockdown_2026_10_02.sql` makes pool writes admin-only and the RPCs
+  service-role-only (the app already calls them with the service role). Pool import/sync actions now admin-only.
+  `proxy.ts` role gate: `/scout/import` admin-only always; while USCL is in, owners only get /war-room,
+  /auction, /players (everything else → /war-room).
+- **Favicon / share card:** `public/brand/meta/{uscl,sdll}-{icon,apple-icon,og}.png`, wired in `layout.tsx`
+  metadata by full `/spartansscout/...` path (the old file-based `/icon` resolved to the SMIFE site's icon).
+- ndpms.in (LMS repo) home has a "🏏 Owners login" button → /spartansscout/login.
+- Pad records **Auction sale / Owner pick / Retained** (deck prices prefilled); team logos in
+  `public/brand/uscl-teams/` + `teams.logo_url`. Retention spreadsheet ignored on purpose (Nikhil waiting for the
+  official list).
 
 ## ▶ LATEST — 2026-10-01 (read this first)
 Everything below is pushed to `main` and live (last commit "War Room: tap any squad player…"). Running list:

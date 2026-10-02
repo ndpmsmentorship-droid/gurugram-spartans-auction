@@ -1,8 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentProfile } from "@/lib/auth";
 import { parseWorkbook, type CleanPlayer } from "@/lib/scout/importer";
 import { fetchLeaguePool } from "@/lib/scout/league";
 import { computeIndices, type RawStats } from "@/lib/scout/rankings";
@@ -16,12 +16,11 @@ export type ImportState = {
   warnings?: string[];
 } | null;
 
+// Replaces the WHOLE pool with the service role — admins only (owners of every
+// USCL franchise can sign in now).
 async function requireUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return user;
+  const profile = await getCurrentProfile();
+  return profile?.role === "admin" ? profile : null;
 }
 
 // Compute index scores across the whole pool and replace scout_players with it
@@ -90,7 +89,7 @@ async function replacePool(
 }
 
 export async function importPool(_prev: ImportState, formData: FormData): Promise<ImportState> {
-  if (!(await requireUser())) return { ok: false, message: "You must be signed in to import." };
+  if (!(await requireUser())) return { ok: false, message: "Only the admin can import the pool." };
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
@@ -127,7 +126,7 @@ export async function importPool(_prev: ImportState, formData: FormData): Promis
 // One-click: pull the current registrations straight from the SCCL / anantanity
 // dashboard and rebuild the ranked pool. No spreadsheet needed.
 export async function syncFromLeague(_prev: ImportState, _formData: FormData): Promise<ImportState> {
-  if (!(await requireUser())) return { ok: false, message: "You must be signed in to sync." };
+  if (!(await requireUser())) return { ok: false, message: "Only the admin can sync the pool." };
 
   let pool;
   try {

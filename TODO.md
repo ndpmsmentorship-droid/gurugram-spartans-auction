@@ -97,9 +97,10 @@ Last updated: 2026-09-30
 
 ## 3 Oct 2026
 - [x] Live board: "Still available" count (was blank); "Players signed" label
-- [x] Ball Library: 14 USCL owner logins (same as auction, watch-only, to 31 Oct); "Back to USCL Auction" pill
+- [x] Ball Library: 14 USCL owner logins (same as auction, watch-only, expire 12 am Sun 4 Oct IST); "Back to USCL Auction" pill
 - [x] RTM per rulebook: revised bid → matched / declined (pad)
 - [x] Smart pool search + clickable "What we need next"
 - [ ] Library stats / pitch map / wagon wheel / clips inside the block card — needs Nikhil's call:
       allow same-site framing (next.config.ts headers in LMS) OR build natively from the gated library JSON
 - [ ] Check Shubhendu Kaushik's stats (500 mat / 20000 runs / SR 190 / econ 4 look like test values)
+- [ ] 44 USCL pool players have doubtful self-entered stats (e.g. Shubhendu Kaushik 500 M / 20000 runs / SR 190 / econ 4; Vishal Tiwari avg 4668) — copied as-is from the USCL site

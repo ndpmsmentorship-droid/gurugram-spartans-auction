@@ -68,7 +68,7 @@ export default function LotControl({
 
   const live = lot.status === "live";
   const base = lot.base_price ?? DEFAULT_RULES.base.B;
-  const steps = raiseSteps(lot.current_bid, base);
+  const steps = raiseSteps(lot.current_bid, base, DEFAULT_RULES, lot.player?.auction_category);
   const nextAmount = lot.current_bid == null ? base : steps[0];
 
   return (

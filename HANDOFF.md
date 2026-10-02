@@ -44,6 +44,12 @@ War Room **auction pad** alone (see LATEST 2026-10-01).
   `node scripts/uscl-sync.mts <cards.json> --apply`, which also re-syncs the pool with a fresh portal scrape
   (12 added, 22 withdrawn → is_rejected, Aman Raj A→B). Tushar Khattar is MIRZAPUR's owner (not Spartans);
   Spartans' 6th is Aakash Sharma (B owner). Spartans ₹50,000 spent. Re-run the script any time the portal changes.
+- **USCL OFFICIAL RULEBOOK applied (2 Oct; ~/Downloads/nikhil/USCL_Rulebook Final.pdf):** auction base/step
+  Legend 3K/1K · A+ 20K/5K · A 10K/3K · B 6K/2K (owner-pick prices unchanged: B/Legend 3K); purse ₹1,75,000
+  after owner/retention value + optional top-ups ₹50K and ₹25K (teams.purse_total 175000, purse_max 250000; the
+  admin console's Top up buttons are 50K/25K); squad 18–20; age 31–34 max 3 per squad; category mixes are
+  MATCH-DAY only (no purchase caps). DB auction_rules updated to match. Nikhil earlier said 1.75L + 1.25L = 3L —
+  the rulebook says 1.75L + 75K = 2.5L; rulebook wins, flagged to him.
 - ndpms.in (LMS repo) home has a "🏏 Owners login" button → /spartansscout/login.
 - Pad records **Auction sale / Owner pick / Retained** (deck prices prefilled); team logos in
   `public/brand/uscl-teams/` + `teams.logo_url`. Retention spreadsheet ignored on purpose (Nikhil waiting for the

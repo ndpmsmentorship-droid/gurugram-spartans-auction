@@ -7,14 +7,14 @@ import { createClient } from "@/lib/supabase/client";
 import { PlayerPhoto } from "@/app/register/PlayerCard";
 import TeamCrest from "@/app/TeamCrest";
 import { catLabel, normCategory, type AuctionCategory } from "@/lib/scout/tier";
-import { DEFAULT_RULES, inr, usclACap, USCL_RETAIN } from "@/lib/auction/rules";
+import { DEFAULT_RULES, inr, USCL_RETAIN, USCL_OWNER, USCL_AGE_BAND, inAgeBand, bidStep } from "@/lib/auction/rules";
 import type { League } from "@/lib/league";
 import phaseData from "@/data/phase-stats.json";
 import cvMap from "@/data/cv-map.json";
 import { clipsUrl } from "@/lib/scout/clips";
 import { rtmState, rtmThreats, RTM_MAX_AGAINST } from "@/lib/auction/rtm";
 
-export type WRTeam = { id: string; name: string; purse_total: number; logo_url?: string | null };
+export type WRTeam = { id: string; name: string; purse_total: number; purse_max?: number | null; logo_url?: string | null };
 export type WRPlayer = {
   id: string;
   full_name: string;
@@ -172,13 +172,14 @@ export default function WarRoom(props: {
 
   // Every team's purse and category counts — powers "who can still bid".
   const teamState = useMemo(() => {
-    const m = new Map<string, { spent: number; size: number; cats: Record<AuctionCategory, number> }>();
-    for (const t of props.teams) m.set(t.id, { spent: 0, size: 0, cats: { "A+": 0, A: 0, B: 0, Special: 0 } });
+    const m = new Map<string, { spent: number; size: number; band: number; cats: Record<AuctionCategory, number> }>();
+    for (const t of props.teams) m.set(t.id, { spent: 0, size: 0, band: 0, cats: { "A+": 0, A: 0, B: 0, Special: 0 } });
     for (const p of all) {
       const s = p.team_id ? m.get(p.team_id) : null;
       if (!s) continue;
       s.spent += p.sold_price ?? 0;
       s.size += 1;
+      if (inAgeBand(p.age)) s.band += 1;
       s.cats[p.cat] += 1;
     }
     return m;
@@ -190,20 +191,19 @@ export default function WarRoom(props: {
   const purseLeft = myTeam.purse_total - me.spent;
   const stillNeed = Math.max(0, R.squadMin - me.size);
 
-  function catRoom(state: { cats: Record<AuctionCategory, number>; size: number }, cat: AuctionCategory): boolean {
+  // Can this squad still buy a player of this category (and age)? USCL rulebook:
+  // only squad size (max 20) and the 31–34 age band (max 3) limit buying — the
+  // category mixes apply to the match-day XII.
+  function catRoom(state: { cats: Record<AuctionCategory, number>; size: number; band?: number }, cat: AuctionCategory, age?: number | null): boolean {
     if (state.size >= R.squadMax) return false;
-    if (props.league === "uscl") {
-      const ap = state.cats["A+"], a = state.cats.A;
-      if (cat === "A+") return ap < 2 && a <= usclACap(ap + 1);
-      if (cat === "A") return a < usclACap(ap);
-      if (cat === "Special") return state.cats.Special < 1;
-      return true;
-    }
+    if (props.league === "uscl") return !(inAgeBand(age) && (state.band ?? 0) >= USCL_AGE_BAND.buyMax);
     return state.cats[cat] < R.cap[cat];
   }
   // Highest we can pay for one player and still fill the minimum squad at B base.
   const maxSafe = Math.max(0, purseLeft - Math.max(0, stillNeed - 1) * R.base.B);
-  const affordable = (p: Enriched) => R.base[p.cat] <= maxSafe && catRoom(me, p.cat);
+  const affordable = (p: Enriched) => R.base[p.cat] <= maxSafe && catRoom(me, p.cat, p.age);
+  // Top-ups not yet taken (rulebook: ₹50K + ₹25K, recorded by the admin).
+  const topUpsLeft = Math.max(0, (myTeam.purse_max ?? myTeam.purse_total) - myTeam.purse_total);
 
   const needs = NEEDS.map((n) => {
     const have = mine.filter(n.test).length;
@@ -347,12 +347,12 @@ export default function WarRoom(props: {
   const padLive = !!onBlock && padId === onBlock.id;
   const bidIsBase = padLive ? padPrice <= R.base[onBlock!.cat] : !(lotIsThis && lot.current_bid != null);
   const bid = !onBlock ? 0 : padLive ? padPrice || R.base[onBlock.cat] : lotIsThis ? lot.current_bid ?? lot.base_price ?? R.base[onBlock.cat] : R.base[onBlock.cat];
-  const nextBid = padLive || bidIsBase ? bid : bid + R.minIncrement;
+  const nextBid = padLive || bidIsBase ? bid : bid + bidStep(onBlock?.cat);
   const rivals = onBlock
     ? props.teams
         .filter((t) => t.id !== myTeamId)
         .map((t) => ({ t, s: teamState.get(t.id)! }))
-        .filter(({ t, s }) => t.purse_total - s.spent >= nextBid && catRoom(s, onBlock.cat))
+        .filter(({ t, s }) => t.purse_total - s.spent >= nextBid && catRoom(s, onBlock.cat, onBlock.age))
         .sort((a, b) => b.t.purse_total - b.s.spent - (a.t.purse_total - a.s.spent))
     : [];
   const alternatives = onBlock
@@ -393,7 +393,12 @@ export default function WarRoom(props: {
       .sort(byIdx("overall_index"));
   }, [all, q, tagF, catF, onlyAvail, wish]);
 
-  const catRow: [AuctionCategory, string][] = [["A+", `max ${R.cap["A+"]}`], ["A", `max ${props.league === "uscl" ? usclACap(me.cats["A+"]) : R.cap.A}`], ["B", props.league === "uscl" ? `min ${me.cats["A+"] >= 2 ? 7 : 6}` : `max ${R.cap.B}`], ["Special", `max ${R.cap.Special}`]];
+  // USCL: these are the match-day XII limits (1 A+·5 A·6 B or 2 A+·3 A·7 B, +1 Legend);
+  // the B count is the one that bites — you can't field a side without enough B.
+  const catRow: [AuctionCategory, string][] =
+    props.league === "uscl"
+      ? [["A+", "plays ≤2"], ["A", `plays ≤${me.cats["A+"] >= 2 ? 3 : 5}`], ["B", `need ${me.cats["A+"] >= 2 ? 7 : 6}+`], ["Special", "plays 1"]]
+      : [["A+", `max ${R.cap["A+"]}`], ["A", `max ${R.cap.A}`], ["B", `max ${R.cap.B}`], ["Special", `max ${R.cap.Special}`]];
 
   return (
     <main className="mx-auto w-full max-w-[1280px] flex-1 px-3 py-5 sm:px-6">
@@ -470,7 +475,7 @@ export default function WarRoom(props: {
                       onClick={() => {
                         setPadKind(k);
                         const c = byId.get(padId)!.cat;
-                        setPadPrice(k === "retained" ? USCL_RETAIN[c] : R.base[c]);
+                        setPadPrice(k === "retained" ? USCL_RETAIN[c] : k === "owner" ? USCL_OWNER[c] : R.base[c]);
                       }}
                     >
                       {k === "auction" ? "Auction sale" : k === "owner" ? "Owner pick" : "Retained"}
@@ -503,7 +508,7 @@ export default function WarRoom(props: {
                   onChange={(e) => setPadPrice(Number(e.target.value) || 0)}
                   aria-label="Price"
                 />
-                {[-1000, 1000, 5000, 10000].map((d) => (
+                {(() => { const s = bidStep(byId.get(padId)?.cat); return [-s, s, 2 * s, 5 * s]; })().map((d) => (
                   <button key={d} type="button" className="pill !px-3 !py-2" onClick={() => setPadPrice((v) => Math.max(0, v + d))}>
                     {d > 0 ? "+" : "−"}{Math.abs(d) / 1000}K
                   </button>
@@ -534,13 +539,16 @@ export default function WarRoom(props: {
       {/* money first (two big tiles), then squad + the four category slots in one compact row */}
       <section className="mt-4 grid gap-2 lg:grid-cols-[2fr_5fr]">
         <div className="grid grid-cols-2 gap-2">
-          <Tile k="Purse left" v={inr(purseLeft)} sub={`of ${inr(myTeam.purse_total)}`} strong />
-          <Tile k="Max safe bid" v={inr(maxSafe)} sub={`keeps ${Math.max(0, stillNeed - 1)} slots at ${inr(R.base.B)}`} strong />
+          <Tile k="Purse left" v={inr(purseLeft)} sub={`of ${inr(myTeam.purse_total)}${topUpsLeft ? ` · +${inr(topUpsLeft)} top-ups available` : ""}`} strong />
+          <Tile k="Max safe bid" v={inr(maxSafe)} sub={`keeps ${Math.max(0, stillNeed - 1)} slots at ${inr(R.base.B)}${topUpsLeft ? ` · ${inr(maxSafe + topUpsLeft)} with top-ups` : ""}`} strong />
         </div>
-        <div className="grid grid-cols-5 gap-2">
+        <div className={`grid gap-2 ${props.league === "uscl" ? "grid-cols-3 sm:grid-cols-6" : "grid-cols-5"}`}>
           <Tile k="Squad" v={`${me.size}`} sub={`${R.squadMin}–${R.squadMax}`} compact />
+          {props.league === "uscl" && (
+            <Tile k="Age 31–34" v={`${me.band}`} sub={`max ${USCL_AGE_BAND.buyMax}`} warn={me.band >= USCL_AGE_BAND.buyMax} compact />
+          )}
           {catRow.map(([c, rule]) => (
-            <Tile key={c} k={catLabel(c)} v={`${me.cats[c]}`} sub={rule} warn={!catRoom(me, c) && c !== "B"} compact />
+            <Tile key={c} k={catLabel(c)} v={`${me.cats[c]}`} sub={rule} warn={props.league === "uscl" ? c === "B" && me.cats.B < (me.cats["A+"] >= 2 ? 7 : 6) && R.squadMax - me.size <= (me.cats["A+"] >= 2 ? 7 : 6) - me.cats.B : !catRoom(me, c) && c !== "B"} compact />
           ))}
         </div>
       </section>
@@ -586,9 +594,13 @@ export default function WarRoom(props: {
                   Fills our gap: <strong>{fills.join(" · ")}</strong>
                 </p>
               )}
-              {!catRoom(me, onBlock.cat) && (
+              {!catRoom(me, onBlock.cat, onBlock.age) && (
                 <p className="mt-3 rounded-[10px] bg-[color-mix(in_srgb,var(--red)_8%,transparent)] px-3 py-2 text-sm text-red-deep">
-                  We have no {catLabel(onBlock.cat)} slot left for him.
+                  {props.league === "uscl"
+                    ? me.size >= R.squadMax
+                      ? `Our squad is full (${R.squadMax}).`
+                      : `Age ${onBlock.age}: we already have ${USCL_AGE_BAND.buyMax} players aged 31–34 — the rulebook allows no more.`
+                    : `We have no ${catLabel(onBlock.cat)} slot left for him.`}
                 </p>
               )}
 
@@ -918,7 +930,7 @@ function Chips({ p }: { p: Enriched }) {
   return (
     <div className="mt-2 flex flex-wrap items-center gap-1.5">
       {p.age && (
-        <span className={`${chip} bg-[var(--red)] font-semibold text-white`}>Age {p.age}</span>
+        <span className={`${chip} bg-[var(--red)] font-semibold text-white`}>Age {p.age}{inAgeBand(p.age) ? " · 31–34 band" : ""}</span>
       )}
       {chips.map((c) => (
         <span key={c as string} className={`${chip} bg-wash text-ink`}>{c}</span>

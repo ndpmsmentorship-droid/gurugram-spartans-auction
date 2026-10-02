@@ -309,7 +309,7 @@ function TopUp({ team, pending, onSet }: { team: ConsoleTeam; pending: boolean; 
   return (
     <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
       <span className="text-muted">Top up:</span>
-      {[25000, 50000, 100000]
+      {(LEAGUE === "uscl" ? [50000, 25000] : [25000, 50000, 100000])
         .filter((a) => a <= headroom)
         .map((a) => (
           <button

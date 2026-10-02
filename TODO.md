@@ -94,3 +94,12 @@ Last updated: 2026-09-30
 - [x] Master admin login `sdlladmin` created (full admin; password shared in chat, not stored in files) — 30 Sep
 - [x] Approved registrations → auction pool (Add to pool / Add all / Remove, category picker) — 30 Sep
 - [x] Quotation with the Launch Partner Package (₹10L + GST), in the name of Foundary Tek, for Playful Ventures — 30 Sep
+
+## 3 Oct 2026
+- [x] Live board: "Still available" count (was blank); "Players signed" label
+- [x] Ball Library: 14 USCL owner logins (same as auction, watch-only, to 31 Oct); "Back to USCL Auction" pill
+- [x] RTM per rulebook: revised bid → matched / declined (pad)
+- [x] Smart pool search + clickable "What we need next"
+- [ ] Library stats / pitch map / wagon wheel / clips inside the block card — needs Nikhil's call:
+      allow same-site framing (next.config.ts headers in LMS) OR build natively from the gated library JSON
+- [ ] Check Shubhendu Kaushik's stats (500 mat / 20000 runs / SR 190 / econ 4 look like test values)

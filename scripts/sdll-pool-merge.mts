@@ -26,6 +26,7 @@ const sb: any = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_
 const APPLY = process.argv.includes("--apply");
 type Row = Record<string, unknown>;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function all(table: string, q = (x: any) => x): Promise<Row[]> {
   const out: Row[] = [];
   for (let from = 0; ; from += 1000) {

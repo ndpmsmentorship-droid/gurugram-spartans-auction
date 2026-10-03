@@ -772,6 +772,10 @@ export default function WarRoom(props: {
         {/* on the block */}
         <section className="order-1 flex flex-col rounded-[16px] border border-line bg-surface p-4 shadow-[var(--elev-sm)]">
           <p className="eyebrow">On the block</p>
+          <p className="mt-2 border-b border-line pb-2.5 text-center text-[0.75rem] text-muted">
+            <span className="font-semibold text-[#FF7A00]">✦ Player intelligence by ND CricVideos AI</span>
+            <span className="text-faint"> — stats, phases &amp; clips in one view.</span>
+          </p>
           {!onBlock ? (
             // empty block: our crest (USCL's if the team has none) fills the card instead of a blank space
             <div className="flex flex-1 flex-col items-center gap-3 pb-4 pt-3 text-center">
@@ -923,7 +927,7 @@ export default function WarRoom(props: {
             <p className="eyebrow">What we need next</p>
             <p className="text-[0.7rem] text-faint">tap a row for every option</p>
           </div>
-          <p className="mt-1.5 text-[0.75rem] text-muted">
+          <p className="mt-2 border-b border-line pb-2.5 text-center text-[0.75rem] text-muted">
             <span className="font-semibold text-[#FF7A00]">✦ Suggestions powered by ND CricVideos AI</span>
             <span className="text-faint"> — every ball read, every gap spotted.</span>
           </p>

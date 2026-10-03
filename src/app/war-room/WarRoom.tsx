@@ -796,7 +796,7 @@ export default function WarRoom(props: {
                 Squad {me.size}/{R.squadMin}–{R.squadMax} · Purse left <b className="text-ink">{inr(purseLeft)}</b> · Max safe bid <b className="text-ink">{inr(maxSafe)}</b>
               </p>
               {/* the rest of the card: a quiet read of where the squad stands */}
-              <div className="mt-3 w-full max-w-md border-t border-line pt-4 text-left text-[0.8rem] leading-relaxed text-muted">
+              <div className="mt-8 w-full max-w-md border-t border-line pt-6 text-left text-[0.8rem] leading-relaxed text-muted">
                 <p className="label-mono mb-2 text-center">Our squad so far · {me.size}</p>
                 <ul className="grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2">
                   {mine

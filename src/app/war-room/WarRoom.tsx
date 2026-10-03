@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 import { PlayerPhoto } from "@/app/register/PlayerCard";
 import TeamCrest from "@/app/TeamCrest";
 import { catLabel, normCategory, type AuctionCategory } from "@/lib/scout/tier";
-import { DEFAULT_RULES, inr, USCL_RETAIN, USCL_OWNER, USCL_AGE_BAND, inAgeBand, bidStep } from "@/lib/auction/rules";
+import { DEFAULT_RULES, inr, USCL_RETAIN, USCL_OWNER, USCL_AGE_BAND, USCL_PURSE, inAgeBand, bidStep } from "@/lib/auction/rules";
 import type { League } from "@/lib/league";
 import phaseData from "@/data/phase-stats.json";
 import cvMap from "@/data/cv-map.json";
@@ -412,18 +412,26 @@ export default function WarRoom(props: {
     });
   }
   // Purse top-up (rulebook: optional ₹50,000 and ₹25,000 during the auction).
-  const [topTeam, setTopTeam] = useState(props.myTeamId);
+  // No default team: a stray tap must not top up anyone (it once landed on Spartans).
+  const [topTeam, setTopTeam] = useState("");
+  // Which of the two top-ups (₹50K, ₹25K) a team has taken, from its purse over the start.
+  const topUpsTaken = (t: WRTeam) => {
+    const extra = Math.max(0, t.purse_total - USCL_PURSE.start);
+    return { 50000: extra === 50000 || extra === 75000, 25000: extra === 25000 || extra === 75000 } as Record<number, boolean>;
+  };
   function topUp(teamId: string, amount: number) {
     const t = teams.find((x) => x.id === teamId);
     if (!t) return;
-    const total = Math.min(t.purse_max ?? t.purse_total, t.purse_total + amount);
+    const verb = amount > 0 ? `Top up ${t.name} by ${inr(amount)}` : `Remove ${t.name}'s ${inr(-amount)} top-up`;
+    if (!window.confirm(`${verb}?`)) return;
+    const total = t.purse_total + amount;
     setTeams((ts) => ts.map((x) => (x.id === teamId ? { ...x, purse_total: total } : x)));
     startSave(async () => {
       const r = await setPurse(teamId, total);
       if (r?.error) {
         setTeams((ts) => ts.map((x) => (x.id === teamId ? { ...x, purse_total: t.purse_total } : x)));
         setPadMsg({ text: r.error, bad: true });
-      } else setPadMsg({ text: `${t.name} topped up ${inr(amount)} → purse ${inr(total)}` });
+      } else setPadMsg({ text: `${amount > 0 ? `${t.name} topped up ${inr(amount)}` : `${t.name}: ${inr(-amount)} top-up removed`} → purse ${inr(total)}` });
     });
   }
 
@@ -673,22 +681,35 @@ export default function WarRoom(props: {
           {padMsg && <p className={`mt-2 text-sm ${padMsg.bad ? "text-red" : "text-up"}`}>{padMsg.text}</p>}
           {props.league === "uscl" && <UsclMatch />}
           {!padId && props.league === "uscl" && (() => {
-            const t = teams.find((x) => x.id === topTeam) ?? myTeam;
-            const left = Math.max(0, (t.purse_max ?? t.purse_total) - t.purse_total);
+            const t = teams.find((x) => x.id === topTeam) ?? null;
+            const taken = t ? topUpsTaken(t) : null;
             return (
               <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-line pt-3 text-sm">
                 <span className="text-muted">Top-up:</span>
                 <select className="input !w-auto !py-1.5 text-sm" value={topTeam} onChange={(e) => setTopTeam(e.target.value)} aria-label="Top-up team">
+                  <option value="">Pick a team…</option>
                   {teams.map((x) => (
                     <option key={x.id} value={x.id}>{x.id === myTeamId ? `Us · ${x.name}` : x.name}</option>
                   ))}
                 </select>
-                {[50000, 25000].filter((a) => a <= left).map((a) => (
-                  <button key={a} type="button" disabled={saving} className="pill !px-3 !py-1.5" onClick={() => topUp(t.id, a)}>
-                    +{inr(a)}
-                  </button>
-                ))}
-                <span className="text-xs text-muted">purse {inr(t.purse_total)}{left ? ` · ${inr(left)} top-up left` : " · all top-ups taken"}</span>
+                {t && taken &&
+                  USCL_PURSE.topUps.map((a) =>
+                    taken[a] ? (
+                      <button key={a} type="button" disabled={saving} className="pill !px-3 !py-1.5 !text-muted" title="Undo this top-up" onClick={() => topUp(t.id, -a)}>
+                        −{inr(a)}
+                      </button>
+                    ) : (
+                      <button key={a} type="button" disabled={saving} className="pill !px-3 !py-1.5" onClick={() => topUp(t.id, a)}>
+                        +{inr(a)}
+                      </button>
+                    ),
+                  )}
+                {t && (
+                  <span className="text-xs text-muted">
+                    purse {inr(t.purse_total)}
+                    {taken && (taken[50000] || taken[25000]) ? ` · taken: ${USCL_PURSE.topUps.filter((a) => taken[a]).map((a) => inr(a)).join(" + ")}` : " · no top-ups yet"}
+                  </span>
+                )}
               </div>
             );
           })()}

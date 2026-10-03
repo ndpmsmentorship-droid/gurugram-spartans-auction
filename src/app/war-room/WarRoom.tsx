@@ -1127,7 +1127,8 @@ function ProfileSheet({ p, teamName, ours, onClose, star }: { p: Enriched; teamN
   const how = p.acquired === "owner" ? "Owner pick" : p.acquired === "retained" ? "Retained" : p.acquired === "rtm" ? "Won by RTM" : p.acquired === "auction" ? "Bought at auction" : null;
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center sm:p-4" onClick={onClose} role="dialog" aria-modal="true" aria-label={p.full_name}>
-      <div className="max-h-[92vh] w-full max-w-[640px] overflow-y-auto rounded-t-[18px] bg-surface p-4 shadow-2xl sm:rounded-[18px] sm:p-5" onClick={(e) => e.stopPropagation()}>
+      {/* wide on laptops when he's on film, so the library inside can go two-column */}
+      <div className={`max-h-[92vh] w-full overflow-y-auto rounded-t-[18px] bg-surface p-4 shadow-2xl sm:rounded-[18px] sm:p-5 ${p.clips ? "max-w-[1040px]" : "max-w-[640px]"}`} onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-3">
           <p className="eyebrow">{ours ? "Our squad" : p.team_id ? teamName : "In the pool"}</p>
           <button type="button" onClick={onClose} className="-mr-1 -mt-1 rounded-full px-3 py-1 text-xl leading-none text-muted hover:bg-wash hover:text-ink" aria-label="Close">×</button>

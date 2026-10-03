@@ -4,6 +4,7 @@ import SpartansStars from "../SpartansStars";
 import Image from "next/image";
 import usclCrest from "../brand/uscl-crest.png";
 import sdllCrest from "../brand/crest.png";
+import playfulWhite from "../brand/playful-ventures-white.png";
 import { LEAGUE, usclClosed } from "@/lib/league";
 
 export default async function LoginPage({
@@ -36,6 +37,10 @@ export default async function LoginPage({
               <li>• Every player&apos;s stats, phase economies and video clips</li>
               <li>• Your own wishlist and squad suggestions — only you see them</li>
             </ul>
+          </div>
+          <div className="flex items-center gap-3 border-t border-white/15 pt-5">
+            <span className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-white/55">Presented by</span>
+            <Image src={playfulWhite} alt="Playful Ventures" className="h-12 w-auto" sizes="100px" />
           </div>
         </section>
         <section className="order-1 flex items-center justify-center bg-background px-6 py-12 md:order-2 md:py-16">

@@ -9,6 +9,7 @@ import { signOut } from "@/app/login/actions";
 import Nav, { type NavItem } from "./Nav";
 import sdllCrest from "./brand/crest.png";
 import usclCrest from "./brand/uscl-crest.png";
+import playfulWhite from "./brand/playful-ventures-white.png";
 import { LEAGUE } from "@/lib/league";
 import SponsorBar from "./SponsorBar";
 import Crumbs from "./Crumbs";
@@ -196,6 +197,14 @@ export default async function RootLayout({
                 </span>
               </span>
             </Link>
+
+            {/* USCL is presented by Playful Ventures — wide screens only, the bar is full on phones */}
+            {USCL && (
+              <span className="hidden shrink-0 items-center gap-2 border-l border-white/15 pl-4 xl:flex">
+                <span className="font-mono text-[0.5rem] uppercase leading-tight tracking-[0.22em] text-white/45">Presented<br />by</span>
+                <Image src={playfulWhite} alt="Playful Ventures" className="h-[30px] w-auto" sizes="60px" />
+              </span>
+            )}
 
             <Nav items={items} />
 

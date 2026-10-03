@@ -7,7 +7,7 @@
 //   "uscl" — Urban Sports Champions League Season 2, run as a live demo for
 //            Gurugram Spartans (A+ / A / B / Legend, ₹3,00,000 purse)
 export type League = "sdll" | "uscl";
-export const LEAGUE: League = "uscl";
+export const LEAGUE = "sdll" as League;
 
 // The USCL demo switches itself off at midnight after the auction (Nikhil, 3 Oct):
 // from then on only the admin can sign in; every owner login is refused and the

@@ -111,7 +111,7 @@ export default async function RootLayout({
   // Only the two public routes are advertised to a signed-out visitor —
   // everything else redirects to /login (see proxy.ts), so linking to it from
   // the masthead would just bounce them.
-  const LIBRARY: NavItem = { href: "https://www.ndpms.in/spartans/?from=uscl", label: "Ball Library", external: true };
+  const LIBRARY: NavItem = { href: "https://www.ndpms.in/spartans", label: "Ball Library", external: true };
   const items: NavItem[] = USCL
     ? // USCL soft launch: only the pages that work for USCL owners.
       [

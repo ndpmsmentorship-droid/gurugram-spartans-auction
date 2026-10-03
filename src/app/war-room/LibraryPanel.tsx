@@ -58,7 +58,7 @@ export default function LibraryPanel({ name, defaultOpen }: { name: string; defa
     );
   const libName = lib[kind]!;
   const src = `/spartans/?p=${kind}-${encodeURIComponent(libName)}&embed=1`;
-  const full = `/spartans/?p=${kind}-${encodeURIComponent(libName)}&from=uscl`;
+  const full = `/spartans/?p=${kind}-${encodeURIComponent(libName)}`;
   const height = measured?.src === src ? measured.h : 640;
 
   function toggle() {

@@ -16,6 +16,8 @@ import type { League } from "@/lib/league";
 import phaseData from "@/data/phase-stats.json";
 import cvMap from "@/data/cv-map.json";
 import LibraryPanel from "./LibraryPanel";
+import { LEAGUE } from "@/lib/league";
+import sdllCrest from "@/app/brand/crest.png";
 import UsclMatch from "./UsclMatch";
 import { clipsUrl } from "@/lib/scout/clips";
 import { rtmState, rtmThreats, RTM_MAX_AGAINST } from "@/lib/auction/rtm";
@@ -112,7 +114,7 @@ function enrich(p: WRPlayer): Enriched {
     deathSpec: starDeath || (!!d && d.balls >= 12 && (d.econ ?? 99) <= 8.5),
     ppSpec: starPP || (!!pp && pp.balls >= 18 && (pp.econ ?? 99) <= 7),
     clips: clipsUrl(p.full_name),
-    doubt: doubtful(p),
+    doubt: LEAGUE === "uscl" ? doubtful(p) : [],
   };
 }
 
@@ -792,7 +794,7 @@ export default function WarRoom(props: {
               {myTeam.logo_url ? (
                 <TeamCrest name={myTeam.name} logoUrl={myTeam.logo_url} size={120} />
               ) : (
-                <Image src={usclCrest} alt="USCL" className="h-36 w-auto" sizes="120px" />
+                <Image src={props.league === "uscl" ? usclCrest : sdllCrest} alt="" className="h-36 w-auto" sizes="120px" />
               )}
               <p className="font-display text-2xl leading-tight">{myTeam.name}</p>
               <p className="max-w-xs text-sm text-muted">Waiting for the next player — he appears here the moment he&apos;s put up.</p>
@@ -915,7 +917,7 @@ export default function WarRoom(props: {
 
         {/* Ball Library for the player on the block: right under the block card on
             phones, its own full-width row on laptops (the library goes two-column there) */}
-        {onBlock && (
+        {onBlock && props.league === "uscl" && (
           <div className="order-2 lg:order-3 lg:col-span-2 [&>div]:mt-0">
             <LibraryPanel key={onBlock.id} name={onBlock.full_name} />
           </div>
@@ -1226,7 +1228,7 @@ function ProfileSheet({ p, teamName, ours, onClose, star }: { p: Enriched; teamN
           </div>
         </div>
         <StatGrid p={p} />
-        <LibraryPanel key={p.id} name={p.full_name} defaultOpen />
+        {LEAGUE === "uscl" && <LibraryPanel key={p.id} name={p.full_name} defaultOpen />}
       </div>
     </div>
   );

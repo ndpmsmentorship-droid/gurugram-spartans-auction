@@ -1,5 +1,8 @@
 "use client";
 
+import Image from "next/image";
+import usclCrest from "@/app/brand/uscl-crest.png";
+
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { assignPlayer, unassignPlayer, rtmPlayer, setPurse } from "@/app/admin/auction/actions";
 import { putUpLot, withdrawLot } from "@/app/admin/auction/live-actions";
@@ -745,10 +748,22 @@ export default function WarRoom(props: {
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_1fr]">
         {/* on the block */}
-        <section className="order-1 rounded-[16px] border border-line bg-surface p-4 shadow-[var(--elev-sm)]">
+        <section className="order-1 flex flex-col rounded-[16px] border border-line bg-surface p-4 shadow-[var(--elev-sm)]">
           <p className="eyebrow">On the block</p>
           {!onBlock ? (
-            <p className="mt-3 text-sm text-muted">Nobody yet. The next player appears here the moment they&apos;re put up.</p>
+            // empty block: our crest (USCL's if the team has none) fills the card instead of a blank space
+            <div className="flex flex-1 flex-col items-center justify-center gap-3 py-8 text-center">
+              {myTeam.logo_url ? (
+                <TeamCrest name={myTeam.name} logoUrl={myTeam.logo_url} size={148} />
+              ) : (
+                <Image src={usclCrest} alt="USCL" className="h-36 w-auto" sizes="120px" />
+              )}
+              <p className="font-display text-2xl leading-tight">{myTeam.name}</p>
+              <p className="max-w-xs text-sm text-muted">Waiting for the next player — he appears here the moment he&apos;s put up.</p>
+              <p className="text-xs tabular-nums text-muted">
+                Squad {me.size}/{R.squadMin}–{R.squadMax} · Purse left <b className="text-ink">{inr(purseLeft)}</b> · Max safe bid <b className="text-ink">{inr(maxSafe)}</b>
+              </p>
+            </div>
           ) : (
             <div className="mt-3">
               <div className="flex flex-wrap gap-x-4 gap-y-3">

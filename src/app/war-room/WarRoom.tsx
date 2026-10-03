@@ -923,6 +923,10 @@ export default function WarRoom(props: {
             <p className="eyebrow">What we need next</p>
             <p className="text-[0.7rem] text-faint">tap a row for every option</p>
           </div>
+          <p className="mt-1.5 text-[0.75rem] text-muted">
+            <span className="font-semibold text-[#FF7A00]">✦ Suggestions powered by ND CricVideos AI</span>
+            <span className="text-faint"> — every ball read, every gap spotted.</span>
+          </p>
           <ul className="mt-2 divide-y divide-line">
             {needs.map((n) => {
               const done = n.have >= n.target;

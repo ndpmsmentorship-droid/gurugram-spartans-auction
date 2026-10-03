@@ -112,4 +112,5 @@ Last updated: 2026-09-30
 - [x] Final check 3 Oct: 14 owner logins OK (own War Room, no pad, /admin blocked), DB squads = official deck, rules = rulebook, RLS/RPC lock verified, public pages OK
 - [ ] Library sign-in cap: 20 tries / hour per connection (LMS pass route `tooMany("pwlogin", ip, 20, 60)`) — owners on one venue Wi-Fi share it; raise for auction day only if Nikhil OKs
 - [x] 3 Oct reconcile vs official USCL site: +Karan Sharma (B); Satish Kumar (Legend) hidden (left the pool); Japani owner Shashank Verma → Sachin Khatana (B, ₹3K, per public franchise page); Nikhil Tandan test sale removed; Ankit Bhargava (45) A→B; 12 players 34→35 per USCL ages (out of the 31–34 band); library sign-in cap 200/h until midnight
+- [x] "Match with USCL" War Room button + Mac checker — 3 Oct
 - [ ] Nitin Ruhela: deck = Chennai retained, USCL pool still lists him available — ask organisers

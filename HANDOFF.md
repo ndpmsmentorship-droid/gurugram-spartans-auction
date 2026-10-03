@@ -453,3 +453,11 @@ See local memory [[gurugram-spartans-video-clips]] for deep pipeline detail.
 ## Handy scripts (`scripts/`, run with `node scripts/*.mts` — Node 26 strips TS types)
 - `import-sdll.mts` — **the current importer** (SDLL platform → `scout_players`, clean-slate semantics above).
 - `import-from-api.mts`, `import-final-list.mts`, `extract-roster.py` — **SCCL S6 era, do not run** (kept for the archive).
+
+## "Match with USCL" button (3 Oct 2026)
+War Room admin pad → **⟳ Match with USCL**. The site never holds the USCL password: the button writes
+`ops/uscl-match/request.json` (private Supabase bucket `ops`); `scripts/uscl-match-watch.mjs`, running on
+Nikhil's Mac (`U=… P=… PY=<venv python> caffeinate -i node scripts/uscl-match-watch.mjs`), sees it within ~8 s,
+runs uscl-fetch.py + uscl-reconcile.mts --apply (never --hide-gone, never the live lot) and writes
+`report.json`; it also runs itself every 15 min 3–11 pm IST and posts a heartbeat (panel shows checker online/offline).
+A match takes ~40 s. Mac must be on/awake with the checker running.

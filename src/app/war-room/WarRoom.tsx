@@ -12,6 +12,7 @@ import type { League } from "@/lib/league";
 import phaseData from "@/data/phase-stats.json";
 import cvMap from "@/data/cv-map.json";
 import LibraryPanel from "./LibraryPanel";
+import UsclMatch from "./UsclMatch";
 import { clipsUrl } from "@/lib/scout/clips";
 import { rtmState, rtmThreats, RTM_MAX_AGAINST } from "@/lib/auction/rtm";
 
@@ -667,6 +668,7 @@ export default function WarRoom(props: {
             </div>
           )}
           {padMsg && <p className={`mt-2 text-sm ${padMsg.bad ? "text-red" : "text-up"}`}>{padMsg.text}</p>}
+          {props.league === "uscl" && <UsclMatch />}
           {!padId && props.league === "uscl" && (() => {
             const t = teams.find((x) => x.id === topTeam) ?? myTeam;
             const left = Math.max(0, (t.purse_max ?? t.purse_total) - t.purse_total);

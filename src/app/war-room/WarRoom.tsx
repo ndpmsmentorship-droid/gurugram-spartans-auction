@@ -774,9 +774,9 @@ export default function WarRoom(props: {
           <p className="eyebrow">On the block</p>
           {!onBlock ? (
             // empty block: our crest (USCL's if the team has none) fills the card instead of a blank space
-            <div className="flex flex-1 flex-col items-center justify-center gap-3 py-8 text-center">
+            <div className="flex flex-1 flex-col items-center gap-3 pb-4 pt-3 text-center">
               {props.league === "uscl" && (
-                <div className="mb-3 flex w-full items-center justify-center gap-5 border-b border-line pb-4">
+                <div className="mb-1 flex w-full items-center justify-center gap-5 border-b border-line pb-3">
                   <Image src={usclCrest} alt="USCL — Urban Sports Champions League" className="h-16 w-auto" sizes="60px" />
                   <span className="h-10 w-px bg-line" aria-hidden />
                   <div className="flex flex-col items-center gap-1">
@@ -786,7 +786,7 @@ export default function WarRoom(props: {
                 </div>
               )}
               {myTeam.logo_url ? (
-                <TeamCrest name={myTeam.name} logoUrl={myTeam.logo_url} size={148} />
+                <TeamCrest name={myTeam.name} logoUrl={myTeam.logo_url} size={120} />
               ) : (
                 <Image src={usclCrest} alt="USCL" className="h-36 w-auto" sizes="120px" />
               )}
@@ -795,6 +795,30 @@ export default function WarRoom(props: {
               <p className="text-xs tabular-nums text-muted">
                 Squad {me.size}/{R.squadMin}–{R.squadMax} · Purse left <b className="text-ink">{inr(purseLeft)}</b> · Max safe bid <b className="text-ink">{inr(maxSafe)}</b>
               </p>
+              {/* the rest of the card: a quiet read of where the squad stands */}
+              <div className="mt-3 w-full max-w-md border-t border-line pt-4 text-left text-[0.8rem] leading-relaxed text-muted">
+                <p className="label-mono mb-2 text-center">Our squad so far · {me.size}</p>
+                <ul className="grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2">
+                  {mine
+                    .slice()
+                    .sort((a, b) => ["A+", "A", "B", "Special"].indexOf(a.cat) - ["A+", "A", "B", "Special"].indexOf(b.cat))
+                    .map((p) => (
+                      <li key={p.id} className="flex items-baseline justify-between gap-2">
+                        <span className="truncate">{p.full_name}</span>
+                        <span className="shrink-0 tabular-nums text-faint">{catLabel(p.cat)} · {inr(p.sold_price)}</span>
+                      </li>
+                    ))}
+                </ul>
+                <p className="mt-3 text-center">
+                  {stillNeed > 0 ? <>Need <b className="text-ink">{stillNeed} more</b> to reach {R.squadMin}</> : <>Minimum squad reached</>} · room for up to {Math.max(0, R.squadMax - me.size)}
+                  {props.league === "uscl" && <> · age 31–34: {me.band}/{USCL_AGE_BAND.buyMax}</>}
+                </p>
+                {needs.some((n) => n.have < n.target) && (
+                  <p className="mt-1 text-center">
+                    Still short of: {needs.filter((n) => n.have < n.target).map((n) => n.label.replace(/ \(.*\)/, "").toLowerCase()).join(", ")}
+                  </p>
+                )}
+              </div>
             </div>
           ) : (
             <div className="mt-3">

@@ -63,6 +63,7 @@ const stamp = () =>
   `1970-01-01T00:00:${String(store.tick++ % 60).padStart(2, "0")}.000Z`;
 
 export const getLot = (): Lot => ({ ...lot });
+export const allEvents = (): Event[] => events.slice();
 export const getEvents = (): Event[] => events.slice(-40).reverse();
 
 type Row = { id: string; team_id: string | null; sold_price: number | null; acquired: string | null; auction_category: string | null };
@@ -176,6 +177,26 @@ export function call(fn: string, args: Record<string, unknown>): string | null {
     }
     events.push({ id: ++store.seq, player_id: sale.player_id, team_id: sale.team_id, kind: "undo", amount: sale.amount });
     lot.updated_at = stamp();
+    return null;
+  }
+
+  // the operator pad's "take back the last bid" (takeBackBid in live-actions)
+  if (fn === "take_back_bid") {
+    if (lot.status !== "live" || !lot.player_id) return "No lot is live";
+    const start = events.findLastIndex((e) => e.kind === "put_up" && e.player_id === lot.player_id);
+    const bids: Event[] = [];
+    for (const e of events.slice(start + 1)) {
+      if (e.player_id !== lot.player_id) continue;
+      if (e.kind === "raise") bids.push(e);
+      else if (e.kind === "undo") bids.pop();
+    }
+    const last = bids.pop();
+    if (!last) return "No bid to take back.";
+    const prev = bids[bids.length - 1];
+    lot.current_bid = prev?.amount ?? null;
+    lot.leading_team_id = prev?.team_id ?? null;
+    lot.updated_at = stamp();
+    events.push({ id: ++store.seq, player_id: lot.player_id, team_id: last.team_id, kind: "undo", amount: -(last.amount ?? 0) });
     return null;
   }
 

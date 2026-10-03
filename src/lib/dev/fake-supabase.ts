@@ -18,6 +18,7 @@ import {
   FIXTURE_PROFILE,
   FIXTURE_SCHEDULE_CONFIG,
 } from "./fixture";
+import { allEvents } from "./live-lot";
 
 export const DEV_FIXTURE = process.env.SPARTANS_DEV_FIXTURE === "1";
 
@@ -39,6 +40,10 @@ function tableRows(table: string): Row[] {
       return fixtureMatches() as unknown as Row[];
     case "schedule_config":
       return [FIXTURE_SCHEDULE_CONFIG] as unknown as Row[];
+    case "auction_event":
+      return allEvents().map((e) => ({ ...e, season_id: FIXTURE_SEASON.id })) as unknown as Row[];
+    case "auction_rules":
+      return [{ season_id: FIXTURE_SEASON.id, squad_max: 25 }];
     default:
       return [];
   }
@@ -100,6 +105,10 @@ class Query implements PromiseLike<{ data: unknown; error: null; count?: number 
       if (av === bv) return 0;
       return (av > bv ? 1 : -1) * (asc ? 1 : -1);
     });
+    return this;
+  }
+  range(from: number, to: number) {
+    this.rows = this.rows.slice(from, to + 1);
     return this;
   }
   limit(n: number) {

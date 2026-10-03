@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { readLiveLot } from "@/lib/auction/read";
 import { getAuctionSeasonId, AUCTION_DIVISIONS } from "@/lib/auction/target";
@@ -112,6 +113,11 @@ export default async function AdminAuctionPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      {/* auction day: the operator works the pad, the hall watches the screen */}
+      <div className="flex flex-wrap gap-3">
+        <Link href="/admin/auction/pad" className="btn-primary">Open operator pad</Link>
+        <Link href="/auction/screen" target="_blank" className="btn-ghost">Big screen ↗</Link>
+      </div>
       <LotControl lot={lot} teams={lotTeams} available={available} />
       <AuctionConsole
         teams={(teams ?? []) as ConsoleTeam[]}

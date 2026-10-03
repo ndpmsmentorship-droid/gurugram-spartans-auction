@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import usclCrest from "@/app/brand/uscl-crest.png";
+import playfulBlack from "@/app/brand/playful-ventures-black.png";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { assignPlayer, unassignPlayer, rtmPlayer, setPurse } from "@/app/admin/auction/actions";
@@ -784,6 +785,16 @@ export default function WarRoom(props: {
               <p className="text-xs tabular-nums text-muted">
                 Squad {me.size}/{R.squadMin}–{R.squadMax} · Purse left <b className="text-ink">{inr(purseLeft)}</b> · Max safe bid <b className="text-ink">{inr(maxSafe)}</b>
               </p>
+              {props.league === "uscl" && (
+                <div className="mt-4 flex items-center justify-center gap-5 border-t border-line pt-4">
+                  <Image src={usclCrest} alt="USCL — Urban Sports Champions League" className="h-16 w-auto" sizes="60px" />
+                  <span className="h-10 w-px bg-line" aria-hidden />
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="font-mono text-[0.55rem] uppercase tracking-[0.22em] text-muted">Presented by</span>
+                    <Image src={playfulBlack} alt="Playful Ventures" className="h-11 w-auto" sizes="90px" />
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="mt-3">

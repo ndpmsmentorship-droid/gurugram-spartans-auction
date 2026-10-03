@@ -2,7 +2,12 @@
 
 _Local Claude memory does not transfer across machines — this file is the source of truth. Last updated 2026-09-30._
 
-## ⚠️ USCL DEMO IS SWITCHED IN (since 1 Oct 2026) — read before anything else
+## ✅ USCL DEMO CLOSED (4 Oct 2026) — portal is back on SDLL
+LEAGUE = "sdll"; USCL pool (412 rows, with sales) archived in league_pool_archive; 13 USCL owner logins banned
+(not deleted); LMS framing back to DENY; ndpms.in USCL band, library back-pill/embed removed; owner library
+passes revoked. USCL code paths stay in the repo behind `league === "uscl"`.
+
+## (history) USCL DEMO WAS SWITCHED IN 1–3 Oct 2026
 The auction side (board, console, pool, owner pages, War Room) is running **USCL Season 2** data with the
 SDLL look, for Gurugram Spartans at the USCL auction on **Sat 3 Oct**. `src/lib/league.ts` has
 `LEAGUE = "uscl"`; the active season is "Urban Sports Champions League — Season 2"; the SDLL pool (295 + 19

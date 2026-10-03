@@ -115,3 +115,8 @@ Last updated: 2026-09-30
 - [x] "Match with USCL" War Room button + Mac checker — 3 Oct
 - [ ] Nitin Ruhela: deck = Chennai retained, USCL pool still lists him available — ask organisers
 - [x] Spartans bought the ₹50,000 top-up (purse ₹2,25,000) — confirmed by Nikhil 3 Oct
+
+## 4 Oct 2026 — after the USCL auction
+- [x] Back to SDLL (league-switch sdll, LEAGUE = "sdll"), USCL owner logins banned, library framing DENY, ndpms.in band removed
+- [ ] USCL Spartans data left as-is: Amit Sehrawat (39 or 40?) unrecorded; 2nd ₹25K top-up unrecorded (official spend ₹2,37,000)
+- [ ] SDLL big-screen auction display, modelled on the USCL official screen (Nikhil's video, 4 Oct): lot #, on-the-block profile, current bid / SOLD, purse board with squad x/20, up next, sponsor strip

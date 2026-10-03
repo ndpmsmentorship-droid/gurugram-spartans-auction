@@ -775,6 +775,16 @@ export default function WarRoom(props: {
           {!onBlock ? (
             // empty block: our crest (USCL's if the team has none) fills the card instead of a blank space
             <div className="flex flex-1 flex-col items-center justify-center gap-3 py-8 text-center">
+              {props.league === "uscl" && (
+                <div className="mb-3 flex w-full items-center justify-center gap-5 border-b border-line pb-4">
+                  <Image src={usclCrest} alt="USCL — Urban Sports Champions League" className="h-16 w-auto" sizes="60px" />
+                  <span className="h-10 w-px bg-line" aria-hidden />
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="font-mono text-[0.55rem] uppercase tracking-[0.22em] text-muted">Presented by</span>
+                    <Image src={playfulBlack} alt="Playful Ventures" className="h-11 w-auto" sizes="90px" />
+                  </div>
+                </div>
+              )}
               {myTeam.logo_url ? (
                 <TeamCrest name={myTeam.name} logoUrl={myTeam.logo_url} size={148} />
               ) : (
@@ -785,16 +795,6 @@ export default function WarRoom(props: {
               <p className="text-xs tabular-nums text-muted">
                 Squad {me.size}/{R.squadMin}–{R.squadMax} · Purse left <b className="text-ink">{inr(purseLeft)}</b> · Max safe bid <b className="text-ink">{inr(maxSafe)}</b>
               </p>
-              {props.league === "uscl" && (
-                <div className="mt-4 flex items-center justify-center gap-5 border-t border-line pt-4">
-                  <Image src={usclCrest} alt="USCL — Urban Sports Champions League" className="h-16 w-auto" sizes="60px" />
-                  <span className="h-10 w-px bg-line" aria-hidden />
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="font-mono text-[0.55rem] uppercase tracking-[0.22em] text-muted">Presented by</span>
-                    <Image src={playfulBlack} alt="Playful Ventures" className="h-11 w-auto" sizes="90px" />
-                  </div>
-                </div>
-              )}
             </div>
           ) : (
             <div className="mt-3">

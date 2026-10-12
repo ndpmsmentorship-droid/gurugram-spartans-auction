@@ -13,6 +13,8 @@ Last updated: 2026-09-30
 - [ ] Decide whether the portal serves at the domain root (needs a basePath change) or at /spartansscout
 
 ## Quotation and contract
+- [x] League entity for all legal agreements = Playful Ventures Pvt Ltd (Nikhil, 11 Oct); legal brief for counsel: https://claude.ai/code/artifact/975f6099-a6fc-4e4a-8fa7-dfbd1387e7e5
+- [ ] Auction Rules & Regulations — ON HOLD (Nikhil, 11 Oct: rules still change a lot). Notes parked in the "On hold: Auction rules" tab of the legal brief; finalise and send to the lawyer before the 2 Jan 2027 auction
 - [ ] Confirm the company spelling: "Foundary Tek Private Ltd" vs "Foundry" (must match the incorporation certificate)
 - [ ] Add GSTIN, CIN and registered address for Foundary Tek and Playful Ventures to the quotation header
 - [ ] Confirm my suggested numbers: ₹2.5L per season from Season 3, ₹4,000 per match for the Ball Library
@@ -21,6 +23,8 @@ Last updated: 2026-09-30
 - [ ] Draft the MSA + SOW (Foundary Tek ↔ Playful Ventures): IP stays with Foundary Tek, non-exclusive licence, 40/40/20
 - [ ] Lawyer review, e-stamp / eSign
 - [ ] Invoice the 40% advance (₹4,00,000 + GST)
+- [ ] Keep the work register up to date — add every product change and service the day it's delivered: https://claude.ai/code/artifact/309e6ebf-c086-4b96-8d4c-91700e7e725f (bill to Playful Ventures Pvt Ltd; services at ₹2,500/h, est. hours to confirm)
+- [ ] Raise change requests for the built Phase 2 add-ons (venue mode ₹85,000, War Room/squad tracker ₹1,48,750) and the services (₹1,70,000 est.) before invoicing
 
 ## Portal — before the Season 2 auction
 - [ ] Check the live board shows exactly the 12 SDLL teams (Lucknow and Bhojpuri are in the DB)
@@ -29,6 +33,7 @@ Last updated: 2026-09-30
 - [ ] Set DEMO_MODE = false at launch (src/app/site-config.ts)
 - [ ] 32 players still show initials instead of a photo
 - [ ] More Kanishk award photos for the carousel (candidates on the picker: 23, 43, 44–56, 59–62)
+- [ ] Instant SOLD clips for Instagram (quoted 13 Oct, FT-Q-2026-02 Part A features 50–55, inside the ₹5L Portal): on every `sell` event, auto-render a 9:16 reel (player photo + stats, bid war replayed, SOLD stamp, team crest + price, SDLL/sponsor branding), caption + hashtags, phone download page for the social team to post live. Need from league: Instagram handle, hashtags, sponsor logos for clips; decide if hall camera footage is added
 
 ## USCL auction — Sat 3 Oct (demo for Gurugram Spartans)
 - [x] USCL season, 14 franchises, ₹3L purses, deck rules, 318-player pool + Spartans' 5 staged and switched in
@@ -53,6 +58,7 @@ Last updated: 2026-09-30
 - [ ] 5. "Only Shanti Devi … other leagues" — clarify: a declaration to play only SDLL this season, or a question listing other leagues played?
 - [ ] 6. "Attire professional" — clarify: profile photo in professional attire (guidance on the photo upload), or a dress code for the auction night?
 - [ ] 7. Animated manual video — short explainer on how to register (script + animation), embed on /register
+- [ ] 8. Player Terms & Conditions + 4th tick box + "non-refundable" fee wording — BUILT on local branch `player-terms` (b4e823f), NOT live: Nikhil said wait for the lawyer (11 Oct). When approved: apply the lawyer's edits (bump TERMS_VERSION in register/shared.ts), merge to main, run the 2026-10-11 addendum in supabase/registration_schema.sql (terms_version column; the code saves without it until then)
 
 ## Landing page — content needed from the league
 - [ ] A message from Kanishk / the league director (quote + photo) for the About section

@@ -149,7 +149,7 @@ Library: 78 matches, 649 profiles, audit clean; ground page 42 S6 matches (par 1
 - [ ] M47 KEI v Texas Holdem (`OTTYlCDMHiM`): scripted card-exact in the Time Tagger — Nikhil time-tags, then merge_m47 (from merge_m46) + card Scorecard_27861332
 - [x] M46 Delhi Knights v Patna time-tagged and merged (211/214, card-exact) — 24 Oct
 - [ ] M38 Spartans v UP: final scorecard (only 10.1-over copies so far; ground counts UP 196/6, card 197/6); 17.4 slip
-- [ ] Shot passes owed: M46 Delhi v Patna (127 + 84), M45 Japani v ACCI (121 + 122), M44 Mumbai v Chandigarh (118 + 99), USCL final (107 + 68), USCL semi-final inn1 (112)
+- [ ] Shot passes owed: M46 Delhi v Patna (127 + 84), M45 Japani v ACCI (121 + 122), USCL final (107 + 68), USCL semi-final inn1 (112)
 - [ ] Legend list: ask Nikhil for every Sarda team's legend (runs count double till 30) — known: Russell (ACCI), Vipul (Japani)
 - [ ] Insta: post Nikhil Raina's 6 every-ball reels (reels/Nikhil Raina; captions + songs in "00 Profile, bio and captions.txt")
 - [ ] Insta: Tarun Yadav carousel (15) — M37 now shot-tagged: re-render the pitch slide (clips.mjs), then post

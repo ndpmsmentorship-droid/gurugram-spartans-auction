@@ -1,7 +1,7 @@
 # SDLL Portal — To-do
 
 Running list. New items go under the right heading; tick with `[x]` when done (move to Done at the bottom).
-Last updated: 2026-09-30
+Last updated: 2026-10-24
 
 ## Domain and hosting (Playful Ventures)
 - [ ] Confirm Playful Ventures owns playfulventures.com and playfulventures.in (both on GoDaddy, owner hidden)
@@ -49,6 +49,17 @@ Last updated: 2026-09-30
 - [ ] Ask USCL: does a declined RTM still use up that franchise's RTM? (built as: only a matched RTM counts)
 - [x] USCL section on the CricVideos page (?league=uscl): 96 pool players on film, by category, Bat/Bowl links — 1 Oct
 - [ ] After the auction: `node scripts/league-switch.mts sdll`, set LEAGUE = "sdll", push
+
+## League tech for other leagues — not priority (Nikhil, 15 Oct: start 16 Oct)
+For league owners who reach us from the Instagram posts (08 league owners, 09 auction platform).
+- [ ] Demo league: a fictional league (made-up name, teams, ~60 players, logo) on its own season — no SDLL/USCL names or real players
+- [ ] Demo walkthrough: registration form → player pool → admin console → live big-screen board → War Room/owner login → results and league site
+- [ ] Demo logins: a view-only owner login + an auctioneer pad that resets on a timer, so prospects can try bidding themselves
+- [ ] Short screen-recorded demo video (2–3 min) + 1-page PDF pitch for WhatsApp
+- [ ] Price sheet / packages: registrations only, + auction, + league site, + CricVideos ball library (base on FT-Q-2026-02)
+- [ ] Onboarding checklist for a new league: what we need from them (logo, teams, purses, rules, categories, dates, domain)
+- [ ] Enquiry intake: a "League tech" page or form on ndpms.in feeding WhatsApp/email, linked from the Instagram bio
+- [ ] Confirm with Playful Ventures what of the SDLL build we may show other leagues (IP stays with Foundary Tek; their branding off the demo)
 
 ## Client feedback — registration form (30 Sep)
 - [x] 1. Declaration: "my information is true" (checkbox) — live
@@ -131,3 +142,22 @@ Last updated: 2026-09-30
 - [x] SDLL pool = every player captured so far: 1,050 (295 SDLL + 321 USCL + 434 SARDA S6), deduped by CricHeroes id / name+age; new rows source_id `pool:uscl:…` / `pool:sccl:…` (scripts/sdll-pool-merge.mts) — 4 Oct
 - [ ] SDLL auction (Sat 2 Jan 2027): big-screen display + War Room; sponsors = partnership-deck placeholders; up next + recent sales; library embed ON for the auction screen (same-origin, like USCL day)
 - [ ] S6 M27 (NCR v BKB): scripted in s6-tagger (top preset) — awaiting Nikhil's time-tag, then publish + merge_m27
+
+## CricVideos Ball Library + Instagram — 24 Oct 2026
+Library: 78 matches, 649 profiles, audit clean; ground page 42 S6 matches (par 186, 240+ never chased). Detail in ycwism-lms-src `public/spartans/HANDOFF.md`.
+- [ ] M45 Japani v ACCI (`CqVHJh_POXw`): scripted, card-exact (preset "S6 · Japani Tsunami vs American Cricket Club of India · 24 Oct") — Nikhil time-tags, then merge_m45 (from merge_m44: `4a`, `4b`, `8nb`, retire), card Scorecard_27849503, ground analytics
+- [ ] M46 Patna v Delhi Knights (`ClEtx7oBLgY`): needs AI-Comms recording + final scorecard, then script
+- [ ] M38 Spartans v UP: final scorecard (only 10.1-over copies so far; ground counts UP 196/6, card 197/6); 17.4 slip
+- [ ] Shot passes owed: M37 Srinagar v Texas (79 + 43 left), M40 Delhi v Uttarakhand (114 + 115), M44 Mumbai v Chandigarh (118 + 99), USCL final (107 + 68), USCL semi-final inn1 (112)
+- [ ] Legend list: ask Nikhil for every Sarda team's legend (runs count double till 30) — known: Russell (ACCI), Vipul (Japani)
+- [ ] Insta: post Nikhil Raina's 6 every-ball reels (reels/Nikhil Raina; captions + songs in "00 Profile, bio and captions.txt")
+- [ ] Insta: Tarun Yadav carousel (15) — don't post until M37 is shot-tagged (pitch slide blank)
+- [ ] Insta: Raina reel captions — add results for S4 SF, USCL SF, BBL M25, BBL final if Nikhil confirms them
+- [ ] Punjab Royals sixes reel: 2 sixes missing (4.5, 18.5) — re-download and rebuild
+- [ ] ACCI v Bengal directions (no tag source)
+- [x] M43 Japani v Bengal shot pass, both innings (Japani 124 pitch/104 dir; Bengal 104/91) — 24 Oct
+- [x] M44 merged card-exact; M43 card in — 24 Oct
+- [x] Time Tagger 1×/1.5×/2× speed button; Shot Tagger same (was 1/0.5/0.25) — 24 Oct
+- [x] Shot Tagger lists only pending innings, hides < 20 balls left — 23 Oct
+- [x] Ground page tagline under the header — 23 Oct
+- [x] Nikhil Raina: 220 (74) sixes reel + 6 every-ball innings reels with covers/thumbs — 24 Oct

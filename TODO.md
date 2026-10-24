@@ -144,12 +144,13 @@ For league owners who reach us from the Instagram posts (08 league owners, 09 au
 - [ ] S6 M27 (NCR v BKB): scripted in s6-tagger (top preset) — awaiting Nikhil's time-tag, then publish + merge_m27
 
 ## CricVideos Ball Library + Instagram — 24 Oct 2026
+- [ ] Insta redesign: new font + design system for posts/reels/covers (Nikhil, 25 Oct: current look feels generic; reference One7 Sports' Instagram)
 Library: 78 matches, 649 profiles, audit clean; ground page 42 S6 matches (par 186, 240+ never chased). Detail in ycwism-lms-src `public/spartans/HANDOFF.md`.
 - [x] M45 Japani v ACCI time-tagged and merged (243/247, card-exact) — 24 Oct
-- [ ] M47 KEI v Texas Holdem (`OTTYlCDMHiM`): scripted card-exact in the Time Tagger — Nikhil time-tags, then merge_m47 (from merge_m46) + card Scorecard_27861332
+- [x] M47 KEI v Texas time-tagged and merged (226/231, card-exact) — 25 Oct
 - [x] M46 Delhi Knights v Patna time-tagged and merged (211/214, card-exact) — 24 Oct
 - [ ] M38 Spartans v UP: final scorecard (only 10.1-over copies so far; ground counts UP 196/6, card 197/6); 17.4 slip
-- [x] Shot passes: every merged S6 match done (M46 finished 24 Oct). USCL final + semi-final dropped (recording quality too poor to shot-tag — Nikhil, 24 Oct)
+- [ ] Shot passes owed: M47 KEI v Texas (129 + 97). All earlier S6 matches done. USCL final + semi-final dropped (recording quality too poor to shot-tag — Nikhil, 24 Oct)
 - [ ] Legend list: ask Nikhil for every Sarda team's legend (runs count double till 30) — known: Russell (ACCI), Vipul (Japani)
 - [ ] Insta: post Nikhil Raina's 6 every-ball reels (reels/Nikhil Raina; captions + songs in "00 Profile, bio and captions.txt")
 - [ ] Insta: Tarun Yadav carousel (15) — M37 now shot-tagged: re-render the pitch slide (clips.mjs), then post

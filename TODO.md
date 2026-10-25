@@ -151,7 +151,7 @@ Library: 78 matches, 649 profiles, audit clean; ground page 42 S6 matches (par 1
 - [x] M47 KEI v Texas time-tagged and merged (226/231, card-exact) — 25 Oct
 - [x] M46 Delhi Knights v Patna time-tagged and merged (211/214, card-exact) — 24 Oct
 - [ ] M38 Spartans v UP: final scorecard (only 10.1-over copies so far; ground counts UP 196/6, card 197/6); 17.4 slip
-- [ ] Shot passes owed: M47 KEI v Texas — KEI innings (129); chase done. All earlier S6 matches done. USCL final + semi-final dropped (recording quality too poor to shot-tag — Nikhil, 24 Oct)
+- [x] Shot passes: every merged S6 match done (M47 finished 25 Oct). USCL final + semi-final dropped (recording quality too poor to shot-tag — Nikhil, 24 Oct)
 - [ ] Legend list: ask Nikhil for every Sarda team's legend (runs count double till 30) — known: Russell (ACCI), Vipul (Japani)
 - [ ] Insta: post Nikhil Raina's 6 every-ball reels (reels/Nikhil Raina; captions + songs in "00 Profile, bio and captions.txt")
 - [ ] Insta: Tarun Yadav carousel (15) — M37 now shot-tagged: re-render the pitch slide (clips.mjs), then post

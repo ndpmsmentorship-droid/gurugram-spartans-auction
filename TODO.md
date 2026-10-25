@@ -148,7 +148,8 @@ For league owners who reach us from the Instagram posts (08 league owners, 09 au
 Library: 78 matches, 649 profiles, audit clean; ground page 42 S6 matches (par 186, 240+ never chased). Detail in ycwism-lms-src `public/spartans/HANDOFF.md`.
 - [x] M45 Japani v ACCI time-tagged and merged (243/247, card-exact) — 24 Oct
 - [ ] M49 Chennai v Bharat Hunters (`rsX1F-aSDbw`): scripted card-exact in the Time Tagger — Nikhil time-tags, then merge_m49 + card Scorecard_27884917
-- [ ] M48 Jaipur v Goan Monks (`xyxB2E2iv-U`): scripted card-exact in the Time Tagger — Nikhil time-tags, then merge_m48 (from merge_m47) + card Scorecard_27873696
+- [x] M48 Jaipur v Goan Monks (`xyxB2E2iv-U`): merged 25 Oct, 244/244 balls timed
+- [ ] M48 shot pass (Shot Tagger)
 - [x] M47 KEI v Texas time-tagged and merged (226/231, card-exact) — 25 Oct
 - [x] M46 Delhi Knights v Patna time-tagged and merged (211/214, card-exact) — 24 Oct
 - [ ] M38 Spartans v UP: final scorecard (only 10.1-over copies so far; ground counts UP 196/6, card 197/6); 17.4 slip

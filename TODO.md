@@ -18,7 +18,7 @@ Last updated: 2026-10-24
 - [ ] Confirm the company spelling: "Foundary Tek Private Ltd" vs "Foundry" (must match the incorporation certificate)
 - [ ] Add GSTIN, CIN and registered address for Foundary Tek and Playful Ventures to the quotation header
 - [ ] Confirm my suggested numbers: ₹2.5L per season from Season 3, ₹4,000 per match for the Ball Library
-- [ ] Send the quotation (PDF: ~/Downloads/SDLL-Portal-Quotation-Foundary-Tek.pdf)
+- [ ] Send the quotation (PDF: ~/Downloads/nikhil/SDLL & USCL/Quotation/SDLL-Portal-Quotation-Foundary-Tek.pdf)
 - [ ] Meeting and demo with Playful Ventures
 - [ ] Draft the MSA + SOW (Foundary Tek ↔ Playful Ventures): IP stays with Foundary Tek, non-exclusive licence, 40/40/20
 - [ ] Lawyer review, e-stamp / eSign
@@ -147,6 +147,7 @@ For league owners who reach us from the Instagram posts (08 league owners, 09 au
 - [ ] Insta redesign: new font + design system for posts/reels/covers (Nikhil, 25 Oct: current look feels generic; reference One7 Sports' Instagram)
 Library: 78 matches, 649 profiles, audit clean; ground page 42 S6 matches (par 186, 240+ never chased). Detail in ycwism-lms-src `public/spartans/HANDOFF.md`.
 - [x] M45 Japani v ACCI time-tagged and merged (243/247, card-exact) — 24 Oct
+- [ ] M48 Jaipur v Goan Monks (`xyxB2E2iv-U`): scripted card-exact in the Time Tagger — Nikhil time-tags, then merge_m48 (from merge_m47) + card Scorecard_27873696
 - [x] M47 KEI v Texas time-tagged and merged (226/231, card-exact) — 25 Oct
 - [x] M46 Delhi Knights v Patna time-tagged and merged (211/214, card-exact) — 24 Oct
 - [ ] M38 Spartans v UP: final scorecard (only 10.1-over copies so far; ground counts UP 196/6, card 197/6); 17.4 slip

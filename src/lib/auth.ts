@@ -20,6 +20,17 @@ export async function getCurrentProfile(): Promise<Profile | null> {
   return profile;
 }
 
+// Third-party vetter: may review registrations (profiles, CricHeroes, LinkedIn,
+// vetting notes) but sees no contact details, Aadhaar or payments and can't
+// approve. The role lives on the auth user's app_metadata.
+export async function isVetter(): Promise<boolean> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user?.app_metadata?.role === "vetter";
+}
+
 export async function getActiveSeason() {
   const supabase = await createClient();
   const { data } = await supabase

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getCurrentProfile } from "@/lib/auth";
+import { getCurrentProfile, isVetter } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { recomputeAllIndices } from "@/lib/scout/recompute";
 import { SEASON, BUCKET } from "@/app/register/shared";
@@ -18,8 +18,15 @@ async function adminId(): Promise<string | null> {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = () => createAdminClient() as unknown as { from: (t: string) => any };
 
-async function update(id: string, patch: Record<string, unknown>) {
-  const by = await adminId();
+// Admins, or a third-party vetter (only for the LinkedIn tick and vetting).
+async function reviewerId(): Promise<string | null> {
+  const p = await getCurrentProfile();
+  if (!p) return null;
+  return p.role === "admin" || (await isVetter()) ? p.id : null;
+}
+
+async function update(id: string, patch: Record<string, unknown>, who: () => Promise<string | null> = adminId) {
+  const by = await who();
   if (!by || !id) return;
   await db()
     .from("registrations")
@@ -32,9 +39,11 @@ async function update(id: string, patch: Record<string, unknown>) {
 // Fewer than 500 connections parks the player in "under review".
 export async function markLinkedin(form: FormData) {
   const ok = form.get("verdict") === "yes";
-  await update(String(form.get("id") || ""), ok
-    ? { linkedin_verified: true }
-    : { linkedin_verified: false, status: "under_review" });
+  await update(
+    String(form.get("id") || ""),
+    ok ? { linkedin_verified: true } : { linkedin_verified: false, status: "under_review" },
+    reviewerId,
+  );
 }
 
 // Approving someone whose LinkedIn hasn't been confirmed at 500+ lands them in
@@ -68,11 +77,23 @@ export async function setVet(form: FormData) {
   const v = String(form.get("vet") || "");
   if (!["unchecked", "clear", "review", "flagged", "rejected"].includes(v)) return;
   const notes = String(form.get("notes") ?? "").trim().slice(0, 1000);
-  await update(String(form.get("id") || ""), {
-    vet_status: v,
-    ...(form.has("notes") ? { vet_notes: notes || null } : {}),
-    vet_checked_at: new Date().toISOString(),
-  });
+  const sources = String(form.get("sources") ?? "")
+    .split(/\s+/)
+    .map((u) => u.trim())
+    .filter((u) => /^(https?:\/\/)?[\w-]+(\.[\w-]+)+/.test(u))
+    .slice(0, 12);
+  const ch = String(form.get("cricheroes") ?? "").trim().slice(0, 300);
+  await update(
+    String(form.get("id") || ""),
+    {
+      vet_status: v,
+      ...(form.has("notes") ? { vet_notes: notes || null } : {}),
+      ...(form.has("sources") ? { vet_sources: sources.length ? sources : null } : {}),
+      ...(ch ? { cricheroes_link: ch } : {}),
+      vet_checked_at: new Date().toISOString(),
+    },
+    reviewerId,
+  );
 }
 
 // ---- Approved registration → auction pool --------------------------------

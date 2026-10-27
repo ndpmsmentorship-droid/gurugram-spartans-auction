@@ -71,6 +71,15 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Third-party vetters (app_metadata.role = "vetter", set on the auth user, so
+  // no extra lookup) only ever see the registrations review.
+  if (user?.app_metadata?.role === "vetter" && !pathname.startsWith("/admin/registrations") && pathname !== "/login") {
+    const to = request.nextUrl.clone();
+    to.pathname = "/admin/registrations";
+    to.search = "";
+    return NextResponse.redirect(to);
+  }
+
   // Role gate (one extra lookup, only on pages that need it). The pool import
   // is admin-only always; during the USCL soft launch the 14 franchise owners
   // get the war room, the live board and player pages — nothing else.

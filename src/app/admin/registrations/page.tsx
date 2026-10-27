@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentProfile, isVetter } from "@/lib/auth";
 import { SEASON, BUCKET } from "@/app/register/shared";
 import { markLinkedin, setStatus, setFee, setVet, addToPool, addAllApprovedToPool, removeFromPool } from "./actions";
 
@@ -59,6 +60,10 @@ export default async function RegistrationsPage({
 }) {
   const { s } = await searchParams;
   const tab = TABS.some((t) => t.key === s) ? (s as string) : "pending";
+  const me = await getCurrentProfile();
+  // A third-party vetter sees profiles, cricket links and vetting only: no
+  // contact details, Aadhaar, payments, approvals or the pool.
+  const vetter = me?.role !== "admin" && (await isVetter());
   const admin = createAdminClient();
   const sb = admin as unknown as { from: (t: string) => any; storage: any };
 
@@ -86,7 +91,9 @@ export default async function RegistrationsPage({
   const shown = rows.filter((r) => r.status === tab);
 
   // Short-lived links for the private selfie / Aadhaar / payment files (1 hour).
-  const paths = shown.flatMap((r) => [r.photo_path, r.photo_thumb_path, r.aadhaar_path, r.fee_proof_path]).filter(Boolean) as string[];
+  const paths = shown
+    .flatMap((r) => (vetter ? [r.photo_path, r.photo_thumb_path] : [r.photo_path, r.photo_thumb_path, r.aadhaar_path, r.fee_proof_path]))
+    .filter(Boolean) as string[];
   const signed = new Map<string, string>();
   if (paths.length) {
     const { data } = await sb.storage.from(BUCKET).createSignedUrls(paths, 3600);
@@ -112,24 +119,32 @@ export default async function RegistrationsPage({
     <div>
       <p className="eyebrow">Admin</p>
       <h1 className="mt-2 font-display text-2xl font-bold">Registrations · Season 2</h1>
+      {vetter ? (
+        <p className="mt-2 max-w-2xl text-sm text-muted">
+          {rows.length} registered. For each player: open CricHeroes, LinkedIn and Instagram, search their name for any board,
+          state, zonal, district or professional cricket in the last 15 years, then record what you found with the evidence links
+          and mark Clear, Needs review or Flagged. Tick LinkedIn 500+ after checking the profile.
+        </p>
+      ) : (
       <p className="mt-2 max-w-2xl text-sm text-muted">
         {rows.length} registered. For each player: match the UPI reference against the bank statement, open
         LinkedIn and tick 500+, record the vetting result, then approve. Anyone approved without the
         LinkedIn tick or a verified fee moves to Under review.
       </p>
+      )}
       <div className="mt-4 flex flex-wrap gap-2 text-sm">
-        <span className="badge bg-gold-fill text-gold">
+        {!vetter && <span className="badge bg-gold-fill text-gold">
           Fees to verify: <span className="num ml-1">{rows.filter((r) => r.fee_utr && r.fee_status === "pending").length}</span>
-        </span>
+        </span>}
         <span className="badge bg-wash">
           Not yet vetted: <span className="num ml-1">{rows.filter((r) => r.fee_utr && (r.vet_status ?? "unchecked") === "unchecked").length}</span>
         </span>
         <span className="badge bg-[color-mix(in_srgb,var(--red)_10%,transparent)] text-red-deep">
           Flagged: <span className="num ml-1">{rows.filter((r) => r.vet_status === "flagged").length}</span>
         </span>
-        <span className="badge bg-wash">
+        {!vetter && <span className="badge bg-wash">
           Fees verified: <span className="num ml-1">₹{(rows.filter((r) => r.fee_status === "verified" && r.fee_utr).reduce((a, r) => a + (r.fee_amount ?? 0), 0)).toLocaleString("en-IN")}</span>
-        </span>
+        </span>}
       </div>
 
       <div className="mt-5 flex flex-wrap gap-2">
@@ -140,7 +155,7 @@ export default async function RegistrationsPage({
         ))}
       </div>
 
-      {tab === "approved" && waiting > 0 && (
+      {!vetter && tab === "approved" && waiting > 0 && (
         <form action={addAllApprovedToPool} className="mt-5 flex flex-wrap items-center gap-3 rounded-[12px] border border-line bg-wash px-4 py-3">
           <p className="text-sm">
             <strong className="num">{waiting}</strong> approved {waiting === 1 ? "player isn't" : "players aren't"} in the auction pool yet.
@@ -183,7 +198,7 @@ export default async function RegistrationsPage({
                     )}
                   </div>
                   <p className="num mt-1 text-sm text-muted">
-                    {[r.phone, r.email, age(r.dob)].filter(Boolean).join(" · ")}
+                    {(vetter ? [age(r.dob)] : [r.phone, r.email, age(r.dob)]).filter(Boolean).join(" · ")}
                   </p>
                   {(r.employer || r.designation) && (
                     <p className="mt-1 text-sm">
@@ -229,7 +244,7 @@ export default async function RegistrationsPage({
                         Instagram ↗
                       </a>
                     )}
-                    {aadhaar && (
+                    {!vetter && aadhaar && (
                       <a className="text-accent-text underline" href={aadhaar} target="_blank" rel="noopener noreferrer">
                         Aadhaar ↗
                       </a>
@@ -238,7 +253,7 @@ export default async function RegistrationsPage({
                 </div>
               </div>
 
-              {r.fee_utr && (
+              {!vetter && r.fee_utr && (
                 <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-4">
                   <span className="label-mono mr-1">Fee ₹{(r.fee_amount ?? 1000).toLocaleString("en-IN")}:</span>
                   <span className={`badge ${FEE_STYLE[r.fee_status] ?? "bg-wash"}`}>{r.fee_status}</span>
@@ -291,6 +306,14 @@ export default async function RegistrationsPage({
                   <form action={setVet} className="mt-3 flex flex-wrap items-center gap-2">
                     <input type="hidden" name="id" value={r.id} />
                     <input name="notes" defaultValue={r.vet_notes ?? ""} placeholder="Notes: what you checked, what you found" className="input !w-auto min-w-[16rem] flex-1 !py-1.5 text-sm" />
+                    <input name="cricheroes" defaultValue={r.cricheroes_link ?? ""} placeholder="CricHeroes profile link (correct it if wrong)" className="input !w-auto min-w-[16rem] flex-1 !py-1.5 text-sm" />
+                    <textarea
+                      name="sources"
+                      defaultValue={Array.isArray(r.vet_sources) ? r.vet_sources.join("\n") : ""}
+                      placeholder="Evidence links, one per line (scorecards, news, profiles)"
+                      rows={2}
+                      className="input basis-full !rounded-[12px] !py-2 text-sm"
+                    />
                     {VET.map((v) => (
                       <button key={v.key} name="vet" value={v.key} className="pill" data-active={r.vet_status === v.key}>
                         {v.label}
@@ -300,7 +323,7 @@ export default async function RegistrationsPage({
                 </div>
               )}
 
-              {r.status === "approved" && (() => {
+              {!vetter && r.status === "approved" && (() => {
                 const inPool = poolOf.get(r.id);
                 return (
                   <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-4">
@@ -351,8 +374,8 @@ export default async function RegistrationsPage({
                   <input type="hidden" name="verdict" value="no" />
                   <button className="pill" data-active={r.linkedin_verified === false}>Under 500</button>
                 </form>
-                <span className="mx-1 h-6 w-px bg-line" aria-hidden />
-                {(["approved", "under_review", "rejected"] as const)
+                {!vetter && <span className="mx-1 h-6 w-px bg-line" aria-hidden />}
+                {!vetter && (["approved", "under_review", "rejected"] as const)
                   .filter((st) => st !== r.status)
                   .map((st) => (
                     <form key={st} action={setStatus}>

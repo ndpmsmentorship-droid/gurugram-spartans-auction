@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { getCurrentProfile } from "@/lib/auth";
+import { getCurrentProfile, isVetter } from "@/lib/auth";
 
 export default async function AdminLayout({
   children,
@@ -8,8 +8,12 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const profile = await getCurrentProfile();
-  if (!profile || profile.role !== "admin") {
+  const vetter = !!profile && profile.role !== "admin" && (await isVetter());
+  if (!profile || (profile.role !== "admin" && !vetter)) {
     redirect("/");
+  }
+  if (vetter) {
+    return <div className="mx-auto w-full max-w-5xl flex-1 p-4 sm:p-6">{children}</div>;
   }
 
   return (

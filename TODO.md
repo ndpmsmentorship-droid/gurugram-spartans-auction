@@ -17,6 +17,44 @@ sdll.playfulventures.co.in = this auction app (added to this Vercel project; `/`
 - [ ] Decide whether the portal later serves at the subdomain root (needs a basePath change; ndpms.in/spartansscout would then need a rewrite update)
 - [x] Avoid "playfulauction" — playfulauction.com is an unrelated adult chat/auction site
 
+## Registration v2 on playfulventures.co.in (27 Oct 2026)
+Built in ~/Claude/playful-site (not deployed until the two blockers below are done).
+- [ ] **Blocker:** Nikhil sends Playful Ventures' UPI ID → set `UPI_ID` in playful-site `src/app/site.ts`
+- [ ] **Blocker:** run `supabase/registration_v2.sql` once in the Supabase SQL Editor
+- [ ] Deploy playful-site, then do one real ₹1 test registration end to end (edit FEE_NOW to 1 for the test, back to 1000 after)
+- [ ] Admin queue (/admin/registrations in this app): show selfie thumb, employer/designation, Instagram, pro declaration,
+      UTR + payment screenshot, a "fee verified" button (fee_status), and vet_status/vet_notes with approve/hold/reject
+- [ ] Point this app's /register at playfulventures.co.in/register (one form only)
+- [ ] Razorpay: open Playful Ventures' account (KYC), then swap the UPI step for checkout + webhook (auto fee_status)
+- [ ] Lawyer to review T&C v2 (live as "v2 · 27 Oct 2026"; courts still say Gurugram — confirm) → bump TERMS_VERSION
+- [ ] Core team for the landing "About us": names, roles, one line each, portraits → src/app/team.ts
+- [ ] Registration closes 20 Dec 2026 23:59 IST (REG_CLOSES in shared.ts; form + server both enforce it)
+
+## Daily player vetting (every day while registration is open — run with Claude)
+Rule: no professional cricket in the last 15 years (international, IPL/franchise T20, BCCI first-class/List A/T20,
+state or zonal teams at any age group, paid contracts). Non-corporate profiles may be rejected.
+1. Pull registrations with vet_status = 'unchecked' (new since yesterday).
+2. Face check: download each 1080px selfie, run macOS Vision face detection (Swift, like scripts/comms/ocr3.swift):
+   exactly one face, face ≥ 15% of the frame, not blurred → face_check; anything else → ask for a new selfie.
+3. Corporate check: LinkedIn URL is a /in/ profile; employer + designation present and plausible; open LinkedIn by hand
+   for anything thin (LinkedIn blocks automated reads).
+4. Cricket footprint deep search, per player (name variants × city × age/DOB):
+   ESPNcricinfo player search, CricketArchive, BCCI domestic scorecards (Ranji / Vijay Hazare / Syed Mushtaq Ali /
+   Cooch Behar / Vinoo Mankad / CK Nayudu), state association sites, IPL and franchise T20 squads, Wikipedia,
+   news ("<name>" + "Ranji" / "U-19" / "state team" / "selected"), YouTube, Instagram bio.
+   CricHeroes: open the player's own link by hand only (no scraping) — look for BCCI/state-affiliated tournaments.
+5. Score each hit: name + age/DOB + state/city match → CLEAR / REVIEW / FLAGGED; save evidence URLs in vet_sources and a
+   one-line reason in vet_notes. Compare with the player's own pro declaration — a hidden match = reject (T&C §false declaration).
+6. Daily report to Nikhil: new registrations, fees to verify, flagged players with evidence; admin decides.
+
+## Face photos for every player, loading instantly
+- [ ] Every Season 2 player now uploads a selfie (returning players too); the browser makes a 1080px JPEG + 384px WebP (~25 KB)
+- [ ] On approval, copy the 384px WebP to a PUBLIC "faces" bucket as faces/<player-id>-<hash>.webp (cache 1 year,
+      immutable) and set scout_players.photo_url to that CDN URL — no next/image proxy hop on auction night
+- [ ] Auction board + screen: preload the next 3 lots' faces (new Image()) so the next player appears instantly
+- [ ] Backfill: list pool players with no face photo; WhatsApp them the registration link
+- [ ] Rule book: squad max is 18 (Nikhil, 27 Oct) — `auction_rules` still has the old squad sizes; update with max_bid 1.5L
+
 ## Quotation and contract
 - [x] League entity for all legal agreements = Playful Ventures Pvt Ltd (Nikhil, 11 Oct); legal brief for counsel: https://claude.ai/code/artifact/975f6099-a6fc-4e4a-8fa7-dfbd1387e7e5
 - [ ] Auction Rules & Regulations — ON HOLD (Nikhil, 11 Oct: rules still change a lot). Notes parked in the "On hold: Auction rules" tab of the legal brief; finalise and send to the lawyer before the 2 Jan 2027 auction

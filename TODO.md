@@ -19,12 +19,12 @@ sdll.playfulventures.co.in = this auction app (added to this Vercel project; `/`
 
 ## Registration v2 on playfulventures.co.in (27 Oct 2026)
 Built in ~/Claude/playful-site (not deployed until the two blockers below are done).
-- [ ] **Blocker:** Nikhil sends Playful Ventures' UPI ID → set `UPI_ID` in playful-site `src/app/site.ts`
-- [ ] **Blocker:** run `supabase/registration_v2.sql` once in the Supabase SQL Editor
-- [ ] Deploy playful-site, then do one real ₹1 test registration end to end (edit FEE_NOW to 1 for the test, back to 1000 after)
+- [x] UPI: ICICI Eazypay merchant QR (MSPLAYFULVENTURESPRIVATELIMITED.eazypay@icici) wired in, 27 Oct
+- [x] registration_v2.sql run 27 Oct; v2 deployed and tested end to end with a dummy entry (deleted)
+- [ ] Nikhil pays ₹1,000 once via the form's UPI button to confirm the pre-filled amount works on the Eazypay QR (fallback: show the bank's own QR, player types the amount)
 - [ ] Admin queue (/admin/registrations in this app): show selfie thumb, employer/designation, Instagram, pro declaration,
       UTR + payment screenshot, a "fee verified" button (fee_status), and vet_status/vet_notes with approve/hold/reject
-- [ ] Point this app's /register at playfulventures.co.in/register (one form only)
+- [x] This app's /register redirects to playfulventures.co.in/register (27 Oct)
 - [ ] Razorpay: open Playful Ventures' account (KYC), then swap the UPI step for checkout + webhook (auto fee_status)
 - [ ] Lawyer to review T&C v2 (live as "v2 · 27 Oct 2026"; courts still say Gurugram — confirm) → bump TERMS_VERSION
 - [ ] Core team for the landing "About us": names, roles, one line each, portraits → src/app/team.ts

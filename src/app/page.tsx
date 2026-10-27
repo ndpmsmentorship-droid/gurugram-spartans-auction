@@ -38,7 +38,7 @@ import { DEMO_MODE, PORTAL_PAGES } from "./site-config";
 const PHOTOS: Photo[] = [
   { src: manojKanishk, caption: "Manoj Tiwari & Kanishk Sheel · Fighter of the Match · 29 Mar 2026" },
   { src: k01, caption: "Match awards · Opening day · 14 Mar 2026" },
-  { src: k02, caption: "Match awards · Opening day · 14 Mar 2026" },
+  { src: k02, caption: "Match awards · 5 Apr 2026" },
   { src: k03, caption: "Match awards · 15 Mar 2026" },
   { src: k04, caption: "Match awards · 22 Mar 2026" },
   { src: k05, caption: "Match awards · Season 1" },

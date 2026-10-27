@@ -55,11 +55,13 @@ const SITE_DESCRIPTION = USCL
 // icon/OG routes emitted "/icon", which on ndpms.in is the SMIFE site's icon.
 const META = `/spartansscout/brand/meta/${USCL ? "uscl" : "sdll"}`;
 const SHARE_TITLE = USCL ? SITE_NAME : `${SITE_NAME} — Auction`;
+// The SDLL build is Playful Ventures' internal owners' portal, so it shares
+// the Playful card (same file as playfulventures.co.in/admin).
 const OG_IMAGE = {
-  url: `${META}-og.png`,
+  url: USCL ? `${META}-og.png` : "/spartansscout/brand/meta/pv-share.png",
   width: 1200,
   height: 630,
-  alt: USCL ? "USCL Auction — Urban Sports Champions League Season 2" : "Gurugram Spartans",
+  alt: USCL ? "USCL Auction — Urban Sports Champions League Season 2" : "Playful Ventures",
 };
 
 export const metadata: Metadata = {

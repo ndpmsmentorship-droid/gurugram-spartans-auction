@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { getCurrentProfile, isVetter } from "@/lib/auth";
+import { getCurrentProfile } from "@/lib/auth";
 
 export default async function AdminLayout({
   children,
@@ -8,12 +8,8 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const profile = await getCurrentProfile();
-  const vetter = !!profile && profile.role !== "admin" && (await isVetter());
-  if (!profile || (profile.role !== "admin" && !vetter)) {
+  if (!profile || profile.role !== "admin") {
     redirect("/");
-  }
-  if (vetter) {
-    return <div className="mx-auto w-full max-w-5xl flex-1 p-4 sm:p-6">{children}</div>;
   }
 
   return (
@@ -23,7 +19,7 @@ export default async function AdminLayout({
           Auction Console
         </Link>
         <Link href="/admin/registrations" className="font-medium hover:text-primary">
-          Registrations
+          Approved → Pool
         </Link>
         <Link href="/admin/players" className="font-medium hover:text-primary">
           Player Pool

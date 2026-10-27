@@ -71,18 +71,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Third-party vetters (app_metadata.role = "vetter", set on the auth user, so
-  // no extra lookup) only ever see the registrations review.
-  if (
-    user?.app_metadata?.role === "vetter" &&
-    !pathname.startsWith("/admin/registrations") &&
-    !pathname.startsWith("/api/registrations/export") &&
-    pathname !== "/login"
-  ) {
-    const to = request.nextUrl.clone();
-    to.pathname = "/admin/registrations";
-    to.search = "";
-    return NextResponse.redirect(to);
+  // Third-party vetters work on the league admin (playfulventures.co.in/admin),
+  // never in the owners' portal.
+  if (user?.app_metadata?.role === "vetter") {
+    await supabase.auth.signOut();
+    return NextResponse.redirect("https://playfulventures.co.in/admin");
   }
 
   // Role gate (one extra lookup, only on pages that need it). The pool import

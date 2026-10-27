@@ -1,109 +1,39 @@
-import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getCurrentProfile, isVetter } from "@/lib/auth";
 import { SEASON, BUCKET } from "@/app/register/shared";
-import { markLinkedin, setStatus, setFee, setVet, addToPool, addAllApprovedToPool, removeFromPool } from "./actions";
+import { addToPool, addAllApprovedToPool, removeFromPool } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-const TABS = [
-  { key: "pending", label: "New" },
-  { key: "under_review", label: "Under review" },
-  { key: "approved", label: "Approved" },
-  { key: "rejected", label: "Rejected" },
-] as const;
-
-const STATUS_STYLE: Record<string, string> = {
-  pending: "bg-wash text-ink",
-  under_review: "bg-gold-fill text-gold",
-  approved: "bg-[color-mix(in_srgb,var(--up)_12%,transparent)] text-up",
-  rejected: "bg-[color-mix(in_srgb,var(--red)_10%,transparent)] text-red-deep",
-};
-
+// Owners' portal side of registrations: only approved players, and only the
+// step that puts them into the auction pool with a category. Review, fees,
+// vetting and exports are on the league admin (playfulventures.co.in/admin).
+const LEAGUE_ADMIN = "https://playfulventures.co.in/admin";
 const CATEGORIES = ["A+", "A", "B", "Special"];
 const chId = (link: string | null | undefined) =>
   link?.match(/player-profile\/(\d+)/)?.[1] ?? link?.match(/\/(\d{4,})(?:\/|$)/)?.[1] ?? null;
 const nameKey = (n: string | null | undefined) => (n ?? "").toLowerCase().replace(/\s+/g, " ").trim();
 
-const PRO_YEARS = 15;
-const FEE_STYLE: Record<string, string> = {
-  pending: "bg-gold-fill text-gold",
-  verified: "bg-[color-mix(in_srgb,var(--up)_12%,transparent)] text-up",
-  rejected: "bg-[color-mix(in_srgb,var(--red)_10%,transparent)] text-red-deep",
-};
-const VET = [
-  { key: "clear", label: "Clear" },
-  { key: "review", label: "Needs review" },
-  { key: "flagged", label: "Flagged" },
-] as const;
-const VET_STYLE: Record<string, string> = {
-  unchecked: "bg-wash text-muted",
-  clear: "bg-[color-mix(in_srgb,var(--up)_12%,transparent)] text-up",
-  review: "bg-gold-fill text-gold",
-  flagged: "bg-[color-mix(in_srgb,var(--red)_10%,transparent)] text-red-deep",
-  rejected: "bg-[color-mix(in_srgb,var(--red)_10%,transparent)] text-red-deep",
-};
-const href = (u: string) => (/^https?:/.test(u) ? u : `https://${u}`);
-
-function age(dob: string | null): string | null {
-  if (!dob) return null;
-  const y = Math.floor((Date.now() - new Date(dob).getTime()) / (365.25 * 864e5));
-  return Number.isFinite(y) ? `${y} yrs` : null;
-}
-
-export default async function RegistrationsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ s?: string }>;
-}) {
-  const { s } = await searchParams;
-  const tab = TABS.some((t) => t.key === s) ? (s as string) : "pending";
-  const me = await getCurrentProfile();
-  // A third-party vetter sees profiles, cricket links and vetting only: no
-  // contact details, Aadhaar, payments, approvals or the pool.
-  const vetter = me?.role !== "admin" && (await isVetter());
-  const admin = createAdminClient();
-  const sb = admin as unknown as { from: (t: string) => any; storage: any };
-
-  const { data: all, error } = await sb
+export default async function PoolFromRegistrationsPage() {
+  const sb = createAdminClient() as unknown as { from: (t: string) => any; storage: any };
+  const { data: rows } = await sb
     .from("registrations")
-    .select("*")
+    .select("id, full_name, photo_path, photo_thumb_path, cricheroes_link, batting_hand, bowling_type, allrounder, is_keeper")
     .eq("season", SEASON)
-    .order("created_at", { ascending: false });
+    .eq("status", "approved")
+    .order("full_name");
+  const shown = (rows ?? []) as any[];
 
-  if (error) {
-    return (
-      <div className="card">
-        <p className="eyebrow">Admin</p>
-        <h1 className="mt-2 font-display text-2xl font-bold">Registrations</h1>
-        <p className="mt-3 text-sm text-muted">
-          Registration isn&apos;t set up yet. Paste <code>supabase/registration_schema.sql</code> into
-          the Supabase SQL Editor and run it once.
-        </p>
-      </div>
-    );
-  }
-
-  const rows = (all ?? []) as any[];
-  const counts = Object.fromEntries(TABS.map((t) => [t.key, rows.filter((r) => r.status === t.key).length]));
-  const shown = rows.filter((r) => r.status === tab);
-
-  // Short-lived links for the private selfie / Aadhaar / payment files (1 hour).
-  const paths = shown
-    .flatMap((r) => (vetter ? [r.photo_path, r.photo_thumb_path] : [r.photo_path, r.photo_thumb_path, r.aadhaar_path, r.fee_proof_path]))
-    .filter(Boolean) as string[];
+  const paths = shown.map((r) => r.photo_thumb_path ?? r.photo_path).filter(Boolean) as string[];
   const signed = new Map<string, string>();
   if (paths.length) {
     const { data } = await sb.storage.from(BUCKET).createSignedUrls(paths, 3600);
     (data ?? []).forEach((d: any) => d.signedUrl && signed.set(d.path, d.signedUrl));
   }
 
-  // Where each approved player stands in the auction pool: their own row
-  // ("reg:<id>"), or already there from the league platform list.
   const poolOf = new Map<string, { own: boolean; category: string | null; sold: boolean }>();
-  if (tab === "approved" && shown.length) {
+  if (shown.length) {
     const { data: pool } = await sb.from("scout_players").select("source_id, full_name, cricheroes_link, auction_category, team_id");
     for (const r of shown) {
       const ch = chId(r.cricheroes_link);
@@ -113,67 +43,21 @@ export default async function RegistrationsPage({
       if (hit) poolOf.set(r.id, { own: !!own, category: hit.auction_category, sold: !!hit.team_id });
     }
   }
-  const waiting = tab === "approved" ? shown.filter((r) => !poolOf.has(r.id)).length : 0;
+  const waiting = shown.filter((r) => !poolOf.has(r.id)).length;
 
   return (
     <div>
       <p className="eyebrow">Admin</p>
-      <h1 className="mt-2 font-display text-2xl font-bold">Registrations · Season 2</h1>
-      {vetter ? (
-        <p className="mt-2 max-w-2xl text-sm text-muted">
-          {rows.length} registered. For each player: open CricHeroes, LinkedIn and Instagram, search their name for any board,
-          state, zonal, district or professional cricket in the last 15 years, then record what you found with the evidence links
-          and mark Clear, Needs review or Flagged. Tick LinkedIn 500+ after checking the profile.
-        </p>
-      ) : (
+      <h1 className="mt-2 font-display text-2xl font-bold">Approved players → auction pool</h1>
       <p className="mt-2 max-w-2xl text-sm text-muted">
-        {rows.length} registered. For each player: match the UPI reference against the bank statement, open
-        LinkedIn and tick 500+, record the vetting result, then approve. Anyone approved without the
-        LinkedIn tick or a verified fee moves to Under review.
+        {shown.length} approved. Review, fees, vetting and exports are on the{" "}
+        <a className="text-accent-text underline" href={LEAGUE_ADMIN} target="_blank" rel="noopener noreferrer">
+          league admin ↗
+        </a>
+        . Here you only give each approved player a category and put them in the pool.
       </p>
-      )}
-      <div className="mt-4 flex flex-wrap gap-2 text-sm">
-        {!vetter && <span className="badge bg-gold-fill text-gold">
-          Fees to verify: <span className="num ml-1">{rows.filter((r) => r.fee_utr && r.fee_status === "pending").length}</span>
-        </span>}
-        <span className="badge bg-wash">
-          Not yet vetted: <span className="num ml-1">{rows.filter((r) => r.fee_utr && (r.vet_status ?? "unchecked") === "unchecked").length}</span>
-        </span>
-        <span className="badge bg-[color-mix(in_srgb,var(--red)_10%,transparent)] text-red-deep">
-          Flagged: <span className="num ml-1">{rows.filter((r) => r.vet_status === "flagged").length}</span>
-        </span>
-        {!vetter && <span className="badge bg-wash">
-          Fees verified: <span className="num ml-1">₹{(rows.filter((r) => r.fee_status === "verified" && r.fee_utr).reduce((a, r) => a + (r.fee_amount ?? 0), 0)).toLocaleString("en-IN")}</span>
-        </span>}
-      </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
-        <span className="label-mono mr-1">Download Excel:</span>
-        {(vetter
-          ? [{ q: "sheet=cricheroes", label: "CricHeroes list" }]
-          : [
-              { q: "sheet=jersey", label: "Jersey (kit maker)" },
-              { q: "sheet=catering", label: "Catering" },
-              { q: "sheet=cricheroes", label: "CricHeroes list" },
-              { q: "sheet=all", label: "Everything" },
-            ]
-        ).map((x) => (
-          <a key={x.q} href={`/spartansscout/api/registrations/export?${x.q}`} className="pill">
-            {x.label} ↓
-          </a>
-        ))}
-        {!vetter && <span className="text-xs text-muted">Jersey and catering include approved players only.</span>}
-      </div>
-
-      <div className="mt-5 flex flex-wrap gap-2">
-        {TABS.map((t) => (
-          <Link key={t.key} href={`/admin/registrations?s=${t.key}`} className="pill" data-active={tab === t.key}>
-            {t.label} <span className="num">{counts[t.key]}</span>
-          </Link>
-        ))}
-      </div>
-
-      {!vetter && tab === "approved" && waiting > 0 && (
+      {waiting > 0 && (
         <form action={addAllApprovedToPool} className="mt-5 flex flex-wrap items-center gap-3 rounded-[12px] border border-line bg-wash px-4 py-3">
           <p className="text-sm">
             <strong className="num">{waiting}</strong> approved {waiting === 1 ? "player isn't" : "players aren't"} in the auction pool yet.
@@ -182,229 +66,51 @@ export default async function RegistrationsPage({
         </form>
       )}
 
-      <ul className="mt-6 space-y-4">
-        {shown.length === 0 && <li className="text-sm text-muted">Nobody here yet.</li>}
+      <ul className="mt-6 space-y-3">
+        {shown.length === 0 && <li className="text-sm text-muted">No approved players yet.</li>}
         {shown.map((r) => {
+          const face = signed.get(r.photo_thumb_path ?? r.photo_path ?? "");
+          const inPool = poolOf.get(r.id);
           const roles = [r.batting_hand, r.bowling_type, r.allrounder, r.is_keeper ? "Wicket keeper" : null].filter(Boolean);
-          const photo = r.photo_path ? signed.get(r.photo_path) : null;
-          const thumb = (r.photo_thumb_path && signed.get(r.photo_thumb_path)) || photo;
-          const aadhaar = r.aadhaar_path ? signed.get(r.aadhaar_path) : null;
-          const proof = r.fee_proof_path ? signed.get(r.fee_proof_path) : null;
-          const proRecent = r.pro_declared && r.pro_last_year && new Date().getFullYear() - r.pro_last_year < PRO_YEARS;
           return (
-            <li key={r.id} className="card">
-              <div className="flex flex-wrap items-start gap-4">
-                {thumb ? (
-                  <a href={photo ?? thumb} target="_blank" rel="noopener noreferrer" title="Open the full selfie">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={thumb} alt="" className="h-[120px] w-24 rounded-[10px] object-cover ring-1 ring-line" />
-                  </a>
-                ) : (
-                  <span className="grid h-[120px] w-24 place-items-center rounded-[10px] bg-wash font-display text-2xl">
-                    {String(r.full_name).slice(0, 1)}
-                  </span>
-                )}
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="text-xl">{r.full_name}</h2>
-                    <span className={`badge ${STATUS_STYLE[r.status] ?? ""}`}>{r.status.replace("_", " ")}</span>
-                    <span className="badge bg-wash">{r.is_returning ? "Returning" : "New player"}</span>
-                    {r.matched_by === "name" && (
-                      <span className="badge bg-gold-fill text-gold" title="Their number wasn't on file; they picked this profile by name. Check it's really them.">
-                        Matched by name · check
-                      </span>
-                    )}
-                  </div>
-                  <p className="num mt-1 text-sm text-muted">
-                    {(vetter ? [age(r.dob)] : [r.phone, r.email, age(r.dob)]).filter(Boolean).join(" · ")}
-                  </p>
-                  {(r.employer || r.designation) && (
-                    <p className="mt-1 text-sm">
-                      Works at <strong>{r.employer ?? "—"}</strong>
-                      {r.designation ? ` · ${r.designation}` : ""}
-                    </p>
-                  )}
-                  {roles.length > 0 && <p className="mt-1 text-sm">{roles.join(" · ")}</p>}
-                  {r.pro_declared != null && (
-                    <p className="mt-1 text-sm">
-                      {r.pro_declared ? (
-                        <span className={`badge ${proRecent ? "bg-[color-mix(in_srgb,var(--red)_10%,transparent)] text-red-deep" : "bg-gold-fill text-gold"}`}>
-                          Declared: {r.pro_level ?? "—"}, last played {r.pro_last_year ?? "—"}
-                          {proRecent ? " · within 15 years" : ""}
-                        </span>
-                      ) : (
-                        <span className="badge bg-wash">Declared: no board, state, district or professional cricket</span>
-                      )}
-                    </p>
-                  )}
-                  <p className="mt-1 text-sm text-muted">
-                    Jersey (father&apos;s name): <strong className="text-ink">{r.jersey_name ?? "—"} #{r.jersey_number ?? "—"}</strong> · T-shirt {r.tshirt_size ?? "—"} · Lower {r.lower_size ?? "—"}
-                  </p>
-                  {(r.meal_pref || r.food_allergies) && (
-                    <p className="mt-1 text-sm text-muted">
-                      Food: <strong className="text-ink">{r.meal_pref ?? "—"}</strong>
-                      {r.food_allergies ? ` · Allergies: ${r.food_allergies}` : ""}
-                    </p>
-                  )}
-                  <div className="mt-2 flex flex-wrap gap-3 text-sm">
-                    {r.linkedin_link && (
-                      <a className="text-accent-text underline" href={/^https?:/.test(r.linkedin_link) ? r.linkedin_link : `https://${r.linkedin_link}`} target="_blank" rel="noopener noreferrer">
-                        LinkedIn ↗
-                      </a>
-                    )}
-                    {r.cricheroes_link && (
-                      <a className="text-accent-text underline" href={/^https?:/.test(r.cricheroes_link) ? r.cricheroes_link : `https://${r.cricheroes_link}`} target="_blank" rel="noopener noreferrer">
-                        CricHeroes ↗
-                      </a>
-                    )}
-                    {r.instagram_link && (
-                      <a className="text-accent-text underline" href={href(r.instagram_link)} target="_blank" rel="noopener noreferrer">
-                        Instagram ↗
-                      </a>
-                    )}
-                    {!vetter && aadhaar && (
-                      <a className="text-accent-text underline" href={aadhaar} target="_blank" rel="noopener noreferrer">
-                        Aadhaar ↗
-                      </a>
-                    )}
-                  </div>
-                </div>
+            <li key={r.id} className="card flex flex-wrap items-center gap-4">
+              {face ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={face} alt="" className="h-16 w-14 rounded-[8px] object-cover" />
+              ) : (
+                <span className="grid h-16 w-14 place-items-center rounded-[8px] bg-wash font-display text-xl">{String(r.full_name).slice(0, 1)}</span>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="font-display text-lg uppercase leading-tight">{r.full_name}</p>
+                {roles.length > 0 && <p className="text-sm text-muted">{roles.join(" · ")}</p>}
               </div>
-
-              {!vetter && r.fee_utr && (
-                <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-4">
-                  <span className="label-mono mr-1">Fee ₹{(r.fee_amount ?? 1000).toLocaleString("en-IN")}:</span>
-                  <span className={`badge ${FEE_STYLE[r.fee_status] ?? "bg-wash"}`}>{r.fee_status}</span>
-                  <span className="num select-all text-sm">UTR {r.fee_utr}</span>
-                  {proof && (
-                    <a className="text-sm text-accent-text underline" href={proof} target="_blank" rel="noopener noreferrer">
-                      Payment screenshot ↗
-                    </a>
-                  )}
-                  <span className="mx-1 h-6 w-px bg-line" aria-hidden />
-                  {r.fee_status !== "verified" && (
-                    <form action={setFee}>
-                      <input type="hidden" name="id" value={r.id} />
-                      <input type="hidden" name="fee" value="verified" />
-                      <button className="btn-primary !py-2">Fee received ✓</button>
-                    </form>
-                  )}
-                  {r.fee_status !== "rejected" && (
-                    <form action={setFee}>
-                      <input type="hidden" name="id" value={r.id} />
-                      <input type="hidden" name="fee" value="rejected" />
-                      <button className="btn-ghost !py-2">Not received</button>
-                    </form>
-                  )}
-                </div>
-              )}
-
-              {r.fee_utr && (
-                <div className="mt-4 border-t border-line pt-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="label-mono mr-1">Vetting:</span>
-                    <span className={`badge ${VET_STYLE[r.vet_status ?? "unchecked"] ?? "bg-wash"}`}>{(r.vet_status ?? "unchecked").replace("_", " ")}</span>
-                    {r.face_check && <span className="badge bg-wash">Face: {r.face_check.replace("_", " ")}</span>}
-                    {r.vet_checked_at && (
-                      <span className="text-xs text-muted">checked {new Date(r.vet_checked_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span>
-                    )}
-                  </div>
-                  {r.vet_notes && <p className="mt-2 whitespace-pre-line text-sm text-ink">{r.vet_notes}</p>}
-                  {Array.isArray(r.vet_sources) && r.vet_sources.length > 0 && (
-                    <ul className="mt-2 flex flex-wrap gap-3 text-sm">
-                      {r.vet_sources.map((u: string, i: number) => (
-                        <li key={i}>
-                          <a className="text-accent-text underline" href={href(String(u))} target="_blank" rel="noopener noreferrer">
-                            Evidence {i + 1} ↗
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  <form action={setVet} className="mt-3 flex flex-wrap items-center gap-2">
-                    <input type="hidden" name="id" value={r.id} />
-                    <input name="notes" defaultValue={r.vet_notes ?? ""} placeholder="Notes: what you checked, what you found" className="input !w-auto min-w-[16rem] flex-1 !py-1.5 text-sm" />
-                    <input name="cricheroes" defaultValue={r.cricheroes_link ?? ""} placeholder="CricHeroes profile link (correct it if wrong)" className="input !w-auto min-w-[16rem] flex-1 !py-1.5 text-sm" />
-                    <textarea
-                      name="sources"
-                      defaultValue={Array.isArray(r.vet_sources) ? r.vet_sources.join("\n") : ""}
-                      placeholder="Evidence links, one per line (scorecards, news, profiles)"
-                      rows={2}
-                      className="input basis-full !rounded-[12px] !py-2 text-sm"
-                    />
-                    {VET.map((v) => (
-                      <button key={v.key} name="vet" value={v.key} className="pill" data-active={r.vet_status === v.key}>
-                        {v.label}
-                      </button>
-                    ))}
-                  </form>
-                </div>
-              )}
-
-              {!vetter && r.status === "approved" && (() => {
-                const inPool = poolOf.get(r.id);
-                return (
-                  <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-4">
-                    <span className="label-mono mr-1">Auction pool:</span>
-                    {inPool ? (
-                      <span className="badge bg-[color-mix(in_srgb,var(--up)_12%,transparent)] text-up">
-                        {inPool.sold ? "Sold" : "In pool"}
-                        {inPool.category ? ` · Category ${inPool.category}` : " · no category"}
-                        {!inPool.own && " · from league list"}
-                      </span>
-                    ) : (
-                      <span className="badge bg-wash">Not yet</span>
-                    )}
-                    {(!inPool || inPool.own) && !inPool?.sold && (
-                      <form action={addToPool} className="flex items-center gap-2">
-                        <input type="hidden" name="id" value={r.id} />
-                        <select name="category" defaultValue={inPool?.category ?? ""} className="input !w-auto !py-1.5 text-sm" aria-label="Auction category">
-                          <option value="">Category…</option>
-                          {CATEGORIES.map((c) => (
-                            <option key={c} value={c}>{c}</option>
-                          ))}
-                        </select>
-                        <button className="btn-primary !py-2">{inPool ? "Update" : "Add to pool"}</button>
-                      </form>
-                    )}
-                    {inPool?.own && !inPool.sold && (
-                      <form action={removeFromPool}>
-                        <input type="hidden" name="id" value={r.id} />
-                        <button className="btn-ghost !py-2">Remove</button>
-                      </form>
-                    )}
-                  </div>
-                );
-              })()}
-
-              <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-4">
-                <span className="label-mono mr-1">
-                  LinkedIn 500+:{" "}
-                  {r.linkedin_verified === true ? "yes" : r.linkedin_verified === false ? "no" : "not checked"}
+              {inPool ? (
+                <span className="badge bg-[color-mix(in_srgb,var(--up)_12%,transparent)] text-up">
+                  {inPool.sold ? "Sold" : "In pool"}
+                  {inPool.category ? ` · ${inPool.category}` : " · no category"}
+                  {!inPool.own && " · from league list"}
                 </span>
-                <form action={markLinkedin}>
+              ) : (
+                <span className="badge bg-wash">Not in pool</span>
+              )}
+              {(!inPool || inPool.own) && !inPool?.sold && (
+                <form action={addToPool} className="flex items-center gap-2">
                   <input type="hidden" name="id" value={r.id} />
-                  <input type="hidden" name="verdict" value="yes" />
-                  <button className="pill" data-active={r.linkedin_verified === true}>500+ ✓</button>
+                  <select name="category" defaultValue={inPool?.category ?? ""} className="input !w-auto !py-1.5 text-sm" aria-label="Auction category">
+                    <option value="">Category…</option>
+                    {CATEGORIES.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                  <button className="btn-primary !py-2">{inPool ? "Update" : "Add to pool"}</button>
                 </form>
-                <form action={markLinkedin}>
+              )}
+              {inPool?.own && !inPool.sold && (
+                <form action={removeFromPool}>
                   <input type="hidden" name="id" value={r.id} />
-                  <input type="hidden" name="verdict" value="no" />
-                  <button className="pill" data-active={r.linkedin_verified === false}>Under 500</button>
+                  <button className="btn-ghost !py-2">Remove</button>
                 </form>
-                {!vetter && <span className="mx-1 h-6 w-px bg-line" aria-hidden />}
-                {!vetter && (["approved", "under_review", "rejected"] as const)
-                  .filter((st) => st !== r.status)
-                  .map((st) => (
-                    <form key={st} action={setStatus}>
-                      <input type="hidden" name="id" value={r.id} />
-                      <input type="hidden" name="status" value={st} />
-                      <button className={st === "approved" ? "btn-primary !py-2" : "btn-ghost !py-2"}>
-                        {st === "approved" ? "Approve" : st === "under_review" ? "Under review" : "Reject"}
-                      </button>
-                    </form>
-                  ))}
-              </div>
+              )}
             </li>
           );
         })}

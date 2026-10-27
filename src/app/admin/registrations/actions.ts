@@ -1,13 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getCurrentProfile, isVetter } from "@/lib/auth";
+import { getCurrentProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { recomputeAllIndices } from "@/lib/scout/recompute";
 import { SEASON, BUCKET } from "@/app/register/shared";
 import { LEAGUE } from "@/lib/league";
 
-// Review actions for /admin/registrations. Server actions are callable
+// Pool actions for /admin/registrations. Server actions are callable
 // directly, so each one re-checks the admin role instead of relying on the
 // admin layout's redirect.
 async function adminId(): Promise<string | null> {
@@ -18,83 +18,9 @@ async function adminId(): Promise<string | null> {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = () => createAdminClient() as unknown as { from: (t: string) => any };
 
-// Admins, or a third-party vetter (only for the LinkedIn tick and vetting).
-async function reviewerId(): Promise<string | null> {
-  const p = await getCurrentProfile();
-  if (!p) return null;
-  return p.role === "admin" || (await isVetter()) ? p.id : null;
-}
-
-async function update(id: string, patch: Record<string, unknown>, who: () => Promise<string | null> = adminId) {
-  const by = await who();
-  if (!by || !id) return;
-  await db()
-    .from("registrations")
-    .update({ ...patch, reviewed_by: by, reviewed_at: new Date().toISOString(), updated_at: new Date().toISOString() })
-    .eq("id", id);
-  revalidatePath("/admin/registrations");
-}
-
-// LinkedIn check is manual: the admin opens the profile and ticks what they see.
-// Fewer than 500 connections parks the player in "under review".
-export async function markLinkedin(form: FormData) {
-  const ok = form.get("verdict") === "yes";
-  await update(
-    String(form.get("id") || ""),
-    ok ? { linkedin_verified: true } : { linkedin_verified: false, status: "under_review" },
-    reviewerId,
-  );
-}
-
-// Approving someone whose LinkedIn hasn't been confirmed at 500+ lands them in
-// "under review" instead, per the league rule. Season 2 (v2 form) rows also
-// need the ₹1,000 fee verified against the bank before they can be approved.
-export async function setStatus(form: FormData) {
-  const id = String(form.get("id") || "");
-  const status = String(form.get("status") || "");
-  if (!["approved", "under_review", "rejected", "pending"].includes(status)) return;
-  if (status === "approved") {
-    const { data } = await db().from("registrations").select("linkedin_verified, fee_utr, fee_status").eq("id", id).maybeSingle();
-    if (!data?.linkedin_verified) return update(id, { status: "under_review" });
-    if (data.fee_utr && data.fee_status !== "verified") return update(id, { status: "under_review" });
-  }
-  await update(id, { status });
-}
-
-// ₹1,000 registration fee: the admin matches the UTR against the bank
-// statement (ICICI Eazypay) and marks it.
-export async function setFee(form: FormData) {
-  const v = String(form.get("fee") || "");
-  if (!["verified", "rejected", "pending"].includes(v)) return;
-  await update(String(form.get("id") || ""), {
-    fee_status: v,
-    fee_verified_at: v === "verified" ? new Date().toISOString() : null,
-  });
-}
-
-// Daily vetting result (professional-cricket footprint, corporate check, face).
-export async function setVet(form: FormData) {
-  const v = String(form.get("vet") || "");
-  if (!["unchecked", "clear", "review", "flagged", "rejected"].includes(v)) return;
-  const notes = String(form.get("notes") ?? "").trim().slice(0, 1000);
-  const sources = String(form.get("sources") ?? "")
-    .split(/\s+/)
-    .map((u) => u.trim())
-    .filter((u) => /^(https?:\/\/)?[\w-]+(\.[\w-]+)+/.test(u))
-    .slice(0, 12);
-  const ch = String(form.get("cricheroes") ?? "").trim().slice(0, 300);
-  await update(
-    String(form.get("id") || ""),
-    {
-      vet_status: v,
-      ...(form.has("notes") ? { vet_notes: notes || null } : {}),
-      ...(form.has("sources") ? { vet_sources: sources.length ? sources : null } : {}),
-      ...(ch ? { cricheroes_link: ch } : {}),
-      vet_checked_at: new Date().toISOString(),
-    },
-    reviewerId,
-  );
-}
+// Registration review (fees, vetting, LinkedIn, approve/reject) lives on the
+// league admin at playfulventures.co.in/admin. This app only moves approved
+// players into the auction pool.
 
 // ---- Approved registration → auction pool --------------------------------
 // The pool (scout_players) is what the auctioneer puts up and owners scout.

@@ -205,7 +205,7 @@ export default async function RegistrationsPage({
                     </p>
                   )}
                   <p className="mt-1 text-sm text-muted">
-                    Kit: <strong className="text-ink">{r.jersey_name ?? "—"} #{r.jersey_number ?? "—"}</strong> · T-shirt {r.tshirt_size ?? "—"} · Lower {r.lower_size ?? "—"}
+                    Jersey (father&apos;s name): <strong className="text-ink">{r.jersey_name ?? "—"} #{r.jersey_number ?? "—"}</strong> · T-shirt {r.tshirt_size ?? "—"} · Lower {r.lower_size ?? "—"}
                   </p>
                   {(r.meal_pref || r.food_allergies) && (
                     <p className="mt-1 text-sm text-muted">

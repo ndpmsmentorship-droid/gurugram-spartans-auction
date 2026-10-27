@@ -33,6 +33,7 @@ Last updated: 2026-10-24
 - [ ] Set DEMO_MODE = false at launch (src/app/site-config.ts)
 - [ ] 32 players still show initials instead of a photo
 - [ ] More Kanishk award photos for the carousel (candidates on the picker: 23, 43, 44–56, 59–62)
+- [ ] Season 2 auction numbers (Nikhil, 27 Oct; subject to change until 1 week before the auction): purse ₹6,00,000 + optional ₹1,00,000 top-up; top bid ₹1,50,000 per player. `auction_rules` still has max_bid 4,00,000 — update before the dry run
 - [ ] Instant SOLD clips for Instagram (quoted 13 Oct, FT-Q-2026-02 Part A features 50–55, inside the ₹5L Portal): on every `sell` event, auto-render a 9:16 reel (player photo + stats, bid war replayed, SOLD stamp, team crest + price, SDLL/sponsor branding), caption + hashtags, phone download page for the social team to post live. Need from league: Instagram handle, hashtags, sponsor logos for clips; decide if hall camera footage is added
 
 ## USCL auction — Sat 3 Oct (demo for Gurugram Spartans)

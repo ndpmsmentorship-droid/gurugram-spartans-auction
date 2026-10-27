@@ -7,6 +7,7 @@ import { normCategory } from "@/lib/scout/tier";
 import type { ScoutPlayerRow } from "@/lib/supabase/types";
 import AuctionConsole, { type ConsolePlayer, type ConsoleTeam } from "./AuctionConsole";
 import LotControl, { type LotPlayer, type LotTeam, type LotView } from "./LotControl";
+import { selectAll } from "@/lib/supabase/select-all";
 
 export const dynamic = "force-dynamic";
 
@@ -29,16 +30,15 @@ export default async function AdminAuctionPage() {
       .eq("season_id", seasonId)
       .in("division", AUCTION_DIVISIONS)
       .order("name"),
-    sb
-      .from("scout_players")
-      .select(
-        "id, full_name, auction_category, primary_role, is_keeper, age, team_id, sold_price, acquired, rtm_against, is_marquee, " +
-          "photo_url, bat_matches, runs, bat_avg, bat_sr, wickets, economy, bat_index, bowl_index, overall_index"
-      )
-      .order("full_name"),
+    selectAll(
+      sb,
+      "scout_players",
+      "id, full_name, auction_category, primary_role, is_keeper, age, team_id, sold_price, acquired, rtm_against, is_marquee, " +
+        "photo_url, bat_matches, runs, bat_avg, bat_sr, wickets, economy, bat_index, bowl_index, overall_index"
+    ).then((r) => ({ ...r, data: r.data?.sort((a, b) => String(a.full_name).localeCompare(String(b.full_name))) ?? null })),
     // full rows, so the lot control can show each player's overall rank —
     // the auctioneer needs to know if the next lot is a #3 or a #300
-    sb.from("scout_players").select("*"),
+    selectAll(sb, "scout_players"),
     // the RTM panel preselects the latest sale
     sb.from("auction_event").select("player_id").eq("season_id", seasonId).eq("kind", "sell").order("id", { ascending: false }).limit(1).maybeSingle(),
   ]);

@@ -14,6 +14,7 @@ import type { ScoutPlayerRow } from "@/lib/supabase/types";
 import PlayerWorkshop from "./PlayerWorkshop";
 import MarqueeToggle from "./MarqueeToggle";
 import SardaScout from "./SardaScout";
+import { selectAll } from "@/lib/supabase/select-all";
 
 export default async function PlayerDetailPage({
   params,
@@ -27,7 +28,7 @@ export default async function PlayerDetailPage({
   const profile = await getCurrentProfile();
   const isAdmin = profile?.role === "admin";
 
-  const { data, error } = await supabase.from("scout_players").select("*");
+  const { data, error } = await selectAll(supabase, "scout_players");
   if (error) {
     return (
       <main className="mx-auto w-full max-w-3xl flex-1 px-5 py-10">

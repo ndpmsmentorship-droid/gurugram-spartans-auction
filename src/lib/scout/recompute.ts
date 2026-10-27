@@ -51,10 +51,15 @@ function toRawStats(r: ScoutPlayerRow): RawStats {
 // player's edit shifts everyone slightly). Single bulk upsert = one round trip.
 export async function recomputeAllIndices() {
   const admin = createAdminClient();
-  const { data, error } = await admin.from("scout_players").select("*");
-  if (error) throw new Error(error.message);
-
-  const rows = (data ?? []) as ScoutPlayerRow[];
+  // PostgREST returns at most 1,000 rows per request and the pool is past that,
+  // so page through it in a fixed order: percentiles need the WHOLE pool.
+  const rows: ScoutPlayerRow[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await admin.from("scout_players").select("*").order("id").range(from, from + 999);
+    if (error) throw new Error(error.message);
+    rows.push(...((data ?? []) as ScoutPlayerRow[]));
+    if (!data || data.length < 1000) break;
+  }
   if (rows.length === 0) return;
 
   const indices = computeIndices(rows.map(toRawStats));

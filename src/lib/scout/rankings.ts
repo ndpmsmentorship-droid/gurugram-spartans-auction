@@ -215,7 +215,11 @@ export function percentileColumn(values: (number | null)[], invert = false): (nu
 
 const BAT_W = { avg: 25, sr: 25, runs: 15, boundary: 15, conversion: 10, finishing: 10 };
 const BOWL_W = { economy: 20, boundaryConc: 12, dots: 12, wickets: 18, avg: 16, sr: 14, fiveW: 8 };
-const FIELD_W = { catches: 60, runOuts: 40 };
+// Fielding counts every dismissal a player makes in the field: catches,
+// run-outs, and for keepers stumpings and caught-behinds too (Nikhil, 27 Oct:
+// a keeper's dismissals were ranked only under keeping, so the best keepers
+// sat mid-table in fielding). Half rate per match, half career total.
+const FIELD_W = { perMatch: 50, total: 50 };
 const KEEP_W = { stumpings: 55, catches: 45 };
 
 // role-aware overall blend (sub-index weights). Sums to 100 within each profile.
@@ -307,8 +311,16 @@ export function computeIndices(players: RawStats[]): IndexScores[] {
   const pFiveW = percentileColumn(players.map((p) => num(p.five_w)));
 
   // fielding & keeping
-  const pCatches = percentileColumn(derived.map((d) => d.catchesPerMatch));
-  const pRunOuts = percentileColumn(derived.map((d) => d.runOutsPerMatch));
+  const dismissals = players.map((p) =>
+    num(p.catches) == null && num(p.run_outs) == null
+      ? null
+      : (num(p.catches) ?? 0) + (num(p.run_outs) ?? 0) + (num(p.stumpings) ?? 0) + (num(p.keeping_catches) ?? 0)
+  );
+  const fieldMatches = players.map((p) => num(p.bowl_matches) ?? num(p.bat_matches));
+  const pDismissalRate = percentileColumn(
+    dismissals.map((d, i) => (d != null && fieldMatches[i] != null && fieldMatches[i]! > 0 ? d / fieldMatches[i]! : null))
+  );
+  const pDismissals = percentileColumn(dismissals);
   const pStumpings = percentileColumn(derived.map((d) => d.stumpingsPerMatch));
   const pKeepCatches = percentileColumn(
     players.map((p) =>
@@ -348,8 +360,8 @@ export function computeIndices(players: RawStats[]): IndexScores[] {
 
     const field =
       blend([
-        { pct: pCatches[i], w: FIELD_W.catches },
-        { pct: pRunOuts[i], w: FIELD_W.runOuts },
+        { pct: pDismissalRate[i], w: FIELD_W.perMatch },
+        { pct: pDismissals[i], w: FIELD_W.total },
       ]) ?? 0;
 
     const hasKeepData =

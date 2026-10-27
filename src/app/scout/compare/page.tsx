@@ -3,10 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { deriveMetrics, type RawStats } from "@/lib/scout/rankings";
 import type { ScoutPlayerRow } from "@/lib/supabase/types";
 import CompareView, { type ComparePlayer } from "./CompareView";
+import { selectAll } from "@/lib/supabase/select-all";
 
 export default async function ComparePage() {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("scout_players").select("*");
+  const { data, error } = await selectAll(supabase, "scout_players");
 
   if (error || !data || data.length === 0) {
     return (

@@ -6,6 +6,7 @@ import { getAuctionSeasonId, AUCTION_DIVISIONS } from "@/lib/auction/target";
 import { readLiveLot } from "@/lib/auction/read";
 import { LEAGUE_NAME, LEAGUE } from "@/lib/league";
 import WarRoom, { type WRPlayer, type WRTeam } from "./WarRoom";
+import { selectAll } from "@/lib/supabase/select-all";
 
 export const metadata: Metadata = { title: "War Room" };
 export const dynamic = "force-dynamic";
@@ -24,9 +25,7 @@ export default async function WarRoomPage({ searchParams }: { searchParams: Prom
 
   const [{ data: teams }, { data: pool }, lot] = await Promise.all([
     sb.from("teams").select("id, name, purse_total, purse_max, owner_profile_id, logo_url").eq("season_id", seasonId).in("division", AUCTION_DIVISIONS).order("name"),
-    sb.from("scout_players")
-      .select("id, full_name, photo_url, age, primary_role, batting_style, bowling_style, is_keeper, auction_category, bat_matches, runs, bat_avg, bat_sr, wickets, economy, bowl_sr, bat_index, bowl_index, overall_index, team_id, sold_price, acquired, rtm_against, is_rejected")
-      .limit(2000),
+    selectAll(sb, "scout_players", "id, full_name, photo_url, age, primary_role, batting_style, bowling_style, is_keeper, auction_category, bat_matches, runs, bat_avg, bat_sr, wickets, economy, bowl_sr, bat_index, bowl_index, overall_index, team_id, sold_price, acquired, rtm_against, is_rejected"),
     readLiveLot(seasonId),
   ]);
 

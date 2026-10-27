@@ -11,6 +11,7 @@ import { deriveMetrics, type RawStats } from "@/lib/scout/rankings";
 import { resolveCategory } from "@/lib/scout/category";
 import type { ScoutPlayerRow } from "@/lib/supabase/types";
 import PoolBoard, { type PoolPlayer } from "./PoolBoard";
+import { selectAll } from "@/lib/supabase/select-all";
 
 const r1 = (v: number | null) => (v == null ? null : Math.round(v * 10) / 10);
 const r2 = (v: number | null) => (v == null ? null : Math.round(v * 100) / 100);
@@ -61,7 +62,7 @@ export default async function ScoutPage({
   let error: any = null;
   async function load(table: string) {
     for (let attempt = 0; attempt < 3; attempt++) {
-      const res = await supabase.from(table as "scout_players").select("*");
+      const res = await selectAll(supabase, table);
       if (!res.error) return { rows: res.data ?? [], error: null };
       if (attempt < 2) await new Promise((r) => setTimeout(r, 500));
       else return { rows: null, error: res.error };

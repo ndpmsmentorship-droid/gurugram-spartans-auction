@@ -47,29 +47,29 @@ const PHOTOS: Photo[] = [
 
 // Season 2 facts, from the published schedule and the auction pool.
 const STATS = [
-  { value: "12", label: "Franchises" },
+  { value: "14", label: "Franchises" },
   { value: "295", label: "Players in the pool" },
-  { value: "34", label: "Matches" },
-  { value: "6", label: "Weekends" },
+  { value: "49", label: "Matches" },
+  { value: "8", label: "Weekends" },
   { value: "40+", label: "Age to play" },
 ];
 
 // Where the season stands. `now` marks the current step.
 const ROAD = [
   { when: "Open now", what: "Player registration", note: "Returning players in two taps", now: true },
-  { when: "Date to be announced", what: "Live auction", note: "12 owners, one room, one purse each" },
-  { when: "20 Feb 2027", what: "Season opener", note: "Three matches, 8 AM to 4 PM" },
-  { when: "27–28 Mar 2027", what: "Knockout weekend", note: "Semi-finals, third place and the final" },
+  { when: "2 Jan 2027", what: "Live auction", note: "14 franchises, one room, one purse each" },
+  { when: "23 Jan 2027", what: "Season opener", note: "Weekend day games from 8 AM" },
+  { when: "13–14 Mar 2027", what: "Knockout weekend", note: "Quarter-finals from 7 Mar, semi-finals and the final" },
 ];
 
-const OPENER = "2027-02-20T08:00:00+05:30";
+const OPENER = "2027-01-23T08:00:00+05:30";
 
 const AT_A_GLANCE = [
-  { k: "Season window", v: "20 Feb – 28 Mar 2027" },
-  { k: "Venue", v: "SportsCube, Gurugram" },
-  { k: "Format", v: "Two groups of six, round robin, semi-finals and final" },
-  { k: "Match days", v: "Saturdays and Sundays · 8 AM, 12 PM, 4 PM" },
-  { k: "Squads", v: "16 to 25 players, built at a live auction" },
+  { k: "Season window", v: "23 Jan – 14 Mar 2027" },
+  { k: "Venue", v: "Essex Farms Cricket Club & Academy, Chhawla, New Delhi" },
+  { k: "Format", v: "Fourteen teams in two groups of seven, 42 league matches, then quarter-finals, semi-finals and final" },
+  { k: "Match days", v: "Saturdays and Sundays, plus Republic Day (26 Jan) · 8 AM, 11:30 AM, 3 PM" },
+  { k: "Squads", v: "Up to 18 players, built at a live auction" },
 ];
 
 // Identical blocks so the two finalists line up; only the frame (gold vs
@@ -104,7 +104,7 @@ const STEPS = [
   },
   {
     title: "Auction",
-    body: "Twelve franchises bid live for their squads. Selected players pay the ₹3,000 registration fee.",
+    body: "Fourteen franchises bid live for their squads. Selected players pay the ₹3,000 registration fee.",
   },
 ];
 
@@ -285,10 +285,10 @@ export default async function Home() {
           <div className="mx-auto flex max-w-[1200px] flex-col items-center gap-5 px-4 pb-24 pt-8 text-center sm:px-7 md:flex-row md:items-end md:justify-between md:text-left">
             <div className="max-w-2xl">
               <p className="inline-block rounded-full border border-white/25 px-3 py-1 font-mono text-[0.625rem] uppercase tracking-[0.2em] text-white/80">
-                Season 2 · Feb 2027 · SportsCube
+                Season 2 · Jan 2027 · Essex Farms, New Delhi
               </p>
               <p className="mt-4 text-white/75">
-                Twelve franchises, one ground and a live auction that builds every squad. Presented
+                Fourteen franchises, one ground and a live auction that builds every squad. Presented
                 by {PRESENTED_BY.name}, title sponsor {TITLE_SPONSOR.name}.
               </p>
             </div>
@@ -398,7 +398,7 @@ export default async function Home() {
             <p>
               The Shanti Devi Legend&apos;s League is cricket for the ones who never stopped
               playing. It is a 40+ league built around a full franchise auction: players register,
-              are graded into categories, and go under the hammer to twelve team owners working a
+              are graded into categories, and go under the hammer to fourteen franchise owners working a
               fixed purse.
             </p>
             <p>
@@ -407,7 +407,7 @@ export default async function Home() {
               SportsCube, Gurugram.
             </p>
             <p>
-              The players are working professionals in their thirties and forties, founders,
+              The players are working professionals in their forties and fifties, founders,
               senior managers and business owners, who bring their families and colleagues to the
               ground and spend the day there.
             </p>

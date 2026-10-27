@@ -11,6 +11,9 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       { source: "/", destination: "/spartansscout", basePath: false, permanent: false },
+      // Season 2 registration lives on playfulventures.co.in (selfie, ₹1,000 UPI
+      // fee, T&C v2); the old form here would skip all of that.
+      { source: "/register", destination: "https://playfulventures.co.in/register", permanent: false },
     ];
   },
   // Player headshots live on the SCCL dashboard, which sends

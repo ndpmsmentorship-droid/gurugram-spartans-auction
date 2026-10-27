@@ -38,16 +38,41 @@ export async function markLinkedin(form: FormData) {
 }
 
 // Approving someone whose LinkedIn hasn't been confirmed at 500+ lands them in
-// "under review" instead, per the league rule.
+// "under review" instead, per the league rule. Season 2 (v2 form) rows also
+// need the ₹1,000 fee verified against the bank before they can be approved.
 export async function setStatus(form: FormData) {
   const id = String(form.get("id") || "");
   const status = String(form.get("status") || "");
   if (!["approved", "under_review", "rejected", "pending"].includes(status)) return;
   if (status === "approved") {
-    const { data } = await db().from("registrations").select("linkedin_verified").eq("id", id).maybeSingle();
+    const { data } = await db().from("registrations").select("linkedin_verified, fee_utr, fee_status").eq("id", id).maybeSingle();
     if (!data?.linkedin_verified) return update(id, { status: "under_review" });
+    if (data.fee_utr && data.fee_status !== "verified") return update(id, { status: "under_review" });
   }
   await update(id, { status });
+}
+
+// ₹1,000 registration fee: the admin matches the UTR against the bank
+// statement (ICICI Eazypay) and marks it.
+export async function setFee(form: FormData) {
+  const v = String(form.get("fee") || "");
+  if (!["verified", "rejected", "pending"].includes(v)) return;
+  await update(String(form.get("id") || ""), {
+    fee_status: v,
+    fee_verified_at: v === "verified" ? new Date().toISOString() : null,
+  });
+}
+
+// Daily vetting result (professional-cricket footprint, corporate check, face).
+export async function setVet(form: FormData) {
+  const v = String(form.get("vet") || "");
+  if (!["unchecked", "clear", "review", "flagged", "rejected"].includes(v)) return;
+  const notes = String(form.get("notes") ?? "").trim().slice(0, 1000);
+  await update(String(form.get("id") || ""), {
+    vet_status: v,
+    ...(form.has("notes") ? { vet_notes: notes || null } : {}),
+    vet_checked_at: new Date().toISOString(),
+  });
 }
 
 // ---- Approved registration → auction pool --------------------------------
@@ -104,7 +129,11 @@ async function publicPhoto(sb: ReturnType<typeof createAdminClient>, path: strin
   const { data: file } = await store.from(BUCKET).download(path);
   if (!file) return null;
   const dest = `${SEASON}/${path.split("/").slice(-2).join("-")}`;
-  const { error } = await store.from(PUBLIC_PHOTOS).upload(dest, file, { upsert: true, contentType: file.type || "image/jpeg" });
+  const { error } = await store.from(PUBLIC_PHOTOS).upload(dest, file, {
+    upsert: true,
+    contentType: file.type || "image/jpeg",
+    cacheControl: "31536000",
+  });
   if (error) return null;
   return store.from(PUBLIC_PHOTOS).getPublicUrl(dest).data.publicUrl;
 }
@@ -147,7 +176,10 @@ async function addOne(regId: string, category: string | null): Promise<void> {
   const n = (k: string) => (s[k] === undefined || s[k] === null || s[k] === "" ? null : Number(s[k]));
   const dobAge = r.dob ? Math.floor((Date.now() - new Date(r.dob).getTime()) / (365.25 * 864e5)) : null;
   // The photo they just uploaded is the freshest; else the one on file.
-  const photo = (r.photo_path ? await publicPhoto(sb, r.photo_path) : null) ?? (isImage(m?.photo_url) ? m.photo_url : null);
+  // The 384px WebP selfie (v2 form) loads instantly on the auction board;
+  // older rows only have the full photo.
+  const face = r.photo_thumb_path ?? r.photo_path;
+  const photo = (face ? await publicPhoto(sb, face) : null) ?? (isImage(m?.photo_url) ? m.photo_url : null);
 
   const { error } = await t.from("scout_players").insert({
     source_id: sourceId,

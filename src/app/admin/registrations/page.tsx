@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SEASON, BUCKET } from "@/app/register/shared";
-import { markLinkedin, setStatus, addToPool, addAllApprovedToPool, removeFromPool } from "./actions";
+import { markLinkedin, setStatus, setFee, setVet, addToPool, addAllApprovedToPool, removeFromPool } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +25,26 @@ const CATEGORIES = ["A+", "A", "B", "Special"];
 const chId = (link: string | null | undefined) =>
   link?.match(/player-profile\/(\d+)/)?.[1] ?? link?.match(/\/(\d{4,})(?:\/|$)/)?.[1] ?? null;
 const nameKey = (n: string | null | undefined) => (n ?? "").toLowerCase().replace(/\s+/g, " ").trim();
+
+const PRO_YEARS = 15;
+const FEE_STYLE: Record<string, string> = {
+  pending: "bg-gold-fill text-gold",
+  verified: "bg-[color-mix(in_srgb,var(--up)_12%,transparent)] text-up",
+  rejected: "bg-[color-mix(in_srgb,var(--red)_10%,transparent)] text-red-deep",
+};
+const VET = [
+  { key: "clear", label: "Clear" },
+  { key: "review", label: "Needs review" },
+  { key: "flagged", label: "Flagged" },
+] as const;
+const VET_STYLE: Record<string, string> = {
+  unchecked: "bg-wash text-muted",
+  clear: "bg-[color-mix(in_srgb,var(--up)_12%,transparent)] text-up",
+  review: "bg-gold-fill text-gold",
+  flagged: "bg-[color-mix(in_srgb,var(--red)_10%,transparent)] text-red-deep",
+  rejected: "bg-[color-mix(in_srgb,var(--red)_10%,transparent)] text-red-deep",
+};
+const href = (u: string) => (/^https?:/.test(u) ? u : `https://${u}`);
 
 function age(dob: string | null): string | null {
   if (!dob) return null;
@@ -65,8 +85,8 @@ export default async function RegistrationsPage({
   const counts = Object.fromEntries(TABS.map((t) => [t.key, rows.filter((r) => r.status === t.key).length]));
   const shown = rows.filter((r) => r.status === tab);
 
-  // Short-lived links for the private photo / Aadhaar files (1 hour).
-  const paths = shown.flatMap((r) => [r.photo_path, r.aadhaar_path]).filter(Boolean) as string[];
+  // Short-lived links for the private selfie / Aadhaar / payment files (1 hour).
+  const paths = shown.flatMap((r) => [r.photo_path, r.photo_thumb_path, r.aadhaar_path, r.fee_proof_path]).filter(Boolean) as string[];
   const signed = new Map<string, string>();
   if (paths.length) {
     const { data } = await sb.storage.from(BUCKET).createSignedUrls(paths, 3600);
@@ -93,9 +113,24 @@ export default async function RegistrationsPage({
       <p className="eyebrow">Admin</p>
       <h1 className="mt-2 font-display text-2xl font-bold">Registrations · Season 2</h1>
       <p className="mt-2 max-w-2xl text-sm text-muted">
-        {rows.length} registered. Open each LinkedIn profile and tick whether it shows 500+
-        connections. Anyone below 500, or approved without the tick, moves to Under review.
+        {rows.length} registered. For each player: match the UPI reference against the bank statement, open
+        LinkedIn and tick 500+, record the vetting result, then approve. Anyone approved without the
+        LinkedIn tick or a verified fee moves to Under review.
       </p>
+      <div className="mt-4 flex flex-wrap gap-2 text-sm">
+        <span className="badge bg-gold-fill text-gold">
+          Fees to verify: <span className="num ml-1">{rows.filter((r) => r.fee_utr && r.fee_status === "pending").length}</span>
+        </span>
+        <span className="badge bg-wash">
+          Not yet vetted: <span className="num ml-1">{rows.filter((r) => r.fee_utr && (r.vet_status ?? "unchecked") === "unchecked").length}</span>
+        </span>
+        <span className="badge bg-[color-mix(in_srgb,var(--red)_10%,transparent)] text-red-deep">
+          Flagged: <span className="num ml-1">{rows.filter((r) => r.vet_status === "flagged").length}</span>
+        </span>
+        <span className="badge bg-wash">
+          Fees verified: <span className="num ml-1">₹{(rows.filter((r) => r.fee_status === "verified" && r.fee_utr).reduce((a, r) => a + (r.fee_amount ?? 0), 0)).toLocaleString("en-IN")}</span>
+        </span>
+      </div>
 
       <div className="mt-5 flex flex-wrap gap-2">
         {TABS.map((t) => (
@@ -119,15 +154,20 @@ export default async function RegistrationsPage({
         {shown.map((r) => {
           const roles = [r.batting_hand, r.bowling_type, r.allrounder, r.is_keeper ? "Wicket keeper" : null].filter(Boolean);
           const photo = r.photo_path ? signed.get(r.photo_path) : null;
+          const thumb = (r.photo_thumb_path && signed.get(r.photo_thumb_path)) || photo;
           const aadhaar = r.aadhaar_path ? signed.get(r.aadhaar_path) : null;
+          const proof = r.fee_proof_path ? signed.get(r.fee_proof_path) : null;
+          const proRecent = r.pro_declared && r.pro_last_year && new Date().getFullYear() - r.pro_last_year < PRO_YEARS;
           return (
             <li key={r.id} className="card">
               <div className="flex flex-wrap items-start gap-4">
-                {photo ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={photo} alt="" className="h-16 w-16 rounded-full object-cover" />
+                {thumb ? (
+                  <a href={photo ?? thumb} target="_blank" rel="noopener noreferrer" title="Open the full selfie">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={thumb} alt="" className="h-[120px] w-24 rounded-[10px] object-cover ring-1 ring-line" />
+                  </a>
                 ) : (
-                  <span className="grid h-16 w-16 place-items-center rounded-full bg-wash font-display text-xl">
+                  <span className="grid h-[120px] w-24 place-items-center rounded-[10px] bg-wash font-display text-2xl">
                     {String(r.full_name).slice(0, 1)}
                   </span>
                 )}
@@ -145,7 +185,25 @@ export default async function RegistrationsPage({
                   <p className="num mt-1 text-sm text-muted">
                     {[r.phone, r.email, age(r.dob)].filter(Boolean).join(" · ")}
                   </p>
+                  {(r.employer || r.designation) && (
+                    <p className="mt-1 text-sm">
+                      Works at <strong>{r.employer ?? "—"}</strong>
+                      {r.designation ? ` · ${r.designation}` : ""}
+                    </p>
+                  )}
                   {roles.length > 0 && <p className="mt-1 text-sm">{roles.join(" · ")}</p>}
+                  {r.pro_declared != null && (
+                    <p className="mt-1 text-sm">
+                      {r.pro_declared ? (
+                        <span className={`badge ${proRecent ? "bg-[color-mix(in_srgb,var(--red)_10%,transparent)] text-red-deep" : "bg-gold-fill text-gold"}`}>
+                          Declared pro cricket: {r.pro_level ?? "—"}, last {r.pro_last_year ?? "—"}
+                          {proRecent ? " · within 15 years" : ""}
+                        </span>
+                      ) : (
+                        <span className="badge bg-wash">Declared: never played professional cricket</span>
+                      )}
+                    </p>
+                  )}
                   <p className="mt-1 text-sm text-muted">
                     Kit: <strong className="text-ink">{r.jersey_name ?? "—"} #{r.jersey_number ?? "—"}</strong> · T-shirt {r.tshirt_size ?? "—"} · Lower {r.lower_size ?? "—"}
                   </p>
@@ -166,6 +224,11 @@ export default async function RegistrationsPage({
                         CricHeroes ↗
                       </a>
                     )}
+                    {r.instagram_link && (
+                      <a className="text-accent-text underline" href={href(r.instagram_link)} target="_blank" rel="noopener noreferrer">
+                        Instagram ↗
+                      </a>
+                    )}
                     {aadhaar && (
                       <a className="text-accent-text underline" href={aadhaar} target="_blank" rel="noopener noreferrer">
                         Aadhaar ↗
@@ -174,6 +237,68 @@ export default async function RegistrationsPage({
                   </div>
                 </div>
               </div>
+
+              {r.fee_utr && (
+                <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-4">
+                  <span className="label-mono mr-1">Fee ₹{(r.fee_amount ?? 1000).toLocaleString("en-IN")}:</span>
+                  <span className={`badge ${FEE_STYLE[r.fee_status] ?? "bg-wash"}`}>{r.fee_status}</span>
+                  <span className="num select-all text-sm">UTR {r.fee_utr}</span>
+                  {proof && (
+                    <a className="text-sm text-accent-text underline" href={proof} target="_blank" rel="noopener noreferrer">
+                      Payment screenshot ↗
+                    </a>
+                  )}
+                  <span className="mx-1 h-6 w-px bg-line" aria-hidden />
+                  {r.fee_status !== "verified" && (
+                    <form action={setFee}>
+                      <input type="hidden" name="id" value={r.id} />
+                      <input type="hidden" name="fee" value="verified" />
+                      <button className="btn-primary !py-2">Fee received ✓</button>
+                    </form>
+                  )}
+                  {r.fee_status !== "rejected" && (
+                    <form action={setFee}>
+                      <input type="hidden" name="id" value={r.id} />
+                      <input type="hidden" name="fee" value="rejected" />
+                      <button className="btn-ghost !py-2">Not received</button>
+                    </form>
+                  )}
+                </div>
+              )}
+
+              {r.fee_utr && (
+                <div className="mt-4 border-t border-line pt-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="label-mono mr-1">Vetting:</span>
+                    <span className={`badge ${VET_STYLE[r.vet_status ?? "unchecked"] ?? "bg-wash"}`}>{(r.vet_status ?? "unchecked").replace("_", " ")}</span>
+                    {r.face_check && <span className="badge bg-wash">Face: {r.face_check.replace("_", " ")}</span>}
+                    {r.vet_checked_at && (
+                      <span className="text-xs text-muted">checked {new Date(r.vet_checked_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span>
+                    )}
+                  </div>
+                  {r.vet_notes && <p className="mt-2 whitespace-pre-line text-sm text-ink">{r.vet_notes}</p>}
+                  {Array.isArray(r.vet_sources) && r.vet_sources.length > 0 && (
+                    <ul className="mt-2 flex flex-wrap gap-3 text-sm">
+                      {r.vet_sources.map((u: string, i: number) => (
+                        <li key={i}>
+                          <a className="text-accent-text underline" href={href(String(u))} target="_blank" rel="noopener noreferrer">
+                            Evidence {i + 1} ↗
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <form action={setVet} className="mt-3 flex flex-wrap items-center gap-2">
+                    <input type="hidden" name="id" value={r.id} />
+                    <input name="notes" defaultValue={r.vet_notes ?? ""} placeholder="Notes: what you checked, what you found" className="input !w-auto min-w-[16rem] flex-1 !py-1.5 text-sm" />
+                    {VET.map((v) => (
+                      <button key={v.key} name="vet" value={v.key} className="pill" data-active={r.vet_status === v.key}>
+                        {v.label}
+                      </button>
+                    ))}
+                  </form>
+                </div>
+              )}
 
               {r.status === "approved" && (() => {
                 const inPool = poolOf.get(r.id);

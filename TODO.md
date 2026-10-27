@@ -1,16 +1,21 @@
 # SDLL Portal — To-do
 
 Running list. New items go under the right heading; tick with `[x]` when done (move to Done at the bottom).
-Last updated: 2026-10-24
+Last updated: 2026-10-27
 
 ## Domain and hosting (Playful Ventures)
-- [ ] Confirm Playful Ventures owns playfulventures.com and playfulventures.in (both on GoDaddy, owner hidden)
-- [ ] Decide: subdomain (auction.playfulventures.com / sdll.playfulventures.com) or a new domain
-      (free on 30 Sep: playfulleague.com/.in, playfulscout.com/.in, playfulcricket.com/.in, shantidevileague.com/.in)
-- [ ] Avoid "playfulauction" — playfulauction.com is an unrelated adult chat/auction site
-- [ ] Playful Ventures adds the DNS record at GoDaddy (or buy the new domain)
-- [ ] Add the domain to the Vercel project (keep the project in our account)
-- [ ] Decide whether the portal serves at the domain root (needs a basePath change) or at /spartansscout
+Decided 27 Oct: domain **playfulventures.co.in** (bought on GoDaddy). Root + www = new light site
+(Vercel project `playful-site`, repo ~/Claude/playful-site: landing + registration only, static, bom1);
+sdll.playfulventures.co.in = this auction app (added to this Vercel project; `/` redirects to /spartansscout).
+- [ ] Add DNS at GoDaddy: A @ 216.198.79.1 and A @ 64.29.17.1 · CNAME www → fe9ab22b5d477a69.vercel-dns-017.com
+      · CNAME sdll → f47687d2359c322b.vercel-dns-017.com (keep GoDaddy nameservers so Gmail MX can go there too)
+- [ ] Re-run `npx vercel domains verify` for all three once DNS is in
+- [ ] playful-site has no GitHub remote yet (repo creation was blocked) — create a private repo and connect it, or keep deploying with `npx vercel deploy --prod`
+- [ ] Registration form exists in both repos — the auction app's /register should point to playfulventures.co.in/register (or be removed) once DNS is live
+- [ ] Fee wording: site still says "registering is free, ₹3,000 if selected"; Season 2 plan is ₹1,000 at registration + ₹3,000 if selected — needs a payment step or wording decision
+- [ ] Google Workspace (Base) for 2–3 mailboxes + aliases on playfulventures.co.in
+- [ ] Decide whether the portal later serves at the subdomain root (needs a basePath change; ndpms.in/spartansscout would then need a rewrite update)
+- [x] Avoid "playfulauction" — playfulauction.com is an unrelated adult chat/auction site
 
 ## Quotation and contract
 - [x] League entity for all legal agreements = Playful Ventures Pvt Ltd (Nikhil, 11 Oct); legal brief for counsel: https://claude.ai/code/artifact/975f6099-a6fc-4e4a-8fa7-dfbd1387e7e5

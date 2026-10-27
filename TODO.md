@@ -47,6 +47,13 @@ state or zonal teams at any age group, paid contracts). Non-corporate profiles m
    one-line reason in vet_notes. Compare with the player's own pro declaration — a hidden match = reject (T&C §false declaration).
 6. Daily report to Nikhil: new registrations, fees to verify, flagged players with evidence; admin decides.
 
+## Master player file and CricHeroes stats (27 Oct 2026)
+
+- [x] Master player file for the core team at playfulventures.co.in/admin/players (admins only): all 1,014 players in player_master with S2 registration matched in, new S2 players added live; Excel "master file" download.
+- [x] Returning players whose CricHeroes link is on file (921 of 1,014) aren't asked for it again.
+- [ ] **CricHeroes stats daily** — Nikhil wants stats refreshed every day. Blocked on the source: we don't scrape cricheroes.com. Options: (a) ask CricHeroes for an official data feed / organiser API; (b) a daily upload of CricHeroes exports (leaderboard PDF/CSV) in the league admin that updates player_master.stats. Waiting on Nikhil's pick.
+- [ ] Individual admin logins for the core team (Deepak, KD, Dilip, Piyush, Sajal, Hariom) instead of sharing sdlladmin — offered.
+
 ## Face photos for every player, loading instantly
 - [ ] Every Season 2 player now uploads a selfie (returning players too); the browser makes a 1080px JPEG + 384px WebP (~25 KB)
 - [ ] On approval, copy the 384px WebP to a PUBLIC "faces" bucket as faces/<player-id>-<hash>.webp (cache 1 year,

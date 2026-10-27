@@ -73,7 +73,12 @@ export async function proxy(request: NextRequest) {
 
   // Third-party vetters (app_metadata.role = "vetter", set on the auth user, so
   // no extra lookup) only ever see the registrations review.
-  if (user?.app_metadata?.role === "vetter" && !pathname.startsWith("/admin/registrations") && pathname !== "/login") {
+  if (
+    user?.app_metadata?.role === "vetter" &&
+    !pathname.startsWith("/admin/registrations") &&
+    !pathname.startsWith("/api/registrations/export") &&
+    pathname !== "/login"
+  ) {
     const to = request.nextUrl.clone();
     to.pathname = "/admin/registrations";
     to.search = "";

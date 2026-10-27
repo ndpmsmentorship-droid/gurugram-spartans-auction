@@ -147,6 +147,24 @@ export default async function RegistrationsPage({
         </span>}
       </div>
 
+      <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+        <span className="label-mono mr-1">Download Excel:</span>
+        {(vetter
+          ? [{ q: "sheet=cricheroes", label: "CricHeroes list" }]
+          : [
+              { q: "sheet=jersey", label: "Jersey (kit maker)" },
+              { q: "sheet=catering", label: "Catering" },
+              { q: "sheet=cricheroes", label: "CricHeroes list" },
+              { q: "sheet=all", label: "Everything" },
+            ]
+        ).map((x) => (
+          <a key={x.q} href={`/spartansscout/api/registrations/export?${x.q}`} className="pill">
+            {x.label} ↓
+          </a>
+        ))}
+        {!vetter && <span className="text-xs text-muted">Jersey and catering include approved players only.</span>}
+      </div>
+
       <div className="mt-5 flex flex-wrap gap-2">
         {TABS.map((t) => (
           <Link key={t.key} href={`/admin/registrations?s=${t.key}`} className="pill" data-active={tab === t.key}>
@@ -211,11 +229,11 @@ export default async function RegistrationsPage({
                     <p className="mt-1 text-sm">
                       {r.pro_declared ? (
                         <span className={`badge ${proRecent ? "bg-[color-mix(in_srgb,var(--red)_10%,transparent)] text-red-deep" : "bg-gold-fill text-gold"}`}>
-                          Declared pro cricket: {r.pro_level ?? "—"}, last {r.pro_last_year ?? "—"}
+                          Declared: {r.pro_level ?? "—"}, last played {r.pro_last_year ?? "—"}
                           {proRecent ? " · within 15 years" : ""}
                         </span>
                       ) : (
-                        <span className="badge bg-wash">Declared: never played professional cricket</span>
+                        <span className="badge bg-wash">Declared: no board, state, district or professional cricket</span>
                       )}
                     </p>
                   )}

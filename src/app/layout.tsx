@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import localFont from "next/font/local";
 import "./globals.css";
-import { getCurrentProfile } from "@/lib/auth";
+import { getCurrentProfile, isVetter } from "@/lib/auth";
 import { isAuctionLive } from "@/lib/auction/state";
 import { signOut } from "@/app/login/actions";
 import Nav, { type NavItem } from "./Nav";
@@ -106,13 +106,16 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // In parallel: these were sequential Supabase round-trips on every request.
-  const [profile, auctionLive] = await Promise.all([getCurrentProfile(), isAuctionLive()]);
+  const [profile, auctionLive, vetter] = await Promise.all([getCurrentProfile(), isAuctionLive(), isVetter()]);
 
   // Only the two public routes are advertised to a signed-out visitor —
   // everything else redirects to /login (see proxy.ts), so linking to it from
   // the masthead would just bounce them.
   const LIBRARY: NavItem = { href: "https://www.ndpms.in/spartans", label: "Ball Library", external: true };
-  const items: NavItem[] = USCL
+  // A third-party vetter only has the registrations review: no other menu.
+  const items: NavItem[] = vetter
+    ? [{ href: "/admin/registrations", label: "Registrations" }]
+    : USCL
     ? // USCL soft launch: only the pages that work for USCL owners.
       [
         ...(profile ? [{ href: "/war-room", label: "War Room" }] : []),

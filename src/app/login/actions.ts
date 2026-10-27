@@ -33,6 +33,7 @@ export async function signIn(
   // When the user came straight to /login (no deep-link), send owners to their
   // squad and everyone else to the pool.
   let dest = next;
+  if (user?.app_metadata?.role === "vetter") redirect("/admin/registrations");
   if (next === "/scout" && user) {
     const { data: profile } = await supabase
       .from("profiles")

@@ -25,7 +25,7 @@ export default async function LoginPage({
             <Image src={usclCrest} alt="USCL — Urban Sports Champions League" className="h-36 w-auto drop-shadow-[0_14px_24px_rgba(0,0,0,0.45)]" sizes="120px" priority />
             <span className="h-24 w-px bg-white/20" aria-hidden />
             <div className="flex flex-col items-center gap-2">
-              <Image src={sdllCrest} alt="Shanti Devi Legend League" className="h-24 w-auto drop-shadow-[0_14px_24px_rgba(0,0,0,0.45)]" sizes="80px" />
+              <Image src={sdllCrest} alt="Shanti Devi Legend’s League" className="h-24 w-auto drop-shadow-[0_14px_24px_rgba(0,0,0,0.45)]" sizes="80px" />
               <span className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-white/55">Powered by SDLL</span>
             </div>
           </div>

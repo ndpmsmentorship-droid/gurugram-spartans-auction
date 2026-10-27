@@ -44,11 +44,11 @@ const jetbrains = localFont({
 // The masthead follows the league the auction side is running (src/lib/league.ts):
 // USCL while its auction is switched in (soft launch), SDLL otherwise.
 const USCL = LEAGUE === "uscl";
-const SITE_NAME = USCL ? "USCL Auction" : "Shanti Devi Legend League";
+const SITE_NAME = USCL ? "USCL Auction" : "Shanti Devi Legend’s League";
 const crest = USCL ? usclCrest : sdllCrest;
 const SITE_DESCRIPTION = USCL
   ? "Urban Sports Champions League Season 2 — live auction, squads and the franchise war room."
-  : "Rank, analyse and buy players on auction day — Shanti Devi Legend League.";
+  : "Rank, analyse and buy players on auction day — Shanti Devi Legend’s League.";
 
 // Icons + share card live in public/brand/meta and are referenced by FULL path:
 // the app is served under /spartansscout on www.ndpms.in, and Next's file-based
@@ -182,8 +182,8 @@ export default async function RootLayout({
               {USCL && (
                 <Image
                   src={sdllCrest}
-                  alt="Shanti Devi Legend League"
-                  title="Powered by the Shanti Devi Legend League portal"
+                  alt="Shanti Devi Legend’s League"
+                  title="Powered by the Shanti Devi Legend’s League portal"
                   width={34}
                   height={46}
                   className="-ml-1 h-[36px] w-auto"
@@ -195,7 +195,7 @@ export default async function RootLayout({
                   {!USCL && <Stars />}
                 </span>
                 <span className={`mt-[4px] font-mono text-[0.563rem] uppercase tracking-[0.28em] text-white/55 ${USCL ? "hidden sm:block" : "block"}`}>
-                  {USCL ? "Champions League · S2" : "Legend League"}
+                  {USCL ? "Champions League · S2" : "Legend’s League"}
                 </span>
               </span>
             </Link>

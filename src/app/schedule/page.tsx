@@ -7,9 +7,9 @@ import ScheduleView, { type SpreadRow } from "./ScheduleView";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Match Schedule — Shanti Devi Legend League",
+  title: "Match Schedule — Shanti Devi Legend’s League",
   description:
-    "Season 2 fixtures, weekend-by-weekend calendar and points tables for the 12 Shanti Devi Legend League teams.",
+    "Season 2 fixtures, weekend-by-weekend calendar and points tables for the 12 Shanti Devi Legend’s League teams.",
 };
 
 export default async function SchedulePage() {

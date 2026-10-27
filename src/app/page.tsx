@@ -78,7 +78,7 @@ const HONOURS = [
   {
     team: "American Cricket Club of India",
     title: "Champions",
-    note: "ACCI lifted the first Shanti Devi Legend's League trophy.",
+    note: "ACCI lifted the first Shanti Devi Legend’s League trophy.",
     logo: acciLogo,
     banner: acciChampions,
     gold: true,
@@ -240,7 +240,7 @@ export default async function Home() {
           <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-center sm:text-left">
             <Image
               src={crest}
-              alt="Shanti Devi Legend's League crest"
+              alt="Shanti Devi Legend’s League crest"
               className="h-40 w-auto shrink-0 drop-shadow-[0_18px_30px_rgba(0,0,0,0.45)] md:h-52"
               loading="eager"
               fetchPriority="high"

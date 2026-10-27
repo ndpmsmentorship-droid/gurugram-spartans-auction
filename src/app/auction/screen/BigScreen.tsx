@@ -95,7 +95,7 @@ function Header({ board }: { board: BoardData }) {
       <div className="flex items-center gap-[0.9vw]">
         <Image src={sdllCrest} alt="" className="h-[3.4vw] w-auto" priority />
         <div className="leading-none">
-          <p className="font-display text-[1.7vw] font-bold uppercase tracking-[0.03em]">Shanti Devi Legend League</p>
+          <p className="font-display text-[1.7vw] font-bold uppercase tracking-[0.03em]">Shanti Devi Legend’s League</p>
           <p className="mt-[0.35vw] font-mono text-[0.72vw] uppercase tracking-[0.3em] text-white/60">Season 2 · Player Auction</p>
         </div>
       </div>

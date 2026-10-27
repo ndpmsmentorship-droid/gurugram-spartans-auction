@@ -3,7 +3,7 @@ import RegisterForm from "./RegisterForm";
 import Faq from "./Faq";
 
 export const metadata: Metadata = {
-  title: "Register · Shanti Devi Legend League",
+  title: "Register · Shanti Devi Legend’s League",
   description: "Player registration for Shanti Devi Legend's League Season 2.",
 };
 

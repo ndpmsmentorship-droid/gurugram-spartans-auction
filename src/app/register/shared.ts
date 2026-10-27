@@ -2,7 +2,7 @@
 export const SEASON = "SDLL-S2";
 export const BUCKET = "registrations";
 export const MAX_FILE_BYTES = 5 * 1024 * 1024;
-export const MIN_AGE = 30;
+export const MIN_AGE = 40;
 
 // Whole years between a yyyy-mm-dd birth date and today (null if unparseable).
 export function ageOn(dob: string, today = new Date()): number | null {

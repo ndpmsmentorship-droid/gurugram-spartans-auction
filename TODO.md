@@ -241,9 +241,13 @@ For league owners who reach us from the Instagram posts (08 league owners, 09 au
 
 ## CricVideos Ball Library + Instagram — 24 Oct 2026
 - [ ] Insta redesign: new font + design system for posts/reels/covers (Nikhil, 25 Oct: current look feels generic; reference One7 Sports' Instagram)
-Library: 78 matches, 649 profiles, audit clean; ground page 42 S6 matches (par 186, 240+ never chased). Detail in ycwism-lms-src `public/spartans/HANDOFF.md`.
+Library: 84 matches, 665 profiles, audit clean; ground page 48 S6 matches (par 190). Detail in ycwism-lms-src `public/spartans/HANDOFF.md`.
 - [x] M45 Japani v ACCI time-tagged and merged (243/247, card-exact) — 24 Oct
-- [ ] M49 Chennai v Bharat Hunters (`rsX1F-aSDbw`): scripted card-exact in the Time Tagger — Nikhil time-tags, then merge_m49 + card Scorecard_27884917
+- [x] M50 UP Warriors v Punjab Royals (`Em95PCubghI`): merged 28 Oct, 243/245 balls timed, card-exact
+- [ ] M50 shot pass (Shot Tagger; local 480p copy in Match videos — Trash it after)
+- [ ] M51 Haryana Titans v J&K Homelanders (`CldIXa783Z8`): AI Comms recording in hand — needs Scorecard PDF, then script + preset
+- [x] M49 Chennai v Bharat Hunters (`rsX1F-aSDbw`): merged 26 Oct, 241/247 balls timed
+- [ ] M49 shot pass (Shot Tagger)
 - [x] M48 Jaipur v Goan Monks (`xyxB2E2iv-U`): merged 25 Oct, 244/244 balls timed
 - [ ] M48 shot pass (Shot Tagger)
 - [x] M47 KEI v Texas time-tagged and merged (226/231, card-exact) — 25 Oct

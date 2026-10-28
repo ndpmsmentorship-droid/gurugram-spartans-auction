@@ -82,8 +82,8 @@ export const DAY_INDEX: Record<string, number> = {
 };
 
 export const DEFAULT_CONFIG: ScheduleConfig = {
-  // Third weekend of February 2027.
-  startDate: "2027-02-20",
+  // Season 2 opener (moved to Sat 16 Jan 2027).
+  startDate: "2027-01-16",
   matchDays: ["Saturday", "Sunday"],
   slots: ["08:00", "12:00", "16:00"],
   blackoutDates: [],

@@ -57,15 +57,15 @@ const STATS = [
 // Where the season stands. `now` marks the current step.
 const ROAD = [
   { when: "Open now", what: "Player registration", note: "Returning players in two taps", now: true },
-  { when: "2 Jan 2027", what: "Live auction", note: "14 franchises, one room, one purse each" },
-  { when: "23 Jan 2027", what: "Season opener", note: "Weekend day games from 8 AM" },
-  { when: "13–14 Mar 2027", what: "Knockout weekend", note: "Quarter-finals from 7 Mar, semi-finals and the final" },
+  { when: "12 Dec 2026", what: "Live auction", note: "14 franchises, one room, one purse each" },
+  { when: "16 Jan 2027", what: "Season opener", note: "Weekend day games from 8 AM" },
+  { when: "6–7 Mar 2027", what: "Knockout weekend", note: "Quarter-finals from 28 Feb, semi-finals and the final" },
 ];
 
-const OPENER = "2027-01-23T08:00:00+05:30";
+const OPENER = "2027-01-16T08:00:00+05:30";
 
 const AT_A_GLANCE = [
-  { k: "Season window", v: "23 Jan – 14 Mar 2027" },
+  { k: "Season window", v: "16 Jan – 7 Mar 2027" },
   { k: "Venue", v: "Essex Farms Cricket Club & Academy, Chhawla, New Delhi" },
   { k: "Format", v: "Fourteen teams in two groups of seven, 42 league matches, then quarter-finals, semi-finals and final" },
   { k: "Match days", v: "Saturdays and Sundays, plus Republic Day (26 Jan) · 8 AM, 11:30 AM, 3 PM" },

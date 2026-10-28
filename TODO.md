@@ -64,7 +64,7 @@ state or zonal teams at any age group, paid contracts). Non-corporate profiles m
 
 ## Quotation and contract
 - [x] League entity for all legal agreements = Playful Ventures Pvt Ltd (Nikhil, 11 Oct); legal brief for counsel: https://claude.ai/code/artifact/975f6099-a6fc-4e4a-8fa7-dfbd1387e7e5
-- [ ] Auction Rules & Regulations — ON HOLD (Nikhil, 11 Oct: rules still change a lot). Notes parked in the "On hold: Auction rules" tab of the legal brief; finalise and send to the lawyer before the 2 Jan 2027 auction
+- [ ] Auction Rules & Regulations — ON HOLD (Nikhil, 11 Oct: rules still change a lot). Notes parked in the "On hold: Auction rules" tab of the legal brief; finalise and send to the lawyer before the 12 Dec 2026 auction
 - [ ] Confirm the company spelling: "Foundary Tek Private Ltd" vs "Foundry" (must match the incorporation certificate)
 - [ ] Add GSTIN, CIN and registered address for Foundary Tek and Playful Ventures to the quotation header
 - [ ] Confirm my suggested numbers: ₹2.5L per season from Season 3, ₹4,000 per match for the Ball Library
@@ -188,10 +188,10 @@ For league owners who reach us from the Instagram posts (08 league owners, 09 au
 - [x] Back to SDLL (league-switch sdll, LEAGUE = "sdll"), USCL owner logins banned, library framing DENY, ndpms.in band removed
 - [ ] USCL Spartans data left as-is: Amit Sehrawat (39 or 40?) unrecorded; 2nd ₹25K top-up unrecorded (official spend ₹2,37,000)
 - [x] SDLL big screen `/auction/screen` + operator pad `/admin/auction/pad` (4 Oct): one tap/key per team bids the next step, Enter = sold, Backspace = take back a bid
-- [ ] Before 2 Jan 2027: clear the test rows from `auction_event` (the lot # counts put-ups), run a dry auction on the pad, swap sponsor placeholders for the S2 deck's signed partners
+- [ ] Before 12 Dec 2026: clear the test rows from `auction_event` (the lot # counts put-ups), run a dry auction on the pad, swap sponsor placeholders for the S2 deck's signed partners
 - [ ] Auction day only (approved): re-enable Ball Library framing for a clips panel on the big screen; put DENY back afterwards
 - [x] SDLL pool = every player captured so far: 1,050 (295 SDLL + 321 USCL + 434 SARDA S6), deduped by CricHeroes id / name+age; new rows source_id `pool:uscl:…` / `pool:sccl:…` (scripts/sdll-pool-merge.mts) — 4 Oct
-- [ ] SDLL auction (Sat 2 Jan 2027): big-screen display + War Room; sponsors = partnership-deck placeholders; up next + recent sales; library embed ON for the auction screen (same-origin, like USCL day)
+- [ ] SDLL auction (Sat 12 Dec 2026): big-screen display + War Room; sponsors = partnership-deck placeholders; up next + recent sales; library embed ON for the auction screen (same-origin, like USCL day)
 - [ ] S6 M27 (NCR v BKB): scripted in s6-tagger (top preset) — awaiting Nikhil's time-tag, then publish + merge_m27
 
 ## CricVideos Ball Library + Instagram — 24 Oct 2026

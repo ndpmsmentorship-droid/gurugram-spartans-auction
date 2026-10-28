@@ -5,7 +5,7 @@ Last updated: 2026-10-28
 
 ## Owners' meeting — Fri 30 Oct 2026 (Vivanta by Taj, Dwarka)
 Agenda order: 1 Registration → 2 Owners Portal + Ball Library demo → 3 Auction rules → 4 League rules → 5 What the ₹6 lakh buys → Q&A + next steps.
-Dates now: auction Sat 12 Dec 2026 · opener Sat 16 Jan 2027 · final Sun 7 Mar 2027 (49 matches, 17 match days, 8 weekends).
+Dates now: auction Sat 12 Dec 2026 · opener Sat 16 Jan 2027 · final Sun 7 Mar 2027 (45 matches: 42 league + 2 semis + final; 16 match days, 8 weekends).
 
 **Must decide first (Nikhil, by Thu 29 Oct)**
 - [ ] Confirm what "₹6 lakh" is: franchise fee for every owner? (owners' deck still says ₹5 L fee + ₹6 L purse)
@@ -33,11 +33,11 @@ Dates now: auction Sat 12 Dec 2026 · opener Sat 16 Jan 2027 · final Sun 7 Mar 
 
 **4. League rules**
 - [ ] 1-page playing conditions: 40+ age rule + ID check, overs, powerplay, ball, timings (8:00 / 11:30 / 3:00), reporting time, walkovers, rain rule, umpire/scorer, code of conduct, fines (blank until lawyer)
-- [ ] Format slide: 2 groups of 7 → 42 league → QF/SF/F; points + net-run-rate tie-breaks
+- [ ] Format slide: 2 groups of 7 → 42 league → 2 semis (A1 v B2, B1 v A2) → final; points + net-run-rate tie-breaks
 - [ ] Hand out the match schedule PDF (Downloads/SDLL/SLL-2-Match-Schedule.pdf)
 
 **5. Why ₹6 lakh — what owners get (most important)**
-- [ ] Rebuild the Season 2 budget for 14 teams / 49 matches / 17 match days (old one is 12 teams / 69 matches / 24 days)
+- [ ] Rebuild the Season 2 budget for 14 teams / 45 matches / 16 match days (old one is 12 teams / 69 matches / 24 days)
 - [ ] One slide "Your ₹6 L vs what we spend per team" (recalc ≈ ₹8.7 L per team; sponsors cover the gap) — confirm figures
 - [ ] One slide itemising the package: ground + umpires + scorers, catering, live stream with commentary every match, kits, trophies/awards, ₹20 L prize pool, 3 events (meet, auction night, gala), Owners Portal + Ball Library + player stats, social coverage, branding
 - [ ] Season 1 proof: photos (gallery), stream links, Instagram numbers (fill the [__] on the owners' deck)

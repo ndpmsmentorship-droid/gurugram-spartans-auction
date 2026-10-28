@@ -49,7 +49,7 @@ const PHOTOS: Photo[] = [
 const STATS = [
   { value: "14", label: "Franchises" },
   { value: "295", label: "Players in the pool" },
-  { value: "49", label: "Matches" },
+  { value: "45", label: "Matches" },
   { value: "8", label: "Weekends" },
   { value: "40+", label: "Age to play" },
 ];
@@ -59,7 +59,7 @@ const ROAD = [
   { when: "Open now", what: "Player registration", note: "Returning players in two taps", now: true },
   { when: "12 Dec 2026", what: "Live auction", note: "14 franchises, one room, one purse each" },
   { when: "16 Jan 2027", what: "Season opener", note: "Weekend day games from 8 AM" },
-  { when: "6–7 Mar 2027", what: "Knockout weekend", note: "Quarter-finals from 28 Feb, semi-finals and the final" },
+  { when: "6–7 Mar 2027", what: "Knockout weekend", note: "Two semi-finals on 6 Mar, the final on 7 Mar" },
 ];
 
 const OPENER = "2027-01-16T08:00:00+05:30";
@@ -67,7 +67,7 @@ const OPENER = "2027-01-16T08:00:00+05:30";
 const AT_A_GLANCE = [
   { k: "Season window", v: "16 Jan – 7 Mar 2027" },
   { k: "Venue", v: "Essex Farms Cricket Club & Academy, Chhawla, New Delhi" },
-  { k: "Format", v: "Fourteen teams in two groups of seven, 42 league matches, then quarter-finals, semi-finals and final" },
+  { k: "Format", v: "Fourteen teams in two groups of seven, 42 league matches, then two semi-finals and the final" },
   { k: "Match days", v: "Saturdays and Sundays, plus Republic Day (26 Jan) · 8 AM, 11:30 AM, 3 PM" },
   { k: "Squads", v: "Up to 18 players, built at a live auction" },
 ];
@@ -402,9 +402,10 @@ export default async function Home() {
               fixed purse.
             </p>
             <p>
-              What follows is a real season, not an exhibition. Two groups of six play a round
-              robin, then semi-finals and a final, to a published schedule across six weekends at
-              SportsCube, Gurugram.
+              What follows is a real season, not an exhibition. Fourteen teams play in two groups of
+              seven, every team meeting the other six in its group, then the top two of each group go
+              into the semi-finals and a final, to a published schedule across eight weekends at
+              Essex Farms in New Delhi.
             </p>
             <p>
               The players are working professionals in their forties and fifties, founders,

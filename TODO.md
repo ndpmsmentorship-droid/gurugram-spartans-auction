@@ -34,7 +34,7 @@ Dates now: auction Sat 12 Dec 2026 · opener Sat 16 Jan 2027 · final Sun 7 Mar 
 **4. League rules**
 - [ ] 1-page playing conditions: 40+ age rule + ID check, overs, powerplay, ball, timings (8:00 / 11:30 / 3:00), reporting time, walkovers, rain rule, umpire/scorer, code of conduct, fines (blank until lawyer)
 - [ ] Format slide: 2 groups of 7 → 42 league → QF/SF/F; points + net-run-rate tie-breaks
-- [ ] Hand out the match schedule PDF (Downloads/SDLL/SDLL-Season-2-Match-Schedule.pdf)
+- [ ] Hand out the match schedule PDF (Downloads/SDLL/SLL-2-Match-Schedule.pdf)
 
 **5. Why ₹6 lakh — what owners get (most important)**
 - [ ] Rebuild the Season 2 budget for 14 teams / 49 matches / 17 match days (old one is 12 teams / 69 matches / 24 days)

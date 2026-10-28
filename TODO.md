@@ -4,11 +4,11 @@ Running list. New items go under the right heading; tick with `[x]` when done (m
 Last updated: 2026-10-28
 
 ## Owners' meeting — Fri 30 Oct 2026 (Vivanta by Taj, Dwarka)
-Agenda order: 1 Registration → 2 Owners Portal + Ball Library demo → 3 Auction rules → 4 League rules → 5 What the ₹6 lakh buys → Q&A + next steps.
+Agenda order: 1 Registration → 2 Owners Portal + Ball Library demo → 3 Auction rules → 4 League rules → 5 What the ₹5 lakh fee buys → Q&A + next steps.
 Dates now: auction Sat 12 Dec 2026 · opener Sat 16 Jan 2027 · final Sun 7 Mar 2027 (45 matches: 42 league + 2 semis + final; 16 match days, 8 weekends).
 
 **Must decide first (Nikhil, by Thu 29 Oct)**
-- [ ] Confirm what "₹6 lakh" is: franchise fee for every owner? (owners' deck still says ₹5 L fee + ₹6 L purse)
+- [x] Fee vs purse settled (Nikhil, 28 Oct): franchise fee ₹5 L; purse ₹5 L, extendable by ₹1 L to ₹6 L at the owner's choice. Owners deck updated.
 - [ ] Freeze auction numbers: purse, ₹1 L top-up, category bases/caps, max bid, squad size (deck says "up to 18", PDF says "16–25")
 - [ ] KEI/Texas group placement + names for Franchise TBA 1/2
 - [ ] Who presents which section; 30-min run-through Thu 29 Oct
@@ -36,9 +36,9 @@ Dates now: auction Sat 12 Dec 2026 · opener Sat 16 Jan 2027 · final Sun 7 Mar 
 - [ ] Format slide: 2 groups of 7 → 42 league → 2 semis (A1 v B2, B1 v A2) → final; points + net-run-rate tie-breaks
 - [ ] Hand out the match schedule PDF (Downloads/SDLL/SLL-2-Match-Schedule.pdf)
 
-**5. Why ₹6 lakh — what owners get (most important)**
+**5. Why ₹5 lakh — what owners get (most important)**
 - [ ] Rebuild the Season 2 budget for 14 teams / 45 matches / 16 match days (old one is 12 teams / 69 matches / 24 days)
-- [ ] One slide "Your ₹6 L vs what we spend per team" (recalc ≈ ₹8.7 L per team; sponsors cover the gap) — confirm figures
+- [ ] One slide "Your ₹5 L fee vs what we spend per team": lead with Season 1 cost over ₹1.5 Cr (Nikhil OK to share, 28 Oct); recalc S2 per-team figure; sponsors + Playful Ventures cover the gap
 - [ ] One slide itemising the package: ground + umpires + scorers, catering, live stream with commentary every match, kits, trophies/awards, ₹20 L prize pool, 3 events (meet, auction night, gala), Owners Portal + Ball Library + player stats, social coverage, branding
 - [ ] Season 1 proof: photos (gallery), stream links, Instagram numbers (fill the [__] on the owners' deck)
 - [ ] Payment terms: amount, GST, due date (before the auction), UPI/bank details (Playful Ventures ICICI QR)
@@ -128,7 +128,7 @@ state or zonal teams at any age group, paid contracts). Non-corporate profiles m
 - [ ] Set DEMO_MODE = false at launch (src/app/site-config.ts)
 - [ ] 32 players still show initials instead of a photo
 - [ ] More Kanishk award photos for the carousel (candidates on the picker: 23, 43, 44–56, 59–62)
-- [ ] Season 2 auction numbers (Nikhil, 27 Oct; subject to change until 1 week before the auction): purse ₹6,00,000 + optional ₹1,00,000 top-up; top bid ₹1,50,000 per player. `auction_rules` still has max_bid 4,00,000 — update before the dry run
+- [ ] Season 2 auction numbers (Nikhil, 27 Oct; subject to change until 1 week before the auction): purse ₹5,00,000 + optional ₹1,00,000 top-up (max ₹6,00,000; changed 28 Oct); top bid ₹1,50,000 per player. `auction_rules` still has max_bid 4,00,000 and new-team default purse_total is 3,00,000 (admin/teams/actions.ts) — set both before the dry run
 - [ ] Instant SOLD clips for Instagram (quoted 13 Oct, FT-Q-2026-02 Part A features 50–55, inside the ₹5L Portal): on every `sell` event, auto-render a 9:16 reel (player photo + stats, bid war replayed, SOLD stamp, team crest + price, SDLL/sponsor branding), caption + hashtags, phone download page for the social team to post live. Need from league: Instagram handle, hashtags, sponsor logos for clips; decide if hall camera footage is added
 
 ## USCL auction — Sat 3 Oct (demo for Gurugram Spartans)

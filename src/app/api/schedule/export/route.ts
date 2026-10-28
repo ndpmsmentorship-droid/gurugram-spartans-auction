@@ -256,7 +256,7 @@ export async function GET() {
   XLSX.utils.book_append_sheet(wb, wsSpread, "Team Time-Slot Spread");
 
   const buf = XLSX.write(wb, { bookType: "xlsx", type: "buffer" }) as Buffer;
-  const filename = `SDLL_S2_Match_Schedule.xlsx`;
+  const filename = `SLL-2_Match_Schedule.xlsx`;
 
   return new Response(new Uint8Array(buf), {
     headers: {

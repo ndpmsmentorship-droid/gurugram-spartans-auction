@@ -37,7 +37,7 @@ function rankMetric(
 // people already in the SDLL pool (same CricHeroes id or name).
 const SOURCES = [
   { key: "all", label: "All players" },
-  { key: "sdll", label: "SDLL pool" },
+  { key: "sdll", label: "SLL pool" },
   { key: "sarda", label: "SARDA S6" },
 ] as const;
 type SourceKey = (typeof SOURCES)[number]["key"];

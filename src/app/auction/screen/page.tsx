@@ -3,7 +3,7 @@ import BigScreen from "./BigScreen";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "SDLL Auction — Big Screen" };
+export const metadata = { title: "SLL Auction — Big Screen" };
 
 // The hall screen: what the projector shows on auction day. Public like the
 // live board (read-only), and follows the operator pad over realtime.

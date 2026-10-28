@@ -564,7 +564,7 @@ export default function WarRoom(props: {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="eyebrow">
-            War room · <span className="sm:hidden">{props.league === "uscl" ? "USCL Season 2" : "SDLL Season 2"}</span>
+            War room · <span className="sm:hidden">{props.league === "uscl" ? "USCL Season 2" : "SLL Season 2"}</span>
             <span className="hidden sm:inline">{props.leagueName}</span>
           </p>
           <h1 className="mt-1 flex items-center gap-3 text-3xl sm:text-4xl">

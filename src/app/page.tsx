@@ -251,7 +251,7 @@ export default async function Home() {
                 Building legends together
               </p>
               <h1 className="mt-3 leading-[0.88]">
-                <span className="block text-[3.4rem] sm:text-7xl">SDLL</span>
+                <span className="block text-[3.4rem] sm:text-7xl">SLL</span>
                 <span className="block text-[3.4rem] text-[#ff5a4f] sm:text-7xl">Season 2</span>
               </h1>
               <p className="mt-4 font-display text-lg uppercase tracking-[0.06em] text-white/85 sm:text-xl">
@@ -393,7 +393,7 @@ export default async function Home() {
       {/* ---------- about ---------- */}
       <section className="mx-auto grid w-full max-w-[1200px] gap-10 px-4 pt-16 sm:px-7 lg:grid-cols-[1.2fr_1fr]">
         <div>
-          <Heading kicker="About the league" lead="About" accent="SDLL" />
+          <Heading kicker="About the league" lead="About" accent="SLL" />
           <div className="mt-6 space-y-4 text-[0.95rem] leading-relaxed text-muted">
             <p>
               The Shanti Devi Legend&apos;s League is cricket for the ones who never stopped
@@ -481,7 +481,7 @@ export default async function Home() {
               <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
                 {FRANCHISES.filter((f) => f.group === g).map((f) => {
                   const own = ownersOf(f.name);
-                  const champs = f.name === "ACCI" ? "★ S1 champions" : f.name === "Goan Monks" ? "S1 runners-up" : null;
+                  const champs = f.name === "ACCI" ? "★ SLL-1 champions" : f.name === "Goan Monks" ? "SLL-1 runners-up" : null;
                   return (
                     <li
                       key={f.name}

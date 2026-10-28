@@ -3,7 +3,7 @@ import OperatorPad from "./OperatorPad";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Operator pad — SDLL Auction" };
+export const metadata = { title: "Operator pad — SLL Auction" };
 
 // The operator's screen on auction day (admin-only via admin/layout). Same
 // data as the big screen, plus the full pool for search.

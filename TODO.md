@@ -7,7 +7,7 @@ Last updated: 2026-10-28
 Agenda order: 1 Registration → 2 Owners Portal + Ball Library demo → 3 Auction rules → 4 League rules → 5 What the ₹6 lakh buys → Q&A + next steps.
 Dates now: auction Sat 12 Dec 2026 · opener Sat 16 Jan 2027 · final Sun 7 Mar 2027 (49 matches, 17 match days, 8 weekends).
 
-**Must decide first (Nikhil, by Tue 27→Wed 28 Oct)**
+**Must decide first (Nikhil, by Thu 29 Oct)**
 - [ ] Confirm what "₹6 lakh" is: franchise fee for every owner? (owners' deck still says ₹5 L fee + ₹6 L purse)
 - [ ] Freeze auction numbers: purse, ₹1 L top-up, category bases/caps, max bid, squad size (deck says "up to 18", PDF says "16–25")
 - [ ] KEI/Texas group placement + names for Franchise TBA 1/2

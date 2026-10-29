@@ -3,7 +3,7 @@
 const FAQS: { q: string; a: React.ReactNode }[] = [
   {
     q: "Who can register?",
-    a: "Any player aged 30 or above on the day they register. The league is built for working professionals who never stopped playing.",
+    a: "Working professionals who never stopped playing: employees, founders, business owners and the self-employed. Every registration is reviewed before it reaches the auction pool.",
   },
   {
     q: "I played Season 1 or in another league with you. Do I fill everything again?",
@@ -23,7 +23,7 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
   },
   {
     q: "Which documents do I need?",
-    a: "New players upload a photo and their Aadhaar card. Returning players need neither, but may upload a new photo. You also agree to share documents such as ID or age proof if the league asks.",
+    a: "New players upload a photo and their Aadhaar card. Returning players need neither, but may upload a new photo. You also agree to share documents such as ID if the league asks.",
   },
   {
     q: "Who can see my Aadhaar and personal details?",

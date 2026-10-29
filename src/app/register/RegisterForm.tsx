@@ -269,7 +269,7 @@ export default function RegisterForm() {
     if (!returning) {
       const age = dob ? ageOn(dob) : null;
       if (age == null) return setErr("Please enter your date of birth.");
-      if (age < MIN_AGE) return setErr(`The league is open to players aged ${MIN_AGE} and above.`);
+      if (age < MIN_AGE) return setErr("Please check your date of birth.");
       if (!photo || !aadhaar) return setErr("Please add your photo and your Aadhaar card.");
     }
     if (!meal) return setErr("Please choose veg or non-veg.");
@@ -527,7 +527,7 @@ export default function RegisterForm() {
           <Field label="Full name">
             <input id="reg-name" className="input" value={fullName} onChange={(e) => setFullName(e.target.value)} autoComplete="name" />
           </Field>
-          <Field label="Date of birth" hint={`Open to players aged ${MIN_AGE} and above.`}>
+          <Field label="Date of birth">
             <input id="reg-dob" type="date" className="input" value={dob} onChange={(e) => setDob(e.target.value)} />
           </Field>
           <Field label="Email">
@@ -636,7 +636,7 @@ export default function RegisterForm() {
             id: "reg-docs",
             checked: docsConsent,
             set: setDocsConsent,
-            text: <>I agree to <strong>share important documents</strong> (such as ID or age proof) with the league if asked.</>,
+            text: <>I agree to <strong>share important documents</strong> (such as ID) with the league if asked.</>,
           },
           {
             id: "reg-fee",

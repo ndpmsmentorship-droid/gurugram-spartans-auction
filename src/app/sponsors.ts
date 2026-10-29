@@ -1,7 +1,6 @@
 import type { StaticImageData } from "next/image";
 import playfulneuro from "./brand/sponsors/playfulneuro.png";
 import playfulVentures from "./brand/sponsors/playful-ventures.png";
-import khabarfast from "./brand/sponsors/khabarfast.png";
 import sportscube from "./brand/sponsors/sportscube.png";
 import mykos from "./brand/sponsors/mykos.png";
 import anthlete from "./brand/sponsors/anthlete.png";
@@ -9,7 +8,6 @@ import saanvika from "./brand/sponsors/saanvika.png";
 import smartstrength from "./brand/sponsors/smartstrength.png";
 import machan from "./brand/sponsors/machan.png";
 import satya from "./brand/sponsors/satya.png";
-import fast1 from "./brand/sponsors/fast1.png";
 
 // Season sponsors, in the order and with the roles printed on the league's own
 // ground sponsor strip (Drive: SLL'26 Repository › Grounds PRINTABLES ›
@@ -33,8 +31,6 @@ export const PARTNERS: Sponsor[] = [
   { name: "Saanvika Films", role: "Associate Sponsor", logo: saanvika },
   { name: "Machan", role: "Associate Sponsor", logo: machan },
   { name: "SportsCube", role: "Venue Partner", logo: sportscube },
-  { name: "Khabarfast", role: "Media Partner", logo: khabarfast },
-  { name: "Fast1", role: "Streaming Partner", logo: fast1 },
   { name: "Mykos", role: "Hospitality Partner", logo: mykos },
   { name: "Anthlete Nutritions", role: "Nutrition Partner", logo: anthlete },
   { name: "Smart Strength", role: "Fitness Partner", logo: smartstrength },

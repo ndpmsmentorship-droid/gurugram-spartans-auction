@@ -122,7 +122,7 @@ const OPPORTUNITIES = [
   {
     title: "On the ground",
     items: [
-      "Boundary Sponsor — 12 boards at all 34 matches",
+      "Boundary Sponsor — 12 boards at all 45 matches",
       "Side Screen Sponsor — in frame for every delivery",
       "Refreshment Sponsor — stalls, meal boxes, cups",
       "Wickets, Fours & Sixes Partner",

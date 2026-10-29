@@ -51,7 +51,7 @@ const STATS = [
   { value: "295", label: "Players in the pool" },
   { value: "45", label: "Matches" },
   { value: "8", label: "Weekends" },
-  { value: "40+", label: "Age to play" },
+  { value: "T20", label: "Format" },
 ];
 
 // Where the season stands. `now` marks the current step.
@@ -255,7 +255,7 @@ export default async function Home() {
                 <span className="block text-[3.4rem] text-[#ff5a4f] sm:text-7xl">Season 2</span>
               </h1>
               <p className="mt-4 font-display text-lg uppercase tracking-[0.06em] text-white/85 sm:text-xl">
-                Delhi NCR&apos;s 40+ T20 league
+                Delhi NCR&apos;s T20 league
               </p>
               <div className="mt-5">
                 <Countdown to={OPENER} label="To the Season 2 opener" />
@@ -397,7 +397,7 @@ export default async function Home() {
           <div className="mt-6 space-y-4 text-[0.95rem] leading-relaxed text-muted">
             <p>
               The Shanti Devi Legend&apos;s League is cricket for the ones who never stopped
-              playing. It is a 40+ league built around a full franchise auction: players register,
+              playing. It is a league built around a full franchise auction: players register,
               are graded into categories, and go under the hammer to fourteen franchise owners working a
               fixed purse.
             </p>

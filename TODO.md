@@ -32,7 +32,7 @@ Dates now: auction Sat 12 Dec 2026 · opener Sat 16 Jan 2027 · final Sun 7 Mar 
 - [ ] Mock auction of 3–4 lots on the hall screen to show how bidding works
 
 **4. League rules**
-- [ ] 1-page playing conditions: 40+ age rule + ID check, overs, powerplay, ball, timings (8:00 / 11:30 / 3:00), reporting time, walkovers, rain rule, umpire/scorer, code of conduct, fines (blank until lawyer)
+- [ ] 1-page playing conditions: ID check (no age rule stated anywhere; form silently refuses under-30 DOBs), overs, powerplay, ball, timings (8:00 / 11:30 / 3:00), reporting time, walkovers, rain rule, umpire/scorer, code of conduct, fines (blank until lawyer)
 - [ ] Format slide: 2 groups of 7 → 42 league → 2 semis (A1 v B2, B1 v A2) → final; points + net-run-rate tie-breaks
 - [ ] Hand out the match schedule PDF (Downloads/SDLL/SLL-2-Match-Schedule.pdf)
 

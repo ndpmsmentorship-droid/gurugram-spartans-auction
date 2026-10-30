@@ -20,10 +20,11 @@ Dates now: auction Sat 12 Dec 2026 · opener Sat 16 Jan 2027 · final Sun 7 Mar 
 - [ ] Answer ready: who vets, how categories are set, what an owner can see about a player
 
 **2. Owners Portal + Ball Library — tour and demo**
-- [x] Demo owner login: username `demo` → Gurugram Spartans (`scripts/demo-owner-login.mts`), 10 targets seeded; owners can't record, live board untouched — 30 Oct
-- [ ] After the meeting: `node scripts/demo-owner-login.mts --unlink` before Spartans' real owner login is linked
-- [ ] Leftover sale on the SLL-2 board: Amit Sehrawat → Gurugram Spartans ₹6,000 (shows in War Room) — Nikhil to say keep or undo
-- [ ] Purses in the app don't match the agreed ₹5 L (+₹1 L top-up): teams are ₹3 L (Spartans ₹4 L), max ₹4.5 L
+- [x] Demo owner login: username `demo` → Gurugram Knights (was Spartans) (`scripts/demo-owner-login.mts`), 10 targets seeded; owners can't record, live board untouched — 30 Oct
+- [ ] After the meeting: `node scripts/demo-owner-login.mts --unlink` before Gurugram Knights' real owner login is linked
+- [ ] Leftover sale on the SLL-2 board: Amit Sehrawat → Gurugram Knights ₹6,000 (shows in War Room) — Nikhil to say keep or undo
+- [x] 14 teams per the owners' meet deck (`scripts/sll2-teams-oct30.mts`): SLL 10, Diplomats 1/2, SLL 13/14, Gurugram Knights, Chennai Thalaiva, Punjab Royals; owners on the landing cards; every purse ₹5 L + ₹1 L top-up — 30 Oct
+- [ ] Logos for UP Warriors, Gurugram Knights, SLL 10, Diplomats 1/2, SLL 13/14 (lettered crests until then); real names for SLL 10/13/14 and the Diplomats teams
 - [ ] Script: Scouting pool rankings → player profile → War Room (purse, max safe bid, open slots) → My Squad
 - [ ] Ball Library: one Season 1 match — ball-by-ball video, pitch map, wagon wheel
 - [ ] Backup: screen recording of the full demo in case Wi-Fi fails; laptop + HDMI + hotspot

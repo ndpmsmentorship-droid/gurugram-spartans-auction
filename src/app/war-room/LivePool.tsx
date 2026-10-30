@@ -100,7 +100,11 @@ export default function LivePool() {
                   {p.name}
                   <span className="ml-2 rounded-full border border-line px-1.5 py-0.5 text-[0.625rem] font-normal text-muted">{p.returning ? "Returning" : "New"}</span>
                 </p>
-                <p className="truncate text-[0.75rem] text-muted">{p.role}</p>
+                <p className="truncate text-[0.75rem] text-muted">
+                  {p.role}
+                  {p.lastTeam ? ` · S1 ${p.lastTeam}` : ""}
+                  {!p.hasData && <span className="ml-1.5 rounded-full bg-gold-fill px-1.5 py-0.5 text-[0.625rem] text-gold">No data yet</span>}
+                </p>
                 {(p.designation || p.employer) && <p className="truncate text-[0.75rem] text-muted">{[p.designation, p.employer].filter(Boolean).join(", ")}</p>}
               </div>
               <span className={`shrink-0 rounded-full px-2 py-1 text-[0.688rem] ${BADGE[p.status]}`}>{LABEL[p.status]}</span>

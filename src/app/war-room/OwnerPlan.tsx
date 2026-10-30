@@ -78,7 +78,7 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
       {/* budget strip */}
       <div className="rounded-[12px] border border-line bg-surface px-4 py-3">
         <p className="text-[0.688rem] uppercase tracking-[0.14em] text-muted">{team.name}</p>
-        <div className="mt-1 grid grid-cols-4 gap-2">
+        <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-4">
           <Stat k="To spend" v={inr(purseLeft)} />
           <Stat k="Most you can bid" v={inr(maxSafe)} />
           <Stat k="Places" v={String(Math.max(0, target - mine.length))} />

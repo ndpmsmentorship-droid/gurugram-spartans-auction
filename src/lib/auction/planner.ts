@@ -129,7 +129,10 @@ export function bestXII(squad: Rated[]): XII {
     }
     twelve.push(left.splice(bi, 1)[0]);
   }
-  return { ...scoreOf(twelve), twelve };
+  // The score is the squad's (top 7 batters + top 5 bowlers — at most twelve
+  // people), so it never disagrees with what the planner optimised; the
+  // greedy twelve is only for drawing the field map.
+  return { ...scoreOf(squad), twelve };
 }
 
 // ---- strategies -------------------------------------------------------------------
@@ -219,6 +222,41 @@ export function buildPlan(key: StrategyKey, inp: PlanInput): Plan {
     if (!best) break;
     take(best, best.price);
   }
+
+  // Greedy filling depends on the order of picks, so polish it: swap any free
+  // pick (not owned, not "going", not the live player) for a pool player while
+  // that makes the squad better for this strategy, or as good for less money.
+  const fixed = new Set([...inp.mine.map((p) => p.id), ...inp.going, ...(inp.forced ? [inp.forced.id] : [])]);
+  const objective = (xs: Rated[]) =>
+    scoreOf(xs).score + 0.3 * xs.reduce((a, p) => a + (tilt(key, p) - 1) * (p.bat + p.bowl), 0);
+  const swaps = [...new Set([...cand.slice().sort((a, b) => strength(b) - strength(a)).slice(0, 120), ...cand.slice().sort((a, b) => a.price - b.price).slice(0, 40)])];
+  for (let pass = 0; pass < 3; pass++) {
+    let improved = false;
+    for (let i = 0; i < squad.length; i++) {
+      const out = squad[i];
+      if (fixed.has(out.id)) continue;
+      const cur = objective(squad);
+      const have = new Set(squad.map((x) => x.id));
+      let bestJ: Rated | null = null, bestGain = 0;
+      for (const c of swaps) {
+        if (have.has(c.id) || c.price > budget + out.price) continue;
+        if (c.cat !== out.cat && cats[c.cat] >= rules.cap[c.cat]) continue;
+        const next = squad.slice();
+        next[i] = c;
+        const gain = objective(next) - cur + (out.price - c.price) / 1e7; // cheaper wins a tie
+        if (gain > bestGain + 1e-9) { bestGain = gain; bestJ = c; }
+      }
+      if (bestJ) {
+        cats[out.cat] -= 1; cats[bestJ.cat] += 1;
+        budget += out.price - bestJ.price;
+        squad[i] = bestJ;
+        const k = buys.findIndex((b) => b.id === out.id);
+        if (k >= 0) buys[k] = bestJ;
+        improved = true;
+      }
+    }
+    if (!improved) break;
+  }
   return { key, squad, buys, cost: buys.reduce((a, b) => a + b.price, 0), xii: bestXII(squad) };
 }
 
@@ -242,22 +280,50 @@ export function liveVerdict(
   ctx: { maxSafe: number; slotOpen: boolean; gaps: string[]; rivalCaps: number[] },
 ): Verdict {
   const without = buildPlan("balanced", { ...inp, exclude: p.id });
-  const withAt = (price: number) => buildPlan("balanced", { ...inp, forced: { id: p.id, price } });
+  // Greedy filling is path-dependent: forcing him first can crowd out a later
+  // pick and score lower than passing, even for a star at base. So also try the
+  // plan we'd follow without him, plus him, dropping whichever planned buys cost
+  // the least strength until the squad fits the purse and size again — and keep the better.
+  const swapIn = (price: number): Plan => {
+    const target = Math.max(inp.rules.squadMin, 12);
+    let buys = [...without.buys];
+    const him = { ...p, price };
+    const fits = () => buys.reduce((a, b) => a + b.price, 0) + price <= inp.purseLeft && inp.mine.length + buys.length + 1 <= Math.max(target, inp.mine.length + 1);
+    while (buys.length && !fits()) {
+      let drop = 0, best = -Infinity;
+      for (let i = 0; i < buys.length; i++) {
+        const rest = buys.filter((_, j) => j !== i);
+        const v = scoreOf([...inp.mine, him, ...rest]).score + buys[i].price / 100000;
+        if (v > best) { best = v; drop = i; }
+      }
+      buys = buys.filter((_, j) => j !== drop);
+    }
+    const squad = [...inp.mine, him, ...buys];
+    return { key: "balanced", squad, buys: [him, ...buys], cost: price + buys.reduce((a, b) => a + b.price, 0), xii: bestXII(squad) };
+  };
+  const withAt = (price: number) => {
+    const a = buildPlan("balanced", { ...inp, forced: { id: p.id, price } });
+    if (price > inp.purseLeft) return a;
+    const b = swapIn(price);
+    return b.xii.score > a.xii.score ? b : a;
+  };
   const canBuy = ctx.slotOpen && bid <= ctx.maxSafe;
   const at = canBuy ? withAt(bid) : without;
   const gainAtBid = at.xii.score - without.xii.score;
 
-  // Highest price at which buying him still leaves a better squad than passing.
+  // Highest price at which buying him still leaves a better squad than passing —
+  // searched from his base, so it doesn't move with the bid.
   let ceiling = 0;
-  if (canBuy && gainAtBid > 0) {
-    let lo = bid, hi = ctx.maxSafe;
+  const base = inp.rules.base[p.cat];
+  if (ctx.slotOpen && base <= ctx.maxSafe && withAt(base).xii.score - without.xii.score > 0) {
+    let lo = base, hi = ctx.maxSafe;
     for (let i = 0; i < 6 && hi - lo > 2000; i++) {
       const mid = Math.round((lo + hi) / 2 / 1000) * 1000;
       if (withAt(mid).xii.score - without.xii.score > 0) lo = mid; else hi = mid;
     }
     ceiling = lo;
   }
-  const worth = canBuy && gainAtBid > 0;
+  const worth = canBuy && gainAtBid > 0 && bid <= ceiling;
   const beaters = ctx.rivalCaps.filter((c) => c > ceiling).length;
   const chance = !worth ? 0 : Math.max(0, Math.min(10, Math.round(10 / (1 + beaters))));
 

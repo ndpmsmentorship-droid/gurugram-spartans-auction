@@ -32,6 +32,17 @@ export type ScheduleConfig = {
   venue: string;
   /** Any integer — same seed and config always produce the same schedule. */
   seed: number;
+  /**
+   * An explicit league calendar. When set, round r is played on the
+   * matchDays.length dates starting at leagueDates[r * matchDays.length], so a
+   * round can straddle a weekday holiday or two weekends; startDate,
+   * matchDays' names and blackoutDates are then ignored for the league.
+   */
+  leagueDates?: string[];
+  /** Knockout dates: semi-finals on the first, the final on the last. */
+  finalsDates?: string[];
+  /** Play a third-place match. */
+  thirdPlace?: boolean;
 };
 
 export type Stage = "group" | "semi" | "third" | "final";
@@ -81,15 +92,40 @@ export const DAY_INDEX: Record<string, number> = {
   Saturday: 6,
 };
 
+// SLL-2 as in the partnership proposal (30 Oct 2026): 14 teams in two groups
+// of seven, 42 league matches over 14 match days (Republic Day Tue 26 Jan is
+// one; Sun 28 Feb is kept free), three a day at 8:00, 11:30 and 3:00, then the
+// semi-finals and final on 6-7 Mar 2027. 45 matches.
 export const DEFAULT_CONFIG: ScheduleConfig = {
-  // Season 2 opener (moved to Sat 16 Jan 2027).
   startDate: "2027-01-16",
   matchDays: ["Saturday", "Sunday"],
-  slots: ["08:00", "12:00", "16:00"],
+  slots: ["08:00", "11:30", "15:00"],
   blackoutDates: [],
   venue: "Sportscube, Gurugram",
-  seed: 7,
+  // Seed 1 gives every team exactly two games in each slot (7 doesn't).
+  seed: 1,
+  leagueDates: [
+    "2027-01-16", "2027-01-17",
+    "2027-01-23", "2027-01-24", "2027-01-26",
+    "2027-01-30", "2027-01-31",
+    "2027-02-06", "2027-02-07",
+    "2027-02-13", "2027-02-14",
+    "2027-02-20", "2027-02-21",
+    "2027-02-27",
+  ],
+  finalsDates: ["2027-03-06", "2027-03-07"],
+  thirdPlace: false,
 };
+
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const dayNameOf = (iso: string) => DAY_NAMES[parseISO(iso).getUTCDay()];
+
+/** Calendar weekend of a date, 1-based, counted in Saturday-to-Friday weeks from the first match. */
+function weekendOf(first: string, iso: string): number {
+  const start = parseISO(first);
+  const back = (start.getUTCDay() + 1) % 7; // days back to that week's Saturday
+  return Math.floor((parseISO(iso).getTime() - addDays(start, -back).getTime()) / (7 * 86400000)) + 1;
+}
 
 /* ------------------------------------------------------------------ dates */
 
@@ -134,6 +170,11 @@ function weekendDates(
   weekendIndex: number,
   blackout: Set<string>
 ): { dayName: string; date: string }[] {
+  if (cfg.leagueDates?.length) {
+    const per = cfg.matchDays.length;
+    const chunk = cfg.leagueDates.slice(weekendIndex * per, weekendIndex * per + per);
+    if (chunk.length) return chunk.map((date) => ({ date, dayName: dayNameOf(date) }));
+  }
   const anchor = parseISO(cfg.startDate);
   const anchorDow = anchor.getUTCDay();
 
@@ -287,8 +328,8 @@ function cost(
     // Only punish unused slots the team could realistically have reached.
     if (played >= cfg.slots.length) total += unused * 40;
 
-    // 2. slot imbalance
-    total += (Math.max(...slots) - Math.min(...slots) > 1 ? 1 : 0) * 6;
+    // 2. slot imbalance: every step away from an even spread costs
+    total += Math.max(0, Math.max(...slots) - Math.min(...slots) - (played % cfg.slots.length ? 1 : 0)) * 6;
 
     // 3. day imbalance
     total += Math.max(0, Math.max(...days) - Math.min(...days) - 1) * 4;
@@ -424,7 +465,7 @@ export function generateSchedule(
       fixtures.push({
         matchNo: matchNo++,
         stage: "group",
-        round: w + 1,
+        round: cfg.leagueDates?.length ? weekendOf(cfg.leagueDates[0], day.date) : w + 1,
         date: day.date,
         dayName: day.dayName,
         slot: cfg.slots[box.slot],
@@ -442,7 +483,9 @@ export function generateSchedule(
   // Top two from each group cross over. Teams aren't known yet, so these
   // carry labels and get filled in once the group tables are final.
   const finalsWeekend = weekendMatches.length;
-  const finalsDates = weekendDates(cfg, finalsWeekend, blackout);
+  const finalsDates = cfg.finalsDates?.length
+    ? cfg.finalsDates.map((date) => ({ date, dayName: dayNameOf(date) }))
+    : weekendDates(cfg, finalsWeekend, blackout);
   const satDay = finalsDates[0];
   const sunDay = finalsDates[1] ?? finalsDates[0];
   const [gA, gB] = [groups[0] ?? "Group A", groups[1] ?? "Group B"];
@@ -456,7 +499,9 @@ export function generateSchedule(
   }> = [
     { stage: "semi", day: satDay, slot: cfg.slots[0], home: `Winner ${gA}`, away: `Runner-up ${gB}` },
     { stage: "semi", day: satDay, slot: cfg.slots[1] ?? cfg.slots[0], home: `Winner ${gB}`, away: `Runner-up ${gA}` },
-    { stage: "third", day: sunDay, slot: cfg.slots[0], home: "Loser Semi-Final 1", away: "Loser Semi-Final 2" },
+    ...(cfg.thirdPlace === false
+      ? []
+      : [{ stage: "third" as Stage, day: sunDay, slot: cfg.slots[0], home: "Loser Semi-Final 1", away: "Loser Semi-Final 2" }]),
     { stage: "final", day: sunDay, slot: cfg.slots[1] ?? cfg.slots[0], home: "Winner Semi-Final 1", away: "Winner Semi-Final 2" },
   ];
 
@@ -464,7 +509,7 @@ export function generateSchedule(
     fixtures.push({
       matchNo: matchNo++,
       stage: k.stage,
-      round: finalsWeekend + 1,
+      round: cfg.leagueDates?.length ? weekendOf(cfg.leagueDates[0], k.day.date) : finalsWeekend + 1,
       date: k.day.date,
       dayName: k.day.dayName,
       slot: k.slot,

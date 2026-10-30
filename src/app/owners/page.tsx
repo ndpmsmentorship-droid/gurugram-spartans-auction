@@ -10,6 +10,28 @@ import { loadOwnerPool } from "@/lib/auction/owner-pool";
 import { DEFAULT_RULES, inr } from "@/lib/auction/rules";
 import { findFranchise } from "@/app/franchises";
 import TeamCrest from "@/app/TeamCrest";
+import { PlayerPhoto } from "@/app/register/PlayerCard";
+import { catLabel } from "@/lib/scout/tier";
+
+type Bought = {
+  id: string;
+  full_name: string;
+  sold_price: number | null;
+  primary_role: string | null;
+  auction_category: string | null;
+  is_keeper: boolean | null;
+  photo_url: string | null;
+  runs: number | null;
+  wickets: number | null;
+};
+
+function roleOf(p: Bought): "Keeper" | "All-rounder" | "Bowler" | "Batter" {
+  const r = (p.primary_role ?? "").toLowerCase();
+  if (p.is_keeper || r.includes("keeper")) return "Keeper";
+  if (r.includes("all")) return "All-rounder";
+  if (r.includes("bowl")) return "Bowler";
+  return "Batter";
+}
 
 export const metadata: Metadata = { title: "Owners’ portal" };
 export const dynamic = "force-dynamic";
@@ -38,8 +60,12 @@ export default async function OwnersHome({ searchParams }: { searchParams: Promi
     (profile.role === "owner" ? list.find((t) => t.owner_profile_id === profile.id) : null) ?? list.find((t) => t.name === teamParam) ?? list[0];
   if (!team) return <main className="mx-auto max-w-[900px] px-4 py-16 text-muted">No teams in the active season yet.</main>;
 
-  const { data: bought } = await sb.from("scout_players").select("id, full_name, sold_price").eq("team_id", team.id);
-  const squad = (bought ?? []) as { id: string; full_name: string; sold_price: number | null }[];
+  const { data: bought } = await sb
+    .from("scout_players")
+    .select("id, full_name, sold_price, primary_role, auction_category, is_keeper, photo_url, runs, wickets")
+    .eq("team_id", team.id)
+    .order("sold_price", { ascending: false, nullsFirst: false });
+  const squad = (bought ?? []) as Bought[];
   const spent = squad.reduce((a, p) => a + (p.sold_price ?? 0), 0);
   const left = Number(team.purse_total) - spent;
   const target = Math.max(R.squadMin, 12);
@@ -117,6 +143,39 @@ export default async function OwnersHome({ searchParams }: { searchParams: Promi
           </Card>
         </div>
 
+        {/* your squad: what My Squad used to be */}
+        <section className="mt-6 rounded-[16px] border border-line bg-surface p-5 shadow-[var(--elev-sm)]">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <div>
+              <span className="label-mono">Your squad</span>
+              <h2 className="mt-1 font-display text-xl uppercase leading-tight">
+                {squad.length ? `${squad.length} bought · ${inr(spent)}` : "No buys yet"}
+              </h2>
+            </div>
+            <RoleMix squad={squad} />
+          </div>
+          {squad.length ? (
+            <ul className="mt-3 divide-y divide-line">
+              {squad.map((p) => (
+                <li key={p.id} className="flex items-center gap-3 py-2.5">
+                  <PlayerPhoto src={p.photo_url} name={p.full_name} className="h-10 w-10 shrink-0 rounded-full" sizes="40px" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold">{p.full_name}</p>
+                    <p className="truncate text-[0.75rem] text-muted">
+                      {[catLabel(p.auction_category), roleOf(p), p.runs ? `${p.runs.toLocaleString("en-IN")} runs` : null, p.wickets ? `${p.wickets} wkts` : null]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  </div>
+                  <span className="num shrink-0 text-sm font-semibold">{p.sold_price != null ? inr(p.sold_price) : "—"}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-2 text-sm text-muted">Players you buy on auction night appear here with their price, and the purse tiles above update with each sale.</p>
+          )}
+        </section>
+
         {/* AI scout */}
         <Link
           href="/war-room?tab=live"
@@ -133,7 +192,8 @@ export default async function OwnersHome({ searchParams }: { searchParams: Promi
         </Link>
 
         <p className="mt-6 text-[0.75rem] text-muted">
-          Also: <Link className="underline" href="/my-team">My squad</Link> · <Link className="underline" href="/auction">Live board</Link> ·{" "}
+          Also: <a className="underline" href="/spartansscout/auction/screen" target="_blank" rel="noreferrer">Big screen</a> ·{" "}
+          <Link className="underline" href="/auction">Live board</Link> ·{" "}
           <Link className="underline" href="/schedule">Schedule</Link> · <a className="underline" href="https://www.ndpms.in/spartans">Ball Library</a>
         </p>
       </div>
@@ -170,5 +230,20 @@ function Pill({ c, n, l }: { c: string; n: number; l: string }) {
     <span className="rounded-full border border-line px-2 py-0.5">
       <b className={`num ${c}`}>{n}</b> {l}
     </span>
+  );
+}
+
+function RoleMix({ squad }: { squad: Bought[] }) {
+  if (!squad.length) return null;
+  const n: Record<string, number> = { Batter: 0, "All-rounder": 0, Bowler: 0, Keeper: 0 };
+  for (const p of squad) n[roleOf(p)] += 1;
+  return (
+    <p className="flex flex-wrap gap-1.5 text-[0.75rem]">
+      {Object.entries(n).map(([k, v]) => (
+        <span key={k} className="rounded-full border border-line px-2 py-0.5">
+          <b className="num">{v}</b> {k === "All-rounder" ? "all-rounders" : `${k.toLowerCase()}s`}
+        </span>
+      ))}
+    </p>
   );
 }

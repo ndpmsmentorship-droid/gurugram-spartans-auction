@@ -157,7 +157,7 @@ export default function SardaRecord() {
         <p className="text-[0.95rem] text-muted">
           Our own campaign — the scouting, the index-based player analysis and the live auction board —
           is recorded in the app. See the{" "}
-          <Link href="/squad" className="font-medium text-accent-text hover:underline">
+          <Link href="/auction" className="font-medium text-accent-text hover:underline">
             final squad
           </Link>{" "}
           and the{" "}

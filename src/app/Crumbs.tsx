@@ -9,10 +9,8 @@ import { usePathname, useRouter } from "next/navigation";
 const LABELS: Record<string, string> = {
   "/register": "Register",
   "/auction": "Live Board",
-  "/squad": "Squads",
   "/schedule": "Schedule",
-  "/my-team": "My Squad",
-  "/my-team/targets": "Targets",
+  "/auction/screen": "Big Screen",
   "/war-room": "War Room",
   "/owners": "Owners’ portal",
   "/scout": "Player Pool",

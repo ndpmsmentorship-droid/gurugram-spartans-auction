@@ -35,7 +35,7 @@ export default function Crest({
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? "")
+    .map((w) => (/^\d+$/.test(w) ? w : (w[0]?.toUpperCase() ?? ""))) // "SLL 10" → S10, not S1
     .join("");
   return (
     <span

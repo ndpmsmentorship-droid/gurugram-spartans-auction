@@ -117,7 +117,7 @@ export default function BallReel({ balls, name, onEnd }: { balls: ReelBall[]; na
     <div className="bs-in absolute inset-0 bg-black">
       <div ref={host} className="absolute inset-0 [&_iframe]:h-full [&_iframe]:w-full" />
       <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent px-[1.2vw] pb-[2vw] pt-[0.9vw]">
-        <span className="rounded-full bg-[#FF7A00] px-[0.8vw] py-[0.3vw] font-mono text-[0.75vw] font-bold uppercase tracking-[0.18em] text-black">
+        <span className="rounded-full bg-[#e8352b] px-[0.8vw] py-[0.3vw] font-mono text-[0.75vw] font-bold uppercase tracking-[0.18em] text-white">
           ▶ Ball Library
         </span>
         <span className="font-mono text-[0.8vw] tracking-[0.12em] text-white/70">

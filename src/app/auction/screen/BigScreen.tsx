@@ -19,8 +19,8 @@ import { CardThenReel } from "./BallReel";
 
 export const CAT_COLOUR: Record<string, string> = {
   "A+": "#E8B64C",
-  A: "#F0564A",
-  B: "#7FA6E8",
+  A: "#e8352b",
+  B: "#8fa3c7",
   Special: "#8FD3A2",
 };
 const catColour = (c: string | null | undefined) => CAT_COLOUR[normCategory(c) ?? "B"] ?? "#fff";
@@ -40,7 +40,7 @@ export default function BigScreen({ board }: { board: BoardData }) {
   return (
     <div
       className="fixed inset-0 z-[100] flex flex-col overflow-hidden text-white"
-      style={{ background: "radial-gradient(120% 90% at 30% 20%, #4d1310 0%, #2a0806 45%, #140302 100%)" }}
+      style={{ background: "radial-gradient(120% 90% at 30% 20%, #1f3a6e 0%, #14274e 45%, #0b1630 100%)" }}
     >
       <style>{`
         @keyframes bs-bump { 0% { transform: scale(1.12); color: #FFD27A } 100% { transform: scale(1); } }
@@ -66,11 +66,11 @@ export default function BigScreen({ board }: { board: BoardData }) {
         <section
           className="relative flex min-h-0 flex-col overflow-hidden rounded-[1vw] border p-[1.4vw]"
           style={{
-            borderColor: sold ? "#3fb27f" : live ? "rgba(240,86,74,.55)" : "rgba(255,255,255,.1)",
+            borderColor: sold ? "#3fb27f" : live ? "rgba(232,53,43,.6)" : "rgba(255,255,255,.1)",
             background: sold
               ? "linear-gradient(160deg, rgba(46,125,80,.45), rgba(20,60,40,.35))"
               : live
-                ? "linear-gradient(160deg, rgba(177,37,32,.32), rgba(87,15,12,.18))"
+                ? "linear-gradient(160deg, rgba(232,53,43,.24), rgba(20,39,78,.35))"
                 : "rgba(255,255,255,.04)",
           }}
         >
@@ -96,7 +96,7 @@ export default function BigScreen({ board }: { board: BoardData }) {
 function Header({ board }: { board: BoardData }) {
   const live = board.lot.status === "live";
   return (
-    <header className="flex shrink-0 items-center justify-between gap-[2vw] border-b-2 border-[#b12520] bg-black/30 px-[1.6vw] py-[0.7vw]">
+    <header className="flex shrink-0 items-center justify-between gap-[2vw] border-b-2 border-[#bc2423] bg-black/30 px-[1.6vw] py-[0.7vw]">
       <div className="flex items-center gap-[0.9vw]">
         <Image src={sdllCrest} alt="" className="h-[3.4vw] w-auto" priority />
         <div className="leading-none">
@@ -107,10 +107,10 @@ function Header({ board }: { board: BoardData }) {
 
       <div className="flex items-center gap-[1.2vw]">
         <span className="font-display text-[2.2vw] font-bold leading-none tracking-[0.04em]">
-          LOT <span className="text-[#F0564A]">#{Math.max(board.lotNo, 0)}</span>
+          LOT <span className="text-[#e8352b]">#{Math.max(board.lotNo, 0)}</span>
         </span>
         {live ? (
-          <span className="inline-flex items-center gap-[0.5vw] rounded-full bg-[#b12520] px-[1vw] py-[0.4vw] font-mono text-[0.85vw] font-semibold uppercase tracking-[0.2em]">
+          <span className="inline-flex items-center gap-[0.5vw] rounded-full bg-[#bc2423] px-[1vw] py-[0.4vw] font-mono text-[0.85vw] font-semibold uppercase tracking-[0.2em]">
             <span className="relative flex h-[0.6vw] w-[0.6vw]">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
               <span className="relative inline-flex h-[0.6vw] w-[0.6vw] rounded-full bg-white" />
@@ -163,7 +163,7 @@ function PlayerPanel({ board }: { board: BoardData }) {
           sizes="40vw"
         />
         {p.is_marquee && (
-          <span className="absolute left-[0.8vw] top-[0.8vw] rounded-full bg-[#E8B64C] px-[0.8vw] py-[0.3vw] font-mono text-[0.75vw] font-bold uppercase tracking-[0.16em] text-[#250201]">
+          <span className="absolute left-[0.8vw] top-[0.8vw] rounded-full bg-[#E8B64C] px-[0.8vw] py-[0.3vw] font-mono text-[0.75vw] font-bold uppercase tracking-[0.16em] text-[#0b1630]">
             ★ Marquee
           </span>
         )}
@@ -173,7 +173,7 @@ function PlayerPanel({ board }: { board: BoardData }) {
         <div className="flex flex-wrap items-center gap-[0.6vw]">
           {cat && (
             <span
-              className="rounded-[0.4vw] px-[0.8vw] py-[0.25vw] font-display text-[1.3vw] font-bold leading-none text-[#250201]"
+              className="rounded-[0.4vw] px-[0.8vw] py-[0.25vw] font-display text-[1.3vw] font-bold leading-none text-[#0b1630]"
               style={{ background: catColour(cat) }}
             >
               {catLabel(cat)}
@@ -206,10 +206,10 @@ function PlayerPanel({ board }: { board: BoardData }) {
         </div>
         <div className="mt-[0.6vw] flex items-center justify-between rounded-[0.6vw] bg-black/25 px-[1vw] py-[0.6vw] font-mono text-[0.8vw] uppercase tracking-[0.12em] text-white/60">
           <span>
-            Bat index <b className="ml-[0.3vw] text-[1.1vw] text-[#F0564A]">{n(p.bat_index, 1)}</b>
+            Bat index <b className="ml-[0.3vw] text-[1.1vw] text-[#e8352b]">{n(p.bat_index, 1)}</b>
           </span>
           <span>
-            Bowl index <b className="ml-[0.3vw] text-[1.1vw] text-[#F0564A]">{n(p.bowl_index, 1)}</b>
+            Bowl index <b className="ml-[0.3vw] text-[1.1vw] text-[#e8352b]">{n(p.bowl_index, 1)}</b>
           </span>
           <span>
             Overall <b className="ml-[0.3vw] text-[1.1vw] text-white">{n(p.overall_index, 1)}</b>
@@ -273,7 +273,7 @@ function BidPanel({ board, leader }: { board: BoardData; leader?: ScreenTeam }) 
     <>
       <p
         className="font-mono text-[1vw] font-semibold uppercase tracking-[0.3em]"
-        style={{ color: status === "sold" ? "#8FE3B5" : status === "unsold" ? "rgba(255,255,255,.55)" : "#F0564A" }}
+        style={{ color: status === "sold" ? "#8FE3B5" : status === "unsold" ? "rgba(255,255,255,.55)" : "#e8352b" }}
       >
         {label}
       </p>
@@ -289,7 +289,7 @@ function BidPanel({ board, leader }: { board: BoardData; leader?: ScreenTeam }) 
       <div className="mt-[1.1vw] flex min-h-[6vw] items-center gap-[1vw]">
         {leader ? (
           <>
-            <Crest name={leader.name} logo={leader.logo} size="5.6vw" ring={status === "sold" ? "#3fb27f" : "#F0564A"} />
+            <Crest name={leader.name} logo={leader.logo} size="5.6vw" ring={status === "sold" ? "#3fb27f" : "#e8352b"} />
             <div className="min-w-0 leading-none">
               <p className="font-mono text-[0.75vw] uppercase tracking-[0.25em] text-white/55">
                 {status === "sold" ? "Sold to" : "Leading"}
@@ -356,7 +356,7 @@ function UpNext({ board }: { board: BoardData }) {
         {board.upNext.map((p, i) => (
           <li key={p.id} className="flex items-center gap-[0.6vw]" style={{ opacity: 1 - i * 0.12 }}>
             <span
-              className="w-[2.4vw] shrink-0 rounded-[0.3vw] py-[0.15vw] text-center font-display text-[0.85vw] font-bold text-[#250201]"
+              className="w-[2.4vw] shrink-0 rounded-[0.3vw] py-[0.15vw] text-center font-display text-[0.85vw] font-bold text-[#0b1630]"
               style={{ background: catColour(p.auction_category) }}
             >
               {catLabel(p.auction_category)}
@@ -415,7 +415,7 @@ function Purses({
       {teams.map((t) => {
         const left = t.purse_total - t.spent;
         const hot = t.id === leaderId || t.id === soldTo;
-        const colour = t.id === soldTo ? "#3fb27f" : "#F0564A";
+        const colour = t.id === soldTo ? "#3fb27f" : "#e8352b";
         return (
           <div
             key={t.id}
@@ -449,12 +449,12 @@ function Purses({
 
 function Sponsors() {
   return (
-    <footer className="flex shrink-0 items-center gap-[2vw] bg-white px-[2.2vw] py-[0.6vw] text-[#250201]">
+    <footer className="flex shrink-0 items-center gap-[2vw] bg-white px-[2.2vw] py-[0.6vw] text-[#0b1630]">
       {[TITLE_SPONSOR, PRESENTED_BY].map((s) => {
         const sz = logoSize(s.logo, 5200, 46);
         return (
           <span key={s.name} className="flex shrink-0 items-center gap-[0.6vw]">
-            <span className="font-mono text-[0.5vw] uppercase leading-tight tracking-[0.2em] text-[#250201]/55">
+            <span className="font-mono text-[0.5vw] uppercase leading-tight tracking-[0.2em] text-[#0b1630]/55">
               {s.role.split(" ").map((w, i) => (
                 <span key={i} className="block">
                   {w}
@@ -465,7 +465,7 @@ function Sponsors() {
           </span>
         );
       })}
-      <span className="h-[2.4vw] w-px bg-[#250201]/15" />
+      <span className="h-[2.4vw] w-px bg-[#0b1630]/15" />
       <div className="flex min-w-0 flex-1 items-center justify-between gap-[1.2vw]">
         {PARTNERS.map((s) => {
           const sz = logoSize(s.logo, 2600, 34);

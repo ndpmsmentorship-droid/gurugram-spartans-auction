@@ -222,8 +222,8 @@ export default async function Home() {
         ]
       : profile?.role === "owner"
         ? [
-            { href: "/my-team", label: "My squad" },
-            { href: "/my-team/targets", label: "Targets" },
+            { href: "/owners", label: "Owners’ portal" },
+            { href: "/war-room?tab=plan", label: "Plan" },
             { href: "/auction", label: "Live board" },
             { href: "/schedule", label: "Schedule" },
           ]

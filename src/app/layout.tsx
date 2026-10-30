@@ -114,6 +114,8 @@ export default async function RootLayout({
   // everything else redirects to /login (see proxy.ts), so linking to it from
   // the masthead would just bounce them.
   const LIBRARY: NavItem = { href: "https://www.ndpms.in/spartans", label: "Ball Library", external: true };
+  // The hall screen opens in its own tab, ready to go full-screen on the projector.
+  const BIG_SCREEN: NavItem = { href: "/spartansscout/auction/screen", label: "Big Screen", external: true };
   const items: NavItem[] = USCL
     ? // USCL soft launch: only the pages that work for USCL owners.
       [
@@ -124,15 +126,14 @@ export default async function RootLayout({
       ]
     : profile?.role === "owner"
     ? // Owners live in their portal (/owners), which has its own tabs.
-      []
+      [BIG_SCREEN]
     : DEMO_MODE
     ? // Demo: every major page for everyone (locked pages bounce to Sign in).
       [
         { href: "/register", label: "Register" },
         { href: "/auction", label: "Live Board" },
-        { href: "/squad", label: "Squads" },
+        BIG_SCREEN,
         { href: "/schedule", label: "Schedule" },
-        { href: "/my-team", label: "My Squad" },
         { href: "/owners", label: "Owners" },
         { href: "/war-room", label: "War Room" },
         { href: "/scout", label: "Pool" },
@@ -143,7 +144,7 @@ export default async function RootLayout({
         { href: "/auction", label: "Live Board" },
         // Player registration is for the public, not for signed-in owners/admins.
         ...(profile ? [] : [{ href: "/register", label: "Register" }]),
-        { href: "/squad", label: "Squads" },
+        BIG_SCREEN,
         ...(profile ? [{ href: "/schedule", label: "Schedule" }] : []),
         ...(profile?.role === "admin" ? [{ href: "/scout", label: "Pool" }] : []),
         LIBRARY,

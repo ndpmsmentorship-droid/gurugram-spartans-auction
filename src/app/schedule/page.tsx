@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Match Schedule — Shanti Devi Legend’s League",
   description:
-    "Season 2 fixtures, weekend-by-weekend calendar and points tables for the 12 Shanti Devi Legend’s League teams.",
+    "Season 2: 45 matches over eight weekends from 16 Jan 2027, weekend-by-weekend calendar and points tables for the 14 Shanti Devi Legend’s League teams.",
 };
 
 export default async function SchedulePage() {

@@ -35,7 +35,7 @@ export function usePlanCalls(profileId: string) {
   const setCall = useCallback(
     (playerId: string, call: Call | null) => {
       const next = { ...read(profileId) };
-      if (!call || call === "hold") delete next[playerId];
+      if (!call) delete next[playerId];
       else next[playerId] = call;
       try {
         localStorage.setItem(keyOf(profileId), JSON.stringify(next));
@@ -49,6 +49,7 @@ export function usePlanCalls(profileId: string) {
   );
 
   const going = new Set(Object.keys(calls).filter((k) => calls[k] === "going"));
+  const held = new Set(Object.keys(calls).filter((k) => calls[k] === "hold"));
   const rejected = new Set(Object.keys(calls).filter((k) => calls[k] === "reject"));
-  return { calls, setCall, going, rejected };
+  return { calls, setCall, going, held, rejected };
 }

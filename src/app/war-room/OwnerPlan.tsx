@@ -18,7 +18,7 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
   const [team, setTeam] = useState(props.team);
   const [strategy, setStrategy] = useState<StrategyKey>("balanced");
   const [query, setQuery] = useState("");
-  const { calls, setCall, going, rejected } = usePlanCalls(props.profileId);
+  const { calls, setCall, going, held, rejected } = usePlanCalls(props.profileId);
 
   // Sales and top-ups land while the owner plans: refresh every 10 s.
   useEffect(() => {
@@ -76,6 +76,7 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
     return rated.filter((p) => !p.team_id && p.full_name.toLowerCase().includes(q)).slice(0, 8);
   }, [query, rated]);
   const ruledOut = rated.filter((p) => rejected.has(p.id));
+  const onHold = rated.filter((p) => held.has(p.id));
   const status = (p: Rated) => (p.team_id === team.id ? "bought" : going.has(p.id) ? "going" : "suggested");
 
   return (
@@ -130,7 +131,7 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
         <p className="text-[0.688rem] uppercase tracking-[0.14em] text-muted">To buy · {chosen.buys.length} players · {inr(chosen.cost)}</p>
         <ul className="mt-2 divide-y divide-line rounded-[12px] border border-line">
           {chosen.buys.map((p) => (
-            <Row key={p.id} p={p} call={calls[p.id] ?? "hold"} setCall={(c) => setCall(p.id, c)} />
+            <Row key={p.id} p={p} call={calls[p.id]} setCall={(c) => setCall(p.id, c)} />
           ))}
           {!chosen.buys.length && <li className="p-3 text-sm text-muted">Nothing left to buy: your squad is full or the purse is spent.</li>}
         </ul>
@@ -147,11 +148,22 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
         {found.length > 0 && (
           <ul className="mt-2 divide-y divide-line rounded-[12px] border border-line">
             {found.map((p) => (
-              <Row key={p.id} p={p} call={calls[p.id] ?? "hold"} setCall={(c) => setCall(p.id, c)} />
+              <Row key={p.id} p={p} call={calls[p.id]} setCall={(c) => setCall(p.id, c)} />
             ))}
           </ul>
         )}
       </section>
+
+      {onHold.length > 0 && (
+        <section className="mt-6">
+          <p className="text-[0.688rem] uppercase tracking-[0.14em] text-muted">On hold · {onHold.length}</p>
+          <ul className="mt-2 divide-y divide-line rounded-[12px] border border-line">
+            {onHold.map((p) => (
+              <Row key={p.id} p={p} call={calls[p.id]} setCall={(c) => setCall(p.id, c)} />
+            ))}
+          </ul>
+        </section>
+      )}
 
       {ruledOut.length > 0 && (
         <section className="mt-6">
@@ -194,7 +206,8 @@ function Legend({ c, l }: { c: string; l: string }) {
   );
 }
 
-function Row({ p, call, setCall }: { p: Rated; call: Call; setCall: (c: Call) => void }) {
+// Tapping the active call again clears it.
+function Row({ p, call, setCall }: { p: Rated; call?: Call; setCall: (c: Call | null) => void }) {
   return (
     <li className="p-3">
       <div className="flex items-start justify-between gap-2">
@@ -212,9 +225,10 @@ function Row({ p, call, setCall }: { p: Rated; call: Call; setCall: (c: Call) =>
           <button
             key={c}
             type="button"
-            onClick={() => setCall(c)}
+            onClick={() => setCall(call === c ? null : c)}
+            aria-pressed={call === c}
             className={`rounded-full border px-2 py-1.5 ${
-              call === c ? (c === "going" ? "border-red bg-red text-white" : c === "reject" ? "border-ink bg-ink text-white" : "border-ink") : "border-line text-muted"
+              call === c ? (c === "going" ? "border-red bg-red text-white" : c === "reject" ? "border-ink bg-ink text-white" : "border-gold bg-gold-fill text-gold") : "border-line text-muted"
             }`}
           >
             {l}

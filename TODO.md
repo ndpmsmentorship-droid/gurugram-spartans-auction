@@ -20,7 +20,10 @@ Dates now: auction Sat 12 Dec 2026 · opener Sat 16 Jan 2027 · final Sun 7 Mar 
 - [ ] Answer ready: who vets, how categories are set, what an owner can see about a player
 
 **2. Owners Portal + Ball Library — tour and demo**
-- [ ] Demo owner login (test franchise), seeded with a sample squad + targets; never use the live board
+- [x] Demo owner login: username `demo` → Gurugram Spartans (`scripts/demo-owner-login.mts`), 10 targets seeded; owners can't record, live board untouched — 30 Oct
+- [ ] After the meeting: `node scripts/demo-owner-login.mts --unlink` before Spartans' real owner login is linked
+- [ ] Leftover sale on the SLL-2 board: Amit Sehrawat → Gurugram Spartans ₹6,000 (shows in War Room) — Nikhil to say keep or undo
+- [ ] Purses in the app don't match the agreed ₹5 L (+₹1 L top-up): teams are ₹3 L (Spartans ₹4 L), max ₹4.5 L
 - [ ] Script: Scouting pool rankings → player profile → War Room (purse, max safe bid, open slots) → My Squad
 - [ ] Ball Library: one Season 1 match — ball-by-ball video, pitch map, wagon wheel
 - [ ] Backup: screen recording of the full demo in case Wi-Fi fails; laptop + HDMI + hotspot

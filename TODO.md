@@ -25,6 +25,9 @@ Dates now: auction Sat 12 Dec 2026 · opener Sat 16 Jan 2027 · final Sun 7 Mar 
 - [ ] Leftover sale on the SLL-2 board: Amit Sehrawat → Gurugram Knights ₹6,000 (shows in War Room) — Nikhil to say keep or undo
 - [x] 14 teams per the owners' meet deck (`scripts/sll2-teams-oct30.mts`): SLL 10, Diplomats 1/2, SLL 13/14, Gurugram Knights, Chennai Thalaiva, Punjab Royals; owners on the landing cards; every purse ₹5 L + ₹1 L top-up — 30 Oct
 - [x] Owners: /plan squad planner (5 strategies, XII field map, Going for him / Hold / Reject) + War Room live decision card (verdict, XII impact, ceiling, chance, Why/Risk/Alternative) + AI scout chat (off until ANTHROPIC_API_KEY is set on Vercel) — 30 Oct
+- [x] Owners' portal v2 (30 Oct): SLL-2 brand kit app-wide; new login; /owners home (franchise, purse, Plan / Live pool / War Room / AI scout cards); /war-room = one page with Plan · Live pool · War Room tabs, AI scout on every tab; Live pool = registrations as Selected / Under review / Rejected (no contact, DOB, Aadhaar, fee or vetting notes; 99999… test numbers hidden)
+- [ ] Header still shows 'Register' to signed-in owners on phones (DEMO_MODE nav) — decide
+- [ ] Big screen, operator pad, squad builder and player card still carry some hard-coded SLL-1 maroon
 - [ ] Auction rules in the app still SLL-1 style (squad 16–25, A+/A/B/Special, base 30K/20K/10K/5K); owners' meet deck says squad 18 (Legend 2 · 40+ 8 · 35+ 6 · 30+ 2), playing 12, bases Legend 15K · 40+ 20K · 35+ 35K · 30+ 35K, tender + chit draw at max — align War Room + planner
 - [ ] Planner/War Room pool is still the Sarda/SCCL stand-in pool; swap in vetted SLL-2 registrants (no-data players get flagged automatically)
 - [ ] Plan calls (going/hold/reject) live on the owner's device only; a plan_calls table would sync phone + laptop

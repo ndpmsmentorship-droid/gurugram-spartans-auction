@@ -3,7 +3,7 @@
 
 Reads the library's OPEN manifest (the one non-members see, so the Spartans
 lock holds) and keeps, per player, up to 10 YouTube-timed deliveries:
-wickets and sixes first, then fours, then anything else. Writes
+a batter's sixes and fours, a bowler's wickets and dots. Writes
 src/data/ball-reels.json keyed by a normalised name.
 
   python3 scripts/build-ball-reels.py [path/to/open/manifest.json]
@@ -28,19 +28,25 @@ def key(name):
     return re.sub(r"[^a-z]", "", re.sub(r"\(.*?\)", "", name.lower()))
 
 
-def rank(b):
-    if b.get("w"): return 0
-    if b.get("r") == 6: return 1
-    if b.get("r") == 4: return 2
-    return 3
+# Only the player's good moments: a batter's sixes and fours (never his
+# dismissal), a bowler's wickets and dots (never the boundaries he conceded).
+# None = leave the ball out.
+def rank(b, kind):
+    r, w = b.get("r"), b.get("w")
+    if kind == "batter":
+        if w: return None
+        return {6: 0, 4: 1}.get(r, 3)
+    if w: return 0
+    if r in (4, 6): return None
+    return 2 if r == 0 else 3
 
 
 def label(b, kind):
-    if b.get("w"): what = "Wicket"
-    elif b.get("r") == 6: what = "Six"
-    elif b.get("r") == 4: what = "Four"
-    else: what = "Batting" if kind == "batter" else "Bowling"
-    return what
+    r = b.get("r")
+    if kind == "batter":
+        return {6: "Six", 4: "Four"}.get(r, "Batting")
+    if b.get("w"): return "Wicket"
+    return "Dot ball" if r == 0 else "Bowling"
 
 
 players = json.loads(SRC.read_text())["players"]
@@ -50,9 +56,10 @@ for p in players:
     balls = []
     for i, b in enumerate(p["log"]):
         m = matches.get(b["mid"])
-        if b.get("t") is None or not m or not m.get("yt"):
+        rk = rank(b, p["kind"])
+        if b.get("t") is None or not m or not m.get("yt") or rk is None:
             continue
-        balls.append((rank(b), i, {
+        balls.append((rk, i, {
             "yt": m["yt"],
             "s": max(0, round(b["t"] - BEFORE, 1)),
             "e": round(b["t"] + AFTER, 1),

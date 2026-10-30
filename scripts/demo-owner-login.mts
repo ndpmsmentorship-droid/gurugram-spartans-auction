@@ -1,6 +1,6 @@
 // A demo owner login for showing the Owners Portal (owners' meeting, prospects).
 //
-//   node scripts/demo-owner-login.mts            # create + link to Gurugram Spartans
+//   node scripts/demo-owner-login.mts            # create + link to Gurugram Knights
 //   node scripts/demo-owner-login.mts --unlink   # free the team for its real owner
 //
 // Creates the auth user demo@owners.sdll (username "demo") with a profiles row
@@ -23,7 +23,7 @@ for (const l of fs.readFileSync(path.join(ROOT, ".env.local"), "utf8").split("\n
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const sb: any = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 
-const TEAM = "Gurugram Spartans";
+const TEAM = "Gurugram Knights";
 const EMAIL = "demo@owners.sdll";
 const WORDS = ["Cover", "Drive", "Yorker", "Sixer", "Googly", "Bouncer", "Century", "Spinner", "Sweep", "Hook"];
 const password = () => `${WORDS[randomInt(WORDS.length)]}-${WORDS[randomInt(WORDS.length)]}-${randomInt(1000, 9999)}`;

@@ -19,7 +19,7 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
   },
   {
     q: "Does registering guarantee a place in a team?",
-    a: "No. The league reviews every registration and grades players into categories. Twelve franchise owners then pick their squads at a live auction.",
+    a: "No. The league reviews every registration and grades players into categories. Franchise owners then pick their squads at a live auction.",
   },
   {
     q: "Which documents do I need?",

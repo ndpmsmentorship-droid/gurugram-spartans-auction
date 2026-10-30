@@ -23,6 +23,7 @@ import { getAuctionSeasonId } from "@/lib/auction/target";
 import { readLiveLot } from "@/lib/auction/read";
 import { LEAGUE } from "@/lib/league";
 import { PlayerPhoto } from "./register/PlayerCard";
+import TeamCrest from "./TeamCrest";
 import { FRANCHISES, findFranchise } from "./franchises";
 import { TITLE_SPONSOR, PRESENTED_BY, PARTNERS, logoSize } from "./sponsors";
 import { DEMO_MODE, PORTAL_PAGES } from "./site-config";
@@ -204,7 +205,10 @@ export default async function Home() {
   // when LEAGUE flips to "sdll".
   if (LEAGUE === "uscl") redirect((await getCurrentProfile()) ? "/war-room" : "/login?next=/war-room");
   const [profile, owners, live] = await Promise.all([getCurrentProfile(), getOwners(), getLiveNow()]);
-  const ownersOf = (team: string) => owners.filter((o) => o.team === team);
+  // Owners as named in the owners' meet deck; a photo where the player master has one.
+  const nameKey = (s: string) => s.toLowerCase().replace(/[^a-z]/g, "");
+  const ownersOf = (f: (typeof FRANCHISES)[number]) =>
+    f.owners.map((name) => ({ name, photo: owners.find((o) => nameKey(o.name) === nameKey(name))?.photo ?? null }));
 
   const portal =
     profile?.role === "admin"
@@ -474,14 +478,14 @@ export default async function Home() {
       {/* ---------- franchises ---------- */}
       <section className="mt-20 bg-wash py-16">
         <div className="mx-auto w-full max-w-[1200px] px-4 sm:px-7">
-          <Heading kicker="Season 2 · owners" lead="The twelve" accent="franchises" />
+          <Heading kicker="Season 2 · owners" lead="The fourteen" accent="franchises" />
           <p className="mt-3 max-w-2xl text-muted">Each franchise and the owners who will be bidding for it at the auction.</p>
           {(["A", "B"] as const).map((g) => (
             <div key={g} className="mt-8">
               <p className="label-mono">Group {g}</p>
-              <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+              <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
                 {FRANCHISES.filter((f) => f.group === g).map((f) => {
-                  const own = ownersOf(f.name);
+                  const own = ownersOf(f);
                   const champs = f.name === "ACCI" ? "★ SLL-1 champions" : f.name === "Goan Monks" ? "SLL-1 runners-up" : null;
                   return (
                     <li
@@ -494,7 +498,11 @@ export default async function Home() {
                             {champs}
                           </span>
                         )}
-                        <Image src={f.logo} alt="" className="h-24 w-24 object-contain transition duration-500 group-hover:scale-110" sizes="96px" />
+                        {f.logo ? (
+                          <Image src={f.logo} alt="" className="h-24 w-24 object-contain transition duration-500 group-hover:scale-110" sizes="96px" />
+                        ) : (
+                          <TeamCrest name={f.name} size={96} />
+                        )}
                       </div>
                       <div className="flex flex-1 flex-col gap-2 p-3">
                         <p className="font-display text-base uppercase leading-tight">{f.name}</p>

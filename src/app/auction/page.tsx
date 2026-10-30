@@ -34,7 +34,7 @@ export default async function AuctionPage() {
 
   // A card only earns a slot if there is a squad behind it: a borrowed SARDA
   // squad (source_team_id) or players genuinely bought in this auction. Lucknow
-  // Strikers and Bhojpuri Dabangs have no SARDA counterpart, so they sit out the
+  // Strikers and SLL 13 (was Bhojpuri Dabangs) have no SARDA counterpart, so they sit out the
   // board while staying real franchises everywhere else (they keep their
   // fixtures and points-table rows on /schedule under their own names).
   const boardTeams = ((teams ?? []) as any[]).filter(

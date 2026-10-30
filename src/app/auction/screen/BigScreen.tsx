@@ -10,6 +10,7 @@ import { TITLE_SPONSOR, PRESENTED_BY, PARTNERS, logoSize } from "@/app/sponsors"
 import sdllCrest from "@/app/brand/crest.png";
 import playfulWhite from "@/app/brand/playful-ventures-white.png";
 import Crest from "./Crest";
+import { CardThenReel } from "./BallReel";
 
 // The hall screen, built from the USCL dry run's official screen (4 Oct):
 // header with the lot number, the player on the block, the bid, every purse,
@@ -55,7 +56,11 @@ export default function BigScreen({ board }: { board: BoardData }) {
       {/* ---- main: player · bid · queue ---- */}
       <div className="grid min-h-0 flex-1 gap-[1.2vw] px-[1.6vw] pt-[1.1vw]" style={{ gridTemplateColumns: "1.35fr 1fr 0.78fr" }}>
         <section className="relative min-h-0 overflow-hidden rounded-[1vw] border border-white/10 bg-white/[0.04]">
-          {onBlock && player ? <PlayerPanel key={player.id} board={board} /> : <Waiting board={board} />}
+          {onBlock && player ? (
+            <CardThenReel key={player.id} name={player.full_name} card={<PlayerPanel board={board} />} />
+          ) : (
+            <Waiting board={board} />
+          )}
         </section>
 
         <section

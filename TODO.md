@@ -59,6 +59,9 @@ Dates now: auction Sat 12 Dec 2026 · opener Sat 16 Jan 2027 · final Sun 7 Mar 
 - [ ] Re-export "SDLL Season 2 — Team Ownership.pdf" (still says 2 Jan auction and 3–4 Apr finals)
 - [ ] Sign-up sheet: owner name, team, contact, payment date
 
+- [ ] Big screen Ball Library reel (30 Oct): `src/data/ball-reels.json` is a snapshot. Re-run `python3 scripts/build-ball-reels.py` after library merges (and after `open-library.mjs`) so new clips reach the hall screen. Uses the OPEN manifest, so Spartans-locked matches never show.
+- [ ] Decide: run big screen + admin on a local machine on auction night (owners' portal stays online). Demo stays online for now.
+
 ## Domain and hosting (Playful Ventures)
 Decided 27 Oct: domain **playfulventures.co.in** (bought on GoDaddy). Root + www = new light site
 (Vercel project `playful-site`, repo ~/Claude/playful-site: landing + registration only, static, bom1);

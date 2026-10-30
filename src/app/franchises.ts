@@ -14,7 +14,7 @@ import punjabRoyals from "./brand/teams/punjab-royals-legends.png";
 export type Franchise = { name: string; group: "A" | "B"; logo?: StaticImageData; owners: string[] };
 
 export const FRANCHISES: Franchise[] = [
-  { name: "ACCI", group: "A", logo: acci, owners: ["Russel A.", "Vishal Salgy"] },
+  { name: "ACCI", group: "A", logo: acci, owners: ["Russel A.", "Vishal Salgy", "Pardeep Mahalawat"] },
   { name: "Bengal Tigers", group: "A", logo: bengalTigers, owners: ["Dipak Singh", "K. Raj Bhansali"] },
   { name: "Chennai Thalaiva", group: "A", logo: chennaiThalaivas, owners: ["Vasant Kumar"] },
   { name: "Lucknow Strikers", group: "A", logo: lucknowStrikers, owners: ["Luvkesh", "Dr. Rohan"] },

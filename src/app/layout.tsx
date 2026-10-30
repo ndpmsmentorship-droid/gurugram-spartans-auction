@@ -122,6 +122,9 @@ export default async function RootLayout({
         LIBRARY,
         ...(profile?.role === "admin" ? [{ href: "/admin/auction", label: "Admin" }] : []),
       ]
+    : profile?.role === "owner"
+    ? // Owners live in their portal (/owners), which has its own tabs.
+      []
     : DEMO_MODE
     ? // Demo: every major page for everyone (locked pages bounce to Sign in).
       [
@@ -140,18 +143,8 @@ export default async function RootLayout({
         { href: "/auction", label: "Live Board" },
         // Player registration is for the public, not for signed-in owners/admins.
         ...(profile ? [] : [{ href: "/register", label: "Register" }]),
-        // The Squads showcase is the single Gurugram Spartans team page — hidden
-        // from owners, who have their own My Squad instead.
-        ...(profile?.role === "owner" ? [] : [{ href: "/squad", label: "Squads" }]),
+        { href: "/squad", label: "Squads" },
         ...(profile ? [{ href: "/schedule", label: "Schedule" }] : []),
-        ...(profile?.role === "owner"
-          ? [
-              { href: "/owners", label: "Owners" },
-              { href: "/war-room", label: "War Room" },
-              { href: "/my-team", label: "My Squad" },
-              { href: "/my-team/targets", label: "Targets" },
-            ]
-          : []),
         ...(profile?.role === "admin" ? [{ href: "/scout", label: "Pool" }] : []),
         LIBRARY,
         ...(profile?.role === "admin" ? [{ href: "/admin/auction", label: "Admin" }] : []),

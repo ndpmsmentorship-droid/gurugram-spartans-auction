@@ -60,7 +60,12 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
 
   const goingKey = [...going].sort().join(","), rejectedKey = [...rejected].sort().join(",");
   const plans = useMemo(
-    () => STRATEGIES.map((s) => ({ ...s, plan: buildPlan(s.key, { rated, mine, purseLeft, rules: RULES, going, rejected }) })),
+    () => {
+      const all = STRATEGIES.map((s) => ({ ...s, plan: buildPlan(s.key, { rated, mine, purseLeft, rules: RULES, going, rejected }) }));
+      // "Balanced" promises the strongest XII, so it takes whichever squad scores highest.
+      const top = all.reduce((a, b) => (b.plan.xii.score > a.plan.xii.score ? b : a));
+      return all.map((s) => (s.key === "balanced" && top.plan.xii.score > s.plan.xii.score ? { ...s, plan: { ...top.plan, key: s.key } } : s));
+    },
     [rated, mine, purseLeft, goingKey, rejectedKey], // eslint-disable-line react-hooks/exhaustive-deps
   );
   const chosen = plans.find((p) => p.key === strategy)!.plan;

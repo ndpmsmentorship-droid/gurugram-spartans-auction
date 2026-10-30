@@ -210,19 +210,19 @@ function FixtureTable({ rows, side }: { rows: FixtureRow[]; side: SideFn }) {
         return (
           <li key={f.id} className="px-3.5 py-3">
             <div className="flex items-center justify-between gap-2 text-[0.75rem] text-muted">
-              <span className="num">
-                #{f.match_no} &middot; {f.day_name?.slice(0, 3)} {formatDate(f.match_date)} &middot; {formatSlot(f.slot)}
+              <span className="num whitespace-nowrap">
+                #{f.match_no} &middot; {f.day_name?.slice(0, 3)} {formatDate(f.match_date).replace(/-\d{4}$/, "").replace("-", " ")} &middot; {formatSlot(f.slot)}
               </span>
               <StageBadge f={f} />
             </div>
             <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-[0.875rem]">
               <span className="flex min-w-0 items-center gap-1.5">
                 <TeamCrest name={home.name} logoUrl={home.logoUrl} size={22} />
-                <span className={`truncate ${home.resolved ? "font-medium" : "italic text-muted"}`}>{home.name}</span>
+                <span className={`leading-tight ${home.resolved ? "font-medium" : "italic text-muted"}`}>{home.name}</span>
               </span>
               <span className="text-faint">v</span>
               <span className="flex min-w-0 items-center justify-end gap-1.5 text-right">
-                <span className={`truncate ${away.resolved ? "font-medium" : "italic text-muted"}`}>{away.name}</span>
+                <span className={`leading-tight ${away.resolved ? "font-medium" : "italic text-muted"}`}>{away.name}</span>
                 <TeamCrest name={away.name} logoUrl={away.logoUrl} size={22} />
               </span>
             </div>

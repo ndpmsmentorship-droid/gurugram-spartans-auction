@@ -14,7 +14,7 @@ const LABELS: Record<string, string> = {
   "/my-team": "My Squad",
   "/my-team/targets": "Targets",
   "/war-room": "War Room",
-  "/plan": "Plan",
+  "/owners": "Owners’ portal",
   "/scout": "Player Pool",
   "/scout/compare": "Compare",
   "/scout/import": "Import",

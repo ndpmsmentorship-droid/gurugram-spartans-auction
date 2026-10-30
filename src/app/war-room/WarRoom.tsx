@@ -19,7 +19,6 @@ import LibraryPanel from "./LibraryPanel";
 import { LEAGUE } from "@/lib/league";
 import sdllCrest from "@/app/brand/crest.png";
 import UsclMatch from "./UsclMatch";
-import AIChat from "./AIChat";
 import DecisionCard from "./DecisionCard";
 import { rateAll, liveVerdict } from "@/lib/auction/planner";
 import { usePlanCalls } from "@/lib/auction/plan-calls";
@@ -214,6 +213,8 @@ export default function WarRoom(props: {
   teams: WRTeam[];
   players: WRPlayer[];
   initialLot: Lot;
+  /** the portal's AI scout reads the War Room through this */
+  onSnapshot?: (read: () => string) => void;
 }) {
   const [players, setPlayers] = useState(props.players);
   // purses change mid-auction (top-ups), so teams are live state too
@@ -537,6 +538,11 @@ export default function WarRoom(props: {
       `Available pool, best ${pool.length} of ${available.length} by overall index (name | category | role | bat | bowl | index | batting | bowling | specialist | price | note):\n${pool.map(row).join("\n")}`,
     ].join("\n\n");
   };
+  const { onSnapshot } = props;
+  useEffect(() => {
+    onSnapshot?.(aiSnapshot);
+  });
+
   // USCL Right to Match: who can still take a player off us after the hammer.
   const rtm = useMemo(() => rtmState(teams, all), [teams, all]);
   const rtmAgainstUs = rtm.against.get(myTeamId) ?? 0;
@@ -609,7 +615,7 @@ export default function WarRoom(props: {
       : [["A+", `max ${R.cap["A+"]}`], ["A", `max ${R.cap.A}`], ["B", `max ${R.cap.B}`], ["Special", `max ${R.cap.Special}`]];
 
   return (
-    <main className="mx-auto w-full max-w-[1280px] flex-1 px-3 py-5 sm:px-6">
+    <div className="mx-auto w-full max-w-[1280px]">
       {/* header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -1245,8 +1251,7 @@ export default function WarRoom(props: {
           star={star(viewId)}
         />
       )}
-      <AIChat snapshot={aiSnapshot} />
-    </main>
+    </div>
   );
 }
 

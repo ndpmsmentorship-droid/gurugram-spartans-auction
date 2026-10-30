@@ -205,6 +205,8 @@ export default async function Home() {
   // when LEAGUE flips to "sdll".
   if (LEAGUE === "uscl") redirect((await getCurrentProfile()) ? "/war-room" : "/login?next=/war-room");
   const [profile, owners, live] = await Promise.all([getCurrentProfile(), getOwners(), getLiveNow()]);
+  // Owners have their own home: the portal.
+  if (profile?.role === "owner") redirect("/owners");
   // Owners as named in the owners' meet deck; a photo where the player master has one.
   const nameKey = (s: string) => s.toLowerCase().replace(/[^a-z]/g, "");
   const ownersOf = (f: (typeof FRANCHISES)[number]) =>

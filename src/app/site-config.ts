@@ -11,8 +11,8 @@ export type PortalPage = { href: string; label: string; what: string; access: "P
 export const PORTAL_PAGES: PortalPage[] = [
   { href: "/register", label: "Player registration", what: "Find your profile by mobile number, add kit details, or register as new.", access: "Public" },
   { href: "/auction", label: "Live auction board", what: "The player on the block and every team's purse and squad, live.", access: "Public" },
-  { href: "/war-room", label: "War Room", what: "Owner's live-auction screen: purse, max safe bid, squad gaps, best fits, who can still bid.", access: "Owner" },
-  { href: "/plan", label: "Plan", what: "Owner's squad planner: pick a strategy, see the best squad the purse can buy, mark players going for / hold / reject.", access: "Owner" },
+  { href: "/war-room", label: "War Room", what: "One page for the auction: Plan (squad strategies), Live pool (registrations as they're vetted) and the live War Room with verdicts and the AI scout.", access: "Owner" },
+  { href: "/owners", label: "Owners’ portal", what: "An owner's home: franchise, purse and the way into Plan, Live pool, War Room and the AI scout.", access: "Owner" },
   { href: "/squad", label: "Squads", what: "The Gurugram Spartans squad showcase.", access: "Public" },
   { href: "/schedule", label: "Schedule & points table", what: "34 fixtures by weekend, points tables and an Excel download.", access: "Signed in" },
   { href: "/my-team", label: "My squad", what: "An owner's roster, role mix and marked players.", access: "Owner" },

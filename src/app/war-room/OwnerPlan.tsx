@@ -74,9 +74,9 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
   const status = (p: Rated) => (p.team_id === team.id ? "bought" : going.has(p.id) ? "going" : "suggested");
 
   return (
-    <main className="mx-auto w-full max-w-[520px] flex-1 px-4 pb-24 pt-4">
+    <div className="mx-auto w-full max-w-[520px] pb-24">
       {/* budget strip */}
-      <div className="sticky top-0 z-10 -mx-4 border-b border-line bg-surface/95 px-4 py-3 backdrop-blur">
+      <div className="rounded-[12px] border border-line bg-surface px-4 py-3">
         <p className="text-[0.688rem] uppercase tracking-[0.14em] text-muted">{team.name}</p>
         <div className="mt-1 grid grid-cols-4 gap-2">
           <Stat k="To spend" v={inr(purseLeft)} />
@@ -168,7 +168,7 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
         &ldquo;No data yet&rdquo; or &ldquo;Little data&rdquo; are rated at their category&rsquo;s median until their numbers come in. Your calls stay on this
         device and are private to your team.
       </p>
-    </main>
+    </div>
   );
 }
 

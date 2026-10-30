@@ -5,20 +5,22 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getAuctionSeasonId, AUCTION_DIVISIONS } from "@/lib/auction/target";
 import { readLiveLot } from "@/lib/auction/read";
 import { LEAGUE_NAME, LEAGUE } from "@/lib/league";
-import WarRoom, { type WRPlayer, type WRTeam } from "./WarRoom";
+import { type WRPlayer, type WRTeam } from "./WarRoom";
+import OwnerPortal, { type PortalTab } from "./OwnerPortal";
 import { selectAll } from "@/lib/supabase/select-all";
 
 export const metadata: Metadata = { title: "War Room" };
 export const dynamic = "force-dynamic";
 
-// One screen for an owner during a live auction: purse, category slots, squad
-// gaps with the best available fits, the player on the block and who can
-// still afford him. Everything after this first load is computed in the
-// browser, and sales arrive over realtime — no reloads mid-auction.
-export default async function WarRoomPage({ searchParams }: { searchParams: Promise<{ team?: string }> }) {
+// The owners' portal, one page: Plan (squad strategies), Live pool (Season 2
+// registrations as they're vetted) and the War Room for auction night — purse,
+// category slots, squad gaps, the player on the block and who can still afford
+// him. Everything after this first load is computed in the browser, and sales
+// arrive over realtime — no reloads mid-auction.
+export default async function WarRoomPage({ searchParams }: { searchParams: Promise<{ team?: string; tab?: string }> }) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login?next=/war-room");
-  const { team: teamParam } = await searchParams;
+  const { team: teamParam, tab } = await searchParams;
 
   const seasonId = await getAuctionSeasonId();
   const sb = createAdminClient() as unknown as { from: (t: string) => any }; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -41,18 +43,28 @@ export default async function WarRoomPage({ searchParams }: { searchParams: Prom
     return <main className="mx-auto max-w-[900px] px-4 py-16 text-muted">No teams in the active season yet.</main>;
   }
 
+  const players = ((pool ?? []) as WRPlayer[]).filter((p) => !p.is_rejected);
   return (
-    <WarRoom
-      league={LEAGUE}
-      leagueName={LEAGUE_NAME[LEAGUE]}
-      seasonId={seasonId ?? ""}
-      myTeamId={mine.id}
-      canSwitch={profile.role === "admin"}
-      profileId={profile.id}
-      canRecord={profile.role === "admin"}
-      teams={list.map(({ id, name, purse_total, purse_max, logo_url }) => ({ id, name, purse_total, purse_max, logo_url }))}
-      players={((pool ?? []) as WRPlayer[]).filter((p) => !p.is_rejected)}
-      initialLot={{ player_id: lot.status === "live" ? lot.player_id : null, current_bid: lot.current_bid, base_price: lot.base_price, leading_team_id: lot.leading_team_id }}
+    <OwnerPortal
+      tab={(["plan", "pool", "live"] as PortalTab[]).includes(tab as PortalTab) ? (tab as PortalTab) : "live"}
+      warRoom={{
+        league: LEAGUE,
+        leagueName: LEAGUE_NAME[LEAGUE],
+        seasonId: seasonId ?? "",
+        myTeamId: mine.id,
+        canSwitch: profile.role === "admin",
+        profileId: profile.id,
+        canRecord: profile.role === "admin",
+        teams: list.map(({ id, name, purse_total, purse_max, logo_url }) => ({ id, name, purse_total, purse_max, logo_url })),
+        players,
+        initialLot: { player_id: lot.status === "live" ? lot.player_id : null, current_bid: lot.current_bid, base_price: lot.base_price, leading_team_id: lot.leading_team_id },
+      }}
+      plan={{
+        seasonId: seasonId ?? "",
+        profileId: profile.id,
+        team: { id: mine.id, name: mine.name, purse_total: mine.purse_total, purse_max: mine.purse_max ?? null },
+        players,
+      }}
     />
   );
 }

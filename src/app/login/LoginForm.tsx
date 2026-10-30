@@ -51,7 +51,7 @@ export default function LoginForm({ next, title = "Spartans Scout", subtitle = "
       </form>
 
       <p className="mt-4 text-xs text-muted">
-        Access is invite-only. Ask the admin to set you up.
+        Access is for franchise owners. Ask the league office for your login.
       </p>
     </div>
   );

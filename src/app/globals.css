@@ -6,44 +6,44 @@
    owner should see exactly the same thing. Do not reintroduce
    prefers-color-scheme or [data-theme] blocks here.
 
-   Brand book (Playful Ventures p.6): EBEBEB / B12520 / 570F0C / 250201.
-   Blue and gold appear ONLY as data encodings (U35 age band, legend /
-   marquee) exactly as the approved design comps use them.
+   SLL-2 brand kit (same tokens as playfulventures.co.in): midnight
+   0B1630, floodlight ivory FFF8EC, crest crimson BC2423, royal 1F4A9A.
+   Gold appears only as a data encoding (legend / marquee).
 ================================================================== */
 
 :root {
-  --background: #ffffff;
-  --wash: #f7f1f0; /* table header band, quiet fills */
+  --background: #fff8ec;
+  --wash: #eef3fb; /* table header band, quiet fills */
   --surface: #ffffff; /* cards */
-  --tile: #fbf7f6; /* stat tiles inside a card */
-  --chip: rgba(37, 2, 1, 0.045);
+  --tile: #f6f9fe; /* stat tiles inside a card */
+  --chip: rgba(11, 22, 48, 0.05);
   /* Opaque, NOT a translucent chip: the pinned first column paints its own
      background over the row's, so any alpha here composites twice and leaves a
      visible seam down the table. */
-  --zebra: #fbf6f5;
+  --zebra: #f6f9fe;
 
   /* blush wash used on team-card headers and the player hero */
-  --blush-a: #f6e0de;
-  --blush-b: #fdf8f7;
+  --blush-a: #dce8fa;
+  --blush-b: #f3f7fd;
 
-  --ink: #250201;
-  --foreground: #250201;
-  --muted: rgba(37, 2, 1, 0.6);
-  --faint: rgba(37, 2, 1, 0.6); /* .label-mono lives here — must clear AA at ~9.5px */
+  --ink: #0b1630;
+  --foreground: #0b1630;
+  --muted: rgba(11, 22, 48, 0.68);
+  --faint: rgba(11, 22, 48, 0.62); /* .label-mono lives here — must clear AA at ~9.5px */
 
-  --line: rgba(37, 2, 1, 0.1);
-  --line2: rgba(37, 2, 1, 0.2);
-  --border: rgba(37, 2, 1, 0.1);
+  --line: rgba(11, 22, 48, 0.1);
+  --line2: rgba(11, 22, 48, 0.2);
+  --border: rgba(11, 22, 48, 0.1);
 
-  --red: #b12520;
-  --red-deep: #8e1a16;
-  --maroon: #570f0c;
-  --accent: #b12520;
-  --accent-text: #8e1a16;
+  --red: #bc2423;
+  --red-deep: #bc2423;
+  --maroon: #6b1712;
+  --accent: #e8352b;
+  --accent-text: #bc2423;
 
   /* masthead + full-bleed hero bands */
-  --header-a: #4d1310;
-  --header-b: #360b09;
+  --header-a: #14274e;
+  --header-b: #0b1630;
 
   /* data encodings — never brand colours */
   --gold: #8c6008; /* legend / marquee text */
@@ -51,13 +51,18 @@
   --gold-line: #ddbd78;
   --highlight: #8c6008;
   --highlight-ink: #8c6008;
-  --u35: #40639e; /* under-35 age band */
-  --u35-fill: #dde6f5;
+  --u35: #1f4a9a; /* under-35 age band */
+  --u35-fill: #dce8fa;
   --up: #2e7d50;
-  --down: #b12520;
+  --down: #bc2423;
 
-  --elev: 0 1px 2px rgba(37, 2, 1, 0.05), 0 8px 24px -14px rgba(37, 2, 1, 0.25);
-  --elev-sm: 0 1px 2px rgba(37, 2, 1, 0.06);
+  --elev: 0 1px 2px rgba(11, 22, 48, 0.06), 0 10px 28px -14px rgba(11, 22, 48, 0.3);
+  --elev-sm: 0 1px 2px rgba(11, 22, 48, 0.07);
+  /* SLL-2 brand kit (playfulventures.co.in), 30 Oct 2026 */
+  --legend: #e8352b;
+  --royal: #1f4a9a;
+  --steel: #8fa3c7;
+  --silver: #e2e2e4;
 }
 
 @theme inline {

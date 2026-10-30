@@ -31,7 +31,7 @@ export async function signIn(
   }
 
   // When the user came straight to /login (no deep-link), send owners to their
-  // squad and everyone else to the pool.
+  // portal and everyone else to the pool.
   let dest = next;
   if (next === "/scout" && user) {
     const { data: profile } = await supabase
@@ -39,7 +39,7 @@ export async function signIn(
       .select("role")
       .eq("id", user.id)
       .maybeSingle();
-    if (profile?.role === "owner") dest = "/my-team";
+    if (profile?.role === "owner") dest = "/owners";
   }
 
   redirect(dest);

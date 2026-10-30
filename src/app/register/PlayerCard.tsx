@@ -51,7 +51,7 @@ export function PlayerPhoto({
 
   return (
     <div
-      className={`relative overflow-hidden bg-gradient-to-b from-[#4d1310] to-[#250201] ${className}`}
+      className={`relative overflow-hidden bg-gradient-to-b from-[var(--header-a)] to-[var(--header-b)] ${className}`}
       style={{ containerType: "inline-size" }}
     >
       {src && !broken ? (

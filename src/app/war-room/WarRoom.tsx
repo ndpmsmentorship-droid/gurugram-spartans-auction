@@ -20,6 +20,9 @@ import { LEAGUE } from "@/lib/league";
 import sdllCrest from "@/app/brand/crest.png";
 import UsclMatch from "./UsclMatch";
 import AIChat from "./AIChat";
+import DecisionCard from "./DecisionCard";
+import { rateAll, liveVerdict } from "@/lib/auction/planner";
+import { usePlanCalls } from "@/lib/auction/plan-calls";
 import { clipsUrl } from "@/lib/scout/clips";
 import { rtmState, rtmThreats, RTM_MAX_AGAINST } from "@/lib/auction/rtm";
 
@@ -544,6 +547,26 @@ export default function WarRoom(props: {
   const lostToRtm = all.filter((p) => p.rtm_against === myTeamId && p.acquired === "rtm");
   const fills = onBlock ? needs.filter((n) => n.have < n.target && n.test(onBlock)).map((n) => n.label) : [];
 
+  // ---- live verdict: the planner's view of the player on the block ----
+  const { going, rejected } = usePlanCalls(props.profileId);
+  const planRules = { squadMin: R.squadMin, squadMax: R.squadMax, maxBid: R.maxBid, base: R.base, cap: R.cap };
+  const rated = useMemo(() => rateAll(all.map((p) => ({ ...p, cat: p.cat })), planRules), [all]); // eslint-disable-line react-hooks/exhaustive-deps
+  const ratedById = useMemo(() => new Map(rated.map((p) => [p.id, p])), [rated]);
+  const verdict = useMemo(() => {
+    const p = onBlock ? ratedById.get(onBlock.id) : null;
+    if (!p || p.team_id) return null;
+    const rivalCaps = rivals.map(({ t, s }) => Math.max(0, t.purse_total - s.spent - Math.max(0, R.squadMin - s.size - 1) * R.base.B));
+    return {
+      p,
+      v: liveVerdict(
+        p,
+        nextBid,
+        { rated, mine: rated.filter((r) => r.team_id === myTeamId), purseLeft, rules: planRules, going, rejected },
+        { maxSafe, slotOpen: catRoom(me, onBlock!.cat, onBlock!.age), gaps: fills, rivalCaps },
+      ),
+    };
+  }, [onBlock?.id, nextBid, rated, myTeamId, purseLeft, maxSafe, going.size, rejected.size]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ---- pool browser state ----
   const [q, setQ] = useState("");
   const [tagF, setTagF] = useState<string>("");
@@ -884,6 +907,7 @@ export default function WarRoom(props: {
               </div>
 
               <StatGrid p={onBlock} />
+              {verdict && <DecisionCard p={verdict.p} v={verdict.v} />}
 
               {fills.length > 0 && (
                 <p className="mt-3 rounded-[10px] bg-[color-mix(in_srgb,var(--up)_10%,transparent)] px-3 py-2 text-sm text-up">

@@ -131,6 +131,7 @@ export default async function RootLayout({
         { href: "/schedule", label: "Schedule" },
         { href: "/my-team", label: "My Squad" },
         { href: "/war-room", label: "War Room" },
+        { href: "/plan", label: "Plan" },
         { href: "/scout", label: "Pool" },
         { href: "/admin/auction", label: "Admin" },
         LIBRARY,
@@ -146,6 +147,7 @@ export default async function RootLayout({
         ...(profile?.role === "owner"
           ? [
               { href: "/war-room", label: "War Room" },
+              { href: "/plan", label: "Plan" },
               { href: "/my-team", label: "My Squad" },
               { href: "/my-team/targets", label: "Targets" },
             ]

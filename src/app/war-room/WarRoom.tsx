@@ -19,6 +19,7 @@ import LibraryPanel from "./LibraryPanel";
 import { LEAGUE } from "@/lib/league";
 import sdllCrest from "@/app/brand/crest.png";
 import UsclMatch from "./UsclMatch";
+import AIChat from "./AIChat";
 import { clipsUrl } from "@/lib/scout/clips";
 import { rtmState, rtmThreats, RTM_MAX_AGAINST } from "@/lib/auction/rtm";
 
@@ -507,6 +508,32 @@ export default function WarRoom(props: {
         .sort(byIdx("overall_index"))
         .slice(0, 3)
     : [];
+  // What the AI scout sees: built only when an owner asks, from the same live
+  // numbers as the tiles above. The pool is trimmed to the best 150 still available.
+  const aiSnapshot = () => {
+    const n = (v: number | null | undefined) => (v == null ? "-" : String(Math.round(v * 10) / 10));
+    const row = (p: Enriched) =>
+      [p.full_name, catLabel(p.cat), p.primary_role ?? "-", p.batting_style ?? "-", p.tag ?? p.bowling_style ?? "-",
+       `idx ${n(p.overall_index)} (bat ${n(p.bat_index)}, bowl ${n(p.bowl_index)})`,
+       `${p.bat_matches ?? 0}m ${p.runs ?? 0}r avg ${n(p.bat_avg)} sr ${n(p.bat_sr)}`,
+       `${p.wickets ?? 0}w econ ${n(p.economy)}`,
+       [p.deathSpec && "death", p.ppSpec && "powerplay", p.is_keeper && "keeper"].filter(Boolean).join("/") || "",
+       affordable(p) ? `base ${inr(R.base[p.cat])}` : "can't buy (slot full or over max safe bid)",
+       wish.has(p.id) ? "★ wishlist" : ""].filter(Boolean).join(" | ");
+    const cats = (Object.keys(R.cap) as AuctionCategory[]).map((c) => `${catLabel(c)} ${me.cats[c]}/${R.cap[c]} (base ${inr(R.base[c])})`).join(", ");
+    const pool = available.slice().sort(byIdx("overall_index")).slice(0, 150);
+    return [
+      `Team: ${myTeam.name}. Purse left ${inr(purseLeft)} of ${inr(myTeam.purse_total)}; top-up still available ${inr(topUpsLeft)}. Max safe bid ${inr(maxSafe)} (keeps ${Math.max(0, stillNeed - 1)} slots at ${inr(R.base.B)}).`,
+      `Squad ${me.size} (min ${R.squadMin}, max ${R.squadMax}). Category slots: ${cats}.`,
+      `Our squad:\n${mine.map((p) => `- ${p.full_name} | ${catLabel(p.cat)} | ${p.primary_role ?? "-"} | ${inr(p.sold_price ?? 0)}`).join("\n") || "- none yet"}`,
+      `Squad gaps:\n${needs.map((x) => `- ${x.label}: have ${x.have} of ${x.target}${x.picks.length ? `; best affordable: ${x.picks.map((p) => p.full_name).join(", ")}` : ""}`).join("\n")}`,
+      onBlock
+        ? `On the block: ${onBlock.full_name} (${catLabel(onBlock.cat)}). Current bid ${inr(bid)}, next bid ${inr(nextBid)}${lot.leading_team_id ? `, leading: ${teams.find((t) => t.id === lot.leading_team_id)?.name ?? "?"}` : ""}. Rivals who can still afford him: ${rivals.map(({ t, s }) => `${t.name} (${inr(t.purse_total - s.spent)} left)`).join(", ") || "none"}. Similar affordable alternatives: ${alternatives.map((p) => p.full_name).join(", ") || "none"}.\n${row(onBlock)}`
+        : "No player on the block right now.",
+      `Wishlist: ${all.filter((p) => wish.has(p.id)).map((p) => `${p.full_name}${p.team_id ? " (gone)" : ""}`).join(", ") || "empty"}`,
+      `Available pool, best ${pool.length} of ${available.length} by overall index (name | category | role | bat | bowl | index | batting | bowling | specialist | price | note):\n${pool.map(row).join("\n")}`,
+    ].join("\n\n");
+  };
   // USCL Right to Match: who can still take a player off us after the hammer.
   const rtm = useMemo(() => rtmState(teams, all), [teams, all]);
   const rtmAgainstUs = rtm.against.get(myTeamId) ?? 0;
@@ -1194,6 +1221,7 @@ export default function WarRoom(props: {
           star={star(viewId)}
         />
       )}
+      <AIChat snapshot={aiSnapshot} />
     </main>
   );
 }

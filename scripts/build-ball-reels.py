@@ -18,6 +18,11 @@ CAP = 10
 BEFORE, AFTER = 3, 4.5  # same window as the library's clip montage
 
 
+# Library cards filed under a CricHeroes handle instead of the player's name
+# (checked against player_master's cricheroes_link).
+ALIAS = {"@Vinny": "Vishal Dullu"}
+
+
 def key(name):
     # Same rule as src/app/auction/reel/route.ts: drop "(nick)" and digits.
     return re.sub(r"[^a-z]", "", re.sub(r"\(.*?\)", "", name.lower()))
@@ -57,7 +62,8 @@ for p in players:
         }))
     if not balls:
         continue
-    r = reels.setdefault(key(p["name"]), {"name": p["name"], "balls": []})
+    name = ALIAS.get(p["name"], p["name"])
+    r = reels.setdefault(key(name), {"name": name, "balls": []})
     r["balls"].extend(balls)
 
 for r in reels.values():

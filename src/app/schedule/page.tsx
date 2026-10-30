@@ -72,7 +72,7 @@ export default async function SchedulePage() {
                 value={`${formatDate(dates[0])} → ${formatDate(dates[dates.length - 1])}`}
               />
               <Stat
-                label="Played"
+                label="League played"
                 value={`${played} / ${groupMatches.length}`}
               />
               <Stat label="Venue" value={config.venue} />

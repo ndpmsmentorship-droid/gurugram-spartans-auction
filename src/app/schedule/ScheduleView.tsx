@@ -91,13 +91,13 @@ export default function ScheduleView({
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center gap-2 sm:w-auto">
           <label className="label-mono" htmlFor="team-filter">
             Team
           </label>
           <select
             id="team-filter"
-            className="input w-auto min-w-[180px] py-2"
+            className="input min-w-0 flex-1 py-2 sm:w-auto sm:min-w-[180px] sm:flex-none"
             value={teamFilter}
             onChange={(e) => setTeamFilter(e.target.value)}
           >
@@ -110,7 +110,7 @@ export default function ScheduleView({
           </select>
           {/* the export answers 404 until a schedule exists */}
           {fixtures.length > 0 && (
-            <a className="btn-ghost" href="/spartansscout/api/schedule/export">
+            <a className="btn-ghost shrink-0 whitespace-nowrap" href="/spartansscout/api/schedule/export">
               Export .xlsx
             </a>
           )}
@@ -201,7 +201,41 @@ function Result({ f, side }: { f: FixtureRow; side: SideFn }) {
 function FixtureTable({ rows, side }: { rows: FixtureRow[]; side: SideFn }) {
   if (!rows.length) return <Empty />;
   return (
-    <div className="card overflow-x-auto p-0">
+    <>
+    {/* Phones: one card per match, so the teams never sit off-screen. */}
+    <ul className="card divide-y divide-line p-0 sm:hidden">
+      {rows.map((f) => {
+        const home = side(f.home_team_id, f.home_label);
+        const away = side(f.away_team_id, f.away_label);
+        return (
+          <li key={f.id} className="px-3.5 py-3">
+            <div className="flex items-center justify-between gap-2 text-[0.75rem] text-muted">
+              <span className="num">
+                #{f.match_no} &middot; {f.day_name?.slice(0, 3)} {formatDate(f.match_date)} &middot; {formatSlot(f.slot)}
+              </span>
+              <StageBadge f={f} />
+            </div>
+            <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-[0.875rem]">
+              <span className="flex min-w-0 items-center gap-1.5">
+                <TeamCrest name={home.name} logoUrl={home.logoUrl} size={22} />
+                <span className={`truncate ${home.resolved ? "font-medium" : "italic text-muted"}`}>{home.name}</span>
+              </span>
+              <span className="text-faint">v</span>
+              <span className="flex min-w-0 items-center justify-end gap-1.5 text-right">
+                <span className={`truncate ${away.resolved ? "font-medium" : "italic text-muted"}`}>{away.name}</span>
+                <TeamCrest name={away.name} logoUrl={away.logoUrl} size={22} />
+              </span>
+            </div>
+            {f.status !== "scheduled" && (
+              <div className="mt-1.5">
+                <Result f={f} side={side} />
+              </div>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+    <div className="card hidden overflow-x-auto p-0 sm:block">
       <table className="w-full min-w-[760px] border-collapse text-[0.875rem]">
         <thead>
           <tr className="bg-wash">
@@ -261,6 +295,7 @@ function FixtureTable({ rows, side }: { rows: FixtureRow[]; side: SideFn }) {
         </tbody>
       </table>
     </div>
+    </>
   );
 }
 

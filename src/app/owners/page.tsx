@@ -101,9 +101,9 @@ export default async function OwnersHome({ searchParams }: { searchParams: Promi
             <h1 className="mt-1 font-display text-3xl font-bold uppercase leading-tight sm:text-4xl">{team.name}</h1>
             {owners.length > 0 && <p className="mt-1 text-sm text-white/75">{owners.join(" · ")}</p>}
           </div>
-          <div className="text-right">
+          <div className="flex w-full items-baseline gap-3 border-t border-white/15 pt-4 sm:ml-auto sm:block sm:w-auto sm:border-0 sm:pt-0 sm:text-right">
             <p className="font-display text-4xl font-bold leading-none">{days}</p>
-            <p className="mt-1 font-mono text-[0.625rem] uppercase tracking-[0.2em] text-white/60">days to auction night · 12 Dec</p>
+            <p className="font-mono sm:mt-1 text-[0.625rem] uppercase tracking-[0.2em] text-white/60">days to auction night · 12 Dec</p>
           </div>
         </div>
       </section>
@@ -179,7 +179,7 @@ export default async function OwnersHome({ searchParams }: { searchParams: Promi
         {/* AI scout */}
         <Link
           href="/war-room?tab=live"
-          className="mt-4 flex items-center justify-between gap-4 rounded-[16px] border border-line bg-surface p-5 shadow-[var(--elev-sm)] transition hover:shadow-[var(--elev)]"
+          className="mt-4 flex flex-col items-start gap-3 rounded-[16px] border border-line bg-surface p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 shadow-[var(--elev-sm)] transition hover:shadow-[var(--elev)]"
         >
           <span>
             <span className="label-mono">04 · AI scout</span>

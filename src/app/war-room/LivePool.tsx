@@ -93,21 +93,21 @@ export default function LivePool() {
       ) : (
         <ul className="mt-4 divide-y divide-line rounded-[12px] border border-line bg-surface">
           {shown.map((p) => (
-            <li key={p.id} className="flex items-center gap-3 p-3">
+            <li key={p.id} className="flex items-start gap-3 p-3">
               <PlayerPhoto src={p.photo} name={p.name} className="h-11 w-11 shrink-0 rounded-full" sizes="44px" />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold">
+                <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm font-semibold">
                   {p.name}
-                  <span className="ml-2 rounded-full border border-line px-1.5 py-0.5 text-[0.625rem] font-normal text-muted">{p.returning ? "Returning" : "New"}</span>
+                  <span className="rounded-full border border-line px-1.5 py-0.5 text-[0.625rem] font-normal text-muted">{p.returning ? "Returning" : "New"}</span>
                 </p>
-                <p className="truncate text-[0.75rem] text-muted">
+                <p className="text-[0.75rem] leading-snug text-muted">
                   {p.role}
                   {p.lastTeam ? ` · S1 ${p.lastTeam}` : ""}
                   {!p.hasData && <span className="ml-1.5 rounded-full bg-gold-fill px-1.5 py-0.5 text-[0.625rem] text-gold">No data yet</span>}
                 </p>
-                {(p.designation || p.employer) && <p className="truncate text-[0.75rem] text-muted">{[p.designation, p.employer].filter(Boolean).join(", ")}</p>}
+                {(p.designation || p.employer) && <p className="text-[0.75rem] leading-snug text-muted">{[p.designation, p.employer].filter(Boolean).join(", ")}</p>}
               </div>
-              <span className={`shrink-0 rounded-full px-2 py-1 text-[0.688rem] ${BADGE[p.status]}`}>{LABEL[p.status]}</span>
+              <span className={`mt-0.5 shrink-0 rounded-full px-2 py-1 text-[0.688rem] ${BADGE[p.status]}`}>{LABEL[p.status]}</span>
             </li>
           ))}
         </ul>

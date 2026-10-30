@@ -103,7 +103,7 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
               key={s.key}
               type="button"
               onClick={() => setStrategy(s.key)}
-              className={`rounded-[12px] border p-3 text-left ${s.key === strategy ? "border-red ring-1 ring-red" : "border-line"}`}
+              className={`rounded-[12px] border p-3 text-left [&:last-child:nth-child(odd)]:col-span-2 ${s.key === strategy ? "border-red ring-1 ring-red" : "border-line"}`}
             >
               <p className="text-sm font-semibold">{s.name}</p>
               <p className="text-[0.688rem] text-muted">{s.blurb}</p>

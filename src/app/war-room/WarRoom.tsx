@@ -1125,7 +1125,7 @@ export default function WarRoom(props: {
           <div className="relative w-full sm:w-[26rem]">
             <input
               className="input !py-2 !pr-8 text-sm"
-              placeholder={'Ask: "left arm spinners", "keeper under 32"…'}
+              placeholder="Ask the pool, e.g. left arm spinners"
               value={q}
               onChange={(e) => { setQ(e.target.value); setLimit(40); }}
             />

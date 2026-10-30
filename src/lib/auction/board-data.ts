@@ -57,6 +57,8 @@ export type BoardData = {
   upNext: QueuePlayer[];
   /** everyone still available, in auction order — the pad's search draws from it */
   available: QueuePlayer[];
+  /** players with an unsold verdict, still in the pool — the pad can put them up again */
+  unsoldList: QueuePlayer[];
   recent: Sale[];
   sold: number;
   unsold: number;
@@ -224,6 +226,7 @@ export async function loadBoard(opts: { queue?: number } = {}): Promise<BoardDat
     )
     .map(toQueue);
   const upNext = available.filter((p) => !unsoldIds.has(p.id)).slice(0, opts.queue ?? 5);
+  const unsoldList = available.filter((p) => unsoldIds.has(p.id));
 
   return {
     lot,
@@ -233,6 +236,7 @@ export async function loadBoard(opts: { queue?: number } = {}): Promise<BoardDat
     teams: screenTeams,
     upNext,
     available,
+    unsoldList,
     recent: sales.slice(-8).reverse(),
     sold: sales.length,
     unsold: unsoldIds.size,

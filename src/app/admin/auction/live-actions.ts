@@ -160,3 +160,51 @@ export async function withdrawLot(): Promise<Result> {
 export async function undoLastSale(): Promise<Result> {
   return call("undo_last_sale", {});
 }
+
+/**
+ * Unsold even after bids: the room's bids are taken back one by one (each
+ * logged as a withdrawn bid, like ⌫), then the player is recorded unsold.
+ */
+export async function unsoldLot(): Promise<Result> {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+  for (let i = 0; i < 200; i++) {
+    const r = await takeBackBid();
+    if (r.error === "No bid to take back.") break;
+    if (r.error) return r;
+  }
+  return call("pass_lot", {});
+}
+
+/**
+ * Reverse ANY sale, not just the last one: the player leaves the team, the
+ * money goes back to the purse (spend is summed from sold prices), and he is
+ * recorded unsold — or simply returned to the pool with toPool.
+ * Logged as an 'undo' with the sale amount, the same as undo_last_sale.
+ */
+export async function reverseSale(playerId: string, toPool = false): Promise<Result> {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+  if (DEV_FIXTURE) return { error: "Not available in the dev fixture." };
+  const season = await activeSeasonId();
+  if (!season) return { error: "No active season." };
+
+  const sb = createAdminClient() as unknown as { from: (t: string) => any }; // eslint-disable-line @typescript-eslint/no-explicit-any
+  const { data: p } = await sb.from("scout_players").select("id, team_id, sold_price").eq("id", playerId).maybeSingle();
+  if (!p?.team_id) return { error: "That player isn't sold." };
+
+  const { error } = await sb.from("scout_players").update({ team_id: null, sold_price: null, acquired: null }).eq("id", playerId).eq("team_id", p.team_id);
+  if (error) return { error: clean(error.message) };
+  await sb
+    .from("auction_lot")
+    .update({ player_id: null, status: "idle", base_price: null, current_bid: null, leading_team_id: null, updated_at: new Date().toISOString() })
+    .eq("season_id", season)
+    .eq("player_id", playerId);
+  await sb.from("auction_event").insert([
+    { season_id: season, player_id: playerId, team_id: p.team_id, kind: "undo", amount: p.sold_price },
+    ...(toPool ? [] : [{ season_id: season, player_id: playerId, kind: "unsold" }]),
+  ]);
+  revalidatePath("/admin/auction");
+  revalidatePath("/auction");
+  return {};
+}

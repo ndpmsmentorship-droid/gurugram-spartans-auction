@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useEffectEvent, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useLotSync } from "@/app/auction/useLotSync";
-import { quickRaise, takeBackBid, hammerLot, passLot, withdrawLot, undoLastSale, putUpLot } from "../live-actions";
+import { quickRaise, takeBackBid, hammerLot, passLot, withdrawLot, undoLastSale, putUpLot, unsoldLot, reverseSale } from "../live-actions";
 import { DEFAULT_RULES, blockReason, inr } from "@/lib/auction/rules";
 import { catLabel, normCategory } from "@/lib/scout/tier";
 import type { BoardData, Bid, QueuePlayer } from "@/lib/auction/board-data";
@@ -17,8 +17,9 @@ import { CAT_COLOUR } from "@/app/auction/screen/BigScreen";
 // the big screen follows over realtime.
 //
 //   1–9, 0, Q, W, E, R  team bids next step      Enter      SOLD
-//   Backspace           take back the last bid   U          unsold (no bids)
-//   N                   put up the next player   /          search the pool
+//   Backspace           take back the last bid   U          unsold (asks first if there are bids)
+//   F                   wrong team: tap the team that really bid, same amount
+//   N                   put up the next player   /          search the pool   Esc  cancel
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "q", "w", "e", "r", "t", "y"];
 const STEPS = [500, 1000, 2000, 2500, 5000, 10000];
@@ -45,6 +46,8 @@ export default function OperatorPad({ board }: { board: BoardData }) {
   const [step, setStep] = useState<"auto" | number>("auto");
   const [jump, setJump] = useState("");
   const [q, setQ] = useState("");
+  // "Wrong team" mode: the next team tap moves the last bid to that team at the same amount.
+  const [fixing, setFixing] = useState(false);
   const search = useRef<HTMLInputElement>(null);
 
   const server: View = { bid: lot.current_bid, leader: lot.leading_team_id, bids: board.bids, gen: 0 };
@@ -105,6 +108,7 @@ export default function OperatorPad({ board }: { board: BoardData }) {
 
   const bidFor = (teamId: string) => {
     if (!live) return;
+    if (fixing) return fixTeam(teamId);
     const cur = current();
     const t = teams.find((x) => x.id === teamId);
     if (!t) return;
@@ -133,6 +137,37 @@ export default function OperatorPad({ board }: { board: BoardData }) {
     optRef.current = next;
     setOpt(next);
     run(() => takeBackBid());
+  };
+
+  // Mis-tap: the last bid goes to the team that actually called it, same amount.
+  const fixTeam = (teamId: string) => {
+    setFixing(false);
+    const cur = current();
+    const last = cur.bids[cur.bids.length - 1];
+    if (!last) return;
+    if (last.team_id === teamId) return;
+    const t = teams.find((x) => x.id === teamId);
+    if (!t) return;
+    const bids = cur.bids.slice(0, -1);
+    const prevLeader = bids[bids.length - 1]?.team_id ?? null;
+    const why = reasonFor(t, last.amount, prevLeader);
+    if (why) {
+      setErr(`${t.name}: ${why}`);
+      return;
+    }
+    gen.current += 1;
+    const next: View = { bid: last.amount, leader: teamId, bids: [...bids, { team_id: teamId, amount: last.amount }], gen: gen.current };
+    optRef.current = next;
+    setOpt(next);
+    run(() => takeBackBid());
+    run(() => quickRaise(teamId, last.amount));
+  };
+
+  const unsold = () => {
+    if (!live) return;
+    const n = current().bids.length;
+    if (n && !confirm(`Cancel ${n} bid${n === 1 ? "" : "s"} and record ${board.player?.full_name ?? "this player"} as UNSOLD?`)) return;
+    run(() => (n ? unsoldLot() : passLot()));
   };
 
   const sell = () => {
@@ -172,8 +207,12 @@ export default function OperatorPad({ board }: { board: BoardData }) {
     } else if (e.key === "Backspace") {
       e.preventDefault();
       takeBack();
-    } else if (k === "u" && live && !current().bids.length) {
-      run(() => passLot());
+    } else if (k === "u" && live) {
+      unsold();
+    } else if (k === "f" && live && current().bids.length) {
+      setFixing((f) => !f);
+    } else if (e.key === "Escape") {
+      setFixing(false);
     } else if (k === "n" && !live && board.upNext[0]) {
       putUp(board.upNext[0].id);
     } else if (e.key === "/") {
@@ -190,14 +229,14 @@ export default function OperatorPad({ board }: { board: BoardData }) {
   const p = board.player;
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden bg-[#f7f1f0] text-ink">
+    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden bg-[#fff8ec] text-ink">
       {/* ---- top bar ---- */}
-      <header className="flex shrink-0 items-center gap-4 bg-[#360b09] px-5 py-2.5 text-white">
+      <header className="flex shrink-0 items-center gap-4 bg-[#0b1630] px-5 py-2.5 text-white">
         <span className="font-display text-[1.1rem] font-bold tracking-[0.04em]">OPERATOR PAD</span>
         <span className="font-mono text-[0.75rem] uppercase tracking-[0.16em] text-white/60">Lot #{board.lotNo}</span>
         <span
           className="rounded-full px-2.5 py-0.5 font-mono text-[0.65rem] font-semibold uppercase tracking-[0.16em]"
-          style={{ background: live ? "#b12520" : lot.status === "sold" ? "#2e7d50" : "rgba(255,255,255,.15)" }}
+          style={{ background: live ? "#bc2423" : lot.status === "sold" ? "#2e7d50" : "rgba(255,255,255,.15)" }}
         >
           {lot.status === "idle" ? "No lot" : lot.status}
         </span>
@@ -224,7 +263,7 @@ export default function OperatorPad({ board }: { board: BoardData }) {
           <section
             className="flex shrink-0 items-center gap-6 rounded-[14px] border px-5 py-4"
             style={{
-              borderColor: live ? "#b12520" : lot.status === "sold" ? "#2e7d50" : "var(--line)",
+              borderColor: live ? "#bc2423" : lot.status === "sold" ? "#2e7d50" : "var(--line)",
               background: live ? "linear-gradient(105deg, #f6e0de, #fff 70%)" : "#fff",
             }}
           >
@@ -233,7 +272,7 @@ export default function OperatorPad({ board }: { board: BoardData }) {
                 <>
                   <p className="flex items-center gap-2">
                     <span
-                      className="rounded px-1.5 py-0.5 font-display text-[0.8rem] font-bold text-[#250201]"
+                      className="rounded px-1.5 py-0.5 font-display text-[0.8rem] font-bold text-[#0b1630]"
                       style={{ background: CAT_COLOUR[normCategory(p.auction_category) ?? "B"] }}
                     >
                       {catLabel(p.auction_category)}
@@ -285,10 +324,17 @@ export default function OperatorPad({ board }: { board: BoardData }) {
                     ↶ Bid <Kbd>⌫</Kbd>
                   </button>
                   <button
-                    onClick={() => run(() => passLot())}
-                    disabled={!!v.bids.length}
+                    onClick={() => setFixing((f) => !f)}
+                    disabled={!v.bids.length}
+                    className={`flex-1 rounded-[8px] border px-3 py-1.5 text-[0.75rem] font-medium disabled:opacity-35 ${fixing ? "border-[#bc2423] bg-[#bc2423] text-white" : "border-line2 bg-white hover:border-red"}`}
+                    title="The bid went to the wrong team: tap the team that really bid, same amount"
+                  >
+                    Wrong team <Kbd dark={fixing}>F</Kbd>
+                  </button>
+                  <button
+                    onClick={unsold}
                     className="flex-1 rounded-[8px] border border-line2 bg-white px-3 py-1.5 text-[0.75rem] font-medium hover:border-red disabled:opacity-35"
-                    title="No bids — record as unsold"
+                    title="Record as unsold (any bids are cancelled first)"
                   >
                     Unsold <Kbd>U</Kbd>
                   </button>
@@ -313,8 +359,8 @@ export default function OperatorPad({ board }: { board: BoardData }) {
                 onClick={() => setStep(s)}
                 className="rounded-full border px-3 py-1 font-mono text-[0.75rem] transition"
                 style={{
-                  borderColor: step === s ? "#b12520" : "var(--line2)",
-                  background: step === s ? "#b12520" : "#fff",
+                  borderColor: step === s ? "#bc2423" : "var(--line2)",
+                  background: step === s ? "#bc2423" : "#fff",
                   color: step === s ? "#fff" : "var(--ink)",
                 }}
               >
@@ -342,6 +388,18 @@ export default function OperatorPad({ board }: { board: BoardData }) {
             </span>
           </section>
 
+          {fixing && live && (
+            <p className="flex shrink-0 items-center justify-between rounded-[10px] bg-[#bc2423] px-4 py-2 text-[0.9rem] font-medium text-white">
+              <span>
+                Wrong team: tap the team that really bid <b>{inr(v.bids[v.bids.length - 1]?.amount ?? 0)}</b> — it moves from{" "}
+                {teams.find((t) => t.id === v.bids[v.bids.length - 1]?.team_id)?.name ?? "—"}.
+              </span>
+              <button onClick={() => setFixing(false)} className="rounded-full border border-white/50 px-3 py-0.5 text-[0.75rem]">
+                Cancel <Kbd dark>Esc</Kbd>
+              </button>
+            </p>
+          )}
+
           {/* the teams — one tap each */}
           <section
             className="grid min-h-0 flex-1 gap-2.5"
@@ -349,14 +407,21 @@ export default function OperatorPad({ board }: { board: BoardData }) {
           >
             {teams.map((t, i) => {
               const leading = v.leader === t.id;
-              const why = live ? reasonFor(t, nextAmount, v.leader) : "No lot";
+              const lastBid = v.bids[v.bids.length - 1];
+              const why = !live
+                ? "No lot"
+                : fixing && lastBid
+                  ? t.id === lastBid.team_id
+                    ? "Has this bid now"
+                    : reasonFor(t, lastBid.amount, v.bids[v.bids.length - 2]?.team_id ?? null)
+                  : reasonFor(t, nextAmount, v.leader);
               const off = !!why && !leading;
               return (
                 <button
                   key={t.id}
                   onClick={() => bidFor(t.id)}
                   disabled={!live || !!why}
-                  className="relative flex min-h-0 flex-col items-center justify-center gap-1.5 rounded-[14px] border-2 bg-white px-2 py-2 text-center transition active:scale-[0.97] enabled:hover:border-[#b12520] enabled:hover:shadow-md"
+                  className="relative flex min-h-0 flex-col items-center justify-center gap-1.5 rounded-[14px] border-2 bg-white px-2 py-2 text-center transition active:scale-[0.97] enabled:hover:border-[#bc2423] enabled:hover:shadow-md"
                   style={{
                     borderColor: leading ? "#2e7d50" : "var(--line)",
                     background: leading ? "#e3f3ea" : "#fff",
@@ -364,7 +429,7 @@ export default function OperatorPad({ board }: { board: BoardData }) {
                   }}
                   title={why ?? `${t.name} bids ${inr(nextAmount)}`}
                 >
-                  <span className="absolute left-2 top-2 rounded bg-[#250201] px-1.5 py-0.5 font-mono text-[0.65rem] font-bold uppercase text-white">
+                  <span className="absolute left-2 top-2 rounded bg-[#0b1630] px-1.5 py-0.5 font-mono text-[0.65rem] font-bold uppercase text-white">
                     {KEYS[i]}
                   </span>
                   {leading && (
@@ -454,19 +519,40 @@ export default function OperatorPad({ board }: { board: BoardData }) {
             </div>
             <ul className="mt-2 flex flex-col gap-1">
               {board.recent.map((s) => (
-                <li key={s.id} className="flex justify-between gap-2 text-[0.8rem]">
+                <li key={s.id} className="group flex items-center justify-between gap-2 text-[0.8rem]">
                   <span className="min-w-0 truncate">
                     {s.player}
                     <span className="text-muted"> → {teams.find((t) => t.id === s.team_id)?.name}</span>
                   </span>
                   <span className="shrink-0 font-mono font-semibold text-[#2e7d50]">{inr(s.amount)}</span>
+                  <button
+                    onClick={() => {
+                      const team = teams.find((t) => t.id === s.team_id)?.name ?? "the team";
+                      if (confirm(`Make ${s.player} UNSOLD? ${inr(s.amount)} goes back to ${team}'s purse.`)) run(() => reverseSale(s.pid));
+                    }}
+                    className="shrink-0 rounded border border-line2 px-1.5 font-mono text-[0.58rem] uppercase text-muted hover:border-red hover:text-red"
+                    title="Reverse this sale and record the player unsold"
+                  >
+                    Unsold
+                  </button>
                 </li>
               ))}
             </ul>
           </section>
 
+          {board.unsoldList.length > 0 && (
+            <section className="max-h-[30%] shrink-0 overflow-auto rounded-[14px] border border-line bg-white p-3">
+              <p className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-muted">Unsold · {board.unsoldList.length} · put up again</p>
+              <ul className="mt-2 flex flex-col">
+                {board.unsoldList.map((m) => (
+                  <QueueRow key={m.id} p={m} disabled={live} onClick={() => putUp(m.id)} />
+                ))}
+              </ul>
+            </section>
+          )}
+
           <p className="shrink-0 font-mono text-[0.6rem] leading-relaxed text-muted">
-            Keys: team <Kbd>1</Kbd>…<Kbd>R</Kbd> · sold <Kbd>⏎</Kbd> · take back <Kbd>⌫</Kbd> · unsold <Kbd>U</Kbd> · next{" "}
+            Keys: team <Kbd>1</Kbd>…<Kbd>R</Kbd> · sold <Kbd>⏎</Kbd> · take back <Kbd>⌫</Kbd> · wrong team <Kbd>F</Kbd> · unsold <Kbd>U</Kbd> · next{" "}
             <Kbd>N</Kbd> · search <Kbd>/</Kbd>
           </p>
         </aside>
@@ -485,7 +571,7 @@ function QueueRow({ p, first, disabled, onClick }: { p: QueuePlayer; first?: boo
         style={{ background: first && !disabled ? "#fbeceb" : undefined }}
       >
         <span
-          className="w-7 shrink-0 rounded text-center font-display text-[0.7rem] font-bold text-[#250201]"
+          className="w-7 shrink-0 rounded text-center font-display text-[0.7rem] font-bold text-[#0b1630]"
           style={{ background: CAT_COLOUR[normCategory(p.auction_category) ?? "B"] }}
         >
           {catLabel(p.auction_category)}

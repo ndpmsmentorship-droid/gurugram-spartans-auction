@@ -266,6 +266,8 @@ Library: 84 matches, 665 profiles, audit clean; ground page 48 S6 matches (par 1
 - [ ] M51 Haryana Titans v J&K Homelanders (`CldIXa783Z8`): preset ready 28 Oct (card-exact) — Time Tagger pass, then merge; fold lowercase `sumit bhat` duplicate into Sumit Bhat at merge
 - [x] M49 Chennai v Bharat Hunters (`rsX1F-aSDbw`): merged 26 Oct, 241/247 balls timed
 - [x] M49 shot pass (Shot Tagger), merged 2 Nov
+- [ ] M52 Japani v Jaipur (`e6nvixFF7oA`, 31 Oct): preset live, card-exact — Nikhil time-tags, then merge_m52 + shot pass
+- [ ] M53–M58 (31 Oct–1 Nov): videos downloading; need each match's commentary recording + scorecard for presets
 - [x] M48 Jaipur v Goan Monks (`xyxB2E2iv-U`): merged 25 Oct, 244/244 balls timed
 - [ ] M48 shot pass (Shot Tagger)
 - [x] M47 KEI v Texas time-tagged and merged (226/231, card-exact) — 25 Oct

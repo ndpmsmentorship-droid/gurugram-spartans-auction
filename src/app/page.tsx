@@ -105,7 +105,7 @@ const STEPS = [
   },
   {
     title: "Auction",
-    body: "Fourteen franchises bid live for their squads. Selected players pay the ₹3,000 registration fee.",
+    body: "Fourteen franchises bid live for their squads. Selected players pay the ₹4,000 registration fee.",
   },
 ];
 
@@ -565,7 +565,7 @@ export default async function Home() {
             ))}
           </ol>
           <p className="mt-6 rounded-[10px] border border-gold-line bg-gold-fill px-4 py-3 text-sm text-gold">
-            A mandatory registration fee of ₹3,000 applies only if you are selected in the auction.
+            A mandatory registration fee of ₹4,000 applies only if you are selected in the auction.
             Registering does not guarantee selection.
           </p>
         </div>

@@ -15,7 +15,7 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
   },
   {
     q: "Is there a fee?",
-    a: "Registering is free. A mandatory registration fee of ₹3,000 applies only if you are selected in the auction.",
+    a: "Registering is free. A mandatory registration fee of ₹4,000 applies only if you are selected in the auction.",
   },
   {
     q: "Does registering guarantee a place in a team?",

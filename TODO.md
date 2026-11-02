@@ -72,7 +72,7 @@ sdll.playfulventures.co.in = this auction app (added to this Vercel project; `/`
 - [ ] Re-run `npx vercel domains verify` for all three once DNS is in
 - [ ] playful-site has no GitHub remote yet (repo creation was blocked) — create a private repo and connect it, or keep deploying with `npx vercel deploy --prod`
 - [ ] Registration form exists in both repos — the auction app's /register should point to playfulventures.co.in/register (or be removed) once DNS is live
-- [ ] Fee wording: site still says "registering is free, ₹3,000 if selected"; Season 2 plan is ₹1,000 at registration + ₹3,000 if selected — needs a payment step or wording decision
+- [ ] Fee wording: site still says "registering is free, ₹3,000 if selected"; Season 2 plan is ₹1,000 at registration + ₹4,000 if selected (changed from ₹3,000 on 2 Nov) — needs a payment step or wording decision
 - [ ] Google Workspace (Base) for 2–3 mailboxes + aliases on playfulventures.co.in
 - [ ] Decide whether the portal later serves at the subdomain root (needs a basePath change; ndpms.in/spartansscout would then need a rewrite update)
 - [x] Avoid "playfulauction" — playfulauction.com is an unrelated adult chat/auction site

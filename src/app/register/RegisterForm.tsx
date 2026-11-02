@@ -645,7 +645,7 @@ export default function RegisterForm() {
             text: (
               <>
                 I understand that if I am selected in the auction, I must pay a{" "}
-                <strong>mandatory registration fee of ₹3,000</strong>, and I agree to be contacted about my registration.
+                <strong>mandatory registration fee of ₹4,000</strong>, and I agree to be contacted about my registration.
               </>
             ),
           },

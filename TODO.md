@@ -78,6 +78,9 @@ sdll.playfulventures.co.in = this auction app (added to this Vercel project; `/`
 - [x] Avoid "playfulauction" — playfulauction.com is an unrelated adult chat/auction site
 
 ## Registration v2 on playfulventures.co.in (27 Oct 2026)
+
+- [ ] **UAT → launch (added 2 Nov 2026):** registration is in test mode — fee ₹10 (`FEE_NOW` in playful-site `src/app/register/shared.ts`) and every Register button hidden (`REG_PUBLIC = false`); /register still works by link. Before opening: fee back to ₹1,000, `REG_PUBLIC = true`, delete Nikhil's test registrations, redeploy.
+- [ ] Staff login for registration admin: decide between sharing `sdlladmin` (also unlocks the auction admin and operator pad) or a separate staff account.
 Built in ~/Claude/playful-site (not deployed until the two blockers below are done).
 - [x] UPI: ICICI Eazypay merchant QR (MSPLAYFULVENTURESPRIVATELIMITED.eazypay@icici) wired in, 27 Oct
 - [x] registration_v2.sql run 27 Oct; v2 deployed and tested end to end with a dummy entry (deleted)

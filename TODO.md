@@ -268,7 +268,8 @@ Library: 84 matches, 665 profiles, audit clean; ground page 48 S6 matches (par 1
 - [x] M49 shot pass (Shot Tagger), merged 2 Nov
 - [ ] M52 Japani v Jaipur (`e6nvixFF7oA`, 31 Oct): preset live, card-exact — Nikhil time-tags, then merge_m52 + shot pass
 - [ ] M53 NCR v Bharat + M54 Srinagar v Haryana (31 Oct): presets live, card-exact — Nikhil time-tags
-- [ ] M55–M58 (1 Nov): need each match's commentary recording + scorecard for presets
+- [ ] M55 Punjab v Goan Monks (1 Nov): preset live, card-exact — Nikhil time-tags
+- [ ] M56–M58 (1 Nov): need each match's commentary recording + scorecard for presets
 - [x] M48 Jaipur v Goan Monks (`xyxB2E2iv-U`): merged 25 Oct, 244/244 balls timed
 - [ ] M48 shot pass (Shot Tagger)
 - [x] M47 KEI v Texas time-tagged and merged (226/231, card-exact) — 25 Oct

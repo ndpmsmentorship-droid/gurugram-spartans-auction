@@ -140,6 +140,14 @@ state or zonal teams at any age group, paid contracts). Non-corporate profiles m
 - [ ] Raise change requests for the built Phase 2 add-ons (venue mode ₹85,000, War Room/squad tracker ₹1,48,750) and the services (₹1,70,000 est.) before invoicing
 
 ## Portal — before the Season 2 auction
+
+### Auction evidence for every player (Nikhil, 2 Nov 2026 — "dont forget")
+Why: the ₹1,000 registration fee is refundable only if the organisers reject a profile. Once a player is accepted into the pool it is not, bought or not, so every player needs a record that they were accepted and actually put up at the auction.
+- [x] **Dated "Approved: you're in the pool" email** (live 2 Nov): sent from playfulventures.co.in admin on Approve, states the date and time (IST) of acceptance and that the fee is no longer refundable.
+- [ ] **Auction Record per player** (in the system): one page per player built from `auction_event` — put up at (time), base price, every bid (team, amount, time), final result SOLD to team at ₹X or UNSOLD. Save as PDF, link it on the player's admin card on playfulventures.co.in, attach it to the post-auction mail. Needs the timeline logged reliably on 12 Dec (operator pad events already timestamp put_up / bid / sell / unsold / undo; make sure undo/reverseSale stay in the record, never deleted).
+- [ ] **Video of every lot + 9:16 reel** — proposed, awaiting decisions: OBS recording of the big screen (+ room camera?) on the auction laptop, sync flash at start, auto-cut one clip per player from `auction_event` times, render reels (crest, player card, bid ticker, SOLD/UNSOLD stamp, Ball Library clips). Decide: reels public on IG or private to each player; room camera yes/no. Test run before 12 Dec. ~400 lots ≈ 6–8 h, ~20–25 GB.
+- [ ] **"Your auction moment" mail** after the auction: clip + reel + Auction Record to each player.
+- [ ] **T&C wording for the lawyer:** (1) "Once your profile is accepted into the auction pool, the registration fee is not refundable, whether or not a team buys you." (2) consent to the auction being recorded and clips used as a record and for league promotion.
 - [ ] Check the live board shows exactly the 12 SDLL teams (Lucknow and Bhojpuri are in the DB)
 - [ ] Header shows "AUCTION LIVE" because a lot was left live on 29 Sep — pass/withdraw it before demos
 - [ ] Link the 12 team owner logins (2 done: ACCI, Bengal Tigers) — need the other 10 owners' emails

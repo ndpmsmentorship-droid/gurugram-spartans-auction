@@ -265,7 +265,7 @@ Library: 84 matches, 665 profiles, audit clean; ground page 48 S6 matches (par 1
 - [ ] M50 shot pass: UP innings done 28 Oct (123 pitch, 103 dir) — Punjab chase left (local 480p copy in Match videos — Trash it after)
 - [ ] M51 Haryana Titans v J&K Homelanders (`CldIXa783Z8`): preset ready 28 Oct (card-exact) — Time Tagger pass, then merge; fold lowercase `sumit bhat` duplicate into Sumit Bhat at merge
 - [x] M49 Chennai v Bharat Hunters (`rsX1F-aSDbw`): merged 26 Oct, 241/247 balls timed
-- [ ] M49 shot pass (Shot Tagger)
+- [x] M49 shot pass (Shot Tagger), merged 2 Nov
 - [x] M48 Jaipur v Goan Monks (`xyxB2E2iv-U`): merged 25 Oct, 244/244 balls timed
 - [ ] M48 shot pass (Shot Tagger)
 - [x] M47 KEI v Texas time-tagged and merged (226/231, card-exact) — 25 Oct

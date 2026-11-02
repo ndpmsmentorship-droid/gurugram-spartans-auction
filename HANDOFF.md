@@ -1,6 +1,38 @@
 # Handoff — Shanti Devi Legend League Auction App
 
-_Local Claude memory does not transfer across machines — this file is the source of truth. Last updated 2026-09-30._
+_Local Claude memory does not transfer across machines — this file is the source of truth. Last updated 2026-11-02._
+
+## ▶ LATEST — 30 Oct → 2 Nov 2026 (SLL-2 build-out + registration UAT)
+
+### Auction app (this repo · ndpms.in/spartansscout · push to main = production)
+- **Owner nav:** owners see only **Big Screen** (opens /auction/screen in a new tab). Squads / My Squad / Schedule buttons removed for owners; demo + default navs also carry Big Screen.
+- **Retired pages:** `/squad` → /auction, `/my-team` → /owners, `/my-team/targets` → /war-room?tab=plan (redirect stubs only).
+- **Owners page (`/owners`)** gained "Your squad" (bought players from `scout_players`, price, role mix) and a phone-friendly hero/AI-scout layout.
+- **Big screen** in the SLL-2 brand (navy/red/gold). Shows the player card for 8 s, then the player's **Ball Library reel**: `src/data/ball-reels.json` (built by `scripts/build-ball-reels.py` from the open library manifest; batters = sixes/fours, bowlers = wickets/dots, never a batter's dismissal or a bowler's conceded boundary), served by `/auction/reel?name=`, played via the YouTube IFrame API. Alias `@Vinny` → Vishal Dullu. **Rebuild ball-reels.json after every library merge.** Crest initials keep numbers whole (SLL 10 → S10).
+- **ACCI owners** now Russel A., Vishal Salgy, **Pardeep Mahalawat** (`src/app/franchises.ts`).
+- **Plan tab:** Hold is an explicit call (was the silent default); tapping the active call clears it; "On hold · N" list.
+- **Schedule** = the partnership deck: 14 teams, 45 matches (42 league + 2 semis Sat 6 Mar 8:00/11:30 + final Sun 7 Mar 11:30, no 3rd-place), 8 weekends 16 Jan → 7 Mar 2027 incl. Tue 26 Jan, slots 8:00/11:30/15:00, every team 2 games per slot. Applied by `scripts/sll2-schedule.mts --apply`; generator takes explicit `leagueDates/finalsDates`. UP Warriors + SLL 14 un-mocked. Phone layout = one card per match.
+- **Operator pad:** **F** = Wrong team (moves the last bid to the right team at the same amount), **U** = Unsold even after bids (confirm, clears bids), **Unsold** on any recent sale (`reverseSale`: returns the money, logs undo + unsold events), **Unsold list** to put players up again. Tested in `SPARTANS_DEV_FIXTURE=1`; reverseSale not fixture-testable — try once in a demo.
+- **Mobile pass (2 Nov):** schedule cards, owners countdown/AI card, plan strategy grid, live-pool rows wrap, pool search placeholder.
+- **Selected-player fee is ₹4,000** (was ₹3,000) on the home page and the old in-app register/FAQ.
+- **Data fixes still waiting on Nikhil's OK:** `sccl_s6_players` "Rohit Rohilla 13-05-1988" (DOB in the name, shows on /auction) and one `scout_players` role "ALl-Rounder".
+- **Open content questions:** /auction still shows SARDA S1 borrowed squads (233 signed, 12 teams) — start empty for SLL-2? War Room/Plan pool is the ~1,038 S1 players, not SLL-2 registrants. Demo owner (Gurugram Knights) shows a test sale of Amit Sehrawat ₹6,000. "ND CricVideos AI" lines are off-brand orange.
+
+### Registration + admin (`~/Claude/playful-site` · playfulventures.co.in · deploy with `npx vercel deploy --prod --yes`, no git remote)
+- **UAT mode (still on):** `FEE_NOW = 10` and `REG_PUBLIC = false` in `src/app/register/shared.ts` — every Register button on / and /sdll is hidden, /register works by direct link. **Before launch:** fee back to 1,000, `REG_PUBLIC = true`, delete test entries, redeploy (TODO.md has it).
+- **Form:** bold live "Age: NN years" under DOB; empty DOB picker opens at 1 Jan 1986; returning players are asked DOB only if `player_master` has none; email + LinkedIn on file shown masked / "we already have it ✓" (raw values never reach the browser — public name search); red "already registered — don't pay again" check on the mobile number / picked profile before payment; Aadhaar/UPI/placeholder overflow fixes; sample card strips age bands ("35+B" → "B"); inbox/spam hint on the done screen.
+- **Refund rule (T&C v2.7 · 2 Nov):** fee refunded **only if the organisers reject the profile as ineligible** (not a working professional, or professional cricket background); never if not bought, withdrawn, removed or rejected for a false declaration. Updated in the declaration, payment note, FAQ, /sdll and T&C. Lawyer brief still says "non-refundable in all cases".
+- **Emails (live):** Gmail SMTP via **kanishk.sheel@playfulventures.co.in** (Google Workspace app password in Vercel env `MAIL_USER` / `MAIL_APP_PASSWORD` only). Branded HTML + plain text, signed "Corporate Profiling Team, 212, SCO 58-59, Sector 17, Chandigarh, www.ndpms.in". Sent: registration received (with **Confirm your email** → `/register/verify`, HMAC link, needs a button tap) + league alert to Kanishk; **payment received** on Fee received; **under review** on Under review; **approved: you're in the pool** on Approve (dated IST acceptance + "fee no longer refundable"). Status mails fire only on the transition (admin `update()` in `(panel)/actions.ts`). Column `registrations.email_verified_at` added 2 Nov. SPF/DKIM/DMARC pass; test mails landed in the inbox.
+- **Admin cards:** bold Age badge (registration DOB, else master DOB, else "Age not on file"), Email verified ✓ / not confirmed, fee label follows `FEE_NOW`.
+- **Staff access:** `sdlladmin` already works on playfulventures.co.in/admin but is also the auction admin/operator pad — decide on a separate registration-only login.
+- **Registrations now (2 Nov):** Nikhil Dhingra (email nikhildhingra@ndpms.in, reset to pending for email tests), Dheeraj Nasa, Pulkit Bhardwaj, Deepak Begraj (= CricHeroes "Bobby Chaudhary") — all **pending**. Their CricHeroes batting/bowling/fielding stats were refreshed from Nikhil's screen recording into `player_master.stats` (`_by` "Screen recording (CricHeroes) 2 Nov").
+
+### Auction evidence for every player (TODO.md → "Auction evidence for every player")
+Approval mail done. To build before 12 Dec: per-player **Auction Record** from `auction_event` (never delete those rows); **cut-to-cut lot clips** (exactly put-up → SOLD/UNSOLD) from the 5–6 camera YouTube live programme — ask whether the vision mixer can record the programme locally; **private** 9:16 reels; "your auction moment" mail; dry run with cameras before 12 Dec; T&C lines (no refund once in the pool, recording consent) for the lawyer.
+
+### Other
+- Ball Library clip cut for Nikhil: `~/Downloads/clips/ND Cric - 3h57m57s.mp4` (SCCL 2026 Day 1, 3:57:47–3:58:02, ND Cric pill + www.ndpms.in). Overlay `wm.png` reusable.
+- Pending match tag: AI-Comms recording "Screen Recording 2026-11-02 at 9.02.50 PM.mov" on the Desktop — scorecard not found yet; paused at Nikhil's request.
 
 ## ✅ USCL DEMO CLOSED (4 Oct 2026) — portal is back on SDLL
 LEAGUE = "sdll"; USCL pool (412 rows, with sales) archived in league_pool_archive; 13 USCL owner logins banned

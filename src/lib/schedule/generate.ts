@@ -94,26 +94,28 @@ export const DAY_INDEX: Record<string, number> = {
 
 // SLL-2 as in the partnership proposal (30 Oct 2026): 14 teams in two groups
 // of seven, 42 league matches over 14 match days (Republic Day Tue 26 Jan is
-// one; Sun 28 Feb is kept free), three a day at 8:00, 11:30 and 3:00, then the
-// semi-finals and final on 6-7 Mar 2027. 45 matches.
+// one; Sun 28 Feb and Sat 6 Mar are league days), three a day at 8:00, 11:30 and 3:00, then the
+// semi-finals and final on 13-14 Mar 2027. 45 matches.
 export const DEFAULT_CONFIG: ScheduleConfig = {
-  startDate: "2027-01-16",
+  startDate: "2027-01-23",
   matchDays: ["Saturday", "Sunday"],
   slots: ["08:00", "11:30", "15:00"],
   blackoutDates: [],
   venue: "Sportscube, Gurugram",
   // Seed 1 gives every team exactly two games in each slot (7 doesn't).
   seed: 1,
+  // From 23 Jan (Nikhil, 3 Nov): 16–17 Jan dropped, Sun 28 Feb and Sat 6 Mar
+  // added, knockouts moved to 13–14 Mar.
   leagueDates: [
-    "2027-01-16", "2027-01-17",
-    "2027-01-23", "2027-01-24", "2027-01-26",
-    "2027-01-30", "2027-01-31",
-    "2027-02-06", "2027-02-07",
-    "2027-02-13", "2027-02-14",
-    "2027-02-20", "2027-02-21",
-    "2027-02-27",
+    "2027-01-23", "2027-01-24",
+    "2027-01-26", "2027-01-30",
+    "2027-01-31", "2027-02-06",
+    "2027-02-07", "2027-02-13",
+    "2027-02-14", "2027-02-20",
+    "2027-02-21", "2027-02-27",
+    "2027-02-28", "2027-03-06",
   ],
-  finalsDates: ["2027-03-06", "2027-03-07"],
+  finalsDates: ["2027-03-13", "2027-03-14"],
   thirdPlace: false,
 };
 

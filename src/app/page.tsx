@@ -69,7 +69,7 @@ const AT_A_GLANCE = [
   { k: "Season window", v: "23 Jan – 14 Mar 2027" },
   { k: "Venue", v: "Essex Farms Cricket Club & Academy, Chhawla, New Delhi" },
   { k: "Format", v: "Fourteen teams in two groups of seven, 42 league matches, then two semi-finals and the final" },
-  { k: "Match days", v: "Saturdays and Sundays, plus Republic Day (26 Jan) · 8 AM, 11:30 AM, 3 PM" },
+  { k: "Match days", v: "Saturdays and Sundays, one match per team a week · 8 AM, 11:30 AM, 3 PM" },
   { k: "Squads", v: "Up to 18 players, built at a live auction" },
 ];
 

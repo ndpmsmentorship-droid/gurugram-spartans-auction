@@ -279,7 +279,7 @@ Until it runs, `/schedule` renders its empty state rather than erroring.
   persistence contract but mean only "listed first"/"listed second"; the export calls them
   Team 1 / Team 2, and the slot-spread table has no home/away column.
 - **Defaults**: start Sat **20 Feb 2027** (third weekend of Feb), slots 08:00/12:00/16:00,
-  Sportscube Gurugram. All of it is editable in the admin UI, including blackout dates (any weekend
+  Essex Farms Cricket Club & Academy, Chhawla, New Delhi. All of it is editable in the admin UI, including blackout dates (any weekend
   touching one is skipped wholesale).
 - **`/admin/schedule`** — generate/regenerate (destructive: replaces all fixtures and discards
   entered results; the UI warns), clear (needs an explicit confirm token in the form), and per-match

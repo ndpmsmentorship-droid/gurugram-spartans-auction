@@ -104,7 +104,7 @@ function GeneratorForm({
             name="venue"
             defaultValue={config.venue}
             className="input"
-            placeholder="Sportscube, Gurugram"
+            placeholder="Essex Farms, Chhawla"
           />
         </Field>
 

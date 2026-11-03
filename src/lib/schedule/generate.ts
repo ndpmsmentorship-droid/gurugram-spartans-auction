@@ -101,7 +101,7 @@ export const DEFAULT_CONFIG: ScheduleConfig = {
   matchDays: ["Saturday", "Sunday"],
   slots: ["08:00", "11:30", "15:00"],
   blackoutDates: [],
-  venue: "Sportscube, Gurugram",
+  venue: "Essex Farms Cricket Club & Academy, Chhawla, New Delhi",
   // Seed 1 gives every team exactly two games in each slot (7 doesn't).
   seed: 1,
   // Nikhil, 3 Nov: from 23 Jan, at least 24 h between a team's matches, one

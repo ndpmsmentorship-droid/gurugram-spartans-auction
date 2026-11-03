@@ -63,7 +63,7 @@ const ROAD = [
   { when: "13–14 Mar 2027", what: "Knockout weekend", note: "Two semi-finals on 13 Mar, the final on 14 Mar" },
 ];
 
-const OPENER = "2027-01-16T08:00:00+05:30";
+const OPENER = "2027-01-23T08:00:00+05:30";
 
 const AT_A_GLANCE = [
   { k: "Season window", v: "23 Jan – 14 Mar 2027" },
@@ -674,7 +674,7 @@ export default async function Home() {
         <div className="mx-auto flex max-w-[1200px] flex-col items-center gap-5 px-4 py-10 text-center sm:px-7">
           <Image src={crest} alt="" className="h-16 w-auto" sizes="60px" />
           <p className="max-w-xl text-sm text-white/75">
-            SportsCube Center for Excellence, Darbaripur Road, Sector 70, Gurugram, Haryana 122101
+            Essex Farms Cricket Club &amp; Academy, near Shokeen International School, Chhawla, New Delhi 110071
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link href="/register" className="btn-accent">

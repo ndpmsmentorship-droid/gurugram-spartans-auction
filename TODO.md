@@ -141,6 +141,8 @@ state or zonal teams at any age group, paid contracts). Non-corporate profiles m
 
 ## Portal — before the Season 2 auction
 
+- [ ] **Schedule moved (3 Nov): season now 23 Jan → 14 Mar 2027** (semis 13 Mar, final 14 Mar; 28 Feb + 6 Mar are league days). Sites + owners page updated; still to update: partnership/sponsor deck, owners' Slides artifact deck, rule book, lawyer brief.
+
 ### Auction evidence for every player (Nikhil, 2 Nov 2026 — "dont forget")
 Why: the ₹1,000 registration fee is refundable only if the organisers reject a profile. Once a player is accepted into the pool it is not, bought or not, so every player needs a record that they were accepted and actually put up at the auction.
 - [x] **Dated "Approved: you're in the pool" email** (live 2 Nov): sent from playfulventures.co.in admin on Approve, states the date and time (IST) of acceptance and that the fee is no longer refundable.

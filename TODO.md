@@ -279,7 +279,7 @@ Library: 84 matches, 665 profiles, audit clean; ground page 48 S6 matches (par 1
 - [ ] M51 Haryana Titans v J&K Homelanders (`CldIXa783Z8`): preset ready 28 Oct (card-exact) — Time Tagger pass, then merge; fold lowercase `sumit bhat` duplicate into Sumit Bhat at merge
 - [x] M49 Chennai v Bharat Hunters (`rsX1F-aSDbw`): merged 26 Oct, 241/247 balls timed
 - [x] M49 shot pass (Shot Tagger), merged 2 Nov
-- [ ] M52 Japani v Jaipur (`e6nvixFF7oA`, 31 Oct): preset live, card-exact — Nikhil time-tags, then merge_m52 + shot pass
+- [ ] M52 Japani v Jaipur (`e6nvixFF7oA`, 31 Oct): Japani innings merged 3 Nov (107/122; untapped 7.1–8.6, 18.5, 19.3, 19.4) — Nikhil taps the chase + the gaps, then re-run merge_m52 + shot pass
 - [ ] M53 NCR v Bharat + M54 Srinagar v Haryana (31 Oct): presets live, card-exact — Nikhil time-tags
 - [ ] M55 Punjab v Goan Monks (1 Nov): preset live, card-exact — Nikhil time-tags
 - [ ] M56 Mumbai v J&K (1 Nov): preset live (CricHeroes header 146/11 is a glitch; 109 real balls) — Nikhil time-tags

@@ -141,7 +141,7 @@ state or zonal teams at any age group, paid contracts). Non-corporate profiles m
 
 ## Portal — before the Season 2 auction
 
-- [ ] **Schedule moved (3 Nov): season now 23 Jan → 14 Mar 2027, one match per team per weekend, no Republic Day game** (semis 13 Mar, final 14 Mar). Sites + owners page updated; still to update: partnership/sponsor deck, owners' Slides artifact deck, rule book, lawyer brief.
+- [ ] **Schedule moved (3 Nov): season now 23 Jan → 14 Mar 2027, one match per team per weekend, no Republic Day game** (semis 13 Mar, final 14 Mar). Sites + owners page updated; still to update: partnership/sponsor deck, owners' Slides artifact deck, rule book, lawyer brief. Also swap the venue there: Sportscube → Essex Farms Cricket Club & Academy, Chhawla (3 Nov; S1 mentions stay). Venue Partner logo on both sites is a stand-in wordmark (`brand/sponsors/essexfarms.png`) until the club's real logo arrives.
 
 ### Auction evidence for every player (Nikhil, 2 Nov 2026 — "dont forget")
 Why: the ₹1,000 registration fee is refundable only if the organisers reject a profile. Once a player is accepted into the pool it is not, bought or not, so every player needs a record that they were accepted and actually put up at the auction.
@@ -303,3 +303,31 @@ Library: 84 matches, 665 profiles, audit clean; ground page 48 S6 matches (par 1
 - [x] Shot Tagger lists only pending innings, hides < 20 balls left — 23 Oct
 - [x] Ground page tagline under the header — 23 Oct
 - [x] Nikhil Raina: 220 (74) sixes reel + 6 every-ball innings reels with covers/thumbs — 24 Oct
+
+## Captains' meet, 30 Oct 2026 (Vivanta Dwarka) — MoM by KD
+
+Approved and done (3 Nov):
+- [x] Selected-player fee ₹3,000 → ₹4,000 (both sites, T&C, mails)
+- [x] Refund only if the organisers reject the profile as ineligible (T&C v2.7)
+- [x] Players acknowledge the non-selection / refund policy before registering (declaration tick boxes)
+- [x] Players can change their own email: playfulventures.co.in/register/email (mobile + payment UTR, confirm link to the new inbox, heads-up to the old one; updates player_master too)
+- [x] Player Accountability Undertaking for paid players: T&C v2.8 section "Players who are paid to play" + 6th declaration; breach = barred from further SLL matches
+- [x] Season dates (see schedule)
+- [ ] Draft the signed Player Accountability Undertaking form itself (one page, for paid players to sign before their first match) — wording for the lawyer
+- [ ] Lawyer to review T&C v2.8 (refund rule + paid-player section)
+
+Not yet approved — for the next discussion:
+- [ ] A1 Registration workflow, steps, mandatory info, confirmation standard (most is built; needs sign-off)
+- [ ] A2 Onboarding: registered → shortlisted → selected communications and timelines per stage
+- [ ] A4 Profile scrutiny criteria; handling incomplete / incorrect / misleading profiles
+- [ ] A7 LinkedIn mandatory for business owners; collect more business info? (T&C already asks every player for LinkedIn)
+- [ ] B2 Semi/final dates vs other tournaments (Maha Shivaratri likely Sat 6 Mar; Republic Day long weekend on opening weekend; CBSE exams Feb–Mar)
+- [ ] C1 Retention policy: only SLL-1 players? conditions, process, deadline
+- [ ] C2 Squad size and composition, Playing 12, age categories A/B
+- [ ] C3 Legends eligibility criteria and policy
+- [ ] C4 Run allotment / special scoring for Legends
+- [ ] D1 Chit draw when teams clash on a player's amount
+- [ ] D2 Prize money split between owners and players; who communicates and implements it
+- [ ] D3 Owners' proposed amount brackets: submission deadline and review process
+- [ ] D4 Secret poll on the distribution model; confirm what 60:40 means (which share is players', which owners')
+- [ ] E1 Admin visibility of team composition: who sees what, confidentiality controls

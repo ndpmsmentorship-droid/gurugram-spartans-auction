@@ -18,7 +18,7 @@ create table if not exists schedule_config (
   match_days      text[]      not null default '{Saturday,Sunday}',
   slots           text[]      not null default '{08:00,12:00,16:00}',
   blackout_dates  date[]      not null default '{}',
-  venue           text        not null default 'Sportscube, Gurugram',
+  venue           text        not null default 'Essex Farms Cricket Club & Academy, Chhawla, New Delhi',
   seed            int         not null default 7,
   generated_at    timestamptz,
   updated_at      timestamptz not null default now()

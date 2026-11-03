@@ -1,7 +1,7 @@
 import type { StaticImageData } from "next/image";
 import playfulneuro from "./brand/sponsors/playfulneuro.png";
 import playfulVentures from "./brand/sponsors/playful-ventures.png";
-import sportscube from "./brand/sponsors/sportscube.png";
+import essexfarms from "./brand/sponsors/essexfarms.png";
 import mykos from "./brand/sponsors/mykos.png";
 import anthlete from "./brand/sponsors/anthlete.png";
 import saanvika from "./brand/sponsors/saanvika.png";
@@ -30,14 +30,14 @@ export const PRESENTED_BY: Sponsor = {
 export const PARTNERS: Sponsor[] = [
   { name: "Saanvika Films", role: "Associate Sponsor", logo: saanvika },
   { name: "Machan", role: "Associate Sponsor", logo: machan },
-  { name: "SportsCube", role: "Venue Partner", logo: sportscube },
+  { name: "Essex Farms Cricket Club & Academy", role: "Venue Partner", logo: essexfarms },
   { name: "Mykos", role: "Hospitality Partner", logo: mykos },
   { name: "Anthlete Nutritions", role: "Nutrition Partner", logo: anthlete },
   { name: "Smart Strength", role: "Fitness Partner", logo: smartstrength },
   { name: "Satya", role: "Wellness Partner", logo: satya },
 ];
 
-// Equal-area sizing: a fixed height makes square marks (SportsCube, Mykos)
+// Equal-area sizing: a fixed height makes square marks (Essex Farms, Mykos)
 // look tiny beside wide wordmarks (Satya, Smart Strength). Giving every logo
 // the same AREA instead balances their visual weight; maxH stops square marks
 // from towering over the row.

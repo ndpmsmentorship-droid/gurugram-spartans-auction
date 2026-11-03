@@ -311,10 +311,9 @@ Approved and done (3 Nov):
 - [x] Refund only if the organisers reject the profile as ineligible (T&C v2.7)
 - [x] Players acknowledge the non-selection / refund policy before registering (declaration tick boxes)
 - [x] Players can change their own email: playfulventures.co.in/register/email (mobile + payment UTR, confirm link to the new inbox, heads-up to the old one; updates player_master too)
-- [x] Player Accountability Undertaking for paid players: T&C v2.8 section "Players who are paid to play" + 6th declaration; breach = barred from further SLL matches
+- [x] No paid players (Nikhil, 3 Nov, replacing the MoM's "accountability undertaking"): T&C v2.9 section "No paid players" + 6th declaration "not a pro, never charged a fee to play, won't take money in SLL"; untrue = barred from further SLL matches without refund
 - [x] Season dates (see schedule)
-- [ ] Draft the signed Player Accountability Undertaking form itself (one page, for paid players to sign before their first match) — wording for the lawyer
-- [ ] Lawyer to review T&C v2.8 (refund rule + paid-player section)
+- [ ] Lawyer to review T&C v2.9 (refund rule + no-paid-players section)
 
 Not yet approved — for the next discussion:
 - [ ] A1 Registration workflow, steps, mandatory info, confirmation standard (most is built; needs sign-off)

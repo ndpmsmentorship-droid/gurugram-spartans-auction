@@ -1,0 +1,115 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>SDLL Captains&rsquo; Meet Minutes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap">
+<style>
+/* Rule book on the league letterhead: the letterhead and page footer are
+   stamped by the PDF renderer; this page sets the articles. Navy for
+   structure, legend red only for article numbers and rules. */
+:root{--ink:#0b1630;--muted:#4a5672;--line:#d8dde8;--tile:#f5f7fb;--red:#bc2423;--legend:#e8352b;--navy:#14274e;
+  --display:"Oswald","Arial Narrow",Impact,sans-serif;--body:"Barlow","Helvetica Neue",Arial,sans-serif}
+@page{size:A4;margin:50mm 20mm 22mm}
+*{box-sizing:border-box}
+html{background:#fff}
+body{margin:0;background:transparent;color:var(--ink);font:400 10.6pt/1.55 var(--body);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.wm{position:fixed;top:50%;left:50%;width:120mm;transform:translate(-50%,-50%);opacity:.05;z-index:0}
+.title,.toc,.art,.sig,.meta,.closing{position:relative;z-index:1}
+.title{text-align:center;margin:0 0 8mm}
+.title .k{font:600 9pt var(--display);letter-spacing:.32em;color:var(--red);text-transform:uppercase}
+.title h1{font:700 25pt/1.05 var(--display);text-transform:uppercase;letter-spacing:.02em;margin:2mm 0 1.5mm}
+.title .s{font-size:10pt;color:var(--muted)}
+.title .ed{display:inline-block;margin-top:3mm;padding:1.2mm 4mm;border:1px solid var(--line);border-radius:2mm;font-size:8.8pt;color:var(--muted)}
+.toc{border-top:2px solid var(--ink);border-bottom:1px solid var(--line);padding:3mm 0 3.5mm;margin:0 0 8mm;columns:2;column-gap:10mm;font-size:9.6pt}
+.toc div{break-inside:avoid;padding:.6mm 0;display:grid;grid-template-columns:20mm 1fr}
+.toc b{font:600 8.6pt var(--display);letter-spacing:.06em;color:var(--red);text-transform:uppercase}
+.art{margin:0 0 6.5mm}
+.art>h2{display:flex;align-items:baseline;gap:4mm;margin:0 0 2.5mm;padding-bottom:1.5mm;border-bottom:1.5px solid var(--ink);font:600 13.5pt/1.2 var(--display);text-transform:uppercase;letter-spacing:.03em;break-after:avoid}
+.art>h2 span{font-size:9.5pt;letter-spacing:.14em;color:var(--red);white-space:nowrap}
+h3{font:600 10.5pt var(--display);text-transform:uppercase;letter-spacing:.06em;color:var(--navy);margin:4mm 0 1.5mm;break-after:avoid}
+.cl{display:grid;grid-template-columns:12mm 1fr;margin:0 0 1.6mm;break-inside:avoid}
+.cl>.n{font:600 9.6pt/1.65 var(--display);color:var(--red)}
+.cl>div{min-width:0}
+.cl p{margin:0 0 1.2mm}
+.cl ol{margin:1mm 0 0;padding-left:6mm}
+.cl ol li{margin:0 0 .8mm}
+.cl ul{margin:1mm 0 0;padding-left:5mm}
+.cl ul li{margin:0 0 .6mm}
+table{width:100%;border-collapse:collapse;margin:1.5mm 0 2.5mm;font-size:9.6pt;font-variant-numeric:tabular-nums}
+th{background:var(--navy);color:#fff;text-align:left;font:600 8.4pt/1.3 var(--display);letter-spacing:.08em;text-transform:uppercase;padding:1.6mm 2.4mm}
+td{padding:1.5mm 2.4mm;border-bottom:1px solid var(--line);vertical-align:top}
+tr:nth-child(even) td{background:var(--tile)}
+.f{font:500 9.6pt/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace;background:var(--tile);border-left:2.5px solid var(--red);padding:2mm 3.5mm;margin:1.5mm 0 2mm;white-space:pre;break-inside:avoid}
+.def{font-weight:600}
+.sig{margin-top:10mm;display:grid;grid-template-columns:1fr 1fr;gap:14mm;font-size:9.4pt;color:var(--muted);break-inside:avoid}
+.sig div{border-top:1px solid var(--ink);padding-top:1.5mm}
+
+.meta{width:100%;border-collapse:collapse;margin:0 0 7mm;font-size:10pt}
+.meta th{width:42mm;background:var(--navy);color:#fff;text-align:left;font:600 8.6pt var(--display);letter-spacing:.08em;text-transform:uppercase;padding:2mm 3mm;border-bottom:1px solid #2a3c66}
+.meta td{padding:2mm 3mm;border-bottom:1px solid var(--line)}
+h4{font:600 10.2pt var(--body);margin:3mm 0 1mm;color:var(--ink);break-after:avoid}
+.pts{margin:0 0 2mm;padding-left:5.5mm}
+.pts li{margin:0 0 .9mm}
+.closing{display:grid;grid-template-columns:1fr 1fr;gap:14mm;margin-top:8mm;font-size:10pt;break-inside:avoid}
+.closing div{border-top:1px solid var(--ink);padding-top:1.5mm}
+.closing b{display:block;font:600 8.6pt var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+</style></head><body>
+<img class="wm" src="data:image/png;base64,WATERMARK" alt="">
+
+<div class="title">
+<div class="k">Shanti Devi Legends League (SDLL)</div>
+<h1>Minutes of Meeting</h1>
+<div class="s">Season 2 &ndash; Captains&rsquo; Meet</div>
+</div>
+<table class="meta"><tbody>
+<tr><th>Meeting Title</th><td>SDLL Season 2 &ndash; Captains&rsquo; Meet</td></tr>
+<tr><th>Date</th><td>30 October</td></tr>
+<tr><th>Time</th><td>7:00 PM</td></tr>
+<tr><th>Venue / Platform</th><td>Vivanta by Taj, Dwarka</td></tr>
+<tr><th>Attendees</th><td>SDLL Management Team, Team Owners, Captains, and other stakeholders.</td></tr>
+</tbody></table>
+
+<section class="art"><h2><span>Section 1</span>Objective of the Meeting</h2>
+<p style="margin:0">To discuss the key policies and operating framework for SDLL Season 2, including player registration and onboarding, tournament scheduling, team composition, player eligibility and retention, Legends policy, financial distribution, and team-management controls.</p>
+</section>
+
+<section class="art"><h2><span>Section 2</span>Agenda and Discussion Points</h2>
+<h3>A. Player Registration and Onboarding</h3>
+<h4>1. Player Registration Process</h4><ul class="pts"><li>The end-to-end player registration workflow for SDLL Season 2 was discussed, including registration steps, eligibility requirements, and mandatory information to be captured.</li><li>A standardized process for registration confirmation is to be established.</li></ul>
+<h4>2. Player Onboarding Scenario</h4><ul class="pts"><li>The onboarding journey from registration through shortlisting and final selection was discussed.</li><li>A structured communication process is to be defined for registered, shortlisted, selected, and non-selected players, along with clear timelines for each stage.</li></ul>
+<h4>3. Registration Fee Revision</h4><ul class="pts"><li>The proposal to revise the player registration fee from ₹3,000 to ₹4,000 was discussed.</li><li>The impact of the proposed revision on player participation and tournament operations is to be evaluated before the applicable fee is confirmed.</li></ul>
+<h4>4. Player Profile Scrutiny</h4><ul class="pts"><li>Player profiles will be scrutinized by the SDLL Management Team, with reference to the applicable SLL Season 1 terms and conditions.</li><li>The scrutiny process will cover the accuracy of player details, cricketing background, category, and eligibility.</li><li>The earlier registration requirements include a mandatory player photograph and father&rsquo;s name; the Instagram handle is optional.</li><li>A process is to be defined for addressing incomplete, incorrect, or misleading profile information.</li></ul>
+<h4>5. Player Non-Selection Terms and Confirmations</h4><ul class="pts"><li>The terms applicable to players who register but are not selected were discussed.</li><li>The refund position, if any, for the registration fee is to be clarified and communicated before registration.</li><li>Players should acknowledge the applicable non-selection terms and conditions as part of registration.</li></ul>
+<h4>6. Editable Email IDs in the Player Portal</h4><ul class="pts"><li>The possibility of allowing players to edit their registered email IDs through the portal was discussed.</li><li>Any email change should be subject to verification and authentication to maintain accurate communication and registration records.</li></ul>
+<h4>7. Additional Player Profile Requirements</h4><ul class="pts"><li>The proposal to collect LinkedIn profile details from players who own businesses or have relevant professional or business interests was discussed.</li><li>The applicability, additional information to be collected, and verification criteria are to be defined.</li></ul>
+<h4>8. Player Accountability Undertaking</h4><ul class="pts"><li>A formal undertaking for players receiving monetary compensation for participating in the tournament was discussed.</li><li>The undertaking is intended to set out player commitments relating to availability, participation, and agreed financial terms.</li><li>The consequences of non-compliance are to be clearly defined in the undertaking.</li></ul>
+
+<h3>B. Tournament Schedule and Dates</h3>
+<h4>1. Tournament Dates</h4><ul class="pts"><li>The proposed SDLL Season 2 tournament dates were discussed, taking into consideration player availability, ground availability, and potential scheduling conflicts.</li><li>The final tournament calendar is to be confirmed and communicated to participating teams.</li></ul>
+<h4>2. Semi-Final and Final Dates</h4><ul class="pts"><li>The proposed dates for the semi-finals and final were reviewed.</li><li>The schedule should be assessed against other ongoing and upcoming cricket tournaments to minimize clashes that may affect player availability, team strength, or audience participation.</li></ul>
+
+<h3>C. Player Retention and Eligibility Policies</h3>
+<h4>1. Player Retention Policy</h4><ul class="pts"><li>Retention eligibility was discussed with reference to participation in SLL Season 1.</li><li>As recorded in the earlier policy discussion, only players who participated in SLL Season 1 are eligible for consideration for retention.</li><li>The maximum retention per team is two players: one from Category A and one from Category B / Legends.</li><li>The final retention conditions, process, and applicable deadlines are to be confirmed and communicated.</li></ul>
+<h4>2. Team and Squad Combinations</h4>
+<ul class="pts"><li>The squad-size limits and Playing 12 format were discussed, along with age-based eligibility and Category A / Category B classification.</li><li><b>Decided:</b> players will be categorised as per the Shanti Devi Players Index (SPI).</li><li>The previously documented squad and playing limits are reproduced below for reference.</li></ul>
+<table><thead><tr><th>Player Category</th><th>Maximum Squad Allowed</th><th>Maximum Playing Allowed</th></tr></thead><tbody><tr><td>Legends</td><td>2</td><td>1</td></tr><tr><td>40+</td><td>8</td><td>6</td></tr><tr><td>35+</td><td>6</td><td>4</td></tr><tr><td>30+</td><td>2</td><td>1</td></tr><tr><td><b>Total</b></td><td><b>18</b></td><td><b>12</b></td></tr></tbody></table>
+<ul class="pts"><li>The previously recorded category-wise maximum playing combination is:</li></ul>
+<table><thead><tr><th>Category</th><th>Maximum Playing Allowed</th></tr></thead><tbody><tr><td>Legends</td><td>1</td></tr><tr><td>A</td><td>5</td></tr><tr><td>B</td><td>6</td></tr><tr><td><b>Total</b></td><td><b>12</b></td></tr></tbody></table>
+<ul class="pts"><li>A celebrity personality may be invited to play by each team owner.</li><li>The team composition framework is to be applied consistently to support balance and transparency.</li></ul>
+<h4>3. Legends Eligibility Criteria and Policy</h4><ul class="pts"><li>The previously documented Legends policy provides for a maximum of two Legends per team.</li><li>The recorded performance benchmarks for Legends are: batting average below 10 and strike rate below 100.</li><li>At least one Legend must play in each match; otherwise, a penalty of 25 runs applies.</li><li>A Legend is required to bat in the top four.</li><li>The eligibility, classification, and participation criteria are to be applied consistently across teams.</li></ul>
+<h4>4. Run Allotment for Legends</h4><ul class="pts"><li>The proposed special run-allotment / scoring provisions for Legends were discussed in relation to match balance and competitive fairness.</li><li><b>Decided:</b> for the duration of a Legend&rsquo;s innings, 1 run is counted as 2 runs, 4 runs as 6 runs, and 6 runs as 8 runs.</li><li>The final rule should be communicated to all teams before the tournament.</li></ul>
+
+<h3>D. Financial Policies and Prize Distribution</h3>
+<h4>1. Chit Amount and Potential Clashes</h4><ul class="pts"><li>The proposed chit / player amount in the event of a financial clash between teams was discussed.</li><li>The applicable amount and process are to be clarified and documented.</li></ul>
+<h4>2. Winning Amount Distribution Between Players and Owners</h4><ul class="pts"><li>The distribution of the winning amount between team owners and players was discussed.</li><li>A transparent allocation framework is to be established, including the responsibilities of team owners and SDLL Management in communicating and implementing the agreed distribution.</li></ul>
+<h4>3. Amount Brackets Proposed by Team Owners</h4><ul class="pts"><li>Team owners will determine their proposed amount brackets and submit them to the SDLL Management Team.</li><li>The submission deadline and process for reviewing and consolidating the proposals are to be communicated.</li></ul>
+<h4>4. Secret Polling for Amount Distribution</h4><ul class="pts"><li>A confidential poll was discussed as a mechanism to identify the preferred prize-money distribution model.</li><li>The proposed 60:40 distribution model was reviewed.</li><li>The exact interpretation of the 60:40 ratio&mdash;including the share allocated to players and the share allocated to owners&mdash;must be explicitly confirmed before implementation.</li><li>The SDLL Management Team will facilitate the polling process and communicate the outcome once approved.</li></ul>
+
+<h3>E. Team Management and Administrative Controls</h3>
+<h4>1. Team Composition Visibility for Administrators</h4><ul class="pts"><li>The visibility of team composition and squad details within the administrative portal was discussed.</li><li>Access permissions are to be defined for the SDLL Management Team and authorized administrators.</li><li>Appropriate confidentiality and access controls should be implemented to prevent unauthorized access to team information.</li></ul>
+</section>
+
+<section class="art"><h2><span>Section 3</span>Decisions and Resolutions</h2>
+<p style="margin:0">The matters captured in these minutes reflect the discussion points and the relevant policy references available at the time of preparation. Items requiring confirmation&mdash;including fee finalization, refund terms, tournament dates, financial brackets, and the 60:40 allocation&mdash;should be formally closed by the SDLL Management Team before implementation.</p>
+</section>
+
+<div class="closing"><div><b>Meeting closed by</b>K Bhai</div><div><b>Minutes prepared by</b>KD</div></div>
+
+</body></html>

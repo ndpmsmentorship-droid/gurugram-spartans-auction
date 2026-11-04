@@ -1,11 +1,15 @@
 // Renders the SLL-2 rule book: letterhead.html -> PNG band, then rulebook.html
 // -> A4 PDF with that band as the header and a page-numbered footer on every
 // page. Needs headless Chrome on CDP port 9351.
-//   node render.mjs "<out.pdf>"
+//   node render.mjs "<out.pdf>" [body.html] [footer label] [band.png]
 import fs from "node:fs";
 import path from "node:path";
 const dir = path.dirname(new URL(import.meta.url).pathname);
 const out = process.argv[2] || path.join(dir, "SLL-2 Rule Book.pdf");
+// optional: a different body page and footer label (letterhead stays the same)
+const src = process.argv[3] || "rulebook.html";
+const label = process.argv[4] || "SLL-2 Rules &amp; Regulations &middot; Issued 3 November 2026";
+const bandOut = process.argv[5];
 const crest = fs.readFileSync(path.join(dir, "crest.b64"), "utf8").trim();
 const wm = fs.readFileSync(path.join(dir, "wm.b64"), "utf8").trim();
 
@@ -28,14 +32,15 @@ await t.send("Emulation.setDeviceMetricsOverride", { width: 794, height: 150, de
 await t.send("Page.navigate", { url: "file://" + lh }); await new Promise((r) => setTimeout(r, 2500));
 const band = (await t.send("Page.captureScreenshot", { format: "png", clip: { x: 0, y: 0, width: 794, height: 150, scale: 1 } })).data;
 t.close();
+if (bandOut) fs.writeFileSync(bandOut, Buffer.from(band, "base64"));
 
 // 2. the book
-const book = tmp(".book.html", fs.readFileSync(path.join(dir, "rulebook.html"), "utf8").replace("WATERMARK", wm));
+const book = tmp(".book.html", fs.readFileSync(path.resolve(dir, src), "utf8").replace("WATERMARK", wm));
 t = await tab();
 await t.send("Page.navigate", { url: "file://" + book }); await new Promise((r) => setTimeout(r, 2500));
 const header = `<div style="width:100%;margin:0;padding:0;-webkit-print-color-adjust:exact"><img src="data:image/png;base64,${band}" style="display:block;width:210mm;height:auto;margin:0"></div>`;
 const footer = `<div style="width:100%;padding:0 20mm;font:8px Arial,sans-serif;color:#4a5672;display:flex;justify-content:space-between;align-items:center;-webkit-print-color-adjust:exact">
-<span style="border-top:2px solid #e8352b;padding-top:4px;flex:1">SLL-2 Rules &amp; Regulations &middot; Issued 3 November 2026</span>
+<span style="border-top:2px solid #e8352b;padding-top:4px;flex:1">${label}</span>
 <span style="border-top:2px solid #14274e;padding-top:4px">Page <span class="pageNumber"></span> of <span class="totalPages"></span></span></div>`;
 const r = await t.send("Page.printToPDF", { printBackground: true, preferCSSPageSize: true, displayHeaderFooter: true, headerTemplate: header, footerTemplate: footer });
 fs.writeFileSync(out, Buffer.from(r.data, "base64")); t.close();

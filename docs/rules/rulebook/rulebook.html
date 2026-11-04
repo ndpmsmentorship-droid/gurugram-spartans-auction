@@ -1,0 +1,303 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>SLL-2 Rule Book</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap">
+<style>
+/* Rule book on the league letterhead: the letterhead and page footer are
+   stamped by the PDF renderer; this page sets the articles. Navy for
+   structure, legend red only for article numbers and rules. */
+:root{--ink:#0b1630;--muted:#4a5672;--line:#d8dde8;--tile:#f5f7fb;--red:#bc2423;--legend:#e8352b;--navy:#14274e;
+  --display:"Oswald","Arial Narrow",Impact,sans-serif;--body:"Barlow","Helvetica Neue",Arial,sans-serif}
+@page{size:A4;margin:50mm 20mm 22mm}
+*{box-sizing:border-box}
+html{background:#fff}
+body{margin:0;background:transparent;color:var(--ink);font:400 10.6pt/1.55 var(--body);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.wm{position:fixed;top:50%;left:50%;width:120mm;transform:translate(-50%,-50%);opacity:.05;z-index:0}
+.title,.toc,.art,.sig{position:relative;z-index:1}
+.title{text-align:center;margin:0 0 8mm}
+.title .k{font:600 9pt var(--display);letter-spacing:.32em;color:var(--red);text-transform:uppercase}
+.title h1{font:700 25pt/1.05 var(--display);text-transform:uppercase;letter-spacing:.02em;margin:2mm 0 1.5mm}
+.title .s{font-size:10pt;color:var(--muted)}
+.title .ed{display:inline-block;margin-top:3mm;padding:1.2mm 4mm;border:1px solid var(--line);border-radius:2mm;font-size:8.8pt;color:var(--muted)}
+.toc{border-top:2px solid var(--ink);border-bottom:1px solid var(--line);padding:3mm 0 3.5mm;margin:0 0 8mm;columns:2;column-gap:10mm;font-size:9.6pt}
+.toc div{break-inside:avoid;padding:.6mm 0;display:grid;grid-template-columns:20mm 1fr}
+.toc b{font:600 8.6pt var(--display);letter-spacing:.06em;color:var(--red);text-transform:uppercase}
+.art{margin:0 0 6.5mm}
+.art>h2{display:flex;align-items:baseline;gap:4mm;margin:0 0 2.5mm;padding-bottom:1.5mm;border-bottom:1.5px solid var(--ink);font:600 13.5pt/1.2 var(--display);text-transform:uppercase;letter-spacing:.03em;break-after:avoid}
+.art>h2 span{font-size:9.5pt;letter-spacing:.14em;color:var(--red);white-space:nowrap}
+h3{font:600 10.5pt var(--display);text-transform:uppercase;letter-spacing:.06em;color:var(--navy);margin:4mm 0 1.5mm;break-after:avoid}
+.cl{display:grid;grid-template-columns:12mm 1fr;margin:0 0 1.6mm;break-inside:avoid}
+.cl>.n{font:600 9.6pt/1.65 var(--display);color:var(--red)}
+.cl>div{min-width:0}
+.cl p{margin:0 0 1.2mm}
+.cl ol{margin:1mm 0 0;padding-left:6mm}
+.cl ol li{margin:0 0 .8mm}
+.cl ul{margin:1mm 0 0;padding-left:5mm}
+.cl ul li{margin:0 0 .6mm}
+table{width:100%;border-collapse:collapse;margin:1.5mm 0 2.5mm;font-size:9.6pt;font-variant-numeric:tabular-nums}
+th{background:var(--navy);color:#fff;text-align:left;font:600 8.4pt/1.3 var(--display);letter-spacing:.08em;text-transform:uppercase;padding:1.6mm 2.4mm}
+td{padding:1.5mm 2.4mm;border-bottom:1px solid var(--line);vertical-align:top}
+tr:nth-child(even) td{background:var(--tile)}
+.f{font:500 9.6pt/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace;background:var(--tile);border-left:2.5px solid var(--red);padding:2mm 3.5mm;margin:1.5mm 0 2mm;white-space:pre;break-inside:avoid}
+.def{font-weight:600}
+.sig{margin-top:10mm;display:grid;grid-template-columns:1fr 1fr;gap:14mm;font-size:9.4pt;color:var(--muted);break-inside:avoid}
+.sig div{border-top:1px solid var(--ink);padding-top:1.5mm}
+</style></head><body>
+<img class="wm" src="data:image/png;base64,WATERMARK" alt="">
+
+<div class="title">
+<div class="k">Shanti Devi Legends League &middot; Season 2</div>
+<h1>Rules &amp; Regulations</h1>
+<div class="s">The official rule book of SLL-2, organised by Playful Ventures Private Limited</div>
+<div class="ed">Issued 3 November 2026 &middot; applies to the 2027 season</div>
+</div>
+
+<div class="toc">
+<div><b>Article 1</b>Tournament Overview</div>
+<div><b>Article 2</b>Shanti Devi Players Index (SPI) and Player Categories</div>
+<div><b>Article 3</b>Team Registration Fees</div>
+<div><b>Article 4</b>Match Schedule and Reporting</div>
+<div><b>Article 5</b>Tournament Format and Qualification</div>
+<div><b>Article 6</b>Squad, Playing XII and Retention</div>
+<div><b>Article 7</b>Uniform and Ground Entry</div>
+<div><b>Article 8</b>Legends</div>
+<div><b>Article 9</b>Broadcast, Photography and Hospitality</div>
+<div><b>Article 10</b>Standard T20 Playing Rules</div>
+<div><b>Article 11</b>Organiser Rights and Final Authority</div>
+<div><b>Article 12</b>Auction Day Operating Rules</div>
+<div><b>Article 13</b>Player Participation Fee</div>
+<div><b>Article 14</b>Code of Conduct and Discipline</div>
+</div>
+
+<section class="art"><h2><span>Preamble</span>The Spirit Behind the Rules</h2>
+<p style="margin:0 0 2mm">These rules are framed to uphold fairness, clarity and a genuine level playing field for all participants. They are intended not as restrictions but as a structure that lets the game be contested in the right spirit, where preparation, skill and collective effort decide success.</p>
+<p style="margin:0">By keeping uniform standards and transparent guidelines, the framework ensures balanced competition and meaningful on-field involvement, encouraging teams to perform as a unit rather than rely on a few individuals. It preserves the integrity of the tournament while celebrating participation, responsibility and the true spirit of cricket.</p>
+</section>
+<section class="art"><h2><span>Article 1</span>Tournament Overview</h2>
+<div class="cl"><div class="n">1.1</div><div>The tournament is played in the T20 (Twenty20) format.</div></div>
+<div class="cl"><div class="n">1.2</div><div>All matches are played with a white ball and in coloured clothing.</div></div>
+<div class="cl"><div class="n">1.3</div><div>Matches are played on weekends only, in three reporting slots (Article 4).</div></div>
+<div class="cl"><div class="n">1.4</div><div>The league stage is followed by the Semi-Finals and the Final, as set out in Article 5.</div></div>
+<div class="cl"><div class="n">1.5</div><div>The season runs from Saturday 23 January to Sunday 14 March 2027 at Essex Farms Cricket Club &amp; Academy, near Shokeen International School, Chhawla, New Delhi 110071.</div></div>
+<div class="cl"><div class="n">1.6</div><div>All matches follow standard ICC T20 playing conditions, except where these league rules say otherwise.</div></div>
+<div class="cl"><div class="n">1.7</div><div>All matches are scored on the league&rsquo;s official digital scoring platform.</div></div>
+</section>
+
+<section class="art"><h2><span>Article 2</span>Shanti Devi Players Index (SPI) and Player Categories</h2>
+<h3>Purpose</h3>
+<div class="cl"><div class="n">2.1</div><div>Every approved player receives an SPI score from 0 to 1000, built from their batting, bowling and fielding records. Each player then receives two ranks: an <span class="def">overall rank</span> across the whole pool and an <span class="def">age-bracket rank</span> against players of their own age bracket. Player categories follow from the bracket and the bracket rank.</div></div>
+
+<h3>Data sources</h3>
+<div class="cl"><div class="n">2.2</div><div>The SPI is built from:
+<table><thead><tr><th>Source</th><th>What is taken</th><th>Use</th></tr></thead><tbody>
+<tr><td>CricHeroes career profile (the player&rsquo;s own link)</td><td>Matches, runs, batting average, strike rate, 4s and 6s, 50s, wickets, economy, bowling average, catches, stumpings</td><td>Main input</td></tr>
+<tr><td>Registration form</td><td>Date of birth, declared role, wicket-keeper</td><td>Age bracket, role tie-break, keeper flag</td></tr>
+</tbody></table></div></div>
+<div class="cl"><div class="n">2.3</div><div>Figures are read on the freeze date, 29 November 2026. Matches played after that date do not count. The League reads CricHeroes figures from each player&rsquo;s own link.</div></div>
+
+<h3>Small samples</h3>
+<div class="cl"><div class="n">2.4</div><div>A record is a <span class="def">small sample</span> when it is below 30% of the pool median: fewer than 30% of the median player&rsquo;s matches for batting, or 30% of the median player&rsquo;s wickets for bowling. A small-sample skill receives a standard low score of 10 out of 100 instead of its percentile.</div></div>
+<div class="cl"><div class="n">2.5</div><div>The cut-off uses the median because a few very long careers pull the average up, and it moves with each season&rsquo;s pool. On the league&rsquo;s 1,000-player database at 3 November 2026 it falls at 101 matches (89 players below, 9%) and 56 wickets (205 players below, 21%).</div></div>
+<div class="cl"><div class="n">2.6</div><div>A player with no record is <span class="def">Unrated</span>, is placed in Category B, and may be moved by the grading panel after a trial or other evidence.</div></div>
+
+<h3>Skill scores</h3>
+<div class="cl"><div class="n">2.7</div><div>Each figure is converted to a percentile within the whole pool (0 = lowest, 100 = highest). For economy and bowling average, lower is better, so the order is reversed.
+<table><thead><tr><th>Score</th><th>Built from</th><th>Weights</th></tr></thead><tbody>
+<tr><td>Batting (Bat)</td><td>Batting average &middot; strike rate &middot; boundary %</td><td>40% &middot; 30% &middot; 30%</td></tr>
+<tr><td>Bowling (Bowl)</td><td>Wickets per match &middot; economy &middot; bowling average</td><td>40% &middot; 30% &middot; 30%</td></tr>
+<tr><td>Fielding (Fld)</td><td>Catches per match, plus stumpings for keepers</td><td>100%</td></tr>
+</tbody></table></div></div>
+<div class="cl"><div class="n">2.8</div><div><span class="def">Boundary %</span> is the share of balls faced hit for four or six: (4s + 6s) &divide; balls faced &times; 100, where balls faced = runs &divide; strike rate &times; 100.</div></div>
+
+<h3>Role</h3>
+<div class="cl"><div class="n">2.9</div><div>Each player&rsquo;s role is set from the two main scores:
+<table><thead><tr><th>Role</th><th>Rule</th></tr></thead><tbody>
+<tr><td>All-rounder</td><td>Bat &ge; 60 and Bowl &ge; 60 (top 40% of the pool in both)</td></tr>
+<tr><td>Batter</td><td>Not an all-rounder, and Bat &ge; Bowl</td></tr>
+<tr><td>Bowler</td><td>Not an all-rounder, and Bowl &gt; Bat</td></tr>
+<tr><td>Wicket-keeper</td><td>A flag added to the role when the player keeps</td></tr>
+</tbody></table>
+Where the two scores are within 2 points, the role declared on registration decides.</div></div>
+
+<h3>The SPI score</h3>
+<div class="cl"><div class="n">2.10</div><div>The SPI score is calculated as:
+<div class="f">SPI = 10 × ( 0.70 × max(Bat, Bowl) + 0.20 × min(Bat, Bowl) + 0.10 × Fld )</div>
+Ties are split by career matches (more first), then by registration date (earlier first).</div></div>
+
+<h3>Ranks and age brackets</h3>
+<div class="cl"><div class="n">2.11</div><div>A player&rsquo;s age is their completed years on <span class="def">Sunday 7 March 2027</span>, the day of the last league match. The age brackets are Under 35, 35&ndash;39 and 40 and over. Only players aged 30 or above on that date may take part.</div></div>
+<div class="cl"><div class="n">2.12</div><div>Each player receives an overall rank (among every approved player), an age-bracket rank (among players of the same bracket), and a place in the bracket&rsquo;s role lists: top batters by Bat, top bowlers by Bowl, and all-rounders by SPI.</div></div>
+
+<h3>Categories</h3>
+<div class="cl"><div class="n">2.13</div><div>Every player under 35 is <span class="def">Category A+</span>, whatever their score. They still receive both ranks.</div></div>
+<div class="cl"><div class="n">2.14</div><div>In the 35&ndash;39 and 40-and-over brackets, the top players by age-bracket rank are <span class="def">Category A</span> and the rest are <span class="def">Category B</span>. Each bracket is ranked only against itself.</div></div>
+<div class="cl"><div class="n">2.15</div><div>The number of Category A places is enough for 14 teams to hold up to 6 each, with some choice left, shared between the two brackets in proportion to the number of players in each, and never more than half a bracket:
+<div class="f">A places = 14 teams × 6 × 1.25 = 105
+bracket A = 105 × (players in bracket ÷ players in both brackets)</div></div></div>
+<div class="cl"><div class="n">2.16</div><div>Within each bracket, the A places are shared in proportion to the bracket&rsquo;s mix of batters, bowlers and all-rounders, each share filled from the top of its role list; places left over go to the next-best SPI.</div></div>
+<div class="cl"><div class="n">2.17</div><div>A player is placed in the <span class="def">Legend</span> category, instead of A+, A or B, if they are 60 or older on the cut-off date, or their career batting average is below 10 and their career strike rate is below 100 (raw career figures). The Board may also name any player a Legend, or make an exception, on a reasonable basis that it records. A Legend keeps both SPI ranks and is left out of the Category A count.</div></div>
+
+<h3>Worked example</h3>
+<div class="cl"><div class="n">2.18</div><div>Three illustrative 40-and-over players, none a small sample:
+<table><thead><tr><th>Player</th><th>Bat</th><th>Bowl</th><th>Fld</th><th>Role</th><th>SPI</th></tr></thead><tbody>
+<tr><td>Player X</td><td>92</td><td>18</td><td>55</td><td>Batter</td><td>10 × (64.4 + 3.6 + 5.5) = 735</td></tr>
+<tr><td>Player Y</td><td>71</td><td>74</td><td>60</td><td>All-rounder</td><td>10 × (51.8 + 14.2 + 6.0) = 720</td></tr>
+<tr><td>Player Z</td><td>22</td><td>88</td><td>40</td><td>Bowler</td><td>10 × (61.6 + 4.4 + 4.0) = 700</td></tr>
+</tbody></table></div></div>
+
+<h3>Governance</h3>
+<div class="cl"><div class="n">2.19</div><div>A grading panel of at least three people runs the index and signs off the categories.</div></div>
+<div class="cl"><div class="n">2.20</div><div>The panel may move a player by one category, with written reasons, where the record clearly misleads, for example after a long injury or with a thin, very old record.</div></div>
+<div class="cl"><div class="n">2.21</div><div>A player may ask once for a review before the auction pool is published. The panel&rsquo;s decision after review is final.</div></div>
+<div class="cl"><div class="n">2.22</div><div>Scores, ranks and categories are frozen when the auction pool is published. The weights and thresholds in this Article are reviewed after each season.</div></div>
+<div class="cl"><div class="n">2.23</div><div>Players are admitted to the auction pool only after a refinement process that ensures only eligible corporate players are considered; professional players are excluded.</div></div>
+<div class="cl"><div class="n">2.24</div><div>Owners are included in the SPI ranking, so that teams have a complete view of the pool.</div></div>
+<div class="cl"><div class="n">2.25</div><div>The League will explain the ranking of any individual player when an owner asks.</div></div>
+</section>
+
+<section class="art"><h2><span>Article 3</span>Team Registration Fees</h2>
+<div class="cl"><div class="n">3.1</div><div>The team registration fee is INR 5,00,000 (Five Lakh).</div></div>
+<div class="cl"><div class="n">3.2</div><div>Registration is confirmed only after full payment and successful document verification.</div></div>
+<div class="cl"><div class="n">3.3</div><div>Each team owner receives an exclusive invitation to a corporate-style networking event, followed by a premium lifestyle party, with the opportunity to meet leading corporate personalities, Bollywood celebrities, diplomats and other distinguished guests during the event and throughout the tournament. Owner benefits include:
+<ol>
+<li>an exclusive networking event with corporate leaders, Bollywood celebrities and diplomats;</li>
+<li>a special dress code and premium attire for Auction Day;</li>
+<li>an exclusive lifestyle party following the auction;</li>
+<li>official tournament merchandise and team apparel;</li>
+<li>match-day and night refreshments, including electrolytes and hydration support; and</li>
+<li>post-match celebrations and exclusive hospitality experiences, including drinks.</li>
+</ol></div></div>
+</section>
+
+<section class="art"><h2><span>Article 4</span>Match Schedule and Reporting</h2>
+<div class="cl"><div class="n">4.1</div><div>Matches are played on weekends only.</div></div>
+<div class="cl"><div class="n">4.2</div><div>Teams must report by the following times:
+<table><thead><tr><th>Slot</th><th>Reporting time</th></tr></thead><tbody>
+<tr><td>Morning</td><td>8:00 AM IST</td></tr><tr><td>Mid Day</td><td>11:30 AM IST</td></tr><tr><td>Day &amp; Night</td><td>3:00 PM IST</td></tr>
+</tbody></table></div></div>
+<div class="cl"><div class="n">4.3</div><div>Each team may change one (1) league match in an emergency, subject to organiser approval and ground availability.</div></div>
+<div class="cl"><div class="n">4.4</div><div>Late reporting may result in match penalties, including a reduction in overs, forfeiture or other action, as the match referee decides.</div></div>
+<div class="cl"><div class="n">4.5</div><div><span class="def">Reporting requirements.</span> At the reporting time each team must confirm its playing XII, submit the official team sheet, and ensure all its players are present in the approved team kit. Late reporting by a team or its players may lead to over penalties, warnings or disciplinary action, as the Match Referee or the League Organising Committee decides.</div></div>
+<div class="cl"><div class="n">4.6</div><div><span class="def">Toss.</span> The toss takes place at the designated toss time for each slot. Both captains must be present with the match umpires and officials. Teams submit their final playing XII to the match officials before the toss, after which no changes are permitted. The captain who marks attendance with the organiser first decides which team&rsquo;s Brand Ambassador flips the coin and which captain calls.</div></div>
+<div class="cl"><div class="n">4.7</div><div><span class="def">Brand Ambassador.</span> In keeping with the spirit of community and family the League represents, each team is encouraged to nominate a Brand Ambassador, a child from the team&rsquo;s ownership group, who represents the team at the toss ceremony.</div></div>
+<div class="cl"><div class="n">4.8</div><div><span class="def">Match duration.</span> A match is expected to take about 3 hours 30 minutes, including the mid-innings break. Each innings has a maximum of 100 minutes, within which the bowling side must complete its 20 overs. Failing to keep the over rate may lead to fielding restrictions or other penalties decided by the match officials.</div></div>
+</section>
+
+<section class="art"><h2><span>Article 5</span>Tournament Format and Qualification</h2>
+<div class="cl"><div class="n">5.1</div><div>Fourteen (14) teams take part, divided into Group A and Group B of seven teams each. Group allocation is decided by lottery.</div></div>
+<div class="cl"><div class="n">5.2</div><div>Each team plays six (6) league matches.</div></div>
+<div class="cl"><div class="n">5.3</div><div>The top two teams of each group qualify for the Semi-Finals:
+<ul><li>Semi-Final 1: Group A Rank 1 v Group B Rank 2</li><li>Semi-Final 2: Group B Rank 1 v Group A Rank 2</li></ul></div></div>
+<div class="cl"><div class="n">5.4</div><div>The winners of the Semi-Finals play the Final.</div></div>
+<div class="cl"><div class="n">5.5</div><div>The points table follows standard T20 league scoring unless announced otherwise: Win = 2 points, No Result = 1 point.</div></div>
+<div class="cl"><div class="n">5.6</div><div>Where teams are level on points, they are separated by Net Run Rate, then head-to-head result, then higher runs scored, as the organisers decide.</div></div>
+<div class="cl"><div class="n">5.7</div><div>A loss earns 0 points. A No Result (a match that cannot be completed) earns 1 point for each team.</div></div>
+</section>
+
+<section class="art"><h2><span>Article 6</span>Squad, Playing XII and Retention</h2>
+<div class="cl"><div class="n">6.1</div><div>Each squad has 18 players, made up as follows:
+<table><thead><tr><th>Category</th><th>In the squad</th><th>In the playing XII</th></tr></thead><tbody>
+<tr><td>Legend</td><td>Up to 2</td><td>Up to 1 (optional)</td></tr>
+<tr><td>A+</td><td>Up to 2</td><td>Up to 1</td></tr>
+<tr><td>A</td><td>Up to 6</td><td>Up to 6</td></tr>
+<tr><td>B</td><td>Up to 8</td><td>The rest</td></tr>
+<tr><td><b>Total</b></td><td><b>18</b></td><td><b>12</b></td></tr>
+</tbody></table></div></div>
+<div class="cl"><div class="n">6.2</div><div>The match-day playing strength is twelve (12) players, including one (1) Impact Player, as per the league playing conditions.</div></div>
+<div class="cl"><div class="n">6.3</div><div>The playing XII may include at most one (1) player under 35 and at most four (4) players aged 35&ndash;39. There is no limit on players aged 40 and over. Ages are taken on the cut-off date in clause 2.11.</div></div>
+<div class="cl"><div class="n">6.4</div><div><span class="def">Owner players.</span> A team may have up to three (3) playing owners: at most two (2) in Category A, who must be aged 40 or over, and at most one (1) in Category B, who may be aged 35 or over. Owner players count towards the 18 and all limits above.</div></div>
+<div class="cl"><div class="n">6.5</div><div><span class="def">Retention.</span> A team may retain two (2) players who played in Season 1: one (1) Category A and one (1) Category B, both aged 40 or over. No player under 35 may be retained, and Category A+ players may be acquired only at the auction.</div></div>
+<div class="cl"><div class="n">6.6</div><div>The category of every owner player and retained player is set by the SPI under Article 2.</div></div>
+<div class="cl"><div class="n">6.7</div><div>Any change to a squad after the registration deadline requires organiser approval.</div></div>
+<div class="cl"><div class="n">6.8</div><div>A team may make at most three (3) replacements, from the unsold auction pool only, each from the same age bracket and the same or a lower category. No outside players are permitted.</div></div>
+<div class="cl"><div class="n">6.9</div><div><span class="def">Minimum squad.</span> Each team must complete a squad of at least sixteen (16) players at the auction, including owner players and Legends. Non-playing owners do not count towards this minimum.</div></div>
+<div class="cl"><div class="n">6.10</div><div>A team that fails to reach the minimum squad is penalised: its most expensive purchase is released back into the auction pool, and fifty percent (50%) of that player&rsquo;s purchase value is forfeited and deducted from the team&rsquo;s purse.</div></div>
+<div class="cl"><div class="n">6.11</div><div>Of a team&rsquo;s three owner players, not all may be Category A; at least one must be Category B in the final SPI-based categorisation. Owners are classified strictly under the SPI and the owner conditions in this Article. Any deviation or special consideration for an owner arises only through prior discussion and agreement between the owner and the League Director at the time of onboarding, is taken solely to keep the competition balanced and fair, and the League Director&rsquo;s decision is final and binding.</div></div>
+<div class="cl"><div class="n">6.12</div><div>Any eleven (11) players from the playing XII may bat, and any eleven (11) may bowl. The wicketkeeper must be one of the playing XII. Other squad players may be used only as fielding substitutes.</div></div>
+</section>
+
+<section class="art"><h2><span>Article 7</span>Uniform and Ground Entry</h2>
+<div class="cl"><div class="n">7.1</div><div>Coloured team kit is mandatory, as per the tournament theme.</div></div>
+<div class="cl"><div class="n">7.2</div><div>Every playing player must wear the official league jersey set to enter the ground and take part in the match.</div></div>
+<div class="cl"><div class="n">7.3</div><div>Players without proper kit may be denied entry or participation.</div></div>
+<div class="cl"><div class="n">7.4</div><div>Substitute players must also wear the team kit. Players without complete team attire are not allowed on the field.</div></div>
+<div class="cl"><div class="n">7.5</div><div>All players must use only the designated changing rooms to change into their match kit.</div></div>
+</section>
+
+<section class="art"><h2><span>Article 8</span>Legends</h2>
+<div class="cl"><div class="n">8.1</div><div>Legend status is decided under clause 2.17.</div></div>
+<div class="cl"><div class="n">8.2</div><div>A team is not required to field a Legend. If a Legend is included in the playing XII, the Legend must bat in the first four (4) positions.</div></div>
+<div class="cl"><div class="n">8.3</div><div>Teams must declare their Legend before the match starts.</div></div>
+<div class="cl"><div class="n">8.4</div><div>For the entire duration of the Legend&rsquo;s innings, runs scored by the Legend count as follows:
+<table><thead><tr><th>Runs scored</th><th>Runs counted</th></tr></thead><tbody>
+<tr><td>1</td><td>2</td></tr><tr><td>4</td><td>6</td></tr><tr><td>6</td><td>8</td></tr>
+</tbody></table></div></div>
+<div class="cl"><div class="n">8.5</div><div>For detailed examples and scoring clarity, teams may contact the Match Referee.</div></div>
+<div class="cl"><div class="n">8.6</div><div>Only one (1) Legend in the playing XII receives the runs benefit in clause 8.4.</div></div>
+<div class="cl"><div class="n">8.7</div><div>There is no cap on the runs a Legend can score, and a Legend may bat through all 20 overs.</div></div>
+<div class="cl"><div class="n">8.8</div><div>A Legend may not use another player as a runner.</div></div>
+</section>
+
+<section class="art"><h2><span>Article 9</span>Broadcast, Photography and Hospitality</h2>
+<div class="cl"><div class="n">9.1</div><div>Matches are telecast live; the platform and schedule will be shared by the organisers.</div></div>
+<div class="cl"><div class="n">9.2</div><div>Unlimited photographs are provided as memories.</div></div>
+<div class="cl"><div class="n">9.3</div><div>Match-day refreshments and meals are included for participating players, as arranged by the organisers.</div></div>
+</section>
+
+<section class="art"><h2><span>Article 10</span>Standard T20 Playing Rules</h2>
+<div class="cl"><div class="n">10.1</div><div>Each side bats for twenty (20) overs.</div></div>
+<div class="cl"><div class="n">10.2</div><div>The standard T20 powerplay applies: the first five (5) overs, plus one (1) over between overs 11 and 15, with fielding restrictions.</div></div>
+<div class="cl"><div class="n">10.3</div><div>A bowler may bowl at most four (4) overs.</div></div>
+<div class="cl"><div class="n">10.4</div><div>Each team receives two (2) DRS reviews to challenge the umpire&rsquo;s decision in both innings.</div></div>
+<div class="cl"><div class="n">10.5</div><div>If a knockout match is tied, a Super Over may be played.</div></div>
+<div class="cl"><div class="n">10.6</div><div>Net Run Rate for the league standings is calculated by the standard method in the CricHeroes app.</div></div>
+<div class="cl"><div class="n">10.7</div><div>Umpire and match referee decisions are final on the field.</div></div>
+<div class="cl"><div class="n">10.8</div><div><span class="def">Powerplay detail.</span> Powerplay 1 is the first five overs of each innings. Powerplay 2 is one over that the batting team may take between overs 11 and 15; if it is not taken earlier, the 15th over automatically becomes Powerplay 2. Only two fielders are allowed outside the 30-yard circle during either powerplay.</div></div>
+<div class="cl"><div class="n">10.9</div><div><span class="def">Over rate.</span> Teams must complete their 20 overs within the allotted time. If the bowling side falls behind the required over rate, the number of fielders allowed outside the 30-yard circle may be reduced for the remaining overs.</div></div>
+<div class="cl"><div class="n">10.10</div><div>DRS reviews may be used for LBW, run-out and stumping decisions.</div></div>
+<div class="cl"><div class="n">10.11</div><div><span class="def">Rain and interruptions.</span> If a match is interrupted by weather or unavoidable circumstances, the Duckworth-Lewis-Stern (DLS) method applies and the match officials set the revised target or overs. In exceptional cases the organiser may reschedule or replay the match.</div></div>
+</section>
+
+<section class="art"><h2><span>Article 11</span>Organiser Rights and Final Authority</h2>
+<div class="cl"><div class="n">11.1</div><div>The organisers reserve the right to amend rules, schedules, venues and playing conditions where required by weather, logistics or other circumstances.</div></div>
+<div class="cl"><div class="n">11.2</div><div>All interpretations of these rules are made by the match referee or the organising committee, whose decision is final.</div></div>
+<div class="cl"><div class="n">11.3</div><div>The League Organising Committee and the Match Referee have final authority on match disputes, player eligibility, rule interpretation and disciplinary action. All decisions taken by the organisers are final and binding.</div></div>
+<div class="cl"><div class="n">11.4</div><div><span class="def">Disclaimer.</span> All rules are subject to interpretation and modification by the organisers where required for the smooth conduct of the tournament.</div></div>
+</section>
+
+
+<section class="art"><h2><span>Article 12</span>Auction Day Operating Rules</h2>
+<p style="margin:0 0 2mm">These rules govern conduct, decisions and enforcement on Auction Day, so the auction is fair, transparent and orderly.</p>
+<div class="cl"><div class="n">12.1</div><div><span class="def">Security and access.</span> Only the three (3) pre-approved owners submitted by each team receive security clearance and access to the auction table area. No other person, including legend co-owners, players, friends, family members or associates, is admitted to the auction table zone. Security personnel may deny entry to, or remove, any unauthorised person without further notice.</div></div>
+<div class="cl"><div class="n">12.2</div><div>Base prices, bid steps and caps are:<table><thead><tr><th>Category</th><th>Base price</th><th>Raise by</th><th>Cap</th></tr></thead><tbody><tr><td>Legend</td><td>₹15,000</td><td>₹5,000</td><td>₹50,000</td></tr><tr><td>A+</td><td>₹35,000</td><td>₹10,000</td><td>₹75,000</td></tr><tr><td>A</td><td>₹35,000</td><td>₹10,000</td><td>₹75,000</td></tr><tr><td>B</td><td>₹20,000</td><td>₹5,000</td><td>₹50,000</td></tr></tbody></table>The same base prices apply to owners and co-owners.</div></div>
+<div class="cl"><div class="n">12.3</div><div>Jump bids are permitted. When two or more owners reach a category&rsquo;s cap, the player goes to a secret tender at the capped price.</div></div>
+<div class="cl"><div class="n">12.4</div><div>Each team bids from a purse of ₹5,00,000 and may add an optional ₹1,00,000 top-up. A team that intends to use the top-up must formally notify the Auctioneer before it has spent 70% of its base purse (₹3,50,000); a team that does not notify in time may not go beyond the base purse.</div></div>
+<div class="cl"><div class="n">12.5</div><div><span class="def">Rounds.</span> The auction runs in rounds, with player names randomised within each round:<ol><li>Round 1: Legends</li><li>Round 2: Category A+</li><li>Round 3: Category A</li><li>Round 4: Category B</li></ol></div></div>
+<div class="cl"><div class="n">12.6</div><div><span class="def">Unsold players.</span> A player who receives no valid bid at their first listing is declared unsold. Unsold players may be re-listed, at the Auctioneer&rsquo;s discretion, in one or more Accelerated Rounds.</div></div>
+</section>
+
+<section class="art"><h2><span>Article 13</span>Player Participation Fee</h2>
+<div class="cl"><div class="n">13.1</div><div>Every player bought at the auction pays a participation fee of ₹4,000. No player may play until the fee is cleared, before the team&rsquo;s first match.</div></div>
+<div class="cl"><div class="n">13.2</div><div>Each player accepts this fee in the declaration signed at registration.</div></div>
+<div class="cl"><div class="n">13.3</div><div>The fee may be paid by the player, or by the team owner on the player&rsquo;s behalf. Fee collection begins when players are asked for their kit sizes, before the league starts.</div></div>
+<div class="cl"><div class="n">13.4</div><div>If a player does not pay, the team owner may either pay the fee to keep the player, or pick a replacement from the unsold player pool.</div></div>
+</section>
+
+<section class="art"><h2><span>Article 14</span>Code of Conduct and Discipline</h2>
+<p style="margin:0 0 2mm">The Shanti Devi Legends League is built on sportsmanship, respect and gentlemanly conduct. All players and captains are expected to uphold the dignity of the League during matches.</p>
+<div class="cl"><div class="n">14.1</div><div><span class="def">Spirit of the game.</span> Cricket must always be played in the true spirit of the game. Players must respect opponents, umpires, teammates and match officials at all times. The League values healthy competition, camaraderie and enjoyment over aggression or confrontation.</div></div>
+<div class="cl"><div class="n">14.2</div><div><span class="def">Respect for umpires.</span> Umpire decisions are final and binding. Players must not argue, protest or show dissent. Only the captain may politely approach the umpire for clarification, and only between deliveries or overs. Aggressive behaviour towards umpires invites immediate disciplinary action.</div></div>
+<div class="cl"><div class="n">14.3</div><div><span class="def">Behaviour on the field.</span> Players must not use abusive or offensive language, sledge or make personal remarks, or engage in physical confrontation. Players should communicate positively, encourage teammates and accept success and failure with dignity.</div></div>
+<div class="cl"><div class="n">14.4</div><div><span class="def">Captains.</span> Captains hold special responsibility for discipline. They must ensure their team follows league rules, control disputes involving their players, communicate respectfully with umpires and officials, and prevent situations from escalating. A captain may be held accountable if their team repeatedly breaks conduct rules.</div></div>
+<div class="cl"><div class="n">14.5</div><div><span class="def">Opponents.</span> Players must treat opponents with respect and courtesy, avoid provoking or insulting gestures, and shake hands and acknowledge good performances.</div></div>
+<div class="cl"><div class="n">14.6</div><div><span class="def">Safety and fair play.</span> Players must avoid dangerous or reckless play, respect the fielding safety rules, and tell the umpire if they believe a player is injured or unfit to continue.</div></div>
+<div class="cl"><div class="n">14.7</div><div><span class="def">Time discipline.</span> Teams must be ready on the field on time and avoid unnecessary delays between overs or innings.</div></div>
+<div class="cl"><div class="n">14.8</div><div><span class="def">Integrity.</span> Misrepresenting player information or a CricHeroes profile, falsely declaring or concealing a professional cricketing background to gain an advantage, manipulating league processes, or concealing facts that may affect the fairness of the competition breaks the trust the League operates on and invites strict disciplinary action.</div></div>
+<div class="cl"><div class="n">14.9</div><div><span class="def">Social media.</span> Players must not post abusive or defamatory comments about the League, players or officials, or share misleading or negative content that damages the League&rsquo;s reputation. Constructive feedback should go directly to the organisers.</div></div>
+<div class="cl"><div class="n">14.10</div><div><span class="def">Disciplinary action.</span> Breaking this Code may lead to an official warning, penalty runs to the opposition, temporary suspension from the match, a match ban, or League suspension in serious cases. The League Organising Committee&rsquo;s decision is final.</div></div>
+<div class="cl"><div class="n">14.11</div><div><span class="def">Commitment.</span> By taking part, every player and captain agrees to respect the spirit of the League, promote friendship and community among players, and represent their team and the League with dignity and sportsmanship.</div></div>
+<div class="cl"><div class="n">14.12</div><div><span class="def">Verification and objection window.</span> Category A+ and A players have been vetted by the organisers as far as practicable. Category B players may not have had the same depth of verification, and in some cases exceptions may have been granted (including, but not limited to, the absence of a LinkedIn profile or age-related considerations) based on SPI rankings and the information available. Because complete verification of a player&rsquo;s cricketing history or occupation is not always feasible:<ul><li>team owners may raise objections about any player&rsquo;s eligibility, background or possible misrepresentation;</li><li>an objection must be raised formally before the start of that player&rsquo;s team&rsquo;s second scheduled match;</li><li>if no objection is raised in time and the player plays the second match, the player is deemed fully cleared for the rest of the league, and no later objection, dispute or penalty about that player&rsquo;s eligibility is entertained.</li></ul></div></div>
+<div class="cl"><div class="n">14.13</div><div>All player and owner profiles are self-declared and must comply strictly with league rules. A false declaration or suppression of material information found within the objection window may lead to disciplinary action under league rules.</div></div>
+</section>
+
+<div class="sig"><div>For Playful Ventures Private Limited</div><div>Date of issue: 3 November 2026</div></div>
+</body></html>

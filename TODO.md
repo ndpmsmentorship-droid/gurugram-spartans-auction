@@ -333,6 +333,6 @@ Not yet approved — for the next discussion:
 
 ## Rules & SDPI drafts (4 Nov 2026)
 - [ ] SLL-2 Rules & Regulations draft (Midnight Stadium): https://claude.ai/artifact/64Z8cPbgkG9S58Z64EzPgS · PDF ~/Downloads/SDLL/SLL-2 Rules (Draft 4 Nov 2026).pdf — get sign-off on every Proposed/Open item
-- [ ] Shanti Devi Players Index (SDPI) methodology draft: https://claude.ai/artifact/52KYBhdN1paNyTtDTqd7sZ · PDF alongside — decided: 30–34 = A+ (max 2 per squad, 1 in XI); 35–39 and 40+ split A/B by bracket rank; every player gets an overall + age-bracket rank
-- [ ] Once the SDPI formula is signed off: compute scores, both ranks and categories from player_master.stats for the pool; show them in the War Room / pool list
+- [ ] Shanti Devi Players Index (SPI) methodology draft: https://claude.ai/artifact/52KYBhdN1paNyTtDTqd7sZ · PDF alongside — decided (4 Nov): age on 7 Mar 2027 (last league match); playing XII = under-35 max 1, 35–39 max 4, 40+ any, A max 6; Legend = 60+ or (avg<10 and SR<100) or Board pick; base/raise/cap from owners deck; every player gets an overall + age-bracket rank
+- [ ] Once the SPI formula is signed off: compute scores, both ranks and categories from player_master.stats for the pool; show them in the War Room / pool list
 - [ ] Old rule book doc (7fziqrSJa5TWeyBrMbCFzp) is stale (12 teams, ₹6L purse, 2 Jan auction, ₹3,000) — superseded by the new draft

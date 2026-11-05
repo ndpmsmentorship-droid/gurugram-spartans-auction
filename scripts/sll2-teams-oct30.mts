@@ -21,7 +21,7 @@ for (const l of fs.readFileSync(path.join(ROOT, ".env.local"), "utf8").split("\n
 const sb: any = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 
 const RENAME: Record<string, string> = {
-  "NCR Turbo Chargers": "SLL 10",
+  "NCR Turbo Chargers": "Tokyo Drifters", // was SLL 10 until 5 Nov
   "Patna Panthers": "Diplomats 1",
   "Uttrakhand Yoddhas": "Diplomats 2",
   "Bhojpuri Dabangs": "SLL 13",

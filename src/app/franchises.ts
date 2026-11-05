@@ -19,7 +19,7 @@ export const FRANCHISES: Franchise[] = [
   { name: "Chennai Thalaiva", group: "A", logo: chennaiThalaivas, owners: ["Vasant Kumar"] },
   { name: "Lucknow Strikers", group: "A", logo: lucknowStrikers, owners: ["Luvkesh", "Prashant Yadav"] },
   { name: "UP Warriors", group: "A", owners: ["Sandeep Kumar", "Bharat Sharma"] },
-  { name: "SLL 10", group: "A", owners: ["Vikram Chaddha", "Sumit Talwar", "Saurabh Anand"] },
+  { name: "Tokyo Drifters", group: "A", owners: ["Vikram Chaddha", "Sumit Talwar", "Saurabh Anand"] },
   { name: "Diplomats 1", group: "A", owners: [] },
   { name: "Goan Monks", group: "B", logo: goanMonks, owners: ["Sameer Bhalla", "Aditya Sharma"] },
   { name: "Gurugram Knights", group: "B", owners: ["Ayush Jagga"] },

@@ -31,7 +31,7 @@ Dates now: auction Sat 12 Dec 2026 · opener Sat 16 Jan 2027 · final Sun 7 Mar 
 - [ ] Auction rules in the app still SLL-1 style (squad 16–25, A+/A/B/Special, base 30K/20K/10K/5K); owners' meet deck says squad 18 (Legend 2 · 40+ 8 · 35+ 6 · 30+ 2), playing 12, bases Legend 15K · 40+ 20K · 35+ 35K · 30+ 35K, tender + chit draw at max — align War Room + planner
 - [ ] Planner/War Room pool is still the Sarda/SCCL stand-in pool; swap in vetted SLL-2 registrants (no-data players get flagged automatically)
 - [ ] Plan calls (going/hold/reject) live on the owner's device only; a plan_calls table would sync phone + laptop
-- [ ] Logos for UP Warriors, Gurugram Knights, SLL 10, Diplomats 1/2, SLL 13/14 (lettered crests until then); real names for SLL 10/13/14 and the Diplomats teams
+- [ ] Logos for UP Warriors, Gurugram Knights, SLL 10, Diplomats 1/2, SLL 13/14 (lettered crests until then); real names for SLL 13/14 (SLL 10 = Tokyo Drifters, 5 Nov) and the Diplomats teams
 - [ ] Script: Scouting pool rankings → player profile → War Room (purse, max safe bid, open slots) → My Squad
 - [ ] Ball Library: one Season 1 match — ball-by-ball video, pitch map, wagon wheel
 - [ ] Backup: screen recording of the full demo in case Wi-Fi fails; laptop + HDMI + hotspot

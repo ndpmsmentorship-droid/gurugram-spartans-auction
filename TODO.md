@@ -7,7 +7,7 @@ Last updated: 2026-11-05
 Strategy + status live here; work happens in separate sessions. Key dates: registration closes **29 Nov** · auction **Sat 12 Dec** · opener **Sat 23 Jan 2027** · final **Sun 14 Mar**.
 
 **Owners group**
-- [ ] Rule book — issued 3 Nov, live at playfulventures.co.in/rules (disclaimer added 5 Nov). Next: send to owners group; settle A+ vs the 6-A cap, purse cost of owners/retained players, under-35 owners
+- [ ] Rule book — issued 3 Nov, live at playfulventures.co.in/rules (disclaimer added 5 Nov). Next: send to owners group. Settled 5 Nov: A+ inside the 6-A XII cap (max 4 A with an A+), owners/retained cost = category price, under-35 owner = A+
 - [ ] Official list of teams + owners — PDF issued 5 Nov (`~/Downloads/SDLL/Teams & Owners/`). Waiting: Chennai owner spelling (Vasant/Vasanth), ACCI owners, Diplomats 1/2 owners, Puneet's team name, team #14
 
 **Sponsorship**

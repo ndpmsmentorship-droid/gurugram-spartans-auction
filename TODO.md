@@ -1,7 +1,29 @@
 # SDLL Portal — To-do
 
 Running list. New items go under the right heading; tick with `[x]` when done (move to Done at the bottom).
-Last updated: 2026-10-28
+Last updated: 2026-11-05
+
+## MASTER LIST — SLL-2 workstreams (Nikhil, 5 Nov 2026)
+Strategy + status live here; work happens in separate sessions. Key dates: registration closes **29 Nov** · auction **Sat 12 Dec** · opener **Sat 23 Jan 2027** · final **Sun 14 Mar**.
+
+**Owners group**
+- [ ] Rule book — issued 3 Nov, live at playfulventures.co.in/rules (disclaimer added 5 Nov). Next: send to owners group; settle A+ vs the 6-A cap, purse cost of owners/retained players, under-35 owners
+- [ ] Official list of teams + owners — PDF issued 5 Nov (`~/Downloads/SDLL/Teams & Owners/`). Waiting: Chennai owner spelling (Vasant/Vasanth), ACCI owners, Diplomats 1/2 owners, Puneet's team name, team #14
+
+**Sponsorship**
+- [ ] KEI update — status to come from Nikhil
+- [ ] Sponsorship deck — Aug deck is out of date: 14 teams, 45 matches, 23 Jan–14 Mar, Essex Farms, SLL-2 name; placeholders still open (S1 recap, reach, contacts)
+
+**Tech**
+- [ ] Registration form — public again 5 Nov at ₹1,000; daily vetting until 29 Nov; UAT test rows still in DB (leave until Nikhil says)
+- [ ] Auction day portal — owner logins (2 of 14 linked), dry run on a test board, sponsor swap, SLL-1 maroon leftovers, Auction Record + lot clips
+
+**Finance**
+- [ ] Clear invoicing — 40% advance (₹4 L + GST) to Playful Ventures; franchise fee collection status per team
+- [ ] Ground booking — Essex Farms for every match day 23 Jan–14 Mar (slots, deposit, written confirmation)
+
+**Marketing**
+- [ ] Social media strategy — registration push to 29 Nov, auction-night content, season calendar; handles for the site footer
 
 ## Owners' meeting — Fri 30 Oct 2026 (Vivanta by Taj, Dwarka)
 Agenda order: 1 Registration → 2 Owners Portal + Ball Library demo → 3 Auction rules → 4 League rules → 5 What the ₹5 lakh fee buys → Q&A + next steps.

@@ -77,6 +77,8 @@ export async function loadOwnerPool({
       "id, phone, full_name, status, is_returning, master_id, batting_hand, bowling_type, allrounder, is_keeper, employer, designation, photo_thumb_path, created_at",
     )
     .eq("season", SEASON)
+    // Page 1 saved, fee never paid (playful-site two-page form): not a registration yet.
+    .neq("status", "awaiting_payment")
     .order("created_at", { ascending: false });
   if (error) return null;
 

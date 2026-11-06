@@ -30,6 +30,8 @@ export async function signIn(
     }
   }
 
+  if (user?.app_metadata?.must_change_password) redirect("/change-password");
+
   // When the user came straight to /login (no deep-link), send owners to their
   // portal and everyone else to the pool.
   let dest = next;

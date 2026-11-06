@@ -71,6 +71,17 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // First sign-in on the starting password: nothing opens until the owner has
+  // set their own (app_metadata, so only the server can clear the flag).
+  if (user?.app_metadata?.must_change_password && pathname !== "/change-password") {
+    const to = request.nextUrl.clone();
+    to.pathname = "/change-password";
+    to.search = "";
+    const out = NextResponse.redirect(to);
+    for (const c of response.cookies.getAll()) out.cookies.set(c);
+    return out;
+  }
+
   // Third-party vetters work on the league admin (playfulventures.co.in/admin),
   // never in the owners' portal.
   if (user?.app_metadata?.role === "vetter") {

@@ -18,7 +18,7 @@ Strategy + status live here; work happens in separate sessions. Key dates: regis
 - [ ] Registration form — public again 5 Nov at ₹1,000; daily vetting until 29 Nov; UAT test rows still in DB (leave until Nikhil says)
   - [x] **Split into two pages — LIVE 7 Nov 2026** (v4 SQL run 6 Nov). Admin "Payment pending" tab = follow-up list; unpaid rows never reach the owners' pool. Was: page 1 = all details + uploads, validated and saved as a pending registration; page 2 = payment (QR / UTR / screenshot) attached to that saved row. Reason: players have paid but the form never got submitted — payment sits inside the long form and every check runs only after paying. Admin should list "details saved, payment pending" so the team can chase them
   - [x] **"What you get" section — LIVE 7 Nov on the payment step (page 2), not the top of /register:** make the page enticing — list what ₹1,000 and ₹4,000 buy; items to be confirmed by Nikhil before they go on the page
-- [ ] Auction day portal — owner logins (2 of 14 linked), dry run on a test board, sponsor swap, SLL-1 maroon leftovers, Auction Record + lot clips
+- [ ] Auction day portal — owner logins: 10 of 14 linked 7 Nov (`scripts/sll2-owner-logins.mts`, CSV in ~/Downloads/SDLL/Teams & Owners/; Diplomats 1/2, SLL 13/14 wait for owners), dry run on a test board, sponsor swap, SLL-1 maroon leftovers, Auction Record + lot clips
 
 **Finance**
 - [ ] Clear invoicing — 40% advance (₹4 L + GST) to Playful Ventures; franchise fee collection status per team
@@ -45,7 +45,7 @@ Dates now: auction Sat 12 Dec 2026 · opener Sat 16 Jan 2027 · final Sun 7 Mar 
 
 **2. Owners Portal + Ball Library — tour and demo**
 - [x] Demo owner login: username `demo` → Gurugram Knights (was Spartans) (`scripts/demo-owner-login.mts`), 10 targets seeded; owners can't record, live board untouched — 30 Oct
-- [ ] After the meeting: `node scripts/demo-owner-login.mts --unlink` before Gurugram Knights' real owner login is linked
+- [x] Demo unlinked from Gurugram Knights; real login `gknights` — 7 Nov
 - [ ] Leftover sale on the SLL-2 board: Amit Sehrawat → Gurugram Knights ₹6,000 (shows in War Room) — Nikhil to say keep or undo
 - [x] 14 teams per the owners' meet deck (`scripts/sll2-teams-oct30.mts`): SLL 10, Diplomats 1/2, SLL 13/14, Gurugram Knights, Chennai Thalaiva, Punjab Royals; owners on the landing cards; every purse ₹5 L + ₹1 L top-up — 30 Oct
 - [x] Owners: /plan squad planner (5 strategies, XII field map, Going for him / Hold / Reject) + War Room live decision card (verdict, XII impact, ceiling, chance, Why/Risk/Alternative) + AI scout chat (off until ANTHROPIC_API_KEY is set on Vercel) — 30 Oct

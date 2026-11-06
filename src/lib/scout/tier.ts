@@ -13,6 +13,13 @@
 
 import { LEAGUE } from "@/lib/league";
 
+// SLL-2 categories come from the SPI (rule book Article 2), computed after
+// registration closes and signed off by the grading panel. Until then the
+// owner-facing Planner and War Room show unsold players as "SPI pending"
+// rather than the stale imported labels. Flip to true once published.
+export const SPI_PUBLISHED = LEAGUE !== "sdll";
+export const SPI_PENDING = "SPI pending";
+
 export type AuctionCategory = "A+" | "A" | "B" | "Special";
 export const CATEGORIES: AuctionCategory[] = ["A+", "A", "B", "Special"];
 

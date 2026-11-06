@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getAuctionSeasonId, AUCTION_DIVISIONS } from "@/lib/auction/target";
 import { readLiveLot } from "@/lib/auction/read";
 import { LEAGUE_NAME, LEAGUE } from "@/lib/league";
+import { SPI_PUBLISHED } from "@/lib/scout/tier";
 import { type WRPlayer, type WRTeam } from "./WarRoom";
 import OwnerPortal, { type PortalTab } from "./OwnerPortal";
 import { selectAll } from "@/lib/supabase/select-all";
@@ -47,7 +48,9 @@ export default async function WarRoomPage({ searchParams }: { searchParams: Prom
   // Only players in the Season 2 registration pool (src/lib/auction/reg-pool.ts),
   // plus anyone already sold. The USCL demo keeps its own imported pool.
   const all = ((pool ?? []) as (WRPlayer & { source_id: string | null; cricheroes_link: string | null })[]).filter((p) => !p.is_rejected);
-  const players = (LEAGUE === "sdll" ? await inRegistrationPool(sb, all) : all) as WRPlayer[];
+  const pooled = (LEAGUE === "sdll" ? await inRegistrationPool(sb, all) : all) as WRPlayer[];
+  // Unsold players carry no category until the SPI is published (tier.ts).
+  const players = SPI_PUBLISHED ? pooled : pooled.map((p) => (p.team_id ? p : { ...p, auction_category: null }));
   return (
     <OwnerPortal
       tab={(["plan", "pool", "live"] as PortalTab[]).includes(tab as PortalTab) ? (tab as PortalTab) : "live"}

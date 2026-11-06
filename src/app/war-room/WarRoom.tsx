@@ -10,7 +10,7 @@ import { putUpLot, withdrawLot } from "@/app/admin/auction/live-actions";
 import { createClient } from "@/lib/supabase/client";
 import { PlayerPhoto } from "@/app/register/PlayerCard";
 import TeamCrest from "@/app/TeamCrest";
-import { catLabel, normCategory, type AuctionCategory } from "@/lib/scout/tier";
+import { catLabel, normCategory, SPI_PENDING, type AuctionCategory } from "@/lib/scout/tier";
 import { DEFAULT_RULES, inr, USCL_RETAIN, USCL_OWNER, USCL_AGE_BAND, USCL_PURSE, inAgeBand, bidStep } from "@/lib/auction/rules";
 import type { League } from "@/lib/league";
 import phaseData from "@/data/phase-stats.json";
@@ -75,6 +75,7 @@ const isSpin = (t: BowlTag | null) => !!t && !isPace(t);
 
 type Enriched = WRPlayer & {
   cat: AuctionCategory;
+  pend: boolean; // no category yet (SPI pending); cat is a B placeholder for the maths
   tag: BowlTag | null;
   lhb: boolean;
   phase: PhaseRow | null;
@@ -100,6 +101,8 @@ function doubtful(p: WRPlayer): string[] {
   return why;
 }
 
+const cl = (p: { cat: AuctionCategory; pend: boolean }) => (p.pend ? SPI_PENDING : catLabel(p.cat));
+
 function enrich(p: WRPlayer): Enriched {
   const lib = CV[p.full_name];
   const phase = lib?.bowler ? PHASES.bowlers[lib.bowler] ?? null : null;
@@ -109,6 +112,7 @@ function enrich(p: WRPlayer): Enriched {
   return {
     ...p,
     cat: normCategory(p.auction_category) ?? "B",
+    pend: !normCategory(p.auction_category),
     tag: bowlTag(p.bowling_style),
     lhb: /left/i.test(p.batting_style ?? ""),
     phase,
@@ -517,7 +521,7 @@ export default function WarRoom(props: {
   const aiSnapshot = () => {
     const n = (v: number | null | undefined) => (v == null ? "-" : String(Math.round(v * 10) / 10));
     const row = (p: Enriched) =>
-      [p.full_name, catLabel(p.cat), p.primary_role ?? "-", p.batting_style ?? "-", p.tag ?? p.bowling_style ?? "-",
+      [p.full_name, cl(p), p.primary_role ?? "-", p.batting_style ?? "-", p.tag ?? p.bowling_style ?? "-",
        `idx ${n(p.overall_index)} (bat ${n(p.bat_index)}, bowl ${n(p.bowl_index)})`,
        `${p.bat_matches ?? 0}m ${p.runs ?? 0}r avg ${n(p.bat_avg)} sr ${n(p.bat_sr)}`,
        `${p.wickets ?? 0}w econ ${n(p.economy)}`,
@@ -529,10 +533,10 @@ export default function WarRoom(props: {
     return [
       `Team: ${myTeam.name}. Purse left ${inr(purseLeft)} of ${inr(myTeam.purse_total)}; top-up still available ${inr(topUpsLeft)}. Max safe bid ${inr(maxSafe)} (keeps ${Math.max(0, stillNeed - 1)} slots at ${inr(R.base.B)}).`,
       `Squad ${me.size} (min ${R.squadMin}, max ${R.squadMax}). Category slots: ${cats}.`,
-      `Our squad:\n${mine.map((p) => `- ${p.full_name} | ${catLabel(p.cat)} | ${p.primary_role ?? "-"} | ${inr(p.sold_price ?? 0)}`).join("\n") || "- none yet"}`,
+      `Our squad:\n${mine.map((p) => `- ${p.full_name} | ${cl(p)} | ${p.primary_role ?? "-"} | ${inr(p.sold_price ?? 0)}`).join("\n") || "- none yet"}`,
       `Squad gaps:\n${needs.map((x) => `- ${x.label}: have ${x.have} of ${x.target}${x.picks.length ? `; best affordable: ${x.picks.map((p) => p.full_name).join(", ")}` : ""}`).join("\n")}`,
       onBlock
-        ? `On the block: ${onBlock.full_name} (${catLabel(onBlock.cat)}). Current bid ${inr(bid)}, next bid ${inr(nextBid)}${lot.leading_team_id ? `, leading: ${teams.find((t) => t.id === lot.leading_team_id)?.name ?? "?"}` : ""}. Rivals who can still afford him: ${rivals.map(({ t, s }) => `${t.name} (${inr(t.purse_total - s.spent)} left)`).join(", ") || "none"}. Similar affordable alternatives: ${alternatives.map((p) => p.full_name).join(", ") || "none"}.\n${row(onBlock)}`
+        ? `On the block: ${onBlock.full_name} (${cl(onBlock)}). Current bid ${inr(bid)}, next bid ${inr(nextBid)}${lot.leading_team_id ? `, leading: ${teams.find((t) => t.id === lot.leading_team_id)?.name ?? "?"}` : ""}. Rivals who can still afford him: ${rivals.map(({ t, s }) => `${t.name} (${inr(t.purse_total - s.spent)} left)`).join(", ") || "none"}. Similar affordable alternatives: ${alternatives.map((p) => p.full_name).join(", ") || "none"}.\n${row(onBlock)}`
         : "No player on the block right now.",
       `Wishlist: ${all.filter((p) => wish.has(p.id)).map((p) => `${p.full_name}${p.team_id ? " (gone)" : ""}`).join(", ") || "empty"}`,
       `Available pool, best ${pool.length} of ${available.length} by overall index (name | category | role | bat | bowl | index | batting | bowling | specialist | price | note):\n${pool.map(row).join("\n")}`,
@@ -591,7 +595,7 @@ export default function WarRoom(props: {
   const shown = useMemo(() => {
     const t = parsed.name;
     return all
-      .filter((p) => (!onlyAvail || !p.team_id) && (!catF || p.cat === catF) && (!t || p.full_name.toLowerCase().includes(t)))
+      .filter((p) => (!onlyAvail || !p.team_id) && (!catF || (!p.pend && p.cat === catF)) && (!t || p.full_name.toLowerCase().includes(t)))
       .filter((p) => parsed.filters.every((f) => f.test(p)) && (!parsed.afford || affordable(p)) && (!parsed.wish || wish.has(p.id)))
       .filter((p) =>
         !tagF ? true
@@ -665,7 +669,7 @@ export default function WarRoom(props: {
                     <li key={p.id}>
                       <button type="button" onClick={() => callUp(p)} className="flex w-full items-center justify-between gap-2 px-3 py-3 text-left hover:bg-wash">
                         <span className="font-medium">{p.full_name}{p.starDeath ? " ★D" : ""}{p.starPP ? " ★P" : ""}</span>
-                        <span className="tabular-nums shrink-0 text-xs text-muted">{catLabel(p.cat)} · {p.primary_role ?? ""}</span>
+                        <span className="tabular-nums shrink-0 text-xs text-muted">{cl(p)} · {p.primary_role ?? ""}</span>
                       </button>
                     </li>
                   ))}
@@ -867,7 +871,7 @@ export default function WarRoom(props: {
                     .map((p) => (
                       <li key={p.id} className="flex items-baseline justify-between gap-2">
                         <span className="truncate">{p.full_name}</span>
-                        <span className="shrink-0 tabular-nums text-faint">{catLabel(p.cat)} · {inr(p.sold_price)}</span>
+                        <span className="shrink-0 tabular-nums text-faint">{cl(p)} · {inr(p.sold_price)}</span>
                       </li>
                     ))}
                 </ul>
@@ -926,7 +930,7 @@ export default function WarRoom(props: {
                     ? me.size >= R.squadMax
                       ? `Our squad is full (${R.squadMax}).`
                       : `Age ${onBlock.age}: we already have ${USCL_AGE_BAND.buyMax} players aged 31–34 — the rulebook allows no more.`
-                    : `We have no ${catLabel(onBlock.cat)} slot left for him.`}
+                    : `We have no ${cl(onBlock)} slot left for him.`}
                 </p>
               )}
 
@@ -961,7 +965,7 @@ export default function WarRoom(props: {
                     {alternatives.map((p) => (
                       <li key={p.id} className="flex items-center justify-between gap-2">
                         <span className="truncate">{p.full_name}</span>
-                        <span className="tabular-nums shrink-0 text-muted">{catLabel(p.cat)} · {num(p.overall_index)}</span>
+                        <span className="tabular-nums shrink-0 text-muted">{cl(p)} · {num(p.overall_index)}</span>
                       </li>
                     ))}
                     {alternatives.length === 0 && <li className="text-muted">No similar player left that we can afford.</li>}
@@ -1018,7 +1022,7 @@ export default function WarRoom(props: {
                       {n.picks.map((p) => (
                         <button key={p.id} type="button" onClick={() => setViewId(p.id)} className="rounded-full border border-line bg-surface px-2.5 py-1 text-[0.78rem] transition hover:border-red" title="Open profile">
                           {wish.has(p.id) && <span className="text-gold">★ </span>}
-                          <span className="text-ink">{p.full_name}</span> <span className="tabular-nums text-muted">{catLabel(p.cat)}{phaseHint(p, n.key)}</span>
+                          <span className="text-ink">{p.full_name}</span> <span className="tabular-nums text-muted">{cl(p)}{phaseHint(p, n.key)}</span>
                           {p.doubt.length > 0 && <span className="ml-1 text-[#b7791f]" title={`Self-reported, looks doubtful: ${p.doubt.join(", ")}`}>⚠</span>}
                         </button>
                       ))}
@@ -1083,7 +1087,7 @@ export default function WarRoom(props: {
                     <p className="truncate text-[0.72rem] text-muted">
                       {p.team_id
                         ? `Gone · ${p.team_id === myTeamId ? "ours" : teamName(p.team_id)} ${inr(p.sold_price)}`
-                        : [catLabel(p.cat), p.tag, p.id === onBlock?.id ? "ON THE BLOCK" : affordable(p) ? null : "over our limit"].filter(Boolean).join(" · ")}
+                        : [cl(p), p.tag, p.id === onBlock?.id ? "ON THE BLOCK" : affordable(p) ? null : "over our limit"].filter(Boolean).join(" · ")}
                     </p>
                   </button>
                   <span className="shrink-0 font-display text-lg">{num(p.overall_index)}</span>
@@ -1109,7 +1113,7 @@ export default function WarRoom(props: {
                 <PlayerPhoto src={p.photo_url} name={p.full_name} className="h-10 w-10 shrink-0 rounded-full" sizes="40px" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{p.full_name}</p>
-                  <p className="truncate text-[0.72rem] text-muted">{[catLabel(p.cat), p.tag, p.acquired === "owner" ? "Owner" : p.acquired === "retained" ? "Retained" : p.acquired === "rtm" ? "RTM" : null].filter(Boolean).join(" · ")}</p>
+                  <p className="truncate text-[0.72rem] text-muted">{[cl(p), p.tag, p.acquired === "owner" ? "Owner" : p.acquired === "retained" ? "Retained" : p.acquired === "rtm" ? "RTM" : null].filter(Boolean).join(" · ")}</p>
                 </div>
                 <span className="tabular-nums text-sm">{inr(p.sold_price)}</span>
                 </button>
@@ -1185,7 +1189,7 @@ export default function WarRoom(props: {
                     {p.doubt.length > 0 && <span className="ml-1 text-[#b7791f]" title={`Self-reported, looks doubtful: ${p.doubt.join(", ")}`}>⚠</span>}
                   </p>
                   <p className="truncate text-[0.75rem] text-muted">
-                    {[catLabel(p.cat), p.tag, p.is_keeper ? "WK" : null, p.team_id ? `${teams.find((t) => t.id === p.team_id)?.name} ${inr(p.sold_price)}` : null].filter(Boolean).join(" · ")}
+                    {[cl(p), p.tag, p.is_keeper ? "WK" : null, p.team_id ? `${teams.find((t) => t.id === p.team_id)?.name} ${inr(p.sold_price)}` : null].filter(Boolean).join(" · ")}
                   </p>
                   <p className="mt-0.5 text-[0.75rem] tabular-nums text-ink">
                     SR <b>{num(p.bat_sr)}</b> · Avg <b>{num(p.bat_avg)}</b> · Econ <b>{num(p.economy)}</b>
@@ -1219,7 +1223,7 @@ export default function WarRoom(props: {
                     {p.doubt.length > 0 && <span className="ml-1 text-[#b7791f]" title={`Self-reported, looks doubtful: ${p.doubt.join(", ")}`}>⚠</span>}
                     {p.team_id && <span className="ml-1 text-[0.7rem] text-muted">· {teams.find((t) => t.id === p.team_id)?.name} {inr(p.sold_price)}</span>}
                   </td>
-                  <td className="px-2">{catLabel(p.cat)}</td>
+                  <td className="px-2">{cl(p)}</td>
                   <td className="px-2 text-muted">{p.tag ?? "—"}{p.is_keeper ? " · WK" : ""}</td>
                   <td className="tabular-nums px-2">{num(p.bat_matches)}</td>
                   <td className="tabular-nums px-2">{num(p.runs)}</td>
@@ -1315,7 +1319,7 @@ function Tile({ k, v, sub, strong, warn, compact }: { k: string; v: string; sub?
 }
 
 function Chips({ p }: { p: Enriched }) {
-  const chips = [catLabel(p.cat), p.primary_role, p.tag, p.is_keeper && !/keep/i.test(p.primary_role ?? "") ? "Keeper" : null, p.lhb ? "Left-hand bat" : null].filter(Boolean);
+  const chips = [cl(p), p.primary_role, p.tag, p.is_keeper && !/keep/i.test(p.primary_role ?? "") ? "Keeper" : null, p.lhb ? "Left-hand bat" : null].filter(Boolean);
   // brand sans, not the mono badge face, so the chips sit with the rest of the card
   const chip = "whitespace-nowrap rounded-full px-3 py-1 text-[0.8rem] font-medium";
   return (

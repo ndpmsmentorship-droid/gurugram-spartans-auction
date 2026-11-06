@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { normCategory } from "@/lib/scout/tier";
+import { normCategory, SPI_PENDING } from "@/lib/scout/tier";
 import { DEFAULT_RULES, inr } from "@/lib/auction/rules";
 import { rateAll, buildPlan, STRATEGIES, DATA_LABEL, type PlanPlayer, type Rated, type StrategyKey } from "@/lib/auction/planner";
 import { usePlanCalls, type Call } from "@/lib/auction/plan-calls";
@@ -51,6 +51,7 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
   }, [props.team.id]);
 
   const rated = useMemo(() => rateAll(players.map((p) => ({ ...p, cat: normCategory(p.auction_category) ?? "B" })), RULES), [players]);
+  const pending = useMemo(() => new Set(players.filter((p) => !normCategory(p.auction_category)).map((p) => p.id)), [players]);
   const mine = useMemo(() => rated.filter((p) => p.team_id === team.id), [rated, team.id]);
   const spent = mine.reduce((a, p) => a + (p.sold_price ?? 0), 0);
   const purseLeft = team.purse_total - spent;
@@ -131,7 +132,7 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
         <p className="text-[0.688rem] uppercase tracking-[0.14em] text-muted">To buy · {chosen.buys.length} players · {inr(chosen.cost)}</p>
         <ul className="mt-2 divide-y divide-line rounded-[12px] border border-line">
           {chosen.buys.map((p) => (
-            <Row key={p.id} p={p} call={calls[p.id]} setCall={(c) => setCall(p.id, c)} />
+            <Row key={p.id} p={p} pend={pending.has(p.id)} call={calls[p.id]} setCall={(c) => setCall(p.id, c)} />
           ))}
           {!chosen.buys.length && <li className="p-3 text-sm text-muted">Nothing left to buy: your squad is full or the purse is spent.</li>}
         </ul>
@@ -148,7 +149,7 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
         {found.length > 0 && (
           <ul className="mt-2 divide-y divide-line rounded-[12px] border border-line">
             {found.map((p) => (
-              <Row key={p.id} p={p} call={calls[p.id]} setCall={(c) => setCall(p.id, c)} />
+              <Row key={p.id} p={p} pend={pending.has(p.id)} call={calls[p.id]} setCall={(c) => setCall(p.id, c)} />
             ))}
           </ul>
         )}
@@ -159,7 +160,7 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
           <p className="text-[0.688rem] uppercase tracking-[0.14em] text-muted">On hold · {onHold.length}</p>
           <ul className="mt-2 divide-y divide-line rounded-[12px] border border-line">
             {onHold.map((p) => (
-              <Row key={p.id} p={p} call={calls[p.id]} setCall={(c) => setCall(p.id, c)} />
+              <Row key={p.id} p={p} pend={pending.has(p.id)} call={calls[p.id]} setCall={(c) => setCall(p.id, c)} />
             ))}
           </ul>
         </section>
@@ -181,7 +182,7 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
       )}
 
       <p className="mt-8 text-[0.688rem] leading-relaxed text-muted">
-        Ratings come from Sarda/SCCL and Ball Library records; prices are estimates from each player&rsquo;s category base and rating. Players marked
+        Ratings come from Sarda/SCCL and Ball Library records; prices are estimates from each player&rsquo;s category base and rating. Categories show &ldquo;SPI pending&rdquo; until the SPI grading is published after registration closes; until then those players are priced at the B base. Players marked
         &ldquo;No data yet&rdquo; or &ldquo;Little data&rdquo; are rated at their category&rsquo;s median until their numbers come in. Your calls stay on this
         device and are private to your team.
       </p>
@@ -207,14 +208,14 @@ function Legend({ c, l }: { c: string; l: string }) {
 }
 
 // Tapping the active call again clears it.
-function Row({ p, call, setCall }: { p: Rated; call?: Call; setCall: (c: Call | null) => void }) {
+function Row({ p, pend, call, setCall }: { p: Rated; pend: boolean; call?: Call; setCall: (c: Call | null) => void }) {
   return (
     <li className="p-3">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold">{p.full_name}</p>
           <p className="text-[0.75rem] text-muted">
-            {p.cat} · {p.primary_role ?? "—"}
+            {pend ? SPI_PENDING : p.cat} · {p.primary_role ?? "—"}
             {p.data !== "ok" && <span className="ml-1.5 rounded-full bg-gold-fill px-1.5 py-0.5 text-[0.625rem] text-gold">{DATA_LABEL[p.data]}</span>}
           </p>
         </div>

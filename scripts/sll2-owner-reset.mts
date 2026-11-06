@@ -2,9 +2,11 @@
 // change at first sign-in (Nikhil, 7 Nov 2026). The portal sends a flagged
 // owner to /change-password and nothing else opens until they set their own.
 //
-//   node --env-file=.env.local --experimental-strip-types scripts/sll2-owner-reset.mts
+//   START_PW='<starting password>' node --env-file=.env.local --experimental-strip-types scripts/sll2-owner-reset.mts
+// The starting password is passed in, never written in the repo.
 import { createClient } from "@supabase/supabase-js";
-const START = "12345678";
+const START = process.env.START_PW ?? "";
+if (START.length < 8) throw new Error("Set START_PW (8+ characters)");
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const sb: any = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
 const { data: season } = await sb.from("seasons").select("id").eq("is_active", true).single();

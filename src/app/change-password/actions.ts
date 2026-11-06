@@ -13,7 +13,6 @@ export async function changePassword(_prev: PwState, form: FormData): Promise<Pw
   const password = String(form.get("password") || "");
   const confirm = String(form.get("confirm") || "");
   if (password.length < 8) return { error: "Use at least 8 characters." };
-  if (password === "12345678") return { error: "Choose a password other than the starting one." };
   if (password !== confirm) return { error: "The two passwords don't match." };
 
   const supabase = await createClient();

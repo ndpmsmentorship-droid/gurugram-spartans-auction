@@ -359,4 +359,5 @@ Not yet approved — for the next discussion:
 - [ ] SLL-2 Rules & Regulations draft (Midnight Stadium): https://claude.ai/artifact/64Z8cPbgkG9S58Z64EzPgS · PDF ~/Downloads/SDLL/SLL-2 Rules (Draft 4 Nov 2026).pdf — get sign-off on every Proposed/Open item
 - [ ] Shanti Devi Players Index (SPI) methodology draft: https://claude.ai/artifact/52KYBhdN1paNyTtDTqd7sZ · PDF alongside — decided (4 Nov): age on 7 Mar 2027 (last league match); playing XII = under-35 max 1, 35–39 max 4, 40+ any, A max 6; Legend = 60+ or (avg<10 and SR<100) or Board pick; base/raise/cap from owners deck; every player gets an overall + age-bracket rank
 - [ ] Once the SPI formula is signed off: compute scores, both ranks and categories from player_master.stats for the pool; show them in the War Room / pool list
+  - 7 Nov: Planner + War Room now show unsold players as "SPI pending" (tier.ts SPI_PUBLISHED). After reg closes 29 Nov: get missing DOBs, compute SPI, panel sign-off (~3 Dec), write auction_category, set SPI_PUBLISHED true before the 12 Dec auction
 - [ ] Old rule book doc (7fziqrSJa5TWeyBrMbCFzp) is stale (12 teams, ₹6L purse, 2 Jan auction, ₹3,000) — superseded by the new draft

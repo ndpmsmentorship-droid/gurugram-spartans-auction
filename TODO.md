@@ -16,6 +16,7 @@ Strategy + status live here; work happens in separate sessions. Key dates: regis
 
 **Tech**
 - [ ] Registration form — public again 5 Nov at ₹1,000; daily vetting until 29 Nov; UAT test rows still in DB (leave until Nikhil says)
+  - [ ] **Split into two pages (Nikhil, 6 Nov — NOT to deploy yet):** page 1 = all details + uploads, validated and saved as a pending registration; page 2 = payment (QR / UTR / screenshot) attached to that saved row. Reason: players have paid but the form never got submitted — payment sits inside the long form and every check runs only after paying. Admin should list "details saved, payment pending" so the team can chase them
 - [ ] Auction day portal — owner logins (2 of 14 linked), dry run on a test board, sponsor swap, SLL-1 maroon leftovers, Auction Record + lot clips
 
 **Finance**

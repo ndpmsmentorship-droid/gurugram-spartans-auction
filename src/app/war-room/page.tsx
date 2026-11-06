@@ -8,6 +8,7 @@ import { LEAGUE_NAME, LEAGUE } from "@/lib/league";
 import { type WRPlayer, type WRTeam } from "./WarRoom";
 import OwnerPortal, { type PortalTab } from "./OwnerPortal";
 import { selectAll } from "@/lib/supabase/select-all";
+import { inRegistrationPool } from "@/lib/auction/reg-pool";
 
 export const metadata: Metadata = { title: "War Room" };
 export const dynamic = "force-dynamic";
@@ -27,7 +28,7 @@ export default async function WarRoomPage({ searchParams }: { searchParams: Prom
 
   const [{ data: teams }, { data: pool }, lot] = await Promise.all([
     sb.from("teams").select("id, name, purse_total, purse_max, owner_profile_id, logo_url").eq("season_id", seasonId).in("division", AUCTION_DIVISIONS).order("name"),
-    selectAll(sb, "scout_players", "id, full_name, photo_url, age, primary_role, batting_style, bowling_style, is_keeper, auction_category, bat_matches, runs, bat_avg, bat_sr, wickets, economy, bowl_sr, bat_index, bowl_index, overall_index, team_id, sold_price, acquired, rtm_against, is_rejected"),
+    selectAll(sb, "scout_players", "id, source_id, cricheroes_link, full_name, photo_url, age, primary_role, batting_style, bowling_style, is_keeper, auction_category, bat_matches, runs, bat_avg, bat_sr, wickets, economy, bowl_sr, bat_index, bowl_index, overall_index, team_id, sold_price, acquired, rtm_against, is_rejected"),
     readLiveLot(seasonId),
   ]);
 
@@ -43,7 +44,10 @@ export default async function WarRoomPage({ searchParams }: { searchParams: Prom
     return <main className="mx-auto max-w-[900px] px-4 py-16 text-muted">No teams in the active season yet.</main>;
   }
 
-  const players = ((pool ?? []) as WRPlayer[]).filter((p) => !p.is_rejected);
+  // Only players in the Season 2 registration pool (src/lib/auction/reg-pool.ts),
+  // plus anyone already sold. The USCL demo keeps its own imported pool.
+  const all = ((pool ?? []) as (WRPlayer & { source_id: string | null; cricheroes_link: string | null })[]).filter((p) => !p.is_rejected);
+  const players = (LEAGUE === "sdll" ? await inRegistrationPool(sb, all) : all) as WRPlayer[];
   return (
     <OwnerPortal
       tab={(["plan", "pool", "live"] as PortalTab[]).includes(tab as PortalTab) ? (tab as PortalTab) : "live"}

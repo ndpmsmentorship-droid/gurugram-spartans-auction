@@ -27,8 +27,6 @@ const GROUP: Record<string, PoolStatus> = {
   pending: "review",
   under_review: "review",
 };
-// Test entries made while building the form (dummy 99999… numbers) stay out of the owners' view.
-const isTest = (phone: string | null) => !!phone && /^9{5}/.test(phone);
 
 type Master = {
   id: string;
@@ -98,7 +96,8 @@ export async function loadOwnerPool({
     photo_thumb_path: string | null;
     created_at: string;
   };
-  const rows = ((data ?? []) as Row[]).filter((r) => !isTest(r.phone));
+  // Nobody is hidden by phone number (Nikhil, 7 Nov): test entries are deleted, not filtered.
+  const rows = (data ?? []) as Row[];
 
   const ids = rows.map((r) => r.master_id).filter(Boolean) as string[];
   const masters = new Map<string, Master>();

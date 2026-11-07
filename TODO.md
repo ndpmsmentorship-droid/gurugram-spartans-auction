@@ -134,6 +134,11 @@ state or zonal teams at any age group, paid contracts). Non-corporate profiles m
    one-line reason in vet_notes. Compare with the player's own pro declaration — a hidden match = reject (T&C §false declaration).
 6. Daily report to Nikhil: new registrations, fees to verify, flagged players with evidence; admin decides.
 
+## Daily clip prep for the auction big screen (every day while registration is open — Nikhil, 7 Nov 2026)
+- [ ] Each day: take the new live registrations, match them to Ball Library players, rerun `scripts/build-ball-reels.py`, and download only the new players' clips (wickets, sixes, fours) with the local clip helper (`scripts/nd-clips/`, yt-dlp + ffmpeg, on Nikhil's machine)
+- [ ] Store clips locally, one folder per player, with a manifest of who is done (runs stay incremental); list players with no footage
+- [ ] Before 12 Dec: big screen `/auction/reel` plays the LOCAL files from the auction-night machine, not YouTube; full offline lot test
+
 ## Master player file and CricHeroes stats (27 Oct 2026)
 
 - [x] Master player file for the core team at playfulventures.co.in/admin/players (admins only): all 1,014 players in player_master with S2 registration matched in, new S2 players added live; Excel "master file" download.

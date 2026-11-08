@@ -85,7 +85,7 @@ export default async function LoginPage({
             <span className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-white/55">Presented by</span>
             <Image src={playfulWhite} alt="Playful Ventures" className="h-10 w-auto" sizes="90px" />
           </span>
-          <span className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-white/55">Auction night · Sat 12 Dec 2026</span>
+          <span className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-white/55">Auction night · Sat 19 Dec 2026</span>
         </div>
       </section>
 

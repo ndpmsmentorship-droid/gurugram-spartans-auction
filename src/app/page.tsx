@@ -58,7 +58,7 @@ const STATS = [
 // Where the season stands. `now` marks the current step.
 const ROAD = [
   { when: "Open now", what: "Player registration", note: "Returning players in two taps", now: true },
-  { when: "12 Dec 2026", what: "Live auction", note: "14 franchises, one room, one purse each" },
+  { when: "19 Dec 2026", what: "Live auction", note: "14 franchises, one room, one purse each" },
   { when: "23 Jan 2027", what: "Season opener", note: "Weekend day games from 8 AM" },
   { when: "13–14 Mar 2027", what: "Knockout weekend", note: "Two semi-finals on 13 Mar, the final on 14 Mar" },
 ];

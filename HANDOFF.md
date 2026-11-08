@@ -28,7 +28,7 @@ _Local Claude memory does not transfer across machines — this file is the sour
 - **Registrations now (2 Nov):** Nikhil Dhingra (email nikhildhingra@ndpms.in, reset to pending for email tests), Dheeraj Nasa, Pulkit Bhardwaj, Deepak Begraj (= CricHeroes "Bobby Chaudhary") — all **pending**. Their CricHeroes batting/bowling/fielding stats were refreshed from Nikhil's screen recording into `player_master.stats` (`_by` "Screen recording (CricHeroes) 2 Nov").
 
 ### Auction evidence for every player (TODO.md → "Auction evidence for every player")
-Approval mail done. To build before 12 Dec: per-player **Auction Record** from `auction_event` (never delete those rows); **cut-to-cut lot clips** (exactly put-up → SOLD/UNSOLD) from the 5–6 camera YouTube live programme — ask whether the vision mixer can record the programme locally; **private** 9:16 reels; "your auction moment" mail; dry run with cameras before 12 Dec; T&C lines (no refund once in the pool, recording consent) for the lawyer.
+Approval mail done. To build before 19 Dec: per-player **Auction Record** from `auction_event` (never delete those rows); **cut-to-cut lot clips** (exactly put-up → SOLD/UNSOLD) from the 5–6 camera YouTube live programme — ask whether the vision mixer can record the programme locally; **private** 9:16 reels; "your auction moment" mail; dry run with cameras before 19 Dec; T&C lines (no refund once in the pool, recording consent) for the lawyer.
 
 ### Other
 - Ball Library clip cut for Nikhil: `~/Downloads/clips/ND Cric - 3h57m57s.mp4` (SCCL 2026 Day 1, 3:57:47–3:58:02, ND Cric pill + www.ndpms.in). Overlay `wm.png` reusable.

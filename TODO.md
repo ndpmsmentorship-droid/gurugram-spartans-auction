@@ -4,7 +4,7 @@ Running list. New items go under the right heading; tick with `[x]` when done (m
 Last updated: 2026-11-05
 
 ## MASTER LIST — SLL-2 workstreams (Nikhil, 5 Nov 2026)
-Strategy + status live here; work happens in separate sessions. Key dates: registration closes **29 Nov** · auction **Sat 12 Dec** · opener **Sat 23 Jan 2027** · final **Sun 14 Mar**.
+Strategy + status live here; work happens in separate sessions. Key dates (auction moved 12 → 19 Dec on 8 Nov): registration closes **29 Nov** · auction **Sat 19 Dec** · opener **Sat 23 Jan 2027** · final **Sun 14 Mar**.
 
 **Owners group**
 - [ ] Rule book — issued 3 Nov, live at playfulventures.co.in/rules (disclaimer added 5 Nov). Next: send to owners group. Settled 5 Nov: A+ inside the 6-A XII cap (max 4 A with an A+), owners/retained cost = category price, no owner may be under 35
@@ -137,7 +137,7 @@ state or zonal teams at any age group, paid contracts). Non-corporate profiles m
 ## Daily clip prep for the auction big screen (every day while registration is open — Nikhil, 7 Nov 2026)
 - [ ] Each day: take the new live registrations, match them to Ball Library players, rerun `scripts/build-ball-reels.py`, and download only the new players' clips (wickets, sixes, fours) with the local clip helper (`scripts/nd-clips/`, yt-dlp + ffmpeg, on Nikhil's machine)
 - [ ] Store clips locally, one folder per player, with a manifest of who is done (runs stay incremental); list players with no footage
-- [ ] Before 12 Dec: big screen `/auction/reel` plays the LOCAL files from the auction-night machine, not YouTube; full offline lot test
+- [ ] Before 19 Dec: big screen `/auction/reel` plays the LOCAL files from the auction-night machine, not YouTube; full offline lot test
 
 ## Master player file and CricHeroes stats (27 Oct 2026)
 
@@ -156,7 +156,7 @@ state or zonal teams at any age group, paid contracts). Non-corporate profiles m
 
 ## Quotation and contract
 - [x] League entity for all legal agreements = Playful Ventures Pvt Ltd (Nikhil, 11 Oct); legal brief for counsel: https://claude.ai/code/artifact/975f6099-a6fc-4e4a-8fa7-dfbd1387e7e5
-- [ ] Auction Rules & Regulations — ON HOLD (Nikhil, 11 Oct: rules still change a lot). Notes parked in the "On hold: Auction rules" tab of the legal brief; finalise and send to the lawyer before the 12 Dec 2026 auction
+- [ ] Auction Rules & Regulations — ON HOLD (Nikhil, 11 Oct: rules still change a lot). Notes parked in the "On hold: Auction rules" tab of the legal brief; finalise and send to the lawyer before the 19 Dec 2026 auction
 - [ ] Confirm the company spelling: "Foundary Tek Private Ltd" vs "Foundry" (must match the incorporation certificate)
 - [ ] Add GSTIN, CIN and registered address for Foundary Tek and Playful Ventures to the quotation header
 - [ ] Confirm my suggested numbers: ₹2.5L per season from Season 3, ₹4,000 per match for the Ball Library
@@ -175,10 +175,10 @@ state or zonal teams at any age group, paid contracts). Non-corporate profiles m
 ### Auction evidence for every player (Nikhil, 2 Nov 2026 — "dont forget")
 Why: the ₹1,000 registration fee is refundable only if the organisers reject a profile. Once a player is accepted into the pool it is not, bought or not, so every player needs a record that they were accepted and actually put up at the auction.
 - [x] **Dated "Approved: you're in the pool" email** (live 2 Nov): sent from playfulventures.co.in admin on Approve, states the date and time (IST) of acceptance and that the fee is no longer refundable.
-- [ ] **Auction Record per player** (in the system): one page per player built from `auction_event` — put up at (time), base price, every bid (team, amount, time), final result SOLD to team at ₹X or UNSOLD. Save as PDF, link it on the player's admin card on playfulventures.co.in, attach it to the post-auction mail. Needs the timeline logged reliably on 12 Dec (operator pad events already timestamp put_up / bid / sell / unsold / undo; make sure undo/reverseSale stay in the record, never deleted).
-- [ ] **Video of every lot, cut to cut** (decided 2 Nov): source = the auction's **YouTube live broadcast** (5–6 camera switched programme, room + big screen). One clip per player, **exactly from their put-up to their SOLD/UNSOLD** — no pre-roll, no break footage, nothing else from the stream. Cut points come from `auction_event` times; sync the stream clock to the auction log with a marker (big-screen sync flash / first lot) and check the offset on a few lots before cutting all ~400. A player re-auctioned after going unsold gets both lots joined in one clip. Prefer the switcher's local programme recording over the YouTube VOD if available (full quality, no live-stream dropouts). Test on a dry run before 12 Dec.
+- [ ] **Auction Record per player** (in the system): one page per player built from `auction_event` — put up at (time), base price, every bid (team, amount, time), final result SOLD to team at ₹X or UNSOLD. Save as PDF, link it on the player's admin card on playfulventures.co.in, attach it to the post-auction mail. Needs the timeline logged reliably on 19 Dec (operator pad events already timestamp put_up / bid / sell / unsold / undo; make sure undo/reverseSale stay in the record, never deleted).
+- [ ] **Video of every lot, cut to cut** (decided 2 Nov): source = the auction's **YouTube live broadcast** (5–6 camera switched programme, room + big screen). One clip per player, **exactly from their put-up to their SOLD/UNSOLD** — no pre-roll, no break footage, nothing else from the stream. Cut points come from `auction_event` times; sync the stream clock to the auction log with a marker (big-screen sync flash / first lot) and check the offset on a few lots before cutting all ~400. A player re-auctioned after going unsold gets both lots joined in one clip. Prefer the switcher's local programme recording over the YouTube VOD if available (full quality, no live-stream dropouts). Test on a dry run before 19 Dec.
 - [ ] **Ask the broadcast team:** can the vision mixer **record the programme feed locally** as well as streaming it? That copy is full quality with none of a live stream's dropouts. If yes, cut from it; if not, use the YouTube recording.
-- [ ] **Dry run before 12 Dec:** a few test lots with the cameras live and streaming, to confirm the clip cuts land exactly on put-up and SOLD/UNSOLD. Never use the live SLL-2 board for this (test season or DEV_FIXTURE).
+- [ ] **Dry run before 19 Dec:** a few test lots with the cameras live and streaming, to confirm the clip cuts land exactly on put-up and SOLD/UNSOLD. Never use the live SLL-2 board for this (test season or DEV_FIXTURE).
 - [ ] **9:16 reel per player** from that clip (crest, player card, bid ticker, SOLD/UNSOLD stamp). **Private — not posted publicly**; sent only to the player.
 - [ ] **"Your auction moment" mail** after the auction (approved 2 Nov): each player privately gets their cut-to-cut clip + reel + Auction Record.
 - [ ] **T&C wording for the lawyer:** (1) "Once your profile is accepted into the auction pool, the registration fee is not refundable, whether or not a team buys you." (2) consent to the auction being recorded and clips used as a record and for league promotion.
@@ -293,10 +293,10 @@ For league owners who reach us from the Instagram posts (08 league owners, 09 au
 - [x] Back to SDLL (league-switch sdll, LEAGUE = "sdll"), USCL owner logins banned, library framing DENY, ndpms.in band removed
 - [ ] USCL Spartans data left as-is: Amit Sehrawat (39 or 40?) unrecorded; 2nd ₹25K top-up unrecorded (official spend ₹2,37,000)
 - [x] SDLL big screen `/auction/screen` + operator pad `/admin/auction/pad` (4 Oct): one tap/key per team bids the next step, Enter = sold, Backspace = take back a bid
-- [ ] Before 12 Dec 2026: clear the test rows from `auction_event` (the lot # counts put-ups), run a dry auction on the pad, swap sponsor placeholders for the S2 deck's signed partners
+- [ ] Before 19 Dec 2026: clear the test rows from `auction_event` (the lot # counts put-ups), run a dry auction on the pad, swap sponsor placeholders for the S2 deck's signed partners
 - [ ] Auction day only (approved): re-enable Ball Library framing for a clips panel on the big screen; put DENY back afterwards
 - [x] SDLL pool = every player captured so far: 1,050 (295 SDLL + 321 USCL + 434 SARDA S6), deduped by CricHeroes id / name+age; new rows source_id `pool:uscl:…` / `pool:sccl:…` (scripts/sdll-pool-merge.mts) — 4 Oct
-- [ ] SDLL auction (Sat 12 Dec 2026): big-screen display + War Room; sponsors = partnership-deck placeholders; up next + recent sales; library embed ON for the auction screen (same-origin, like USCL day)
+- [ ] SDLL auction (Sat 19 Dec 2026): big-screen display + War Room; sponsors = partnership-deck placeholders; up next + recent sales; library embed ON for the auction screen (same-origin, like USCL day)
 - [ ] S6 M27 (NCR v BKB): scripted in s6-tagger (top preset) — awaiting Nikhil's time-tag, then publish + merge_m27
 
 ## CricVideos Ball Library + Instagram — 24 Oct 2026
@@ -364,5 +364,5 @@ Not yet approved — for the next discussion:
 - [ ] SLL-2 Rules & Regulations draft (Midnight Stadium): https://claude.ai/artifact/64Z8cPbgkG9S58Z64EzPgS · PDF ~/Downloads/SDLL/SLL-2 Rules (Draft 4 Nov 2026).pdf — get sign-off on every Proposed/Open item
 - [ ] Shanti Devi Players Index (SPI) methodology draft: https://claude.ai/artifact/52KYBhdN1paNyTtDTqd7sZ · PDF alongside — decided (4 Nov): age on 7 Mar 2027 (last league match); playing XII = under-35 max 1, 35–39 max 4, 40+ any, A max 6; Legend = 60+ or (avg<10 and SR<100) or Board pick; base/raise/cap from owners deck; every player gets an overall + age-bracket rank
 - [ ] Once the SPI formula is signed off: compute scores, both ranks and categories from player_master.stats for the pool; show them in the War Room / pool list
-  - 7 Nov: Planner + War Room now show unsold players as "SPI pending" (tier.ts SPI_PUBLISHED). After reg closes 29 Nov: get missing DOBs, compute SPI, panel sign-off (~3 Dec), write auction_category, set SPI_PUBLISHED true before the 12 Dec auction
+  - 7 Nov: Planner + War Room now show unsold players as "SPI pending" (tier.ts SPI_PUBLISHED). After reg closes 29 Nov: get missing DOBs, compute SPI, panel sign-off (~3 Dec), write auction_category, set SPI_PUBLISHED true before the 19 Dec auction
 - [ ] Old rule book doc (7fziqrSJa5TWeyBrMbCFzp) is stale (12 teams, ₹6L purse, 2 Jan auction, ₹3,000) — superseded by the new draft

@@ -36,7 +36,7 @@ function roleOf(p: Bought): "Keeper" | "All-rounder" | "Bowler" | "Batter" {
 export const metadata: Metadata = { title: "Owners’ portal" };
 export const dynamic = "force-dynamic";
 
-const AUCTION = new Date("2026-12-12T18:00:00+05:30");
+const AUCTION = new Date("2026-12-19T18:00:00+05:30");
 const R = DEFAULT_RULES;
 const daysTo = (d: Date) => Math.max(0, Math.ceil((d.getTime() - Date.now()) / 86400000));
 
@@ -103,7 +103,7 @@ export default async function OwnersHome({ searchParams }: { searchParams: Promi
           </div>
           <div className="flex w-full items-baseline gap-3 border-t border-white/15 pt-4 sm:ml-auto sm:block sm:w-auto sm:border-0 sm:pt-0 sm:text-right">
             <p className="font-display text-4xl font-bold leading-none">{days}</p>
-            <p className="font-mono sm:mt-1 text-[0.625rem] uppercase tracking-[0.2em] text-white/60">days to auction night · 12 Dec</p>
+            <p className="font-mono sm:mt-1 text-[0.625rem] uppercase tracking-[0.2em] text-white/60">days to auction night · 19 Dec</p>
           </div>
         </div>
       </section>

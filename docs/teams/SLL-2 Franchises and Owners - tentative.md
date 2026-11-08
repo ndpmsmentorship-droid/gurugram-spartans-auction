@@ -1,6 +1,6 @@
 # SLL-2 franchises and owners — tentative working list
 
-_Working copy, last updated 8 Nov 2026 (Nikhil's list). Not for circulation. The League's last
+_Working copy, last updated 8 Nov 2026 (Nikhil's list; Bengal Tigers and Chennai Thalaiva excluded). Not for circulation. The League's last
 official list is [`SLL-2 Franchises and Owners (5 Nov 2026).pdf`](SLL-2%20Franchises%20and%20Owners%20(5%20Nov%202026).pdf)
 (`teams.html`); this file is ahead of it and should be re-issued as the official list once
 confirmed._
@@ -25,18 +25,23 @@ confirmed._
 **Totals:** 12 franchises listed · 9 with owners · 18 owners named (out of 36 possible places,
 3 per team) · 8 portal logins already exist for these teams.
 
-## Not on the 8 Nov list — confirm
+## Excluded for now (Nikhil, 8 Nov 2026)
 
-- **Bengal Tigers** (Dipak Kumar Singh, K. Raj Bhansali) — on the 5 Nov official list, has a
+- **Bengal Tigers** (Dipak Kumar Singh, K. Raj Bhansali) — on the 5 Nov official list; has a
   portal login `thebengaltigers` and a logo.
-- **Chennai Thalaiva** (Vasant Kumar) — on the 5 Nov official list, has a portal login
+- **Chennai Thalaiva** (Vasant Kumar) — on the 5 Nov official list; has a portal login
   `chennai` and a logo.
 
-If both are out, the league is **12 teams, not 14**. That changes, at least:
-- the schedule (built for 2 groups of 7, 45 matches, one game per team per weekend; Rule 5);
-- the Category A count in Rule 2.15 (written as 14 teams × 6 × 1.25 = 105; for 12 teams = 90);
-- the sponsor deck, the owners' deck and the plan, which all say 14 teams;
-- their two owner logins, which should be disabled if they're out.
+The league is therefore planned as **12 teams, not 14**. Still to follow from that:
+- [ ] Schedule: rebuild for 12 teams (the 3 Nov schedule is 2 groups of 7, 45 matches, one game
+      per team per weekend) — and decide the format (2 groups of 6 → 30 league matches + 2 semis +
+      final = 33, or another format). Rule 5.2 (six league matches each) and the dates may change.
+- [ ] Rule book: Rule 5.1 (14 teams, groups of seven) and Rule 2.15 (A places = 14 × 6 × 1.25 =
+      105; for 12 teams = 90) need a new version.
+- [ ] App: disable the two owner logins and remove the two teams from the active season
+      (`teams` table, `src/app/franchises.ts`) — production change, needs Nikhil's go-ahead.
+- [ ] Re-issue the official franchise list; update the sponsor deck, owners' deck and the plan.
+- [ ] Tell both franchises in writing.
 
 ## Notes
 
@@ -66,7 +71,7 @@ From the draft Franchise Participation Agreement and the Rules (3 Nov):
 - 8 Nov 2026 (later) — Nikhil's updated list: 12 teams; ACCI full name and owner spellings;
   Luvi Grover; Aditya Prakash Sharma; Punjab Royals → Punjab Warriors; Gurugram → Gurgaon
   Knights + Sajal Sharma; Jaipur without Hemant Kumar; Team 9 = Puneet Jain + Sandeep
-  Bharadwaj; Team 10 in consideration; Bengal Tigers and Chennai Thalaiva not listed.
+  Bharadwaj; Team 10 in consideration; Bengal Tigers and Chennai Thalaiva excluded for now (confirmed by Nikhil).
 - 8 Nov 2026 — first tentative list, built from the 5 Nov official list.
 - Earlier: SLL 10 → Tokyo Drifters (5 Nov); Lucknow owner is Prashant Yadav, not Dr. Rohan;
   Gurugram Spartans → Gurugram Knights; the SCCL 6 "Team Owners" sheet (24 teams, used in Sep)

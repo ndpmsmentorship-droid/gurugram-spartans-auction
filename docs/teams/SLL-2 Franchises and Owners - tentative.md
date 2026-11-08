@@ -1,57 +1,73 @@
 # SLL-2 franchises and owners — tentative working list
 
-_Working copy, last updated 8 Nov 2026. Not for circulation: the League's official list is
-[`SLL-2 Franchises and Owners (5 Nov 2026).pdf`](SLL-2%20Franchises%20and%20Owners%20(5%20Nov%202026).pdf)
-(`teams.html`), which wins wherever the two differ. Update this file as owners confirm, then
-re-issue the official list._
+_Working copy, last updated 8 Nov 2026 (Nikhil's list). Not for circulation. The League's last
+official list is [`SLL-2 Franchises and Owners (5 Nov 2026).pdf`](SLL-2%20Franchises%20and%20Owners%20(5%20Nov%202026).pdf)
+(`teams.html`); this file is ahead of it and should be re-issued as the official list once
+confirmed._
 
-Sources: the official list of 5 Nov 2026 (owners) · `src/app/franchises.ts` (groups from the
-3 Nov schedule draw, logos) · `scripts/sll2-owner-logins.mts` (portal logins, 7 Nov) ·
-TODO.md "Owners group" (what is still awaited).
+## The franchises (as of 8 Nov 2026)
 
-## The 14 franchises
+| # | Franchise | Owner(s) | Owners | Portal login | Change since 5 Nov list | Still awaited |
+|---|---|---|---|---|---|---|
+| 1 | The American Cricket Club of India (ACCI) | Vishal Salgy, Russell Stamets, Pradeep Mahalawat | 3 | `theacciowner` | Full name was "American Club of India"; owners were spelled Russel A., Pardeep | — |
+| 2 | Lucknow Strikers | Luvi Grover, Prashant Yadav | 2 | `lucknow` | "Luvkesh" → Luvi Grover | — |
+| 3 | Goan Monks | Aditya Prakash Sharma, Sameer Bhalla | 2 | `goanmonks` | Aditya Sharma → full name | — |
+| 4 | Punjab Warriors | Sunil Bansal | 1 | `punjab` | Renamed from Punjab Royals | New logo (old one is Punjab Royals) |
+| 5 | Tokyo Drifters | Vikram Chaddha, Saurabh Anand, Sumit Talwar | 3 | `tokyodrifters` | — | Logo |
+| 6 | Gurgaon Knights | Ayush Jagga, Sajal Sharma | 2 | `gknights` | Was "Gurugram Knights"; Sajal Sharma added | Logo; see note on Sajal |
+| 7 | UP Warriors | Sandeep Kumar, Bharat Sharma | 2 | `upwarriors` | — | Logo |
+| 8 | Jaipur Royals | Saurav Suneja | 1 | `jaipur` | Hemant Kumar no longer listed | Confirm Hemant Kumar is out |
+| 9 | Team 9 (name awaited) | Puneet Jain, Sandeep Bharadwaj | 2 | none | Was "Puneet's team / SLL 13"; Sandeep Bharadwaj added | Team name, logo, login |
+| 10 | Team 10 | _in consideration_ | 0 | none | Was "SLL 14 / name awaited" | Franchise, owners, name, logo |
+| 11 | Diplomats | _to be announced_ | 0 | none | Was "Diplomats 1" | Owners, logo |
+| 12 | Diplomats | _to be announced_ | 0 | none | Was "Diplomats 2" | Owners, logo; two teams can't share a name |
 
-| # | Franchise | Owner(s) | Owners named | Group* | Logo | Portal login | Still awaited |
-|---|---|---|---|---|---|---|---|
-| 1 | Bengal Tigers | Dipak Kumar Singh, K. Raj Bhansali | 2 of 3 | A | yes | `thebengaltigers` | 3rd owner? |
-| 2 | Chennai Thalaiva | Vasant Kumar | 1 of 3 | A | yes | `chennai` | Spelling: Vasant or Vasanth |
-| 3 | Gurugram Knights | Ayush Jagga | 1 of 3 | B | no | `gknights` | Logo; other owners? (was Gurugram Spartans) |
-| 4 | American Club of India (ACCI) | Russel A., Vishal Salgy, Pardeep Mahalawat | 3 of 3 | A | yes | `theacciowner` | Full legal names (TODO: "ACCI owners") |
-| 5 | Lucknow Strikers | Luvkesh, Prashant Yadav | 2 of 3 | A | yes | `lucknow` | Luvkesh's full name |
-| 6 | UP Warriors | Sandeep Kumar, Bharat Sharma | 2 of 3 | A | no | `upwarriors` | Logo |
-| 7 | Tokyo Drifters (was "SLL 10") | Vikram Chaddha, Sumit Talwar, Saurabh Anand | 3 of 3 | A | no | `tokyodrifters` | Logo |
-| 8 | Goan Monks | Sameer Bhalla, Aditya Sharma | 2 of 3 | B | yes | `goanmonks` | — |
-| 9 | Jaipur Royals | Saurav Suneja, Hemant Kumar | 2 of 3 | B | yes | `jaipur` | — |
-| 10 | Punjab Royals | Sunil Bansal | 1 of 3 | B | yes | `punjab` | Other owners? |
-| 11 | Diplomats 1 | _to be announced_ | 0 | A | no | none | Owners, real name, logo |
-| 12 | Diplomats 2 | _to be announced_ | 0 | B | no | none | Owners, real name, logo |
-| 13 | Puneet's team ("SLL 13") | Puneet | 1 of 3 | B | no | none | Team name, Puneet's surname, logo |
-| 14 | "SLL 14" | _to be announced_ | 0 | B | no | none | Franchise, owners, name, logo |
+**Totals:** 12 franchises listed · 9 with owners · 18 owners named (out of 36 possible places,
+3 per team) · 8 portal logins already exist for these teams.
 
-\* Groups follow the 3 Nov schedule draw in the app. Rule 5.1 says groups are decided **by
-lottery** — hold the lottery (or record that the draw was it) before the schedule goes out.
+## Not on the 8 Nov list — confirm
 
-**Totals:** 10 franchises named with owners · 4 open (Diplomats 1/2, SLL 13 name, SLL 14) ·
-20 owners named out of 42 possible places (3 per team) · 10 of 14 portal logins linked.
+- **Bengal Tigers** (Dipak Kumar Singh, K. Raj Bhansali) — on the 5 Nov official list, has a
+  portal login `thebengaltigers` and a logo.
+- **Chennai Thalaiva** (Vasant Kumar) — on the 5 Nov official list, has a portal login
+  `chennai` and a logo.
+
+If both are out, the league is **12 teams, not 14**. That changes, at least:
+- the schedule (built for 2 groups of 7, 45 matches, one game per team per weekend; Rule 5);
+- the Category A count in Rule 2.15 (written as 14 teams × 6 × 1.25 = 105; for 12 teams = 90);
+- the sponsor deck, the owners' deck and the plan, which all say 14 teams;
+- their two owner logins, which should be disabled if they're out.
+
+## Notes
+
+- **Sajal Sharma** (Gurgaon Knights): TODO.md lists a "Sajal" on the League's core admin team.
+  If that is the same person, an owner with League admin access can see other teams' data —
+  decide how that's handled (captains' meet item E1) and give them an owner-only login.
+- Team names and logos are allotted and owned by the League (decided 8 Nov), so the
+  renames above (Punjab Warriors, Gurgaon Knights) are the League's call; the app
+  (`src/app/franchises.ts`, the `teams` table) still uses the 5 Nov names.
+- Groups are left out on purpose: Rule 5.1 says groups are decided by lottery, and the 3 Nov
+  draw assumed 14 teams.
 
 ## What each franchise still has to give the League
 
 From the draft Franchise Participation Agreement and the Rules (3 Nov):
 
 - Signed agreement (League + franchise + every owner) — none yet
-- Fee: 60% (₹3,00,000 + GST) by **5 Dec 2026**, 40% (₹2,00,000 + GST) by **15 Jan 2027** — no
-  payment status recorded here yet
+- Fee: 60% (₹3,00,000 + GST) by **5 Dec 2026**, 40% (₹2,00,000 + GST) by **15 Jan 2027**
 - Owner KYC: PAN, Aadhaar/passport, address, DOB, LinkedIn; CricHeroes link for playing owners
-- Lead owner + the 3 owners cleared for the auction table (Rule 12.1)
-- Playing owners: at most 3 — up to 2 Category A (aged 40+), at least 1 Category B (35+), none
-  under 35 (Rules 6.4, 6.11)
+- Lead owner + the up-to-3 owners cleared for the auction table (Rule 12.1)
+- Playing owners: up to 2 Category A (aged 40+), at least 1 Category B (35+), none under 35
+  (Rules 6.4, 6.11)
 - Retained players, if any: 1 A + 1 B, both 40+, SLL-1 players only (Rule 6.5)
-- Team name and logo are allotted and owned by the League (decided 8 Nov) — existing
-  franchises play under the League's name/logo
 
 ## Change log
 
+- 8 Nov 2026 (later) — Nikhil's updated list: 12 teams; ACCI full name and owner spellings;
+  Luvi Grover; Aditya Prakash Sharma; Punjab Royals → Punjab Warriors; Gurugram → Gurgaon
+  Knights + Sajal Sharma; Jaipur without Hemant Kumar; Team 9 = Puneet Jain + Sandeep
+  Bharadwaj; Team 10 in consideration; Bengal Tigers and Chennai Thalaiva not listed.
 - 8 Nov 2026 — first tentative list, built from the 5 Nov official list.
-- Earlier names, for reference: SLL 10 → Tokyo Drifters (5 Nov); Lucknow owner is Prashant
-  Yadav, not Dr. Rohan; Gurugram Spartans → Gurugram Knights; the SCCL 6 "Team Owners" sheet
-  (24 teams, used in Sep) is **not** the SLL-2 list.
+- Earlier: SLL 10 → Tokyo Drifters (5 Nov); Lucknow owner is Prashant Yadav, not Dr. Rohan;
+  Gurugram Spartans → Gurugram Knights; the SCCL 6 "Team Owners" sheet (24 teams, used in Sep)
+  is **not** the SLL-2 list.

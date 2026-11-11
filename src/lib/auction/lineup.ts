@@ -169,3 +169,25 @@ export function buildLineup(twelve: Rated[], available: Rated[]): Lineup {
 
   return { bands, attack, spells, hasLegend: !!legend };
 }
+
+/** A player's Ball Library numbers for his profile sheet: positions batted, and every phase
+ *  with balls behind it (no minimum here — the ball counts are shown). */
+export function libraryCard(p: { full_name: string }) {
+  const bn = CV[p.full_name]?.batter ?? CV[p.full_name]?.bowler;
+  const wn = CV[p.full_name]?.bowler ?? CV[p.full_name]?.batter;
+  const bat = bn ? ROLE.players[bn]?.bat : undefined;
+  const bowl = wn ? ROLE.players[wn]?.bowl : undefined;
+  const phases: Phase[] = ["pp", "mid", "death"];
+  return {
+    bat: bat
+      ? {
+          inns: bat.inns,
+          pos: BANDS.map((b) => ({ label: b.range, n: bat.pos[b.key] })),
+          phases: phases.filter((ph) => bat[ph].b > 0).map((ph) => ({ k: PHASE_NAME[ph], sr: Math.round((bat[ph].r / bat[ph].b) * 100), r: bat[ph].r, b: bat[ph].b, out: bat[ph].out })),
+        }
+      : null,
+    bowl: bowl
+      ? phases.filter((ph) => bowl[ph].b > 0).map((ph) => ({ k: PHASE_NAME[ph], econ: Math.round((bowl[ph].r / bowl[ph].b) * 60) / 10, b: bowl[ph].b, w: bowl[ph].w }))
+      : null,
+  };
+}

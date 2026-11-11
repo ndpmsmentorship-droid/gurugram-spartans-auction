@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { normCategory, SPI_PENDING } from "@/lib/scout/tier";
 import { DEFAULT_RULES, inr } from "@/lib/auction/rules";
@@ -9,8 +9,8 @@ import { usePlanCalls, type Call } from "@/lib/auction/plan-calls";
 import { catLabel } from "@/lib/scout/tier";
 import { PlayerPhoto } from "@/app/register/PlayerCard";
 import TeamCrest from "@/app/TeamCrest";
-import { Tile } from "./WarRoom";
-import { buildLineup, LIBRARY_MATCHES, type Note, type Pick } from "@/lib/auction/lineup";
+import { Tile, ProfileSheet, enrich, type WRPlayer } from "./WarRoom";
+import { buildLineup, libraryCard, LIBRARY_MATCHES, type Note, type Pick } from "@/lib/auction/lineup";
 
 export type PlanTeam = { id: string; name: string; purse_total: number; purse_max: number | null; logo_url?: string | null };
 export type PoolPlayer = Omit<PlanPlayer, "cat"> & { auction_category: string | null; photo_url?: string | null };
@@ -23,6 +23,7 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
   const [synced, setSynced] = useState<number | null>(null);
   const [team, setTeam] = useState(props.team);
   const [strategy, setStrategy] = useState<StrategyKey>("balanced");
+  const [viewId, setViewId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const { calls, setCall, going, held, rejected } = usePlanCalls(props.profileId);
 
@@ -85,6 +86,7 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
   }, [query, rated]);
   const ruledOut = rated.filter((p) => rejected.has(p.id));
   const onHold = rated.filter((p) => held.has(p.id));
+  const goingFor = rated.filter((p) => going.has(p.id) && !p.team_id);
   const status = (p: Rated) => (p.team_id === team.id ? "bought" : going.has(p.id) ? "going" : "suggested");
   const lineup = useMemo(() => {
     const inXII = new Set(chosen.xii.twelve.map((p) => p.id));
@@ -103,7 +105,9 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
 
   // Same frame as the War Room (header, money tiles, cards, player rows), so the
   // planner is auction-night practice: owners learn where everything sits.
+  const viewed = viewId ? (players.find((p) => p.id === viewId) as unknown as WRPlayer | undefined) : undefined;
   return (
+    <OpenPlayer.Provider value={setViewId}>
     <div className="mx-auto w-full max-w-[1280px] pb-24">
       {/* header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -169,7 +173,7 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
             <Box key={b.key} tone={BAND_TONE[b.key]} title={b.label} chip={b.range}>
               <ol className="divide-y divide-line">
                 {b.slots.map((s) => (
-                  <SlotRow key={s.p.id} n={s.pos} name={s.p.full_name} note={s.note} dot={status(s.p)} tag={s.legend ? "Legend" : undefined} />
+                  <SlotRow key={s.p.id} id={s.p.id} n={s.pos} name={s.p.full_name} note={s.note} dot={status(s.p)} tag={s.legend ? "Legend" : undefined} />
                 ))}
                 {b.key === "upper" && !lineup.hasLegend && (
                   <li className="py-1.5 text-[0.72rem] text-muted">#4 is the Legend&rsquo;s spot once you have one.</li>
@@ -192,7 +196,7 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
             <Box key={sp.key} tone={SPELL_TONE[sp.key]} title={sp.label} chip={SPELL_COUNT[sp.key]}>
               <ol className="divide-y divide-line">
                 {sp.picks.map((x) => (
-                  <SlotRow key={x.p.id} name={x.p.full_name} note={x.note} dot={status(x.p)} />
+                  <SlotRow key={x.p.id} id={x.p.id} name={x.p.full_name} note={x.note} dot={status(x.p)} />
                 ))}
               </ol>
               <BestPick pick={sp.best} tone={SPELL_TONE[sp.key]} call={sp.best ? calls[sp.best.p.id] : undefined} setCall={(c) => sp.best && setCall(sp.best.p.id, c)} />
@@ -233,6 +237,13 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
         {found.length > 0 && <ul className="mt-3 grid gap-2 sm:grid-cols-2">{found.map(row)}</ul>}
       </section>
 
+      {goingFor.length > 0 && (
+        <section className={`mt-5 ${card}`}>
+          <p className="eyebrow">Going for · {goingFor.length}</p>
+          <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{goingFor.map(row)}</ul>
+        </section>
+      )}
+
       {onHold.length > 0 && (
         <section className={`mt-5 ${card}`}>
           <p className="eyebrow">On hold · {onHold.length}</p>
@@ -260,7 +271,18 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
         &ldquo;No data yet&rdquo; or &ldquo;Little data&rdquo; are rated at their category&rsquo;s median until their numbers come in. Your calls stay on this
         device, are private to your team, and show on the War Room&rsquo;s live card on auction night.
       </p>
+      {viewed && (
+        <ProfileSheet
+          p={enrich(viewed)}
+          teamName=""
+          ours={viewed.team_id === team.id}
+          onClose={() => setViewId(null)}
+          star={null}
+          extra={<LibraryCard name={viewed.full_name} />}
+        />
+      )}
     </div>
+    </OpenPlayer.Provider>
   );
 }
 
@@ -279,7 +301,7 @@ function Row({ p, photo, pend, call, setCall }: { p: Rated; photo: string | null
       <div className="flex items-center gap-3">
         <PlayerPhoto src={photo} name={p.full_name} className="h-10 w-10 shrink-0 rounded-full" sizes="40px" />
         <div className="min-w-0 flex-1">
-          <p className="truncate font-medium">{p.full_name}</p>
+          <Name id={p.id} name={p.full_name} className="block max-w-full truncate font-medium" />
           <p className="truncate text-[0.72rem] text-muted">
             {[pend ? SPI_PENDING : catLabel(p.cat), p.primary_role, `≈ ${inr(p.price)}`].filter(Boolean).join(" · ")}
             {p.data !== "ok" && <span className="ml-1.5 rounded-full bg-gold-fill px-1.5 py-0.5 text-[0.625rem] text-gold">{DATA_LABEL[p.data]}</span>}
@@ -290,9 +312,10 @@ function Row({ p, photo, pend, call, setCall }: { p: Rated; photo: string | null
       <div className="mt-2 flex flex-wrap gap-1.5">
         {([["going", "Going for him"], ["hold", "Hold"], ["reject", "Reject"]] as const).map(([c, l]) => (
           <button key={c} type="button" className="pill !px-3 !py-1" data-active={call === c} aria-pressed={call === c} onClick={() => setCall(call === c ? null : c)}>
-            {l}
+            {call === c ? `${l} ✓` : l}
           </button>
         ))}
+        {call && <Unselect onClick={() => setCall(null)} />}
       </div>
     </li>
   );
@@ -323,13 +346,13 @@ function NoteText({ note }: { note: Note }) {
 }
 
 // One line of a list: number, status dot, name, the number that put him there.
-function SlotRow({ n, name, note, dot, tag }: { n?: number; name: string; note: Note; dot: keyof typeof DOT; tag?: string }) {
+function SlotRow({ id, n, name, note, dot, tag }: { id: string; n?: number; name: string; note: Note; dot: keyof typeof DOT; tag?: string }) {
   return (
     <li className="flex items-baseline gap-2.5 py-1.5">
       {n != null && <span className="w-5 shrink-0 text-right font-display tabular-nums text-muted">{n}</span>}
       <span className={`h-1.5 w-1.5 shrink-0 translate-y-[-2px] rounded-full ${DOT[dot]}`} />
       <span className="min-w-0 flex-1">
-        <span className="font-medium">{name}</span>
+        <Name id={id} name={name} className="font-medium" />
         {tag && <span className="ml-1.5 rounded-full bg-gold-fill px-1.5 py-0.5 text-[0.625rem] text-gold">{tag}</span>}
         <span className="block text-[0.72rem] leading-snug"><NoteText note={note} /></span>
       </span>
@@ -344,13 +367,16 @@ function BestPick({ pick, tone, call, setCall }: { pick: Pick; tone: string; cal
     <div className="mt-2 flex items-center gap-2 rounded-[10px] border border-dashed px-2.5 py-1.5" style={{ borderColor: `color-mix(in srgb, ${tone} 45%, transparent)`, background: `color-mix(in srgb, ${tone} 5%, transparent)` }}>
       <div className="min-w-0 flex-1 text-[0.75rem] leading-snug">
         <span className="text-muted">Best available: </span>
-        <span className="font-medium">{pick.p.full_name}</span>
+        <Name id={pick.p.id} name={pick.p.full_name} className="font-medium" />
         <span className="text-muted"> · ≈ {inr(pick.p.price)}</span>
         <span className="block text-[0.7rem]"><NoteText note={pick.note} /></span>
       </div>
-      <button type="button" className="pill !px-2.5 !py-1 text-[0.72rem]" data-active={call === "going"} aria-pressed={call === "going"} onClick={() => setCall(call === "going" ? null : "going")}>
-        Going for him
-      </button>
+      <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center">
+        <button type="button" className="pill !px-2.5 !py-1 text-[0.72rem]" data-active={call === "going"} aria-pressed={call === "going"} onClick={() => setCall(call === "going" ? null : "going")}>
+          {call === "going" ? "Going for him ✓" : "Going for him"}
+        </button>
+        {call && <Unselect onClick={() => setCall(null)} />}
+      </div>
     </div>
   );
 }
@@ -360,5 +386,74 @@ function Credit() {
     <p className="mt-4 border-t border-line pt-2 text-[0.68rem] leading-snug text-muted">
       Analytics: <span className="font-medium text-ink">ND Cric Videos</span> Ball Library · {LIBRARY_MATCHES} matches, ball by ball. Where a player has under 12 balls in a phase, his CricHeroes career figure is shown (&ldquo;career&rdquo;).
     </p>
+  );
+}
+
+// Any player name in the planner opens his profile (the War Room's own sheet).
+const OpenPlayer = createContext<(id: string) => void>(() => {});
+function Name({ id, name, className }: { id: string; name: string; className?: string }) {
+  const open = useContext(OpenPlayer);
+  return (
+    <button type="button" onClick={() => open(id)} className={`text-left underline decoration-line2 underline-offset-2 hover:text-red hover:decoration-red ${className ?? ""}`}>
+      {name}
+    </button>
+  );
+}
+
+// His ND Cric Videos Ball Library numbers, under the career stats in the profile sheet.
+function LibraryCard({ name }: { name: string }) {
+  const c = libraryCard({ full_name: name });
+  const cell = "rounded-[10px] border border-line px-2 py-1.5 text-center";
+  return (
+    <div className="mt-4 rounded-[12px] border border-line p-3">
+      <p className="eyebrow">ND Cric Videos · Ball Library</p>
+      {!c.bat && !c.bowl ? (
+        <p className="mt-1.5 text-sm text-muted">Not in the Ball Library yet.</p>
+      ) : (
+        <>
+          {c.bat && (
+            <>
+              <p className="mt-2 text-[0.72rem] text-muted">
+                Batted {c.bat.inns} innings · position: {c.bat.pos.filter((x) => x.n).map((x) => `${x.label} ×${x.n}`).join(" · ") || "—"}
+              </p>
+              <div className="mt-1.5 grid grid-cols-3 gap-1.5">
+                {c.bat.phases.map((x) => (
+                  <div key={x.k} className={cell}>
+                    <p className="label-mono">{x.k} SR</p>
+                    <p className="font-display text-xl leading-tight tabular-nums">{x.sr}</p>
+                    <p className="text-[0.68rem] text-muted tabular-nums">
+                      {x.r} off {x.b} · {x.out} out
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+          {c.bowl && c.bowl.length > 0 && (
+            <div className="mt-2 grid grid-cols-3 gap-1.5">
+              {c.bowl.map((x) => (
+                <div key={x.k} className={cell}>
+                  <p className="label-mono">{x.k} econ</p>
+                  <p className="font-display text-xl leading-tight tabular-nums">{x.econ}</p>
+                  <p className="text-[0.68rem] text-muted tabular-nums">
+                    {x.w}w in {x.b} balls
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+          <p className="mt-2 text-[0.68rem] text-muted">Ball by ball from {LIBRARY_MATCHES} matches · analytics by ND Cric Videos.</p>
+        </>
+      )}
+    </div>
+  );
+}
+
+// Clears whatever call is on a player (going / hold / reject).
+function Unselect({ onClick }: { onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} className="rounded-full border border-line px-2.5 py-1 text-[0.72rem] text-muted hover:border-red hover:text-red">
+      ✕ Unselect
+    </button>
   );
 }

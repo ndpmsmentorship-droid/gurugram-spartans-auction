@@ -73,7 +73,7 @@ function bowlTag(style: string | null): BowlTag | null {
 const isPace = (t: BowlTag | null) => t === "Left-arm pace" || t === "Right-arm pace";
 const isSpin = (t: BowlTag | null) => !!t && !isPace(t);
 
-type Enriched = WRPlayer & {
+export type Enriched = WRPlayer & {
   cat: AuctionCategory;
   pend: boolean; // no category yet (SPI pending); cat is a B placeholder for the maths
   tag: BowlTag | null;
@@ -103,7 +103,7 @@ function doubtful(p: WRPlayer): string[] {
 
 const cl = (p: { cat: AuctionCategory; pend: boolean }) => (p.pend ? SPI_PENDING : catLabel(p.cat));
 
-function enrich(p: WRPlayer): Enriched {
+export function enrich(p: WRPlayer): Enriched {
   const lib = CV[p.full_name];
   const phase = lib?.bowler ? PHASES.bowlers[lib.bowler] ?? null : null;
   const starDeath = !!lib?.bowler && PHASES.top.death.includes(lib.bowler);
@@ -1261,7 +1261,7 @@ export default function WarRoom(props: {
 
 // A player's full War Room profile without putting him on the block — for our
 // own squad, and any name in the pool table.
-function ProfileSheet({ p, teamName, ours, onClose, star }: { p: Enriched; teamName: string; ours: boolean; onClose: () => void; star: React.ReactNode }) {
+export function ProfileSheet({ p, teamName, ours, onClose, star, extra }: { p: Enriched; teamName: string; ours: boolean; onClose: () => void; star: React.ReactNode; extra?: React.ReactNode }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -1289,6 +1289,7 @@ function ProfileSheet({ p, teamName, ours, onClose, star }: { p: Enriched; teamN
           </div>
         </div>
         <StatGrid p={p} />
+        {extra}
         {LEAGUE === "uscl" && <LibraryPanel key={p.id} name={p.full_name} defaultOpen />}
       </div>
     </div>

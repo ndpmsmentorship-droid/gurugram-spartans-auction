@@ -19,6 +19,48 @@ const BADGE: Record<PoolStatus, string> = {
 };
 const LABEL: Record<PoolStatus, string> = { selected: "Selected", review: "Under review", rejected: "Rejected" };
 
+const fmt = (n: number | null, d = 0) => (n == null ? "–" : n.toLocaleString("en-IN", { maximumFractionDigits: d, minimumFractionDigits: d }));
+
+// Instagram-style verified mark, in league red: the numbers were checked on CricHeroes by the league team.
+function Checked({ on }: { on: string }) {
+  const d = new Date(on).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+  return (
+    <span className="inline-flex items-center gap-1 text-[0.625rem] text-muted" title="CricHeroes stats checked and entered by the league team">
+      <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+        <path fill="var(--red)" d="M12 1.5l2.4 1.8 3-.2 1 2.8 2.6 1.6-.6 2.9 1.4 2.6-2 2.2-.2 3-2.9.7-1.8 2.4-2.9-.9-2.9.9-1.8-2.4-2.9-.7-.2-3-2-2.2 1.4-2.6-.6-2.9 2.6-1.6 1-2.8 3 .2z" />
+        <path fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" d="M7.5 12.3l3 3 6-6.3" />
+      </svg>
+      CricHeroes · {d}
+    </span>
+  );
+}
+
+function StatLine({ s, checkedOn }: { s: NonNullable<PoolEntry["stats"]>; checkedOn: string | null }) {
+  const cells: [string, string][] = [
+    ["Mat", fmt(s.m)],
+    ["Runs", fmt(s.runs)],
+    ["Avg", fmt(s.avg, 1)],
+    ["SR", fmt(s.sr, 1)],
+    ["HS", s.hs ?? "–"],
+    ["Wkts", fmt(s.wk)],
+    ["Econ", fmt(s.econ, 2)],
+    ["Best", s.best ?? "–"],
+  ];
+  return (
+    <div className="mt-1.5">
+      <dl className="flex flex-wrap gap-1">
+        {cells.map(([k, v]) => (
+          <div key={k} className="flex flex-col-reverse rounded-[6px] border border-line px-1.5 py-0.5 text-center leading-tight">
+            <dt className="text-[0.563rem] uppercase tracking-wide text-muted">{k}</dt>
+            <dd className="num text-[0.75rem] font-semibold">{v}</dd>
+          </div>
+        ))}
+      </dl>
+      {checkedOn && <div className="mt-1"><Checked on={checkedOn} /></div>}
+    </div>
+  );
+}
+
 export function usePool() {
   const [pool, setPool] = useState<PoolEntry[] | null>(null);
   const [at, setAt] = useState<string | null>(null);
@@ -106,6 +148,7 @@ export default function LivePool() {
                   {!p.hasData && <span className="ml-1.5 rounded-full bg-gold-fill px-1.5 py-0.5 text-[0.625rem] text-gold">No data yet</span>}
                 </p>
                 {(p.designation || p.employer) && <p className="text-[0.75rem] leading-snug text-muted">{[p.designation, p.employer].filter(Boolean).join(", ")}</p>}
+                {p.stats && <StatLine s={p.stats} checkedOn={p.checkedOn} />}
               </div>
               <span className={`mt-0.5 shrink-0 rounded-full px-2 py-1 text-[0.688rem] ${BADGE[p.status]}`}>{LABEL[p.status]}</span>
             </li>

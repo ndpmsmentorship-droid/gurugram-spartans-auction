@@ -17,6 +17,9 @@ export type PoolEntry = {
   photo: string | null;
   lastTeam: string | null; // Season 1 team, for returning players
   hasData: boolean; // match stats on record
+  // CricHeroes career headline (player_master.stats). Cricket numbers only.
+  stats: { m: number | null; runs: number | null; avg: number | null; sr: number | null; hs: string | null; wk: number | null; econ: number | null; best: string | null } | null;
+  checkedOn: string | null; // ISO date the league team last entered them from CricHeroes
   at: string; // registered
 };
 
@@ -131,6 +134,27 @@ export async function loadOwnerPool({
       if (u.path && u.signedUrl) signed.set(u.path, u.signedUrl);
   }
 
+  const num = (v: unknown) => (v === null || v === undefined || v === "" || !Number.isFinite(Number(v)) ? null : Number(v));
+  const headline = (m?: Master): PoolEntry["stats"] => {
+    if (!statsOn(m)) return null;
+    const st = m!.stats as Record<string, unknown>;
+    return {
+      m: num(st.matches),
+      runs: num(st.runs),
+      avg: num(st.bat_avg),
+      sr: num(st.bat_sr),
+      hs: st.highest != null ? String(st.highest) : null,
+      wk: num(st.wickets),
+      econ: num(st.economy),
+      best: st.best_bowling != null ? String(st.best_bowling) : null,
+    };
+  };
+  // Only the league team's own CricHeroes entry earns the "checked" mark (same rule as the admin red tick).
+  const checked = (m?: Master) => {
+    const st = (m?.stats ?? {}) as Record<string, unknown>;
+    return typeof st._by === "string" && /cricheroes/i.test(st._by) && typeof st._updated === "string" ? st._updated : null;
+  };
+
   return rows.map((r) => {
     const m = r.master_id ? masters.get(r.master_id) : undefined;
     return {
@@ -146,6 +170,8 @@ export async function loadOwnerPool({
         : null,
       lastTeam: m?.last_team ?? null,
       hasData: statsOn(m),
+      stats: headline(m),
+      checkedOn: checked(m),
       at: r.created_at,
     };
   });

@@ -10,6 +10,7 @@ import { catLabel } from "@/lib/scout/tier";
 import { PlayerPhoto } from "@/app/register/PlayerCard";
 import TeamCrest from "@/app/TeamCrest";
 import { Tile } from "./WarRoom";
+import { buildLineup, LIBRARY_MATCHES, type Note, type Pick } from "@/lib/auction/lineup";
 
 export type PlanTeam = { id: string; name: string; purse_total: number; purse_max: number | null; logo_url?: string | null };
 export type PoolPlayer = Omit<PlanPlayer, "cat"> & { auction_category: string | null; photo_url?: string | null };
@@ -85,6 +86,11 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
   const ruledOut = rated.filter((p) => rejected.has(p.id));
   const onHold = rated.filter((p) => held.has(p.id));
   const status = (p: Rated) => (p.team_id === team.id ? "bought" : going.has(p.id) ? "going" : "suggested");
+  const lineup = useMemo(() => {
+    const inXII = new Set(chosen.xii.twelve.map((p) => p.id));
+    const available = rated.filter((p) => !p.team_id && !rejected.has(p.id) && !inXII.has(p.id) && p.price <= maxSafe);
+    return buildLineup(chosen.xii.twelve, available);
+  }, [chosen, rated, rejected, maxSafe]);
 
   const photo = useMemo(() => new Map(players.map((p) => [p.id, p.photo_url ?? null])), [players]);
   const cats = useMemo(() => {
@@ -130,54 +136,90 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
         </div>
       </section>
 
-      <div className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_1fr]">
-        {/* strategies + the buy list */}
+      {/* squad style */}
+      <section className={`mt-5 ${card}`}>
+        <div className="flex items-baseline justify-between gap-2">
+          <p className="eyebrow">What kind of squad?</p>
+          <p className="text-xs text-muted">scored as the XII&rsquo;s runs a match</p>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+          {plans.map((s) => (
+            <button
+              key={s.key}
+              type="button"
+              onClick={() => setStrategy(s.key)}
+              className={`rounded-[12px] border p-3 text-left transition ${s.key === strategy ? "border-red bg-[color-mix(in_srgb,var(--red)_6%,transparent)]" : "border-line hover:border-red/40 hover:bg-wash"}`}
+            >
+              <p className="label-mono">{s.name}</p>
+              <p className="mt-1.5 font-display text-2xl leading-none tabular-nums">{s.plan.xii.score}</p>
+              <p className="mt-1 text-[0.68rem] leading-snug text-muted">{inr(s.plan.cost)} to buy</p>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <div className="mt-5 grid gap-5 lg:grid-cols-2">
+        {/* batting order */}
         <section className={card}>
           <div className="flex items-baseline justify-between gap-2">
-            <p className="eyebrow">What kind of squad?</p>
-            <p className="text-xs text-muted">scored as the XII&rsquo;s runs a match</p>
-          </div>
-          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {plans.map((s) => (
-              <button
-                key={s.key}
-                type="button"
-                onClick={() => setStrategy(s.key)}
-                className={`rounded-[12px] border p-3 text-left transition ${s.key === strategy ? "border-red bg-[color-mix(in_srgb,var(--red)_6%,transparent)]" : "border-line hover:border-red/40 hover:bg-wash"}`}
-              >
-                <p className="label-mono">{s.name}</p>
-                <p className="mt-1.5 font-display text-2xl leading-none tabular-nums">{s.plan.xii.score}</p>
-                <p className="mt-1 text-[0.68rem] leading-snug text-muted">XII · {inr(s.plan.cost)} to buy</p>
-                <p className="mt-1 text-[0.68rem] leading-snug text-muted">{s.blurb}</p>
-              </button>
-            ))}
-          </div>
-
-          <div className="mt-5 flex items-baseline justify-between">
-            <p className="eyebrow">To buy · {chosen.buys.length}</p>
-            <p className="tabular-nums text-sm text-muted">{inr(chosen.cost)}</p>
-          </div>
-          <ul className="mt-3 grid gap-2">
-            {chosen.buys.map(row)}
-            {!chosen.buys.length && <li className="text-sm text-muted">Nothing left to buy: your squad is full or the purse is spent.</li>}
-          </ul>
-        </section>
-
-        {/* the playing XII */}
-        <section className={`${card} self-start`}>
-          <div className="flex items-baseline justify-between gap-2">
-            <p className="eyebrow">Playing XII · {STRATEGIES.find((s) => s.key === strategy)!.name}</p>
+            <p className="eyebrow">Playing XII · batting order</p>
             <span className="font-display text-2xl leading-none tabular-nums">{chosen.xii.score}</span>
           </div>
-          <FieldMap twelve={chosen.xii.twelve} status={status} />
-          <div className="mt-2 flex flex-wrap gap-3 text-[0.72rem] text-muted">
+          {lineup.bands.map((b) => (
+            <div key={b.key} className="mt-4">
+              <p className="label-mono text-muted">{b.label} · {b.range}</p>
+              <ol className="mt-1.5 divide-y divide-line">
+                {b.slots.map((s) => (
+                  <SlotRow key={s.p.id} n={s.pos} name={s.p.full_name} note={s.note} dot={status(s.p)} tag={s.legend ? "Legend" : undefined} />
+                ))}
+                {b.key === "upper" && !lineup.hasLegend && (
+                  <li className="py-1.5 text-[0.72rem] text-muted">#4 is the Legend&rsquo;s spot once you have one.</li>
+                )}
+              </ol>
+              <BestPick pick={b.best} call={b.best ? calls[b.best.p.id] : undefined} setCall={(c) => b.best && setCall(b.best.p.id, c)} />
+            </div>
+          ))}
+          {!chosen.xii.keeper && <p className="mt-3 text-sm text-red">No wicket-keeper in this XII yet.</p>}
+          <Credit />
+        </section>
+
+        {/* bowling attack */}
+        <section className={`${card} self-start`}>
+          <div className="flex items-baseline justify-between gap-2">
+            <p className="eyebrow">Bowling attack · {lineup.attack.length} bowlers</p>
+          </div>
+          <p className="mt-1 text-sm">{lineup.attack.map((p) => p.full_name).join(" · ") || "No bowlers in this XII yet."}</p>
+          {lineup.spells.map((sp) => (
+            <div key={sp.key} className="mt-4">
+              <p className="label-mono text-muted">{sp.label} · {SPELL_COUNT[sp.key]}</p>
+              <ol className="mt-1.5 divide-y divide-line">
+                {sp.picks.map((x) => (
+                  <SlotRow key={x.p.id} name={x.p.full_name} note={x.note} dot={status(x.p)} />
+                ))}
+              </ol>
+              <BestPick pick={sp.best} call={sp.best ? calls[sp.best.p.id] : undefined} setCall={(c) => sp.best && setCall(sp.best.p.id, c)} />
+            </div>
+          ))}
+          <div className="mt-4 flex flex-wrap gap-3 text-[0.72rem] text-muted">
             <Legend c="bg-ink" l="In your squad" />
             <Legend c="bg-red" l="Going for him" />
             <Legend c="bg-up" l="Suggested buy" />
           </div>
-          {!chosen.xii.keeper && <p className="mt-2 text-sm text-red">No wicket-keeper in this XII yet.</p>}
+          <Credit />
         </section>
       </div>
+
+      {/* to buy */}
+      <section className={`mt-5 ${card}`}>
+        <div className="flex items-baseline justify-between">
+          <p className="eyebrow">To buy · {chosen.buys.length}</p>
+          <p className="tabular-nums text-sm text-muted">{inr(chosen.cost)}</p>
+        </div>
+        <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {chosen.buys.map(row)}
+          {!chosen.buys.length && <li className="text-sm text-muted">Nothing left to buy: your squad is full or the purse is spent.</li>}
+        </ul>
+      </section>
 
       {/* find a player: the War Room pool's search box */}
       <section className={`mt-5 ${card}`}>
@@ -258,43 +300,50 @@ function Row({ p, photo, pend, call, setCall }: { p: Rated; photo: string | null
   );
 }
 
-// The playing XII on a field: keeper behind the stumps, the lead bowler at the
-// bowler's end, the rest round the ring; the twelfth sits below the map.
-const SPOTS: [number, number][] = [
-  [160, 92], [160, 232], [200, 78], [62, 128], [78, 206], [124, 270], [198, 270], [242, 206], [258, 128], [232, 58], [88, 58],
-];
-const short = (n: string) => {
-  const w = n.trim().split(/\s+/);
-  return w.length > 1 ? `${w[0][0]}. ${w[w.length - 1]}` : n;
-};
+const SPELL_COUNT = { pp: "2 bowlers", mid: "3 bowlers", death: "2 bowlers" } as const;
+const DOT = { bought: "bg-ink", going: "bg-red", suggested: "bg-up" } as const;
 
-function FieldMap({ twelve, status }: { twelve: Rated[]; status: (p: Rated) => "bought" | "going" | "suggested" }) {
-  const keeper = twelve.find((p) => p.keeper);
-  const bowler = twelve.filter((p) => p !== keeper && p.bowler).sort((a, b) => b.bowl - a.bowl)[0];
-  const rest = twelve.filter((p) => p !== keeper && p !== bowler);
-  const onField = [keeper ?? rest.shift(), bowler ?? rest.shift(), ...rest].filter(Boolean) as Rated[];
-  const eleven = onField.slice(0, 11), twelfth = onField[11];
-  const fill = { bought: "var(--color-ink)", going: "var(--color-red)", suggested: "var(--up)" } as const;
+function NoteText({ note }: { note: Note }) {
+  return <span className={note.library ? "text-ink/70" : "text-muted"}>{note.text}</span>;
+}
+
+// One line of a list: number, status dot, name, the number that put him there.
+function SlotRow({ n, name, note, dot, tag }: { n?: number; name: string; note: Note; dot: keyof typeof DOT; tag?: string }) {
   return (
-    <div className="mt-2">
-      <svg viewBox="0 0 320 320" className="w-full" role="img" aria-label="Playing XII field map">
-        <circle cx="160" cy="160" r="152" fill="color-mix(in srgb, var(--up) 7%, transparent)" stroke="var(--color-line)" />
-        <circle cx="160" cy="160" r="88" fill="none" stroke="var(--color-line)" strokeDasharray="4 4" />
-        <rect x="152" y="112" width="16" height="96" rx="2" fill="color-mix(in srgb, var(--gold, #c99a3c) 25%, transparent)" />
-        {eleven.map((p, i) => (
-          <g key={p.id}>
-            <circle cx={SPOTS[i][0]} cy={SPOTS[i][1]} r="6" fill={fill[status(p)]} />
-            <text x={SPOTS[i][0]} y={SPOTS[i][1] + 17} textAnchor="middle" fontSize="10" fill="currentColor">
-              {short(p.full_name)}
-            </text>
-          </g>
-        ))}
-      </svg>
-      {twelfth && (
-        <p className="text-center text-[0.75rem] text-muted">
-          12th: <span className="text-ink">{twelfth.full_name}</span>
-        </p>
-      )}
+    <li className="flex items-baseline gap-2.5 py-1.5">
+      {n != null && <span className="w-5 shrink-0 text-right font-display tabular-nums text-muted">{n}</span>}
+      <span className={`h-1.5 w-1.5 shrink-0 translate-y-[-2px] rounded-full ${DOT[dot]}`} />
+      <span className="min-w-0 flex-1">
+        <span className="font-medium">{name}</span>
+        {tag && <span className="ml-1.5 rounded-full bg-gold-fill px-1.5 py-0.5 text-[0.625rem] text-gold">{tag}</span>}
+        <span className="block text-[0.72rem] leading-snug"><NoteText note={note} /></span>
+      </span>
+    </li>
+  );
+}
+
+// The best player still in the pool for this band / spell, with the War Room's call pill.
+function BestPick({ pick, call, setCall }: { pick: Pick; call?: Call; setCall: (c: Call | null) => void }) {
+  if (!pick) return null;
+  return (
+    <div className="mt-1.5 flex items-center gap-2 rounded-[10px] border border-dashed border-line2 px-2.5 py-1.5">
+      <div className="min-w-0 flex-1 text-[0.75rem] leading-snug">
+        <span className="text-muted">Best available: </span>
+        <span className="font-medium">{pick.p.full_name}</span>
+        <span className="text-muted"> · ≈ {inr(pick.p.price)}</span>
+        <span className="block text-[0.7rem]"><NoteText note={pick.note} /></span>
+      </div>
+      <button type="button" className="pill !px-2.5 !py-1 text-[0.72rem]" data-active={call === "going"} aria-pressed={call === "going"} onClick={() => setCall(call === "going" ? null : "going")}>
+        Going for him
+      </button>
     </div>
+  );
+}
+
+function Credit() {
+  return (
+    <p className="mt-4 border-t border-line pt-2 text-[0.68rem] leading-snug text-muted">
+      Analytics: <span className="font-medium text-ink">ND Cric Videos</span> Ball Library · {LIBRARY_MATCHES} matches, ball by ball. Where a player has under 12 balls in a phase, his CricHeroes career figure is shown (&ldquo;career&rdquo;).
+    </p>
   );
 }

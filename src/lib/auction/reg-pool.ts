@@ -30,12 +30,28 @@ export async function inRegistrationPool<T extends Scout>(sb: { from: (t: string
 
   const regIds = new Set(live.map((r) => `reg:${r.id}`));
   const chIds = new Set<string>();
-  const names = new Set<string>();
+  // name -> the CricHeroes ids registered under it ("" = a registration with no readable id)
+  const names = new Map<string, Set<string>>();
   for (const r of live) {
     const m = r.master_id ? mById.get(r.master_id) : undefined;
-    for (const c of [chId(r.cricheroes_link), chId(m?.cricheroes_link)]) if (c) chIds.add(c);
-    for (const n of [nameKey(r.full_name), nameKey(m?.full_name)]) if (n) names.add(n);
+    const ids = [chId(r.cricheroes_link), chId(m?.cricheroes_link)].filter(Boolean) as string[];
+    for (const c of ids) chIds.add(c);
+    for (const n of [nameKey(r.full_name), nameKey(m?.full_name)]) {
+      if (!n) continue;
+      const set = names.get(n) ?? new Set<string>();
+      if (ids.length) ids.forEach((c) => set.add(c));
+      else set.add("");
+      names.set(n, set);
+    }
   }
+  // Same name is not the same person (12 Nov: a USCL-pool "Nitin Yadav", CricHeroes 487209, rode in
+  // on registrant Nitin Yadav, 944570): when both sides carry a CricHeroes id, the ids must agree.
+  const sameName = (p: Scout) => {
+    const set = names.get(nameKey(p.full_name));
+    if (!set) return false;
+    const c = chId(p.cricheroes_link);
+    return !c || set.has("") || set.has(c);
+  };
   return players.filter(
     (p) =>
       !!p.team_id ||
@@ -44,6 +60,6 @@ export async function inRegistrationPool<T extends Scout>(sb: { from: (t: string
         const c = chId(p.cricheroes_link);
         return !!c && chIds.has(c);
       })() ||
-      names.has(nameKey(p.full_name)),
+      sameName(p),
   );
 }

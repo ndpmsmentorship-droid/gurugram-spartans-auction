@@ -23,7 +23,7 @@ export default function OwnerPortal({
 }: {
   tab: PortalTab;
   warRoom: Omit<React.ComponentProps<typeof WarRoom>, "onSnapshot">;
-  plan: { seasonId: string; profileId: string; team: PlanTeam; players: PoolPlayer[] };
+  plan: { seasonId: string; profileId: string; team: PlanTeam; players: PoolPlayer[]; leagueName?: string };
 }) {
   const [tab, setTab] = useState<PortalTab>(initial);
   const snapshot = useRef<(() => string) | null>(null);

@@ -69,7 +69,8 @@ export default async function WarRoomPage({ searchParams }: { searchParams: Prom
       plan={{
         seasonId: seasonId ?? "",
         profileId: profile.id,
-        team: { id: mine.id, name: mine.name, purse_total: mine.purse_total, purse_max: mine.purse_max ?? null },
+        team: { id: mine.id, name: mine.name, purse_total: mine.purse_total, purse_max: mine.purse_max ?? null, logo_url: mine.logo_url ?? null },
+        leagueName: LEAGUE_NAME[LEAGUE],
         players,
       }}
     />

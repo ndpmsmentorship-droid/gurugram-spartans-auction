@@ -1299,7 +1299,7 @@ const num = (v: number | null | undefined) => (v == null ? "—" : String(Math.r
 const phaseHint = (p: Enriched, key: string) =>
   key === "death" && p.phase?.death.econ != null ? ` · ${p.phase.death.econ}` : key === "pp" && p.phase?.pp.econ != null ? ` · ${p.phase.pp.econ}` : "";
 
-function Tile({ k, v, sub, strong, warn, compact }: { k: string; v: string; sub?: string; strong?: boolean; warn?: boolean; compact?: boolean }) {
+export function Tile({ k, v, sub, strong, warn, compact }: { k: string; v: string; sub?: string; strong?: boolean; warn?: boolean; compact?: boolean }) {
   const frame = warn ? "border-red/50 bg-[color-mix(in_srgb,var(--red)_6%,transparent)]" : "border-line bg-surface";
   if (compact)
     return (

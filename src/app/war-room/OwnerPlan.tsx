@@ -6,15 +6,20 @@ import { normCategory, SPI_PENDING } from "@/lib/scout/tier";
 import { DEFAULT_RULES, inr } from "@/lib/auction/rules";
 import { rateAll, buildPlan, STRATEGIES, DATA_LABEL, type PlanPlayer, type Rated, type StrategyKey } from "@/lib/auction/planner";
 import { usePlanCalls, type Call } from "@/lib/auction/plan-calls";
+import { catLabel } from "@/lib/scout/tier";
+import { PlayerPhoto } from "@/app/register/PlayerCard";
+import TeamCrest from "@/app/TeamCrest";
+import { Tile } from "./WarRoom";
 
-export type PlanTeam = { id: string; name: string; purse_total: number; purse_max: number | null };
-export type PoolPlayer = Omit<PlanPlayer, "cat"> & { auction_category: string | null };
+export type PlanTeam = { id: string; name: string; purse_total: number; purse_max: number | null; logo_url?: string | null };
+export type PoolPlayer = Omit<PlanPlayer, "cat"> & { auction_category: string | null; photo_url?: string | null };
 
 const R = DEFAULT_RULES;
 const RULES = { squadMin: R.squadMin, squadMax: R.squadMax, maxBid: R.maxBid, base: R.base, cap: R.cap };
 
-export default function OwnerPlan(props: { seasonId: string; profileId: string; team: PlanTeam; players: PoolPlayer[] }) {
+export default function OwnerPlan(props: { seasonId: string; profileId: string; team: PlanTeam; players: PoolPlayer[]; leagueName?: string }) {
   const [players, setPlayers] = useState(props.players);
+  const [synced, setSynced] = useState<number | null>(null);
   const [team, setTeam] = useState(props.team);
   const [strategy, setStrategy] = useState<StrategyKey>("balanced");
   const [query, setQuery] = useState("");
@@ -30,6 +35,7 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
         sb.from("teams").select("purse_total, purse_max").eq("id", props.team.id).maybeSingle(),
       ]);
       if (!alive) return;
+      setSynced(Date.now());
       if (sold.data) {
         const m = new Map((sold.data as unknown as { id: string; team_id: string; sold_price: number | null }[]).map((r) => [r.id, r]));
         setPlayers((ps) =>
@@ -80,99 +86,127 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
   const onHold = rated.filter((p) => held.has(p.id));
   const status = (p: Rated) => (p.team_id === team.id ? "bought" : going.has(p.id) ? "going" : "suggested");
 
+  const photo = useMemo(() => new Map(players.map((p) => [p.id, p.photo_url ?? null])), [players]);
+  const cats = useMemo(() => {
+    const c: Record<string, number> = { "A+": 0, A: 0, B: 0, Special: 0 };
+    for (const p of mine) c[p.cat] = (c[p.cat] ?? 0) + 1;
+    return c;
+  }, [mine]);
+  const card = "rounded-[16px] border border-line bg-surface p-4 shadow-[var(--elev-sm)]";
+  const row = (p: Rated) => <Row key={p.id} p={p} photo={photo.get(p.id) ?? null} pend={pending.has(p.id)} call={calls[p.id]} setCall={(c) => setCall(p.id, c)} />;
+
+  // Same frame as the War Room (header, money tiles, cards, player rows), so the
+  // planner is auction-night practice: owners learn where everything sits.
   return (
-    <div className="mx-auto w-full max-w-[520px] pb-24">
-      {/* budget strip */}
-      <div className="rounded-[12px] border border-line bg-surface px-4 py-3">
-        <p className="text-[0.688rem] uppercase tracking-[0.14em] text-muted">{team.name}</p>
-        <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-4">
-          <Stat k="To spend" v={inr(purseLeft)} />
-          <Stat k="Most you can bid" v={inr(maxSafe)} />
-          <Stat k="Places" v={String(Math.max(0, target - mine.length))} />
-          <Stat k="XII" v={String(chosen.xii.score)} />
+    <div className="mx-auto w-full max-w-[1280px] pb-24">
+      {/* header */}
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="eyebrow">
+            Plan · <span className="sm:hidden">SLL Season 2</span>
+            <span className="hidden sm:inline">{props.leagueName ?? "SLL Season 2"}</span>
+          </p>
+          <h1 className="mt-1 flex items-center gap-3 text-3xl sm:text-4xl">
+            {team.logo_url && <TeamCrest name={team.name} logoUrl={team.logo_url} size={52} />}
+            {team.name}
+          </h1>
         </div>
-        {topUp > 0 && <p className="mt-1 text-[0.688rem] text-muted">+ {inr(topUp)} top-up available in the auction</p>}
+        <span className="flex items-center gap-1.5 text-xs text-muted">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-up" /> live{synced ? ` · ${new Date(synced).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}` : ""}
+        </span>
       </div>
 
-      {/* strategies */}
-      <section className="mt-5">
-        <h1 className="font-display text-xl uppercase leading-tight">What kind of squad do you want?</h1>
-        <p className="mt-1 text-sm text-muted">Each option is the best squad your purse can still buy, scored the same way: the playing XII&rsquo;s runs a match.</p>
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          {plans.map((s) => (
-            <button
-              key={s.key}
-              type="button"
-              onClick={() => setStrategy(s.key)}
-              className={`rounded-[12px] border p-3 text-left [&:last-child:nth-child(odd)]:col-span-2 ${s.key === strategy ? "border-red ring-1 ring-red" : "border-line"}`}
-            >
-              <p className="text-sm font-semibold">{s.name}</p>
-              <p className="text-[0.688rem] text-muted">{s.blurb}</p>
-              <p className="mt-2 num text-lg font-semibold leading-none">{s.plan.xii.score}</p>
-              <p className="text-[0.688rem] text-muted">XII · {inr(s.plan.cost)} to buy</p>
-            </button>
+      {/* tiles: the War Room's own row */}
+      <section className="mt-4 grid gap-2 lg:grid-cols-[2fr_5fr]">
+        <div className="grid grid-cols-2 gap-2">
+          <Tile k="Purse left" v={inr(purseLeft)} sub={`of ${inr(team.purse_total)}${topUp ? ` · +${inr(topUp)} top-ups available` : ""}`} strong />
+          <Tile k="Max safe bid" v={inr(maxSafe)} sub={`keeps ${Math.max(0, target - mine.length - 1)} slots at ${inr(R.base.B)}`} strong />
+        </div>
+        <div className="grid grid-cols-5 gap-2">
+          <Tile k="Squad" v={`${mine.length}`} sub={`${R.squadMin}–${R.squadMax}`} compact />
+          {(["A+", "A", "B", "Special"] as const).map((c) => (
+            <Tile key={c} k={catLabel(c)} v={`${cats[c] ?? 0}`} sub={`max ${R.cap[c]}`} warn={c !== "B" && (cats[c] ?? 0) >= R.cap[c]} compact />
           ))}
         </div>
       </section>
 
-      {/* field map of the playing XII */}
-      <section className="mt-6">
-        <p className="text-[0.688rem] uppercase tracking-[0.14em] text-muted">Playing XII · {STRATEGIES.find((s) => s.key === strategy)!.name}</p>
-        <FieldMap twelve={chosen.xii.twelve} status={status} />
-        <div className="mt-2 flex flex-wrap gap-3 text-[0.688rem] text-muted">
-          <Legend c="bg-ink" l="In your squad" />
-          <Legend c="bg-red" l="Going for him" />
-          <Legend c="bg-up" l="Suggested buy" />
-        </div>
-        {!chosen.xii.keeper && <p className="mt-2 text-sm text-red">No wicket-keeper in this XII yet.</p>}
-      </section>
-
-      {/* to buy */}
-      <section className="mt-6">
-        <p className="text-[0.688rem] uppercase tracking-[0.14em] text-muted">To buy · {chosen.buys.length} players · {inr(chosen.cost)}</p>
-        <ul className="mt-2 divide-y divide-line rounded-[12px] border border-line">
-          {chosen.buys.map((p) => (
-            <Row key={p.id} p={p} pend={pending.has(p.id)} call={calls[p.id]} setCall={(c) => setCall(p.id, c)} />
-          ))}
-          {!chosen.buys.length && <li className="p-3 text-sm text-muted">Nothing left to buy: your squad is full or the purse is spent.</li>}
-        </ul>
-      </section>
-
-      {/* find a player */}
-      <section className="mt-6">
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Find a player to go for or rule out"
-          className="w-full rounded-full border border-line bg-surface px-4 py-2.5 text-sm outline-none focus:border-red"
-        />
-        {found.length > 0 && (
-          <ul className="mt-2 divide-y divide-line rounded-[12px] border border-line">
-            {found.map((p) => (
-              <Row key={p.id} p={p} pend={pending.has(p.id)} call={calls[p.id]} setCall={(c) => setCall(p.id, c)} />
+      <div className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_1fr]">
+        {/* strategies + the buy list */}
+        <section className={card}>
+          <div className="flex items-baseline justify-between gap-2">
+            <p className="eyebrow">What kind of squad?</p>
+            <p className="text-xs text-muted">scored as the XII&rsquo;s runs a match</p>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {plans.map((s) => (
+              <button
+                key={s.key}
+                type="button"
+                onClick={() => setStrategy(s.key)}
+                className={`rounded-[12px] border p-3 text-left transition ${s.key === strategy ? "border-red bg-[color-mix(in_srgb,var(--red)_6%,transparent)]" : "border-line hover:border-red/40 hover:bg-wash"}`}
+              >
+                <p className="label-mono">{s.name}</p>
+                <p className="mt-1.5 font-display text-2xl leading-none tabular-nums">{s.plan.xii.score}</p>
+                <p className="mt-1 text-[0.68rem] leading-snug text-muted">XII · {inr(s.plan.cost)} to buy</p>
+                <p className="mt-1 text-[0.68rem] leading-snug text-muted">{s.blurb}</p>
+              </button>
             ))}
+          </div>
+
+          <div className="mt-5 flex items-baseline justify-between">
+            <p className="eyebrow">To buy · {chosen.buys.length}</p>
+            <p className="tabular-nums text-sm text-muted">{inr(chosen.cost)}</p>
+          </div>
+          <ul className="mt-3 grid gap-2">
+            {chosen.buys.map(row)}
+            {!chosen.buys.length && <li className="text-sm text-muted">Nothing left to buy: your squad is full or the purse is spent.</li>}
           </ul>
-        )}
+        </section>
+
+        {/* the playing XII */}
+        <section className={`${card} self-start`}>
+          <div className="flex items-baseline justify-between gap-2">
+            <p className="eyebrow">Playing XII · {STRATEGIES.find((s) => s.key === strategy)!.name}</p>
+            <span className="font-display text-2xl leading-none tabular-nums">{chosen.xii.score}</span>
+          </div>
+          <FieldMap twelve={chosen.xii.twelve} status={status} />
+          <div className="mt-2 flex flex-wrap gap-3 text-[0.72rem] text-muted">
+            <Legend c="bg-ink" l="In your squad" />
+            <Legend c="bg-red" l="Going for him" />
+            <Legend c="bg-up" l="Suggested buy" />
+          </div>
+          {!chosen.xii.keeper && <p className="mt-2 text-sm text-red">No wicket-keeper in this XII yet.</p>}
+        </section>
+      </div>
+
+      {/* find a player: the War Room pool's search box */}
+      <section className={`mt-5 ${card}`}>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="eyebrow mr-2">Pool</p>
+          <div className="relative w-full sm:w-[26rem]">
+            <input className="input !py-2 !pr-8 text-sm" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Find a player to go for or rule out" />
+            {query && (
+              <button type="button" aria-label="Clear" onClick={() => setQuery("")} className="absolute right-2 top-1/2 -translate-y-1/2 px-1 text-muted hover:text-ink">✕</button>
+            )}
+          </div>
+        </div>
+        {found.length > 0 && <ul className="mt-3 grid gap-2 sm:grid-cols-2">{found.map(row)}</ul>}
       </section>
 
       {onHold.length > 0 && (
-        <section className="mt-6">
-          <p className="text-[0.688rem] uppercase tracking-[0.14em] text-muted">On hold · {onHold.length}</p>
-          <ul className="mt-2 divide-y divide-line rounded-[12px] border border-line">
-            {onHold.map((p) => (
-              <Row key={p.id} p={p} pend={pending.has(p.id)} call={calls[p.id]} setCall={(c) => setCall(p.id, c)} />
-            ))}
-          </ul>
+        <section className={`mt-5 ${card}`}>
+          <p className="eyebrow">On hold · {onHold.length}</p>
+          <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{onHold.map(row)}</ul>
         </section>
       )}
 
       {ruledOut.length > 0 && (
-        <section className="mt-6">
-          <p className="text-[0.688rem] uppercase tracking-[0.14em] text-muted">Rejected · {ruledOut.length}</p>
-          <ul className="mt-2 flex flex-wrap gap-2">
+        <section className={`mt-5 ${card}`}>
+          <p className="eyebrow">Rejected · {ruledOut.length}</p>
+          <ul className="mt-3 flex flex-wrap gap-1.5">
             {ruledOut.map((p) => (
               <li key={p.id}>
-                <button type="button" onClick={() => setCall(p.id, null)} className="rounded-full border border-line px-3 py-1 text-sm text-muted hover:border-red">
+                <button type="button" onClick={() => setCall(p.id, null)} className="pill !px-3 !py-1.5">
                   {p.full_name} · undo
                 </button>
               </li>
@@ -181,20 +215,11 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
         </section>
       )}
 
-      <p className="mt-8 text-[0.688rem] leading-relaxed text-muted">
+      <p className="mt-8 text-[0.72rem] leading-relaxed text-muted">
         Ratings come from Sarda/SCCL and Ball Library records; prices are estimates from each player&rsquo;s category base and rating. Categories show &ldquo;SPI pending&rdquo; until the SPI grading is published after registration closes; until then those players are priced at the B base. Players marked
         &ldquo;No data yet&rdquo; or &ldquo;Little data&rdquo; are rated at their category&rsquo;s median until their numbers come in. Your calls stay on this
-        device and are private to your team.
+        device, are private to your team, and show on the War Room&rsquo;s live card on auction night.
       </p>
-    </div>
-  );
-}
-
-function Stat({ k, v }: { k: string; v: string }) {
-  return (
-    <div>
-      <p className="num text-base font-semibold leading-tight">{v}</p>
-      <p className="text-[0.625rem] leading-tight text-muted">{k}</p>
     </div>
   );
 }
@@ -207,31 +232,24 @@ function Legend({ c, l }: { c: string; l: string }) {
   );
 }
 
-// Tapping the active call again clears it.
-function Row({ p, pend, call, setCall }: { p: Rated; pend: boolean; call?: Call; setCall: (c: Call | null) => void }) {
+// A War Room player card with the three calls under it. Tapping the active call again clears it.
+function Row({ p, photo, pend, call, setCall }: { p: Rated; photo: string | null; pend: boolean; call?: Call; setCall: (c: Call | null) => void }) {
   return (
-    <li className="p-3">
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">{p.full_name}</p>
-          <p className="text-[0.75rem] text-muted">
-            {pend ? SPI_PENDING : p.cat} · {p.primary_role ?? "—"}
+    <li className={`rounded-[10px] border p-2 ${call === "going" ? "border-red bg-[color-mix(in_srgb,var(--red)_7%,transparent)]" : "border-line"}`}>
+      <div className="flex items-center gap-3">
+        <PlayerPhoto src={photo} name={p.full_name} className="h-10 w-10 shrink-0 rounded-full" sizes="40px" />
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-medium">{p.full_name}</p>
+          <p className="truncate text-[0.72rem] text-muted">
+            {[pend ? SPI_PENDING : catLabel(p.cat), p.primary_role, `≈ ${inr(p.price)}`].filter(Boolean).join(" · ")}
             {p.data !== "ok" && <span className="ml-1.5 rounded-full bg-gold-fill px-1.5 py-0.5 text-[0.625rem] text-gold">{DATA_LABEL[p.data]}</span>}
           </p>
         </div>
-        <p className="num shrink-0 text-sm">≈ {inr(p.price)}</p>
+        <span className="shrink-0 font-display text-lg">{p.overall_index != null ? Math.round(p.overall_index) : "—"}</span>
       </div>
-      <div className="mt-2 grid grid-cols-3 gap-1.5 text-[0.75rem]">
+      <div className="mt-2 flex flex-wrap gap-1.5">
         {([["going", "Going for him"], ["hold", "Hold"], ["reject", "Reject"]] as const).map(([c, l]) => (
-          <button
-            key={c}
-            type="button"
-            onClick={() => setCall(call === c ? null : c)}
-            aria-pressed={call === c}
-            className={`rounded-full border px-2 py-1.5 ${
-              call === c ? (c === "going" ? "border-red bg-red text-white" : c === "reject" ? "border-ink bg-ink text-white" : "border-gold bg-gold-fill text-gold") : "border-line text-muted"
-            }`}
-          >
+          <button key={c} type="button" className="pill !px-3 !py-1" data-active={call === c} aria-pressed={call === c} onClick={() => setCall(call === c ? null : c)}>
             {l}
           </button>
         ))}

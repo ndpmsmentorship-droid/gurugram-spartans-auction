@@ -51,6 +51,16 @@ export default async function WarRoomPage({ searchParams }: { searchParams: Prom
   const pooled = (LEAGUE === "sdll" ? await inRegistrationPool(sb, all) : all) as WRPlayer[];
   // Unsold players carry no category until the SPI is published (tier.ts).
   const players = SPI_PUBLISHED ? pooled : pooled.map((p) => (p.team_id ? p : { ...p, auction_category: null }));
+  // The planner uses the whole player database for now (Nikhil, 12 Nov 2026), one row per person:
+  // the same player can sit in more than one import (SCCL + USCL), so keep one per CricHeroes
+  // profile (else per name) — the sold row first, then the one with more matches.
+  const chOf = (l: string | null) => l?.match(/player-profile\/(\d+)/)?.[1] ?? null;
+  const byPerson = new Map<string, (typeof all)[number]>();
+  for (const p of [...all].sort((a, b) => (b.team_id ? 1 : 0) - (a.team_id ? 1 : 0) || (b.bat_matches ?? 0) - (a.bat_matches ?? 0))) {
+    const k = chOf(p.cricheroes_link) ?? `n:${p.full_name.toLowerCase().replace(/\s+/g, " ").trim()}`;
+    if (!byPerson.has(k)) byPerson.set(k, p);
+  }
+  const planPlayers = [...byPerson.values()].map((p) => (SPI_PUBLISHED || p.team_id ? p : { ...p, auction_category: null })) as WRPlayer[];
   return (
     <OwnerPortal
       tab={(["plan", "pool", "live"] as PortalTab[]).includes(tab as PortalTab) ? (tab as PortalTab) : "live"}
@@ -71,7 +81,7 @@ export default async function WarRoomPage({ searchParams }: { searchParams: Prom
         profileId: profile.id,
         team: { id: mine.id, name: mine.name, purse_total: mine.purse_total, purse_max: mine.purse_max ?? null, logo_url: mine.logo_url ?? null },
         leagueName: LEAGUE_NAME[LEAGUE],
-        players,
+        players: planPlayers,
       }}
     />
   );

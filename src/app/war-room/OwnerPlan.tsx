@@ -166,9 +166,8 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
             <span className="font-display text-2xl leading-none tabular-nums">{chosen.xii.score}</span>
           </div>
           {lineup.bands.map((b) => (
-            <div key={b.key} className="mt-4">
-              <p className="label-mono text-muted">{b.label} · {b.range}</p>
-              <ol className="mt-1.5 divide-y divide-line">
+            <Box key={b.key} tone={BAND_TONE[b.key]} title={b.label} chip={b.range}>
+              <ol className="divide-y divide-line">
                 {b.slots.map((s) => (
                   <SlotRow key={s.p.id} n={s.pos} name={s.p.full_name} note={s.note} dot={status(s.p)} tag={s.legend ? "Legend" : undefined} />
                 ))}
@@ -176,8 +175,8 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
                   <li className="py-1.5 text-[0.72rem] text-muted">#4 is the Legend&rsquo;s spot once you have one.</li>
                 )}
               </ol>
-              <BestPick pick={b.best} call={b.best ? calls[b.best.p.id] : undefined} setCall={(c) => b.best && setCall(b.best.p.id, c)} />
-            </div>
+              <BestPick pick={b.best} tone={BAND_TONE[b.key]} call={b.best ? calls[b.best.p.id] : undefined} setCall={(c) => b.best && setCall(b.best.p.id, c)} />
+            </Box>
           ))}
           {!chosen.xii.keeper && <p className="mt-3 text-sm text-red">No wicket-keeper in this XII yet.</p>}
           <Credit />
@@ -190,15 +189,14 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
           </div>
           <p className="mt-1 text-sm">{lineup.attack.map((p) => p.full_name).join(" · ") || "No bowlers in this XII yet."}</p>
           {lineup.spells.map((sp) => (
-            <div key={sp.key} className="mt-4">
-              <p className="label-mono text-muted">{sp.label} · {SPELL_COUNT[sp.key]}</p>
-              <ol className="mt-1.5 divide-y divide-line">
+            <Box key={sp.key} tone={SPELL_TONE[sp.key]} title={sp.label} chip={SPELL_COUNT[sp.key]}>
+              <ol className="divide-y divide-line">
                 {sp.picks.map((x) => (
                   <SlotRow key={x.p.id} name={x.p.full_name} note={x.note} dot={status(x.p)} />
                 ))}
               </ol>
-              <BestPick pick={sp.best} call={sp.best ? calls[sp.best.p.id] : undefined} setCall={(c) => sp.best && setCall(sp.best.p.id, c)} />
-            </div>
+              <BestPick pick={sp.best} tone={SPELL_TONE[sp.key]} call={sp.best ? calls[sp.best.p.id] : undefined} setCall={(c) => sp.best && setCall(sp.best.p.id, c)} />
+            </Box>
           ))}
           <div className="mt-4 flex flex-wrap gap-3 text-[0.72rem] text-muted">
             <Legend c="bg-ink" l="In your squad" />
@@ -301,6 +299,23 @@ function Row({ p, photo, pend, call, setCall }: { p: Rated; photo: string | null
 }
 
 const SPELL_COUNT = { pp: "2 bowlers", mid: "3 bowlers", death: "2 bowlers" } as const;
+// One colour per band / spell: openers blue, upper middle the Legend's gold, finishers violet,
+// tail slate; new ball green, middle overs blue, death the league red.
+const BAND_TONE = { top: "#2563eb", upper: "#b7791f", lower: "#7c3aed", tail: "#64748b" } as const;
+const SPELL_TONE = { pp: "#2e7d50", mid: "#2563eb", death: "#bc2423" } as const;
+
+// A boxed group: coloured edge, tinted title strip with its range / count.
+function Box({ tone, title, chip, children }: { tone: string; title: string; chip: string; children: React.ReactNode }) {
+  return (
+    <div className="mt-3 overflow-hidden rounded-[12px] border border-line" style={{ borderLeft: `4px solid ${tone}` }}>
+      <div className="flex items-center justify-between px-3 py-1.5" style={{ background: `color-mix(in srgb, ${tone} 10%, transparent)` }}>
+        <p className="text-sm font-semibold" style={{ color: tone }}>{title}</p>
+        <span className="rounded-full px-2 py-0.5 text-[0.68rem] font-semibold tabular-nums text-white" style={{ background: tone }}>{chip}</span>
+      </div>
+      <div className="px-3 pb-2.5 pt-1">{children}</div>
+    </div>
+  );
+}
 const DOT = { bought: "bg-ink", going: "bg-red", suggested: "bg-up" } as const;
 
 function NoteText({ note }: { note: Note }) {
@@ -323,10 +338,10 @@ function SlotRow({ n, name, note, dot, tag }: { n?: number; name: string; note: 
 }
 
 // The best player still in the pool for this band / spell, with the War Room's call pill.
-function BestPick({ pick, call, setCall }: { pick: Pick; call?: Call; setCall: (c: Call | null) => void }) {
+function BestPick({ pick, tone, call, setCall }: { pick: Pick; tone: string; call?: Call; setCall: (c: Call | null) => void }) {
   if (!pick) return null;
   return (
-    <div className="mt-1.5 flex items-center gap-2 rounded-[10px] border border-dashed border-line2 px-2.5 py-1.5">
+    <div className="mt-2 flex items-center gap-2 rounded-[10px] border border-dashed px-2.5 py-1.5" style={{ borderColor: `color-mix(in srgb, ${tone} 45%, transparent)`, background: `color-mix(in srgb, ${tone} 5%, transparent)` }}>
       <div className="min-w-0 flex-1 text-[0.75rem] leading-snug">
         <span className="text-muted">Best available: </span>
         <span className="font-medium">{pick.p.full_name}</span>

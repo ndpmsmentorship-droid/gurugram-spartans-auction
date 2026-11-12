@@ -10,7 +10,7 @@ import { catLabel } from "@/lib/scout/tier";
 import { PlayerPhoto } from "@/app/register/PlayerCard";
 import TeamCrest from "@/app/TeamCrest";
 import { Tile, ProfileSheet, enrich, type WRPlayer } from "./WarRoom";
-import { buildLineup, libraryCard, LIBRARY_MATCHES, type Note, type Pick } from "@/lib/auction/lineup";
+import { buildLineup, libraryCard, LIBRARY_MATCHES, type Note, type Opt } from "@/lib/auction/lineup";
 
 export type PlanTeam = { id: string; name: string; purse_total: number; purse_max: number | null; logo_url?: string | null };
 export type PoolPlayer = Omit<PlanPlayer, "cat"> & { auction_category: string | null; photo_url?: string | null };
@@ -179,7 +179,7 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
                   <li className="py-1.5 text-[0.72rem] text-muted">#4 is the Legend&rsquo;s spot once you have one.</li>
                 )}
               </ol>
-              <BestPick pick={b.best} tone={BAND_TONE[b.key]} call={b.best ? calls[b.best.p.id] : undefined} setCall={(c) => b.best && setCall(b.best.p.id, c)} />
+              <BestPicks opts={b.best} tone={BAND_TONE[b.key]} calls={calls} setCall={setCall} />
             </Box>
           ))}
           {!chosen.xii.keeper && <p className="mt-3 text-sm text-red">No wicket-keeper in this XII yet.</p>}
@@ -199,7 +199,7 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
                   <SlotRow key={x.p.id} id={x.p.id} name={x.p.full_name} note={x.note} dot={status(x.p)} />
                 ))}
               </ol>
-              <BestPick pick={sp.best} tone={SPELL_TONE[sp.key]} call={sp.best ? calls[sp.best.p.id] : undefined} setCall={(c) => sp.best && setCall(sp.best.p.id, c)} />
+              <BestPicks opts={sp.best} tone={SPELL_TONE[sp.key]} calls={calls} setCall={setCall} />
             </Box>
           ))}
           <div className="mt-4 flex flex-wrap gap-3 text-[0.72rem] text-muted">
@@ -360,23 +360,40 @@ function SlotRow({ id, n, name, note, dot, tag }: { id: string; n?: number; name
   );
 }
 
-// The best player still in the pool for this band / spell, with the War Room's call pill.
-function BestPick({ pick, tone, call, setCall }: { pick: Pick; tone: string; call?: Call; setCall: (c: Call | null) => void }) {
-  if (!pick) return null;
+// The best players still in the pool for this band / spell: three, and three more on tap.
+function BestPicks({ opts, tone, calls, setCall }: { opts: Opt[]; tone: string; calls: Record<string, Call>; setCall: (id: string, c: Call | null) => void }) {
+  const [more, setMore] = useState(false);
+  if (!opts.length) return null;
+  const shown = more ? opts : opts.slice(0, 3);
   return (
-    <div className="mt-2 flex items-center gap-2 rounded-[10px] border border-dashed px-2.5 py-1.5" style={{ borderColor: `color-mix(in srgb, ${tone} 45%, transparent)`, background: `color-mix(in srgb, ${tone} 5%, transparent)` }}>
-      <div className="min-w-0 flex-1 text-[0.75rem] leading-snug">
-        <span className="text-muted">Best available: </span>
-        <Name id={pick.p.id} name={pick.p.full_name} className="font-medium" />
-        <span className="text-muted"> · ≈ {inr(pick.p.price)}</span>
-        <span className="block text-[0.7rem]"><NoteText note={pick.note} /></span>
-      </div>
-      <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center">
-        <button type="button" className="pill !px-2.5 !py-1 text-[0.72rem]" data-active={call === "going"} aria-pressed={call === "going"} onClick={() => setCall(call === "going" ? null : "going")}>
-          {call === "going" ? "Going for him ✓" : "Going for him"}
+    <div className="mt-2 rounded-[10px] border border-dashed px-2.5 py-1.5" style={{ borderColor: `color-mix(in srgb, ${tone} 45%, transparent)`, background: `color-mix(in srgb, ${tone} 5%, transparent)` }}>
+      <p className="text-[0.68rem] font-semibold uppercase tracking-[0.08em]" style={{ color: tone }}>Best available</p>
+      <ol className="divide-y divide-line">
+        {shown.map(({ p, note }, i) => {
+          const call = calls[p.id];
+          return (
+            <li key={p.id} className="flex items-center gap-2 py-1.5">
+              <span className="w-4 shrink-0 text-right text-[0.72rem] tabular-nums text-muted">{i + 1}</span>
+              <div className="min-w-0 flex-1 text-[0.75rem] leading-snug">
+                <Name id={p.id} name={p.full_name} className="font-medium" />
+                <span className="text-muted"> · ≈ {inr(p.price)}</span>
+                <span className="block text-[0.7rem]"><NoteText note={note} /></span>
+              </div>
+              <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center">
+                <button type="button" className="pill !px-2.5 !py-1 text-[0.72rem]" data-active={call === "going"} aria-pressed={call === "going"} onClick={() => setCall(p.id, call === "going" ? null : "going")}>
+                  {call === "going" ? "Going for him ✓" : "Going for him"}
+                </button>
+                {call && <Unselect onClick={() => setCall(p.id, null)} />}
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+      {opts.length > 3 && (
+        <button type="button" onClick={() => setMore((m) => !m)} className="mt-0.5 pb-0.5 text-[0.72rem] font-medium hover:underline" style={{ color: tone }}>
+          {more ? "Show fewer" : `Show ${opts.length - 3} more`}
         </button>
-        {call && <Unselect onClick={() => setCall(null)} />}
-      </div>
+      )}
     </div>
   );
 }

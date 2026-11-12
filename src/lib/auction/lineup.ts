@@ -95,10 +95,12 @@ function bandNote(p: Rated, band: Band): Note {
 
 export type Slot = { pos: number; p: Rated; note: Note; legend?: boolean };
 export type Pick = { p: Rated; note: Note } | null;
+export type Opt = { p: Rated; note: Note };
+export const OPTIONS = 6; // best-available options per band / spell (3 shown, 3 more on tap)
 export type Lineup = {
-  bands: { key: Band; label: string; range: string; slots: Slot[]; best: Pick }[];
+  bands: { key: Band; label: string; range: string; slots: Slot[]; best: Opt[] }[];
   attack: Rated[];
-  spells: { key: Phase; label: string; picks: { p: Rated; note: Note }[]; best: Pick }[];
+  spells: { key: Phase; label: string; picks: { p: Rated; note: Note }[]; best: Opt[] }[];
   hasLegend: boolean;
 };
 
@@ -130,11 +132,10 @@ export function buildLineup(twelve: Rated[], available: Rated[]): Lineup {
   let pos = 0;
   // each suggestion names a different player
   const suggested = new Set<string>();
-  const best = (fit: (p: Rated) => number, note: (p: Rated) => Note, ok: (p: Rated) => boolean = () => true): Pick => {
-    const p = available.filter((x) => !suggested.has(x.id) && ok(x)).sort((a, b) => fit(b) - fit(a))[0];
-    if (!p) return null;
-    suggested.add(p.id);
-    return { p, note: note(p) };
+  const best = (fit: (p: Rated) => number, note: (p: Rated) => Note, ok: (p: Rated) => boolean = () => true): Opt[] => {
+    const ps = available.filter((x) => !suggested.has(x.id) && ok(x)).sort((a, b) => fit(b) - fit(a)).slice(0, OPTIONS);
+    ps.forEach((p) => suggested.add(p.id));
+    return ps.map((p) => ({ p, note: note(p) }));
   };
   const bands = ordered.map(([key, ps]) => {
     const meta = BANDS.find((b) => b.key === key)!;
@@ -142,7 +143,7 @@ export function buildLineup(twelve: Rated[], available: Rated[]): Lineup {
     // the tail's "best available" is a bowler who can hold a bat, so it's skipped
     const pick =
       key === "tail"
-        ? null
+        ? []
         : best((p) => bandFit(p, key), (p) => bandNote(p, key));
     return { ...meta, slots, best: pick };
   });

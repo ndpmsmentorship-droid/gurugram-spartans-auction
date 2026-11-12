@@ -16,6 +16,7 @@ export type PlanTeam = { id: string; name: string; purse_total: number; purse_ma
 export type PoolPlayer = Omit<PlanPlayer, "cat"> & { auction_category: string | null; photo_url?: string | null };
 
 const R = DEFAULT_RULES;
+const MIN_MATCHES = 200; // fewest career matches for a player to be suggested
 const RULES = { squadMin: R.squadMin, squadMax: R.squadMax, maxBid: R.maxBid, base: R.base, cap: R.cap };
 
 export default function OwnerPlan(props: { seasonId: string; profileId: string; team: PlanTeam; players: PoolPlayer[]; leagueName?: string }) {
@@ -59,6 +60,12 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
   }, [props.team.id]);
 
   const rated = useMemo(() => rateAll(players.map((p) => ({ ...p, cat: normCategory(p.auction_category) ?? "B" })), RULES), [players]);
+  // Only proven records are suggested (Nikhil, 12 Nov 2026): 200+ career matches. Players already
+  // in the squad, and anyone the owner is going for, always count; search still finds anyone.
+  const eligible = useMemo(
+    () => rated.filter((p) => p.team_id === team.id || calls[p.id] === "going" || (p.bat_matches ?? 0) >= MIN_MATCHES),
+    [rated, team.id, calls],
+  );
   const pending = useMemo(() => new Set(players.filter((p) => !normCategory(p.auction_category)).map((p) => p.id)), [players]);
   const mine = useMemo(() => rated.filter((p) => p.team_id === team.id), [rated, team.id]);
   const spent = mine.reduce((a, p) => a + (p.sold_price ?? 0), 0);
@@ -70,12 +77,12 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
   const goingKey = [...going].sort().join(","), rejectedKey = [...rejected].sort().join(",");
   const plans = useMemo(
     () => {
-      const all = STRATEGIES.map((s) => ({ ...s, plan: buildPlan(s.key, { rated, mine, purseLeft, rules: RULES, going, rejected }) }));
+      const all = STRATEGIES.map((s) => ({ ...s, plan: buildPlan(s.key, { rated: eligible, mine, purseLeft, rules: RULES, going, rejected }) }));
       // "Balanced" promises the strongest XII, so it takes whichever squad scores highest.
       const top = all.reduce((a, b) => (b.plan.xii.score > a.plan.xii.score ? b : a));
       return all.map((s) => (s.key === "balanced" && top.plan.xii.score > s.plan.xii.score ? { ...s, plan: { ...top.plan, key: s.key } } : s));
     },
-    [rated, mine, purseLeft, goingKey, rejectedKey], // eslint-disable-line react-hooks/exhaustive-deps
+    [eligible, mine, purseLeft, goingKey, rejectedKey], // eslint-disable-line react-hooks/exhaustive-deps
   );
   const chosen = plans.find((p) => p.key === strategy)!.plan;
 
@@ -90,9 +97,9 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
   const status = (p: Rated) => (p.team_id === team.id ? "bought" : going.has(p.id) ? "going" : "suggested");
   const lineup = useMemo(() => {
     const inXII = new Set(chosen.xii.twelve.map((p) => p.id));
-    const available = rated.filter((p) => !p.team_id && !rejected.has(p.id) && !inXII.has(p.id) && p.price <= maxSafe);
+    const available = eligible.filter((p) => !p.team_id && !rejected.has(p.id) && !inXII.has(p.id) && p.price <= maxSafe);
     return buildLineup(chosen.xii.twelve, available);
-  }, [chosen, rated, rejected, maxSafe]);
+  }, [chosen, eligible, rejected, maxSafe]);
 
   const photo = useMemo(() => new Map(players.map((p) => [p.id, p.photo_url ?? null])), [players]);
   const cats = useMemo(() => {

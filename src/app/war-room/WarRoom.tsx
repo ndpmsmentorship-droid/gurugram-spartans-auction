@@ -834,7 +834,7 @@ export default function WarRoom(props: {
         {/* on the block */}
         <section className="order-1 flex flex-col rounded-[16px] border border-line bg-surface p-4 shadow-[var(--elev-sm)]">
           <p className="mb-3 border-b border-line pb-2.5 text-center text-[0.75rem] leading-snug text-muted">
-            <span className="block font-semibold text-[#FF7A00] sm:inline">✦ Player intelligence by ND CricVideos AI</span>
+            <span className="block font-semibold text-[#FF7A00] sm:inline">✦ Player intelligence by CricVideos AI</span>
             <span className="block text-faint sm:inline"><span className="hidden sm:inline"> — </span>Stats, phases &amp; clips in one view.</span>
           </p>
           <p className="eyebrow">On the block</p>
@@ -987,7 +987,7 @@ export default function WarRoom(props: {
         {/* needs */}
         <section className="order-3 lg:order-2 rounded-[16px] border border-line bg-surface p-4 shadow-[var(--elev-sm)]">
           <p className="mb-3 border-b border-line pb-2.5 text-center text-[0.75rem] leading-snug text-muted">
-            <span className="block font-semibold text-[#FF7A00] sm:inline">✦ Suggestions powered by ND CricVideos AI</span>
+            <span className="block font-semibold text-[#FF7A00] sm:inline">✦ Suggestions powered by CricVideos AI</span>
             <span className="block text-faint sm:inline"><span className="hidden sm:inline"> — </span>Every ball read, every gap spotted.</span>
           </p>
           <div className="flex items-baseline justify-between gap-2">

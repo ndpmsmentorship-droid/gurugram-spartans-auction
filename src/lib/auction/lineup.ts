@@ -3,7 +3,7 @@
 //   Legend always at #4; five bowlers split into opening spell (2), middle overs (3), death (2).
 // Every band and bowling role also names the best player still available in the pool.
 //
-// Numbers come from the ND Cric Videos Ball Library (src/data/role-stats.json, built by
+// Numbers come from the CricVideos Ball Library (src/data/role-stats.json, built by
 // scripts/build-role-stats.mjs): batting position share and phase strike rates / economies.
 // A phase figure is used only with at least MIN_BALLS behind it; otherwise the player's
 // CricHeroes career figure stands in, and the line says so.

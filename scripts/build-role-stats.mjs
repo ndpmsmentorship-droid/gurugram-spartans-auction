@@ -1,4 +1,4 @@
-// Batting-order and phase numbers for the owners' planner, from the ND Cric Videos Ball Library
+// Batting-order and phase numbers for the owners' planner, from the CricVideos Ball Library
 // (Nikhil, 12 Nov 2026: "best suggestions on each field based on ball library numbers").
 //
 // Source: the Ball Library's per-ball match files (LMS repo public/spartans/shots/*.json): every
@@ -73,6 +73,6 @@ for (const [n, p] of Object.entries(players)) {
   if (!p.bowl.pp.b && !p.bowl.mid.b && !p.bowl.death.b) delete p.bowl;
   if (!p.bat && !p.bowl) delete players[n];
 }
-const out = { source: "ND Cric Videos Ball Library — per-ball logs", matches, built: new Date().toISOString().slice(0, 10), players };
+const out = { source: "CricVideos Ball Library — per-ball logs", matches, built: new Date().toISOString().slice(0, 10), players };
 fs.writeFileSync(path.join(ROOT, "src/data/role-stats.json"), JSON.stringify(out));
 console.log(`${matches} matches · ${Object.keys(players).length} players → src/data/role-stats.json`);

@@ -408,7 +408,7 @@ function BestPicks({ opts, tone, calls, setCall }: { opts: Opt[]; tone: string; 
 function Credit() {
   return (
     <p className="mt-4 border-t border-line pt-2 text-[0.68rem] leading-snug text-muted">
-      Analytics: <span className="font-medium text-ink">ND Cric Videos</span> Ball Library · {LIBRARY_MATCHES} matches, ball by ball. Where a player has under 12 balls in a phase, his CricHeroes career figure is shown (&ldquo;career&rdquo;).
+      Analytics: <span className="font-medium text-ink">CricVideos</span> Ball Library · {LIBRARY_MATCHES} matches, ball by ball. Where a player has under 12 balls in a phase, his CricHeroes career figure is shown (&ldquo;career&rdquo;).
     </p>
   );
 }
@@ -424,13 +424,13 @@ function Name({ id, name, className }: { id: string; name: string; className?: s
   );
 }
 
-// His ND Cric Videos Ball Library numbers, under the career stats in the profile sheet.
+// His CricVideos Ball Library numbers, under the career stats in the profile sheet.
 function LibraryCard({ name }: { name: string }) {
   const c = libraryCard({ full_name: name });
   const cell = "rounded-[10px] border border-line px-2 py-1.5 text-center";
   return (
     <div className="mt-4 rounded-[12px] border border-line p-3">
-      <p className="eyebrow">ND Cric Videos · Ball Library</p>
+      <p className="eyebrow">CricVideos · Ball Library</p>
       {!c.bat && !c.bowl ? (
         <p className="mt-1.5 text-sm text-muted">Not in the Ball Library yet.</p>
       ) : (
@@ -466,7 +466,7 @@ function LibraryCard({ name }: { name: string }) {
               ))}
             </div>
           )}
-          <p className="mt-2 text-[0.68rem] text-muted">Ball by ball from {LIBRARY_MATCHES} matches · analytics by ND Cric Videos.</p>
+          <p className="mt-2 text-[0.68rem] text-muted">Ball by ball from {LIBRARY_MATCHES} matches · analytics by CricVideos.</p>
         </>
       )}
     </div>

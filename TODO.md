@@ -103,6 +103,7 @@ sdll.playfulventures.co.in = this auction app (added to this Vercel project; `/`
 
 ## Registration v2 on playfulventures.co.in (27 Oct 2026)
 
+- [ ] **/register (19 Nov, Nikhil): ₹1,000 fee strictly non-refundable (tick box + notice) and restricted professions (Advocates, Real Estate Agents, Uniformed Services/Police) only on a franchise owner's recommendation + Organising Committee approval** — full spec in HANDOFF.md "NEXT ON THE MAC"
 - [ ] **UAT → launch (added 2 Nov 2026):** registration is in test mode — fee ₹10 (`FEE_NOW` in playful-site `src/app/register/shared.ts`) and every Register button hidden (`REG_PUBLIC = false`); /register still works by link. Before opening: fee back to ₹1,000, `REG_PUBLIC = true`, delete Nikhil's test registrations, redeploy.
 - [ ] Staff login for registration admin: decide between sharing `sdlladmin` (also unlocks the auction admin and operator pad) or a separate staff account.
 Built in ~/Claude/playful-site (not deployed until the two blockers below are done).

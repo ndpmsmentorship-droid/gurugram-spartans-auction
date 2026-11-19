@@ -18,6 +18,22 @@ _Local Claude memory does not transfer across machines — this file is the sour
 - **Data fixes still waiting on Nikhil's OK:** `sccl_s6_players` "Rohit Rohilla 13-05-1988" (DOB in the name, shows on /auction) and one `scout_players` role "ALl-Rounder".
 - **Open content questions:** /auction still shows SARDA S1 borrowed squads (233 signed, 12 teams) — start empty for SLL-2? War Room/Plan pool is the ~1,038 S1 players, not SLL-2 registrants. Demo owner (Gurugram Knights) shows a test sale of Amit Sehrawat ₹6,000. "ND CricVideos AI" lines are off-brand orange.
 
+### ⏸ READY, NOT LIVE — simple stage filters (built 20 Nov; ship ONLY when Nikhil says go)
+Branch **`simple-stages`** in BOTH repos: playful-site 08305e5 (admin) + gurugram-spartans-auction a723388 (owners' pool).
+- **Admin /admin:** the old tabs + "To verify" queues + badge row are replaced by **four filters**:
+  1. New · waiting (fee and profiling both to do) · 2. Profiling ✓ · fee pending · 3. Fee ✓ · profiling pending · 4. In the pool;
+  plus a quiet "Also: Recommendation required · Rejected · Payment not completed" line.
+- **Corporate profiling = one row of buttons** on each card: **LinkedIn 500+ ✓ · Under 500 · vetted ✓ · Recommendation required · Reject** (+ Undo).
+  Recommendation required mails the player (unchanged); Reject sends nothing; 500+/under 500 also clears a recommendation-required.
+- **No Approve button any more:** fee verified + profiling passed → status approved automatically → "Congratulations" mail
+  (`promote()` in actions.ts). Stage logic: `src/app/admin/stage.ts` (copy in the auction repo `src/lib/auction/owner-pool.ts` — change both).
+- **One-off on launch:** a gold banner "N players have both checks done but are not in the pool yet → Move all into the pool"
+  (`promoteReady`) — click it once after deploying; it sends those players the congratulations mail.
+- **Owners' Live pool:** same four stages as tabs (+ Rejected), each player tagged "Needs an owner's recommendation" when asked;
+  owners' home pills: in the pool / one check left / new. Owners never see fee amounts or UTRs.
+- **To ship:** playful-site: `git checkout main && git pull && git merge simple-stages && git push && npx vercel deploy --prod --yes`;
+  auction: `git checkout main && git pull && git merge simple-stages && git push` (git-connected, deploys itself). Then click the banner.
+
 ### playfulventures.co.in/admin — fee + corporate profiling flow (19 Nov, Nikhil; playful-site 309e2f9, auction e63f3a6)
 - **Two checks, two teams.** Accounts: **Fee received ✓** → mail "Payment received and verified". LinkedIn: 500+ / Under 500 vetted (unchanged).
 - **Corporate profiling = three buttons:** **Approve into pool** (status approved → mail "Congratulations! You're selected for the Season 2 auction pool"),

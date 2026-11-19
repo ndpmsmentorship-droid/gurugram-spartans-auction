@@ -78,7 +78,7 @@ export default async function OwnersHome({ searchParams }: { searchParams: Promi
     onBlock = (data as { full_name: string } | null)?.full_name ?? null;
   }
 
-  const counts = { selected: 0, recommend: 0, review: 0, rejected: 0 };
+  const counts = { new: 0, fee_pending: 0, profiling_pending: 0, pool: 0, rejected: 0 };
   for (const p of pool ?? []) counts[p.status] += 1;
   const latest = (pool ?? []).slice(0, 3);
 
@@ -124,10 +124,9 @@ export default async function OwnersHome({ searchParams }: { searchParams: Promi
           </Card>
           <Card href="/war-room?tab=pool" kicker="02 · Live pool" title="Players as they register" cta="See the pool">
             <span className="mt-1 flex gap-2 text-[0.75rem]">
-              <Pill c="text-up" n={counts.selected} l="selected" />
-              <Pill c="text-ink" n={counts.recommend} l="need recommendation" />
-              <Pill c="text-gold" n={counts.review} l="under review" />
-              <Pill c="text-red-deep" n={counts.rejected} l="rejected" />
+              <Pill c="text-up" n={counts.pool} l="in the pool" />
+              <Pill c="text-gold" n={counts.fee_pending + counts.profiling_pending} l="one check left" />
+              <Pill c="text-ink" n={counts.new} l="new" />
             </span>
             {latest.length > 0 ? (
               <span className="mt-2 block text-[0.75rem]">Latest: {latest.map((p) => p.name).join(", ")}</span>

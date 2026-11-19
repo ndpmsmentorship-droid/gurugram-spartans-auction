@@ -5,21 +5,30 @@ import { PlayerPhoto } from "@/app/register/PlayerCard";
 import type { PoolEntry, PoolStatus } from "@/lib/auction/owner-pool";
 
 // Season 2 registrations as they come in, with the league's call on each:
-// selected, recommendation required, under review or rejected. Refreshes every 30 s.
+// new, one check done, in the pool, or rejected. Refreshes every 30 s.
+// The league's own four stages (same as its admin), so owners see exactly where each player stands.
 const TABS: { key: PoolStatus | "all"; label: string }[] = [
   { key: "all", label: "All" },
-  { key: "selected", label: "Selected" },
-  { key: "recommend", label: "Recommendation required" },
-  { key: "review", label: "Under review" },
+  { key: "new", label: "1. New · waiting" },
+  { key: "fee_pending", label: "2. Profiling ✓ · fee pending" },
+  { key: "profiling_pending", label: "3. Fee ✓ · profiling pending" },
+  { key: "pool", label: "4. In the pool" },
   { key: "rejected", label: "Rejected" },
 ];
 const BADGE: Record<PoolStatus, string> = {
-  selected: "bg-[color-mix(in_srgb,var(--up)_12%,transparent)] text-up",
-  recommend: "bg-[color-mix(in_srgb,var(--accent,#2563eb)_12%,transparent)] text-ink",
-  review: "bg-gold-fill text-gold",
+  new: "bg-wash text-muted",
+  fee_pending: "bg-gold-fill text-gold",
+  profiling_pending: "bg-gold-fill text-gold",
+  pool: "bg-[color-mix(in_srgb,var(--up)_12%,transparent)] text-up",
   rejected: "bg-[color-mix(in_srgb,var(--red)_10%,transparent)] text-red-deep",
 };
-const LABEL: Record<PoolStatus, string> = { selected: "Selected", recommend: "Recommendation required", review: "Under review", rejected: "Rejected" };
+const LABEL: Record<PoolStatus, string> = {
+  new: "New",
+  fee_pending: "Profiling ✓ · fee pending",
+  profiling_pending: "Fee ✓ · profiling pending",
+  pool: "In the pool",
+  rejected: "Rejected",
+};
 
 const fmt = (n: number | null, d = 0) => (n == null ? "–" : n.toLocaleString("en-IN", { maximumFractionDigits: d, minimumFractionDigits: d }));
 
@@ -91,7 +100,7 @@ export default function LivePool() {
   const [tab, setTab] = useState<PoolStatus | "all">("all");
   const [q, setQ] = useState("");
   const counts = useMemo(() => {
-    const c: Record<string, number> = { all: pool?.length ?? 0, selected: 0, recommend: 0, review: 0, rejected: 0 };
+    const c: Record<string, number> = { all: pool?.length ?? 0, new: 0, fee_pending: 0, profiling_pending: 0, pool: 0, rejected: 0 };
     for (const p of pool ?? []) c[p.status] += 1;
     return c;
   }, [pool]);
@@ -152,7 +161,10 @@ export default function LivePool() {
                 {(p.designation || p.employer) && <p className="text-[0.75rem] leading-snug text-muted">{[p.designation, p.employer].filter(Boolean).join(", ")}</p>}
                 {p.stats && <StatLine s={p.stats} checkedOn={p.checkedOn} />}
               </div>
-              <span className={`mt-0.5 shrink-0 rounded-full px-2 py-1 text-[0.688rem] ${BADGE[p.status]}`}>{LABEL[p.status]}</span>
+              <span className="mt-0.5 flex shrink-0 flex-col items-end gap-1">
+                <span className={`rounded-full px-2 py-1 text-[0.688rem] ${BADGE[p.status]}`}>{LABEL[p.status]}</span>
+                {p.recommend && <span className="rounded-full border border-line px-2 py-0.5 text-[0.625rem] text-ink">Needs an owner&rsquo;s recommendation</span>}
+              </span>
             </li>
           ))}
         </ul>

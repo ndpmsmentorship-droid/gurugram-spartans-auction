@@ -5,7 +5,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // it comes in, grouped Selected / Under review / Rejected from the league's
 // vetting. Owners see cricket and work details only — never phone, email, date
 // of birth, Aadhaar, fee or vetting notes.
-export type PoolStatus = "selected" | "review" | "rejected";
+// "recommend" = the league needs a franchise owner's recommendation (registrations.status under_review, 19 Nov 2026).
+export type PoolStatus = "selected" | "recommend" | "review" | "rejected";
 export type PoolEntry = {
   id: string;
   name: string;
@@ -28,7 +29,7 @@ const GROUP: Record<string, PoolStatus> = {
   approved: "selected",
   rejected: "rejected",
   pending: "review",
-  under_review: "review",
+  under_review: "recommend",
 };
 
 type Master = {

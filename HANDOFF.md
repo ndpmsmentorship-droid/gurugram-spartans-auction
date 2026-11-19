@@ -20,7 +20,7 @@ _Local Claude memory does not transfer across machines — this file is the sour
 
 ### /register: strict non-refundable fee + restricted professions (asked 19 Nov, Nikhil)
 **playful-site is now on GitHub: `ndpmsmentorship-droid/playful-site`** (pushed from the Mac 19 Nov) — clone it on any machine, `npx vercel link --project playful-site --scope nikhil-dhingra-s-projects`, `npx vercel deploy --prod --yes` (Vercel is NOT git-connected yet; connecting it would deploy on push). On the Mac: `git pull` in ~/Claude/playful-site before editing.
-- **DONE + LIVE 19 Nov (Windows, 163c7a0 + b973345):** item 1 below — T&C **v3.0 · 19 Nov 2026**, fee non-refundable in any case in FAQ, payment note, fee tick box, T&C, /sdll, approval email. Also "Only if a team buys you" kit now lists **winter pullover + tracksuit**. Item 2 (restricted professions) NOT done — Nikhil to confirm whether a DB field for profession + recommending owner is wanted.
+- **DONE + LIVE 19 Nov (Windows, 163c7a0 + b973345):** item 1 below — T&C **v3.0 · 19 Nov 2026**, fee non-refundable in any case in FAQ, payment note, fee tick box, T&C, /sdll, approval email. Also "Only if a team buys you" kit now lists **winter pullover + tracksuit**. - **Item 2 LIVE 19 Nov (fb6efec), T&C v3.1:** a **sixth required declaration tick** "Restricted professions" on /register — advocates and legal professionals, real estate agents and property dealers, police and other uniformed services, **and sole proprietors of a business** (added by Nikhil) are accepted only on a franchise owner's recommendation + Organising Committee approval; the player declares it via employer/designation; fee not refunded if not approved. Same text in FAQ "Who can register?" and T&C "Fees and refunds". **Not stored as its own column** (the tick is required to submit; `terms_version` v3.1 records it) — no profession / recommending-owner fields yet; add them (Supabase columns + admin badge) if the OC wants to filter on it.
 1. **Fee is now STRICTLY non-refundable — replaces the T&C v2.7 "refund if rejected as ineligible" rule everywhere**
    (declaration, payment note, FAQ "Is there a fee?", /sdll, T&C page, the Approve email's "no longer refundable" line).
    Show it as a red bordered notice right above the payment / UTR step, with its own required tick box:
@@ -29,7 +29,7 @@ _Local Claude memory does not transfer across machines — this file is the sour
    > ☐ I understand the ₹1,000 registration fee is non-refundable.
    FAQ answer: "Yes. The registration fee is ₹1,000, paid by UPI when you register, and it is strictly non-refundable in all
    cases, including if your registration is not approved or you are not bought at the auction. Players bought at the auction pay a further ₹4,000."
-2. **Restricted professions — franchise owner's recommendation + Organising Committee approval only.** Notice on the form (and in FAQ "Who can register?"):
+2. **(DONE as a tick box — see above) Restricted professions — franchise owner's recommendation + Organising Committee approval only.** Notice on the form (and in FAQ "Who can register?"):
    > **Restricted professions.** To keep the league fair and maintain a level playing field, players who are **Advocates / legal
    > professionals, Real Estate Agents / property dealers, or in the Uniformed Services (Police and other law-enforcement or armed
    > services)** are accepted only on the recommendation of a franchise owner, and only with the approval of the Organising Committee.

@@ -29,6 +29,7 @@ Branch **`simple-stages`** in BOTH repos: playful-site 08305e5 (admin) + gurugra
   (`promote()` in actions.ts). Stage logic: `src/app/admin/stage.ts` (copy in the auction repo `src/lib/auction/owner-pool.ts` — change both).
 - **One-off on launch:** a gold banner "N players have both checks done but are not in the pool yet → Move all into the pool"
   (`promoteReady`) — click it once after deploying; it sends those players the congratulations mail.
+- **Accounts (added 20 Nov, playful-site b-branch):** a **Collections** box on /admin — ₹ verified against the bank (players), ₹ submitted still to verify, total submitted — and **"Payments for bank reconciliation ↓"** Excel (`/api/admin/export?sheet=payments`: Summary tab + one row per UPI payment: registered on, player, mobile, UTR, amount, fee status, verified on, registration status).
 - **Owners' Live pool:** same four stages as tabs (+ Rejected), each player tagged "Needs an owner's recommendation" when asked;
   owners' home pills: in the pool / one check left / new. Owners never see fee amounts or UTRs.
 - **To ship:** playful-site: `git checkout main && git pull && git merge simple-stages && git push && npx vercel deploy --prod --yes`;

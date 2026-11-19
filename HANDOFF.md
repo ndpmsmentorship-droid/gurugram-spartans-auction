@@ -18,6 +18,24 @@ _Local Claude memory does not transfer across machines — this file is the sour
 - **Data fixes still waiting on Nikhil's OK:** `sccl_s6_players` "Rohit Rohilla 13-05-1988" (DOB in the name, shows on /auction) and one `scout_players` role "ALl-Rounder".
 - **Open content questions:** /auction still shows SARDA S1 borrowed squads (233 signed, 12 teams) — start empty for SLL-2? War Room/Plan pool is the ~1,038 S1 players, not SLL-2 registrants. Demo owner (Gurugram Knights) shows a test sale of Amit Sehrawat ₹6,000. "ND CricVideos AI" lines are off-brand orange.
 
+### playfulventures.co.in/admin — fee + corporate profiling flow (19 Nov, Nikhil; playful-site 309e2f9, auction e63f3a6)
+- **Two checks, two teams.** Accounts: **Fee received ✓** → mail "Payment received and verified". LinkedIn: 500+ / Under 500 vetted (unchanged).
+- **Corporate profiling = three buttons:** **Approve into pool** (status approved → mail "Congratulations! You're selected for the Season 2 auction pool"),
+  **Recommendation required** (status **under_review** — no new DB status, so the check constraint is untouched → mail asking for a franchise
+  owner's recommendation by **29 Nov** (REG_CLOSES_LABEL); they reply to the mail with owner + franchise), **Reject** (no mail).
+- **Approve is disabled until LinkedIn is checked AND the fee is verified** (the button says which is missing). Before this, Approve silently
+  moved such players to under_review — that is why the Approved tab was empty. **Rows already in under_review were parked by that old rule,
+  not marked "recommendation required" by anyone**: they now show as "Recommendation required" (admin tab + owners' pool) but were sent no
+  mail. The team should open that tab and re-decide each one (Approve once fee + LinkedIn are ticked).
+- Every admin card now has three marks under the name: **✓ Fee verified / Fee: to verify**, **✓ LinkedIn checked / LinkedIn: to check**,
+  **✓ In the pool / Pool: recommendation required / Pool: not decided / ✗ Rejected**.
+- **Owners' Live pool** (auction app, reads registrations directly, refreshes every 30 s): new **Recommendation required** group (under_review)
+  beside Selected / Under review (pending) / Rejected; the owners' home page shows a "need recommendation" count.
+- /sdll eligibility rewritten (bc47e8a): Working professional · Amateur cricketer · Recommended entry · Verified identity (the face photo moved
+  into identity). About us now sits just before Sponsors. Mail sign-off: "Corporate Profiling Team, Playful Ventures Pvt Ltd, www.playfulventures.co.in".
+- Deploy note: `npx vercel deploy --prod` from Windows sometimes ends with "ECONNRESET" while polling — the deployment still goes Ready
+  (check with `npx vercel ls playful-site --prod`).
+
 ### /register: strict non-refundable fee + restricted professions (asked 19 Nov, Nikhil)
 **playful-site is now on GitHub: `ndpmsmentorship-droid/playful-site`** (pushed from the Mac 19 Nov) — clone it on any machine, `npx vercel link --project playful-site --scope nikhil-dhingra-s-projects`, `npx vercel deploy --prod --yes` (Vercel is NOT git-connected yet; connecting it would deploy on push). On the Mac: `git pull` in ~/Claude/playful-site before editing.
 - **DONE + LIVE 19 Nov (Windows, 163c7a0 + b973345):** item 1 below — T&C **v3.0 · 19 Nov 2026**, fee non-refundable in any case in FAQ, payment note, fee tick box, T&C, /sdll, approval email. Also "Only if a team buys you" kit now lists **winter pullover + tracksuit**. - **Restricted list now (19 Nov, T&C v3.3, playful-site 784df5d):** advocates and legal professionals, real estate agents and property dealers, and **business owners and founders (including sole proprietors and partners)**. Police/uniformed services REMOVED (Nikhil, v3.2). Nikhil: **no recommending-owner field** — the tick + employer/designation is enough.

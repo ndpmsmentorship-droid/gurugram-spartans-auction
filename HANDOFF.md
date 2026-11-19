@@ -35,6 +35,8 @@ _Local Claude memory does not transfer across machines — this file is the sour
   into identity). About us now sits just before Sponsors. Mail sign-off: "Corporate Profiling Team, Playful Ventures Pvt Ltd, www.playfulventures.co.in".
 - **Auction date is Sat 19 Dec 2026** (was 12 Dec): fixed on /sdll timeline, approval mail and /owners (playful-site 1eed768, c175475); the auction app already said 19 Dec.
 - **Player mails rewritten (e222c16):** every player mail names **admin@playfulventures.co.in** and the **Corporate Profiling Team, +91 98150 11317** (Nikhil's number; Sajal's removed from mails 19 Nov, d65d6fa — site pages + T&C still list Sajal for enquiries) (Need help? block) and uses it as **Reply-To** (`CONTACT` in src/lib/mail.ts); "What happens next" steps; per-mail header line (PAYMENT CONFIRMED / AUCTION POOL / ACTION NEEDED). Preview without sending: scratch harness that stubs nodemailer (see git log e222c16).
+- **⚠ playful-site is edited from several machines: ALWAYS `git pull` before `npx vercel deploy --prod`.** The CLI deploys the local folder, not GitHub — a stale folder rolls back the other machine's live changes (happened 19 Nov: a Windows deploy briefly dropped the Mac's player-card fixes; redeployed after rebasing). Connecting Vercel to the GitHub repo would end this.
+- /register payment step now has **"Start a new registration"** (0ac7f06/f5886ee): the saved draft used to reopen on the payment page with no way back.
 - Deploy note: `npx vercel deploy --prod` from Windows sometimes ends with "ECONNRESET" while polling — the deployment still goes Ready
   (check with `npx vercel ls playful-site --prod`).
 

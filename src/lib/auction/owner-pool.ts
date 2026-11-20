@@ -5,12 +5,16 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // it comes in, grouped Selected / Under review / Rejected from the league's
 // vetting. Owners see cricket and work details only — never phone, email, date
 // of birth, Aadhaar, fee or vetting notes.
-// "recommend" = the league needs a franchise owner's recommendation (registrations.status under_review, 19 Nov 2026).
-export type PoolStatus = "selected" | "recommend" | "review" | "rejected";
+// The same four stages as the league admin (playful-site src/app/admin/stage.ts, 20 Nov 2026 — change both
+// together), so owners watch every registration move: new → one check done → in the pool. Two checks: the
+// fee (accounts) and corporate profiling (LinkedIn 500+ / under 500 vetted; or a franchise owner's
+// recommendation required; or rejected). Owners see the stage only, never the fee amount or UPI reference.
+export type PoolStatus = "new" | "fee_pending" | "profiling_pending" | "pool" | "rejected";
 export type PoolEntry = {
   id: string;
   name: string;
   status: PoolStatus;
+  recommend: boolean; // corporate profiling asked for a franchise owner's recommendation
   returning: boolean;
   role: string;
   employer: string | null;
@@ -25,12 +29,15 @@ export type PoolEntry = {
 };
 
 const SEASON = "SDLL-S2";
-const GROUP: Record<string, PoolStatus> = {
-  approved: "selected",
-  rejected: "rejected",
-  pending: "review",
-  under_review: "recommend",
-};
+function stageOf(r: { status: string; fee_status: string | null; linkedin_verified: boolean | null }): PoolStatus {
+  if (r.status === "rejected") return "rejected";
+  if (r.status === "approved") return "pool";
+  const fee = r.fee_status === "verified";
+  const prof = r.linkedin_verified != null && r.status !== "under_review";
+  if (prof && !fee) return "fee_pending";
+  if (fee) return "profiling_pending";
+  return "new";
+}
 
 type Master = {
   id: string;
@@ -76,7 +83,7 @@ export async function loadOwnerPool({
   const { data, error } = await sb
     .from("registrations")
     .select(
-      "id, phone, full_name, status, is_returning, master_id, batting_hand, bowling_type, allrounder, is_keeper, employer, designation, photo_thumb_path, created_at",
+      "id, phone, full_name, status, fee_status, linkedin_verified, is_returning, master_id, batting_hand, bowling_type, allrounder, is_keeper, employer, designation, photo_thumb_path, created_at",
     )
     .eq("season", SEASON)
     // Page 1 saved, fee never paid (playful-site two-page form): not a registration yet.
@@ -89,6 +96,8 @@ export async function loadOwnerPool({
     phone: string | null;
     full_name: string;
     status: string;
+    fee_status: string | null;
+    linkedin_verified: boolean | null;
     is_returning: boolean;
     master_id: string | null;
     batting_hand: string | null;
@@ -161,7 +170,8 @@ export async function loadOwnerPool({
     return {
       id: r.id,
       name: r.full_name,
-      status: GROUP[r.status] ?? "review",
+      status: stageOf(r),
+      recommend: r.status === "under_review",
       returning: r.is_returning,
       role: roleOf(r, m),
       employer: r.employer,

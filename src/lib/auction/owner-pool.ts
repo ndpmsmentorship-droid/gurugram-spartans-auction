@@ -15,6 +15,10 @@ export type PoolEntry = {
   name: string;
   status: PoolStatus;
   recommend: boolean; // corporate profiling asked for a franchise owner's recommendation
+  // How many owners recommended this player (owner_recommendations). Owners see the count only — which
+  // teams did would show their auction interest; the team names stay on the league admin.
+  recBy: string[];
+  mine: boolean; // the signed-in owner's own team is one of them
   returning: boolean;
   role: string;
   employer: string | null;
@@ -77,7 +81,8 @@ function roleOf(
 
 export async function loadOwnerPool({
   photos = true,
-}: { photos?: boolean } = {}): Promise<PoolEntry[] | null> {
+  teamId = null,
+}: { photos?: boolean; teamId?: string | null } = {}): Promise<PoolEntry[] | null> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = createAdminClient() as any;
   const { data, error } = await sb
@@ -122,6 +127,13 @@ export async function loadOwnerPool({
       )
       .in("id", ids);
     for (const m of (ms ?? []) as Master[]) masters.set(m.id, m);
+  }
+  // Owners' recommendations (playful-site supabase/registration_v8.sql); none until that table exists.
+  const recs = new Map<string, { team_id: string; team_name: string }[]>();
+  {
+    const { data: rs } = await sb.from("owner_recommendations").select("registration_id, team_id, team_name");
+    for (const x of (rs ?? []) as { registration_id: string; team_id: string; team_name: string }[])
+      recs.set(x.registration_id, [...(recs.get(x.registration_id) ?? []), x]);
   }
   const statsOn = (m?: Master) =>
     !!m?.stats &&
@@ -172,6 +184,8 @@ export async function loadOwnerPool({
       name: r.full_name,
       status: stageOf(r),
       recommend: r.status === "under_review",
+      recBy: (recs.get(r.id) ?? []).map((x) => (teamId && x.team_id === teamId ? x.team_name : "owner")),
+      mine: !!teamId && (recs.get(r.id) ?? []).some((x) => x.team_id === teamId),
       returning: r.is_returning,
       role: roleOf(r, m),
       employer: r.employer,

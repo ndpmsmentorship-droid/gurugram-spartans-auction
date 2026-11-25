@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { PlayerPhoto } from "@/app/register/PlayerCard";
 import type { PoolEntry, PoolStatus } from "@/lib/auction/owner-pool";
+import { MarkRow, MarkerKey } from "./Markers";
 
 // Season 2 registrations as they come in, with the league's call on each:
 // new, one check done, in the pool, or rejected. Refreshes every 30 s.
@@ -15,9 +16,11 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "fee_pending", label: "2. Profiling ✓ · fee pending" },
   { key: "profiling_pending", label: "3. Fee ✓ · profiling pending" },
   { key: "pool", label: "4. In the pool" },
+  { key: "unpaid", label: "Payment pending" },
   { key: "rejected", label: "Rejected" },
 ];
 const BADGE: Record<PoolStatus, string> = {
+  unpaid: "border border-dashed border-red text-red-deep",
   new: "bg-wash text-muted",
   fee_pending: "bg-gold-fill text-gold",
   profiling_pending: "bg-gold-fill text-gold",
@@ -25,6 +28,7 @@ const BADGE: Record<PoolStatus, string> = {
   rejected: "bg-[color-mix(in_srgb,var(--red)_10%,transparent)] text-red-deep",
 };
 const LABEL: Record<PoolStatus, string> = {
+  unpaid: "Payment pending",
   new: "New",
   fee_pending: "Profiling ✓ · fee pending",
   profiling_pending: "Fee ✓ · profiling pending",
@@ -34,21 +38,7 @@ const LABEL: Record<PoolStatus, string> = {
 
 const fmt = (n: number | null, d = 0) => (n == null ? "–" : n.toLocaleString("en-IN", { maximumFractionDigits: d, minimumFractionDigits: d }));
 
-// Instagram-style verified mark, in league red: the numbers were checked on CricHeroes by the league team.
-function Checked({ on }: { on: string }) {
-  const d = new Date(on).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
-  return (
-    <span className="inline-flex items-center gap-1 text-[0.625rem] text-muted" title="CricHeroes stats checked and entered by the league team">
-      <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
-        <path fill="var(--red)" d="M12 1.5l2.4 1.8 3-.2 1 2.8 2.6 1.6-.6 2.9 1.4 2.6-2 2.2-.2 3-2.9.7-1.8 2.4-2.9-.9-2.9.9-1.8-2.4-2.9-.7-.2-3-2-2.2 1.4-2.6-.6-2.9 2.6-1.6 1-2.8 3 .2z" />
-        <path fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" d="M7.5 12.3l3 3 6-6.3" />
-      </svg>
-      CricHeroes · {d}
-    </span>
-  );
-}
-
-function StatLine({ s, checkedOn }: { s: NonNullable<PoolEntry["stats"]>; checkedOn: string | null }) {
+function StatLine({ s }: { s: NonNullable<PoolEntry["stats"]> }) {
   const cells: [string, string][] = [
     ["Mat", fmt(s.m)],
     ["Runs", fmt(s.runs)],
@@ -69,7 +59,6 @@ function StatLine({ s, checkedOn }: { s: NonNullable<PoolEntry["stats"]>; checke
           </div>
         ))}
       </dl>
-      {checkedOn && <div className="mt-1"><Checked on={checkedOn} /></div>}
     </div>
   );
 }
@@ -140,7 +129,7 @@ export default function LivePool() {
   const [tab, setTab] = useState<Tab>("all");
   const [q, setQ] = useState("");
   const counts = useMemo(() => {
-    const c: Record<string, number> = { all: pool?.length ?? 0, recommend: 0, new: 0, fee_pending: 0, profiling_pending: 0, pool: 0, rejected: 0 };
+    const c: Record<string, number> = { all: pool?.length ?? 0, recommend: 0, unpaid: 0, new: 0, fee_pending: 0, profiling_pending: 0, pool: 0, rejected: 0 };
     for (const p of pool ?? []) {
       c[p.status] += 1;
       if (p.recommend) c.recommend += 1;
@@ -202,7 +191,8 @@ export default function LivePool() {
                   {!p.hasData && <span className="ml-1.5 rounded-full bg-gold-fill px-1.5 py-0.5 text-[0.625rem] text-gold">No data yet</span>}
                 </p>
                 {(p.designation || p.employer) && <p className="text-[0.75rem] leading-snug text-muted">{[p.designation, p.employer].filter(Boolean).join(", ")}</p>}
-                {p.stats && <StatLine s={p.stats} checkedOn={p.checkedOn} />}
+                <MarkRow p={p} />
+                {p.stats && <StatLine s={p.stats} />}
               </div>
               <span className="mt-0.5 flex shrink-0 flex-col items-end gap-1">
                 <span className={`rounded-full px-2 py-1 text-[0.688rem] ${BADGE[p.status]}`}>{LABEL[p.status]}</span>
@@ -234,6 +224,7 @@ export default function LivePool() {
         The league vets every registration. Contact details stay with the league office.
         {team ? " Recommend a player who needs one; the league makes the final call." : ""}
       </p>
+      <MarkerKey />
     </section>
   );
 }

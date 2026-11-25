@@ -9,7 +9,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // together), so owners watch every registration move: new → one check done → in the pool. Two checks: the
 // fee (accounts) and corporate profiling (LinkedIn 500+ / under 500 vetted; or a franchise owner's
 // recommendation required; or rejected). Owners see the stage only, never the fee amount or UPI reference.
-export type PoolStatus = "new" | "fee_pending" | "profiling_pending" | "pool" | "rejected";
+// "unpaid" (25 Nov 2026, Nikhil): page 1 of the form saved, fee not paid yet. Owners now see them too,
+// clearly tagged "Payment pending", so they know the player is not in the pool yet.
+export type PoolStatus = "unpaid" | "new" | "fee_pending" | "profiling_pending" | "pool" | "rejected";
+export type AgeBand = "30–34" | "35–39" | "40+";
 export type PoolEntry = {
   id: string;
   name: string;
@@ -27,13 +30,19 @@ export type PoolEntry = {
   lastTeam: string | null; // Season 1 team, for returning players
   hasData: boolean; // match stats on record
   // CricHeroes career headline (player_master.stats). Cricket numbers only.
-  stats: { m: number | null; runs: number | null; avg: number | null; sr: number | null; hs: string | null; wk: number | null; econ: number | null; best: string | null } | null;
+  stats: { m: number | null; runs: number | null; avg: number | null; sr: number | null; hs: string | null; wk: number | null; econ: number | null; best: string | null; ct: number | null; stp: number | null } | null;
   checkedOn: string | null; // ISO date the league team last entered them from CricHeroes
   at: string; // registered
+  feePaid: boolean; // the league's accounts team verified the registration fee (never the amount or UTR)
+  ageBand: AgeBand | null; // SPI age bracket only; owners never see the date of birth
+  owner: string | null; // franchise this player owns (owner marker on the league admin)
+  keeper: boolean;
+  tags: string[]; // CricHeroes player-type tags, e.g. Hard Hitter · Economist
 };
 
 const SEASON = "SDLL-S2";
 function stageOf(r: { status: string; fee_status: string | null; linkedin_verified: boolean | null }): PoolStatus {
+  if (r.status === "awaiting_payment") return "unpaid";
   if (r.status === "rejected") return "rejected";
   if (r.status === "approved") return "pool";
   const fee = r.fee_status === "verified";
@@ -50,6 +59,7 @@ type Master = {
   bowling_style: string | null;
   last_team: string | null;
   stats: unknown;
+  dob: string | null;
 };
 
 // The form's own answers first; a returning player's record fills the gaps.
@@ -88,11 +98,9 @@ export async function loadOwnerPool({
   const { data, error } = await sb
     .from("registrations")
     .select(
-      "id, phone, full_name, status, fee_status, linkedin_verified, is_returning, master_id, batting_hand, bowling_type, allrounder, is_keeper, employer, designation, photo_thumb_path, created_at",
+      "id, phone, full_name, status, fee_status, linkedin_verified, is_returning, master_id, batting_hand, bowling_type, allrounder, is_keeper, employer, designation, photo_thumb_path, created_at, dob, owner_team",
     )
     .eq("season", SEASON)
-    // Page 1 saved, fee never paid (playful-site two-page form): not a registration yet.
-    .neq("status", "awaiting_payment")
     .order("created_at", { ascending: false });
   if (error) return null;
 
@@ -113,6 +121,8 @@ export async function loadOwnerPool({
     designation: string | null;
     photo_thumb_path: string | null;
     created_at: string;
+    dob: string | null;
+    owner_team: string | null;
   };
   // Nobody is hidden by phone number (Nikhil, 7 Nov): test entries are deleted, not filtered.
   const rows = (data ?? []) as Row[];
@@ -123,7 +133,7 @@ export async function loadOwnerPool({
     const { data: ms } = await sb
       .from("player_master")
       .select(
-        "id, primary_role, batting_style, bowling_style, last_team, stats",
+        "id, primary_role, batting_style, bowling_style, last_team, stats, dob",
       )
       .in("id", ids);
     for (const m of (ms ?? []) as Master[]) masters.set(m.id, m);
@@ -169,6 +179,8 @@ export async function loadOwnerPool({
       wk: num(st.wickets),
       econ: num(st.economy),
       best: st.best_bowling != null ? String(st.best_bowling) : null,
+      ct: num(st.caught_behind),
+      stp: num(st.stumpings),
     };
   };
   // Only the league team's own CricHeroes entry earns the "checked" mark (same rule as the admin red tick).
@@ -177,8 +189,15 @@ export async function loadOwnerPool({
     return typeof st._by === "string" && /cricheroes/i.test(st._by) && typeof st._updated === "string" ? st._updated : null;
   };
 
+  const band = (dob: string | null): AgeBand | null => {
+    if (!dob) return null;
+    const y = Math.floor((Date.now() - new Date(dob).getTime()) / (365.25 * 864e5));
+    if (!Number.isFinite(y) || y < 30) return null;
+    return y < 35 ? "30–34" : y < 40 ? "35–39" : "40+";
+  };
   return rows.map((r) => {
     const m = r.master_id ? masters.get(r.master_id) : undefined;
+    const st = (m?.stats ?? {}) as Record<string, unknown>;
     return {
       id: r.id,
       name: r.full_name,
@@ -198,6 +217,11 @@ export async function loadOwnerPool({
       stats: headline(m),
       checkedOn: checked(m),
       at: r.created_at,
+      feePaid: r.fee_status === "verified",
+      ageBand: band(r.dob ?? m?.dob ?? null),
+      owner: r.owner_team ?? null,
+      keeper: !!r.is_keeper || /keeper/i.test(m?.primary_role ?? ""),
+      tags: Array.isArray(st.ch_tags) ? (st.ch_tags as unknown[]).map(String) : [],
     };
   });
 }

@@ -78,7 +78,7 @@ export default async function OwnersHome({ searchParams }: { searchParams: Promi
     onBlock = (data as { full_name: string } | null)?.full_name ?? null;
   }
 
-  const counts = { new: 0, fee_pending: 0, profiling_pending: 0, pool: 0, rejected: 0 };
+  const counts = { unpaid: 0, new: 0, fee_pending: 0, profiling_pending: 0, pool: 0, rejected: 0 };
   for (const p of pool ?? []) counts[p.status] += 1;
   const latest = (pool ?? []).slice(0, 3);
 
@@ -120,13 +120,14 @@ export default async function OwnersHome({ searchParams }: { searchParams: Promi
         {/* the three parts */}
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <Card href="/war-room?tab=plan" kicker="01 · Plan" title="Plan your squad" cta="Open the planner">
-            Five strategies, each the best squad your purse can still buy, scored on the playing XII. Mark players going for, hold or reject.
+            Build the playing XII you have in mind: your own owners go in first, then pick each slot from the live pool, with our suggestions beside it.
           </Card>
           <Card href="/war-room?tab=pool" kicker="02 · Live pool" title="Players as they register" cta="See the pool">
-            <span className="mt-1 flex gap-2 text-[0.75rem]">
+            <span className="mt-1 flex flex-wrap gap-2 text-[0.75rem]">
               <Pill c="text-up" n={counts.pool} l="in the pool" />
               <Pill c="text-gold" n={counts.fee_pending + counts.profiling_pending} l="one check left" />
               <Pill c="text-ink" n={counts.new} l="new" />
+              {counts.unpaid > 0 && <Pill c="text-red-deep" n={counts.unpaid} l="payment pending" />}
             </span>
             {latest.length > 0 ? (
               <span className="mt-2 block text-[0.75rem]">Latest: {latest.map((p) => p.name).join(", ")}</span>

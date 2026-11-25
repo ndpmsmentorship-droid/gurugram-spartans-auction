@@ -24,6 +24,42 @@ export const DEV_FIXTURE = process.env.SPARTANS_DEV_FIXTURE === "1";
 
 type Row = Record<string, unknown>;
 
+// Season 2 registrations for the owners' Live pool + Plan XII, built from the fixture pool:
+// every stage (paid, unpaid, rejected…), CricHeroes tags, and two owners of Gurugram Spartans.
+let regCache: { regs: Row[]; masters: Row[] } | null = null;
+function fixtureRegs() {
+  if (regCache) return regCache;
+  const stages = ["approved", "approved", "pending", "awaiting_payment", "approved", "under_review", "rejected", "approved"];
+  const tags = [["Hard Hitter", "Economist"], ["Accumulator", "Spearhead"], [], ["Accumulator", "Aspirant"]];
+  const regs: Row[] = [], masters: Row[] = [];
+  fixturePlayers().slice(0, 140).forEach((p, i) => {
+    const status = stages[i % stages.length];
+    const year = 1970 + (i * 7) % 26;
+    const keeper = /keep/i.test(p.primary_role ?? "");
+    regs.push({
+      id: `reg-${i}`, season: "SDLL-S2", phone: null, full_name: p.full_name, status,
+      fee_status: status === "awaiting_payment" ? "unpaid" : i % 3 ? "verified" : "pending",
+      linkedin_verified: i % 4 ? true : null, is_returning: i % 2 === 0, master_id: `m-${i}`,
+      batting_hand: p.batting_style, bowling_type: p.bowling_style,
+      allrounder: /all/i.test(p.primary_role ?? "") ? "Batting All Rounder" : null, is_keeper: keeper,
+      employer: "Fixture Corp", designation: "Manager", photo_thumb_path: null,
+      created_at: new Date(Date.UTC(2026, 10, 1 + (i % 24))).toISOString(),
+      dob: `${year}-06-15`, owner_team: i === 5 || i === 11 ? "Gurugram Spartans" : i === 20 ? "Goan Monks" : null,
+    });
+    masters.push({
+      id: `m-${i}`, primary_role: p.primary_role, batting_style: p.batting_style, bowling_style: p.bowling_style,
+      last_team: null, dob: `${year}-06-15`,
+      stats: (p.bat_matches ?? 0) < 5 ? {} : {
+        matches: p.bat_matches, runs: p.runs, bat_avg: p.bat_avg, bat_sr: p.bat_sr, wickets: p.wickets, economy: p.economy,
+        stumpings: p.stumpings, caught_behind: keeper ? Math.round((p.bat_matches ?? 0) * 0.1) : 0,
+        ch_tags: tags[i % tags.length], ...(i % 3 === 0 ? { _by: "Claude · CricHeroes", _updated: "2026-11-25T05:00:00Z" } : {}),
+      },
+    });
+  });
+  regCache = { regs, masters };
+  return regCache;
+}
+
 function tableRows(table: string): Row[] {
   switch (table) {
     case "scout_players":
@@ -44,6 +80,10 @@ function tableRows(table: string): Row[] {
       return allEvents().map((e) => ({ ...e, season_id: FIXTURE_SEASON.id })) as unknown as Row[];
     case "auction_rules":
       return [{ season_id: FIXTURE_SEASON.id, squad_max: 25 }];
+    case "registrations":
+      return fixtureRegs().regs;
+    case "player_master":
+      return fixtureRegs().masters;
     default:
       return [];
   }

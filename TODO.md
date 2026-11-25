@@ -1,7 +1,15 @@
 # SDLL Portal — To-do
 
 Running list. New items go under the right heading; tick with `[x]` when done (move to Done at the bottom).
-Last updated: 2026-11-05
+Last updated: 2026-11-25
+
+## 🔴 TOP PRIORITY — owners' page (Nikhil, 25 Nov 2026)
+- [ ] **AI feature + suggestions chat bot for owners** — link it (ANTHROPIC_API_KEY on Vercel, AIChat on every owners' tab) **by Wed 16 Dec 2026, 3 days before the 19 Dec auction**. Reminder set for 16 Dec.
+- [ ] **1. Plan = the owner's own playing XII.** The first job on Plan is to complete a wishlist of the XII they imagine: 12 slots in batting order (openers, top, middle, finisher, keeper, all-rounders, bowlers), saved per owner.
+- [ ] **2. The team's own owners go in first, compulsorily.** Owners marked on /admin (registrations.owner_team) fill XII slots automatically and can be moved between slots but never removed.
+- [ ] **3. Search + suggestions per slot.** Each empty slot opens a search over the live pool, with our top suggestions for that role next to it.
+- [ ] **4. Live pool shows unpaid registrations too**, tagged clearly "Payment pending" so owners know they aren't in the pool yet.
+- [ ] **5. Marker key** at the end of the Plan and Live pool pages: red seal = CricHeroes numbers updated by the league; green seal = fee paid; Payment pending; age band (30–34 red · 35–39 blue · 40+ green, no exact ages or DOB); category (SPI pending until grading is published); Owner; CricHeroes player tags.
 
 ## MASTER LIST — SLL-2 workstreams (Nikhil, 5 Nov 2026)
 Strategy + status live here; work happens in separate sessions. Key dates (auction moved 12 → 19 Dec on 8 Nov): registration closes **29 Nov** · auction **Sat 19 Dec** · opener **Sat 23 Jan 2027** · final **Sun 14 Mar**.

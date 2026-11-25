@@ -1,6 +1,16 @@
 # Handoff — Shanti Devi Legend League Auction App
 
-_Local Claude memory does not transfer across machines — this file is the source of truth. Last updated 2026-11-02._
+_Local Claude memory does not transfer across machines — this file is the source of truth. Last updated 2026-11-25._
+
+## 🔴 TOP PRIORITY — 25 Nov 2026: owners' page (Nikhil)
+Full list in TODO.md (top section). In short:
+1. **Plan tab = the owner's wishlist playing XII first** (12 slots, batting order), suggestions second.
+2. **The franchise's own owners are placed in the XII automatically and can't be removed** (owner marker on playfulventures.co.in/admin → `registrations.owner_team`).
+3. **Every slot: search the live pool + our suggestions for that role.**
+4. **Live pool includes "Payment pending" registrations** (page 1 saved, fee not paid) with a clear tag.
+5. **Marker key** at the foot of Plan + Live pool (CricHeroes seal red, fee-paid seal green, payment pending, age band, category, owner, CricHeroes tags).
+- **AI chat bot / suggestions:** link it by **Wed 16 Dec 2026** (3 days before the 19 Dec auction) — needs ANTHROPIC_API_KEY on Vercel.
+- CricHeroes player tags (Hard Hitter, Economist…) are in `player_master.stats.ch_tags` (25 Nov).
 
 ## ▶ LATEST — 30 Oct → 2 Nov 2026 (SLL-2 build-out + registration UAT)
 

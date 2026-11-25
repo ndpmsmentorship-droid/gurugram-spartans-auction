@@ -94,6 +94,28 @@ export function TagChips({ tags }: { tags: string[] }) {
   );
 }
 
+// Opens the player's own CricHeroes profile in a new tab (Nikhil, 25 Nov 2026). Shown wherever a
+// player is listed; nothing when we hold no CricHeroes link for him.
+export function CricHeroesLink({ href, compact = false }: { href: string | null; compact?: boolean }) {
+  if (!href) return null;
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      title="Open his CricHeroes profile in a new tab"
+      aria-label="Open CricHeroes profile"
+      className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-line bg-surface font-semibold text-ink/80 transition-colors hover:border-red hover:text-red ${compact ? "h-7 w-7 justify-center" : "px-2 py-0.5 text-[0.65rem]"}`}
+    >
+      <svg viewBox="0 0 24 24" width={compact ? 13 : 11} height={compact ? 13 : 11} aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+      </svg>
+      {!compact && "CricHeroes"}
+    </a>
+  );
+}
+
 // Every mark a player carries, in one row.
 // `inPool`: the Live pool card already shows payment and fee in its stage pill, so skip those two there.
 export function MarkRow({ p, showCategory = true, inPool = false }: { p: PoolEntry; showCategory?: boolean; inPool?: boolean }) {
@@ -152,6 +174,15 @@ const KEY: { title: string; items: { mark: React.ReactNode; name: string; text: 
     title: "How he plays",
     items: [
       { mark: <TagChips tags={["Hard Hitter"]} />, name: "CricHeroes tag", text: "Hard Hitter, Accumulator, Economist, Spearhead and more." },
+      {
+        mark: (
+          <span className="pointer-events-none">
+            <CricHeroesLink href="https://cricheroes.com" />
+          </span>
+        ),
+        name: "CricHeroes profile",
+        text: "Opens his full CricHeroes profile in a new tab.",
+      },
       {
         mark: <span className="whitespace-nowrap rounded-full bg-gold-fill px-1.5 py-0.5 text-[0.625rem] font-semibold leading-none text-gold">No data yet</span>,
         name: "No numbers yet",

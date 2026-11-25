@@ -48,7 +48,7 @@ function fixtureRegs() {
     });
     masters.push({
       id: `m-${i}`, primary_role: p.primary_role, batting_style: p.batting_style, bowling_style: p.bowling_style,
-      last_team: null, dob: `${year}-06-15`,
+      last_team: null, dob: `${year}-06-15`, cricheroes_link: i % 4 === 3 ? null : `https://cricheroes.com/player-profile/${1000 + i}/fixture`,
       stats: (p.bat_matches ?? 0) < 5 ? {} : {
         matches: p.bat_matches, runs: p.runs, bat_avg: p.bat_avg, bat_sr: p.bat_sr, wickets: p.wickets, economy: p.economy,
         stumpings: p.stumpings, caught_behind: keeper ? Math.round((p.bat_matches ?? 0) * 0.1) : 0,

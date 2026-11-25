@@ -45,6 +45,7 @@ export type PoolEntry = {
   owner: string | null; // franchise this player owns (owner marker on the league admin)
   keeper: boolean;
   tags: string[]; // CricHeroes player-type tags, e.g. Hard Hitter · Economist
+  chLink: string | null; // public CricHeroes profile (https://cricheroes.com/… only)
 };
 
 const SEASON = "SDLL-S2";
@@ -67,6 +68,7 @@ type Master = {
   last_team: string | null;
   stats: unknown;
   dob: string | null;
+  cricheroes_link: string | null;
 };
 
 // The form's own answers first; a returning player's record fills the gaps.
@@ -105,7 +107,7 @@ export async function loadOwnerPool({
   const { data, error } = await sb
     .from("registrations")
     .select(
-      "id, phone, full_name, status, fee_status, linkedin_verified, is_returning, master_id, batting_hand, bowling_type, allrounder, is_keeper, employer, designation, photo_thumb_path, created_at, dob, owner_team",
+      "id, phone, full_name, status, fee_status, linkedin_verified, is_returning, master_id, batting_hand, bowling_type, allrounder, is_keeper, employer, designation, photo_thumb_path, created_at, dob, owner_team, cricheroes_link",
     )
     .eq("season", SEASON)
     .order("created_at", { ascending: false });
@@ -130,6 +132,7 @@ export async function loadOwnerPool({
     created_at: string;
     dob: string | null;
     owner_team: string | null;
+    cricheroes_link: string | null;
   };
   // Nobody is hidden by phone number (Nikhil, 7 Nov): test entries are deleted, not filtered.
   const rows = (data ?? []) as Row[];
@@ -154,7 +157,7 @@ export async function loadOwnerPool({
     const { data: ms } = await sb
       .from("player_master")
       .select(
-        "id, primary_role, batting_style, bowling_style, last_team, stats, dob",
+        "id, primary_role, batting_style, bowling_style, last_team, stats, dob, cricheroes_link",
       )
       .in("id", ids);
     for (const m of (ms ?? []) as Master[]) masters.set(m.id, m);
@@ -229,6 +232,19 @@ export async function loadOwnerPool({
     if (s && (s.m ?? 0) >= 10 && s.avg != null && s.sr != null && s.avg < 10 && s.sr < 100) return "Legend";
     return "A/B";
   };
+  // Only a real CricHeroes web address becomes a link; anything else typed in the form is dropped.
+  const chUrl = (...xs: (string | null | undefined)[]) => {
+    for (const x of xs) {
+      const t = (x ?? "").trim();
+      if (!t) continue;
+      const u = /^https?:\/\//i.test(t) ? t : `https://${t}`;
+      try {
+        const h = new URL(u);
+        if (/(^|\.)cricheroes\.(com|in)$/i.test(h.hostname)) return `https://${h.hostname}${h.pathname}${h.search}`;
+      } catch {}
+    }
+    return null;
+  };
   const fromStarts: PoolEntry[] = stalled.map((x) => {
     const m = x.master_id ? masters.get(x.master_id) : undefined;
     const st = (m?.stats ?? {}) as Record<string, unknown>;
@@ -255,6 +271,7 @@ export async function loadOwnerPool({
       owner: null,
       keeper: /keeper/i.test(m?.primary_role ?? ""),
       tags: Array.isArray(st.ch_tags) ? (st.ch_tags as unknown[]).map(String) : [],
+      chLink: chUrl(m?.cricheroes_link),
     };
   });
   const fromRegs: PoolEntry[] = rows.map((r) => {
@@ -285,6 +302,7 @@ export async function loadOwnerPool({
       owner: r.owner_team ?? null,
       keeper: !!r.is_keeper || /keeper/i.test(m?.primary_role ?? ""),
       tags: Array.isArray(st.ch_tags) ? (st.ch_tags as unknown[]).map(String) : [],
+      chLink: chUrl(r.cricheroes_link, m?.cricheroes_link),
     };
   });
   return [...fromRegs, ...fromStarts].sort((a, b) => b.at.localeCompare(a.at));

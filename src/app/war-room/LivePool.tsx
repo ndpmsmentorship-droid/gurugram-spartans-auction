@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { PlayerPhoto } from "@/app/register/PlayerCard";
 import type { PoolEntry, PoolStatus } from "@/lib/auction/owner-pool";
-import { MarkRow, MarkerKey } from "./Markers";
+import { MarkRow, MarkerKey, CricHeroesLink } from "./Markers";
 
 // Season 2 registrations as they come in, with the league's call on each:
 // new, one check done, in the pool, or rejected. Refreshes every 30 s.
@@ -287,6 +287,7 @@ export default function LivePool() {
               </div>
               <span className="col-start-3 row-start-1 flex flex-col items-end gap-1.5 lg:col-start-4">
                 <Stage p={p} />
+                <CricHeroesLink href={p.chLink} />
                 {p.recommend && (
                   <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[0.65rem] font-semibold" style={{ background: "color-mix(in srgb, #7c3aed 10%, transparent)", color: "#7c3aed" }}>
                     <Dot c="#7c3aed" /> Needs a recommendation

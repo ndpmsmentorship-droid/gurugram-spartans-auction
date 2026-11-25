@@ -5,7 +5,7 @@ import { PlayerPhoto } from "@/app/register/PlayerCard";
 import { findFranchise } from "@/app/franchises";
 import type { AgeBand, Category, PoolEntry } from "@/lib/auction/owner-pool";
 import { usePool } from "./LivePool";
-import { MarkRow, AgeChip, CategoryChip } from "./Markers";
+import { MarkRow, AgeChip, CategoryChip, CricHeroesLink } from "./Markers";
 
 // The Plan tab (Nikhil, 25 Nov 2026): the owner's own playing XII is the whole job.
 // Left: the twelve in batting order, grouped Top order · Middle order · Lower-order hitters ·
@@ -319,6 +319,7 @@ export default function DreamXII({ profileId, team }: { profileId: string; team:
                           {p && <MarkRow p={p} />}
                         </span>
                       </button>
+                      {p && <CricHeroesLink href={p.chLink} compact />}
                       {p && (
                         <RowMenu
                           name={p.name}
@@ -512,7 +513,10 @@ function Choice({ n, p, inXII, onAdd }: { n: number | null; p: PoolEntry; inXII:
       {n != null && <span className="w-5 shrink-0 text-right text-[0.75rem] tabular-nums text-muted">{n}</span>}
       <PlayerPhoto src={p.photo} name={p.name} className="h-9 w-9 shrink-0 rounded-full" sizes="36px" />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold">{p.name}</p>
+        <p className="flex min-w-0 items-center gap-1.5">
+          <span className="truncate text-sm font-semibold">{p.name}</span>
+          <CricHeroesLink href={p.chLink} />
+        </p>
         <p className="truncate text-[0.7rem] text-muted">{p.role}</p>
         <p className="text-[0.7rem] tabular-nums text-ink/80">{line}</p>
         <MarkRow p={p} />

@@ -19,7 +19,7 @@ const R = DEFAULT_RULES;
 
 // The Plan tab (25 Nov 2026, Nikhil): the owner's own playing XII is the job — owners first,
 // then each slot picked from the live pool with our sorted suggestions in the right column
-// (DreamXII). The purse tiles stay on top, the War Room's own row, so planning is practice for
+// (DreamXII). The purse tiles sit at the foot (War Room row), so planning is practice for
 // auction night. The old strategy cards, batting-order / bowling-attack boxes and to-buy list
 // were replaced by the XII builder (old version in git history before this change).
 export default function OwnerPlan(props: { seasonId: string; profileId: string; team: PlanTeam; players: PoolPlayer[]; leagueName?: string }) {
@@ -93,7 +93,12 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
         </span>
       </div>
 
-      <section className="mt-4 grid grid-cols-1 gap-2 lg:grid-cols-[2fr_5fr]">
+
+      <DreamXII profileId={props.profileId} team={team.name} />
+
+      {/* Purse cards at the foot of the page (Nikhil, 25 Nov 2026): the squad comes first. */}
+      <p className="eyebrow mt-10">Purse &amp; squad on auction night</p>
+      <section className="mt-2 grid grid-cols-1 gap-2 lg:grid-cols-[2fr_5fr]">
         <div className="grid grid-cols-2 gap-2">
           <Tile k="Purse left" v={inr(purseLeft)} sub={`of ${inr(team.purse_total)}${topUp ? ` · +${inr(topUp)} top-ups available` : ""}`} strong />
           <Tile k="Max safe bid" v={inr(maxSafe)} sub={`keeps ${Math.max(0, target - mine.length - 1)} slots at ${inr(floor)}`} strong />
@@ -115,8 +120,6 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
           </div>
         )}
       </section>
-
-      <DreamXII profileId={props.profileId} team={team.name} />
 
       <MarkerKey />
     </div>

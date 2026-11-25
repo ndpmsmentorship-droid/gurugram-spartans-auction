@@ -7,7 +7,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getAuctionSeasonId, AUCTION_DIVISIONS } from "@/lib/auction/target";
 import { readLiveLot } from "@/lib/auction/read";
 import { loadOwnerPool } from "@/lib/auction/owner-pool";
-import { DEFAULT_RULES, inr } from "@/lib/auction/rules";
+import { DEFAULT_RULES, SLL2_SQUAD, inr } from "@/lib/auction/rules";
+import { LEAGUE } from "@/lib/league";
 import { findFranchise } from "@/app/franchises";
 import TeamCrest from "@/app/TeamCrest";
 import { PlayerPhoto } from "@/app/register/PlayerCard";
@@ -68,8 +69,9 @@ export default async function OwnersHome({ searchParams }: { searchParams: Promi
   const squad = (bought ?? []) as Bought[];
   const spent = squad.reduce((a, p) => a + (p.sold_price ?? 0), 0);
   const left = Number(team.purse_total) - spent;
-  const target = Math.max(R.squadMin, 12);
-  const maxSafe = Math.max(0, left - Math.max(0, target - squad.length - 1) * R.base.B);
+  const target = LEAGUE === "sdll" ? SLL2_SQUAD.size : Math.max(R.squadMin, 12);
+  const floor = LEAGUE === "sdll" ? SLL2_SQUAD.base.B : R.base.B;
+  const maxSafe = Math.max(0, left - Math.max(0, target - squad.length - 1) * floor);
   const topUp = Math.max(0, (team.purse_max ?? team.purse_total) - team.purse_total);
 
   let onBlock: string | null = null;
@@ -109,16 +111,9 @@ export default async function OwnersHome({ searchParams }: { searchParams: Promi
       </section>
 
       <div className="mx-auto max-w-[1100px] px-4 py-6 sm:px-7">
-        {/* money */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Tile k="Purse left" v={inr(left)} sub={`of ${inr(team.purse_total)}`} />
-          <Tile k="Most you can bid" v={inr(maxSafe)} sub={`keeps ${Math.max(0, target - squad.length - 1)} places at ${inr(R.base.B)}`} />
-          <Tile k="Squad" v={`${squad.length} / ${target}`} sub={squad.length ? `${inr(spent)} spent` : "no buys yet"} />
-          <Tile k="Top-up" v={inr(topUp)} sub="in one go, during the auction" />
-        </div>
 
         {/* the three parts */}
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-3">
           <Card href="/war-room?tab=plan" kicker="01 · Plan" title="Plan your squad" cta="Open the planner">
             Build the squad of 18 you have in mind — playing XII plus 6 bench. Your own owners go in first; pick every other slot from the live pool, with our suggestions beside it.
           </Card>
@@ -173,7 +168,7 @@ export default async function OwnersHome({ searchParams }: { searchParams: Promi
               ))}
             </ul>
           ) : (
-            <p className="mt-2 text-sm text-muted">Players you buy on auction night appear here with their price, and the purse tiles above update with each sale.</p>
+            <p className="mt-2 text-sm text-muted">Players you buy on auction night appear here with their price, and the purse cards below update with each sale.</p>
           )}
         </section>
 
@@ -192,6 +187,14 @@ export default async function OwnersHome({ searchParams }: { searchParams: Promi
           <span className="shrink-0 rounded-full bg-red px-4 py-2 font-display text-sm uppercase tracking-wide text-white">✦ AI scout</span>
         </Link>
 
+        {/* money — at the foot of the page (Nikhil, 25 Nov 2026) */}
+        <p className="label-mono mt-8">Purse &amp; squad</p>
+        <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Tile k="Purse left" v={inr(left)} sub={`of ${inr(team.purse_total)}`} />
+          <Tile k="Most you can bid" v={inr(maxSafe)} sub={`keeps ${Math.max(0, target - squad.length - 1)} places at ${inr(floor)}`} />
+          <Tile k="Squad" v={`${squad.length} / ${target}`} sub={squad.length ? `${inr(spent)} spent` : "no buys yet"} />
+          <Tile k="Top-up" v={inr(topUp)} sub="in one go, during the auction" />
+        </div>
         <p className="mt-6 text-[0.75rem] text-muted">
           Also: <a className="underline" href="/spartansscout/auction/screen" target="_blank" rel="noreferrer">Big screen</a> ·{" "}
           <Link className="underline" href="/auction">Live board</Link> ·{" "}

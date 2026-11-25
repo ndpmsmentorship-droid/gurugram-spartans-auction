@@ -28,7 +28,12 @@ function Lockup({ s }: { s: Sponsor }) {
 export default function SponsorBar() {
   return (
     <div className="border-b border-line bg-surface">
-      <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-4 px-4 sm:gap-6 sm:px-7">
+      <div className="relative mx-auto flex h-14 max-w-[1400px] items-center gap-4 px-4 sm:gap-6 sm:px-7">
+        {/* League name in the middle of the bar (Nikhil, 25 Nov 2026); laptop widths only — phones have no room. */}
+        <p className="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-center lg:block">
+          <span className="block font-display text-[1.1rem] font-bold uppercase leading-none tracking-[0.05em] xl:text-[1.35rem] xl:tracking-[0.06em] text-ink">Shanti Devi Legend’s League</span>
+          <span className="mt-1 block font-mono text-[0.58rem] uppercase tracking-[0.3em] text-red">Legends never retire</span>
+        </p>
         <Lockup s={TITLE_SPONSOR} />
         <span className="h-8 w-px shrink-0 bg-line" aria-hidden />
         <Lockup s={PRESENTED_BY} />

@@ -127,7 +127,21 @@ export async function loadOwnerPool({
   // Nobody is hidden by phone number (Nikhil, 7 Nov): test entries are deleted, not filtered.
   const rows = (data ?? []) as Row[];
 
-  const ids = rows.map((r) => r.master_id).filter(Boolean) as string[];
+  // Players who reached the payment step of the form and stopped there (Nikhil, 25 Nov 2026): no
+  // registration row yet, only their start (registration_starts, step "payment"). Shown as Payment pending.
+  type Start = { id: string; phone: string; full_name: string; master_id: string | null; is_returning: boolean; created_at: string; last_active_at: string | null };
+  const haveRegPhone = new Set(rows.map((r) => (r.phone ?? "").replace(/\D/g, "").slice(-10)));
+  const starts = ((
+    await sb
+      .from("registration_starts")
+      .select("id, phone, full_name, master_id, is_returning, created_at, last_active_at")
+      .eq("season", SEASON)
+      .eq("step", "payment")
+      .is("registration_id", null)
+  ).data ?? []) as Start[];
+  const stalled = starts.filter((x) => !haveRegPhone.has((x.phone ?? "").replace(/\D/g, "").slice(-10)));
+
+  const ids = [...rows.map((r) => r.master_id), ...stalled.map((x) => x.master_id)].filter(Boolean) as string[];
   const masters = new Map<string, Master>();
   if (ids.length) {
     const { data: ms } = await sb
@@ -195,7 +209,34 @@ export async function loadOwnerPool({
     if (!Number.isFinite(y) || y < 30) return null;
     return y < 35 ? "30–34" : y < 40 ? "35–39" : "40+";
   };
-  return rows.map((r) => {
+  const fromStarts: PoolEntry[] = stalled.map((x) => {
+    const m = x.master_id ? masters.get(x.master_id) : undefined;
+    const st = (m?.stats ?? {}) as Record<string, unknown>;
+    return {
+      id: `start:${x.id}`,
+      name: x.full_name,
+      status: "unpaid",
+      recommend: false,
+      recBy: [],
+      mine: false,
+      returning: x.is_returning,
+      role: m?.primary_role ? [m.primary_role, m.bowling_style].filter(Boolean).join(" · ") : "Role not given yet",
+      employer: null,
+      designation: null,
+      photo: null,
+      lastTeam: m?.last_team ?? null,
+      hasData: statsOn(m),
+      stats: headline(m),
+      checkedOn: checked(m),
+      at: x.last_active_at ?? x.created_at,
+      feePaid: false,
+      ageBand: band(m?.dob ?? null),
+      owner: null,
+      keeper: /keeper/i.test(m?.primary_role ?? ""),
+      tags: Array.isArray(st.ch_tags) ? (st.ch_tags as unknown[]).map(String) : [],
+    };
+  });
+  const fromRegs: PoolEntry[] = rows.map((r) => {
     const m = r.master_id ? masters.get(r.master_id) : undefined;
     const st = (m?.stats ?? {}) as Record<string, unknown>;
     return {
@@ -224,4 +265,5 @@ export async function loadOwnerPool({
       tags: Array.isArray(st.ch_tags) ? (st.ch_tags as unknown[]).map(String) : [],
     };
   });
+  return [...fromRegs, ...fromStarts].sort((a, b) => b.at.localeCompare(a.at));
 }

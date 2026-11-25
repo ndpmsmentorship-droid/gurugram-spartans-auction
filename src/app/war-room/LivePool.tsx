@@ -61,8 +61,7 @@ function Tick({ ok, l }: { ok: boolean; l: string }) {
 const fmt = (n: number | null, d = 0) => (n == null ? "–" : n.toLocaleString("en-IN", { maximumFractionDigits: d, minimumFractionDigits: d }));
 
 function StatLine({ s }: { s: NonNullable<PoolEntry["stats"]> }) {
-  // Some imported figures are junk ("0/0", "0", or a spreadsheet date like 46299): treat those as missing.
-  const bowlBest = s.best && /^\d{1,2}\/\d{1,3}$/.test(s.best.trim()) && !/^0\/0$/.test(s.best.trim()) ? s.best.trim() : null;
+  // Some imported figures are junk ("0", or a spreadsheet date like 46299): treat those as missing.
   const hs = s.hs && s.hs.trim() !== "0" && /^\d{1,3}\*?$/.test(s.hs.trim()) ? s.hs.trim() : "–";
   const cells: [string, string][] = [
     ["Mat", fmt(s.m)],
@@ -72,14 +71,13 @@ function StatLine({ s }: { s: NonNullable<PoolEntry["stats"]> }) {
     ["HS", hs],
     ["Wkts", fmt(s.wk)],
     ["Econ", fmt(s.econ, 2)],
-    // Best bowling when we have a real figure (e.g. 5/12); otherwise his best score with the bat (Nikhil, 25 Nov 2026).
-    bowlBest ? ["Best", bowlBest] : ["Best (bat)", hs],
+    // The Best (bat/bowl) column was removed (Nikhil, 25 Nov 2026).
   ];
   return (
     <div>
-      <dl className="grid grid-cols-4 gap-px overflow-hidden rounded-[10px] border border-line bg-line sm:grid-cols-8">
+      <dl className="grid grid-cols-12 gap-px overflow-hidden rounded-[10px] border border-line bg-line sm:grid-cols-7">
         {cells.map(([k, v], i) => (
-          <div key={k} className={`flex flex-col-reverse px-1.5 py-1 text-center leading-tight ${i >= 5 ? "bg-[color-mix(in_srgb,var(--up)_4%,var(--surface))]" : "bg-surface"}`}>
+          <div key={k} className={`flex flex-col-reverse px-1.5 py-1 text-center leading-tight ${i < 4 ? "col-span-3" : "col-span-4"} sm:col-span-1 ${i >= 5 ? "bg-[color-mix(in_srgb,var(--up)_4%,var(--surface))]" : "bg-surface"}`}>
             <dt className="text-[0.55rem] uppercase tracking-wide text-muted">{k}</dt>
             <dd className="num text-[0.78rem] font-semibold">{v}</dd>
           </div>

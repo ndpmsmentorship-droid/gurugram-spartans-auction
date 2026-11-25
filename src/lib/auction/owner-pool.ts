@@ -240,7 +240,7 @@ export async function loadOwnerPool({
       const u = /^https?:\/\//i.test(t) ? t : `https://${t}`;
       try {
         const h = new URL(u);
-        if (/(^|\.)cricheroes\.(com|in)$/i.test(h.hostname)) return `https://${h.hostname}${h.pathname}${h.search}`;
+        if (/(^|\.)(cricheroes\.(com|in)|chshare\.link)$/i.test(h.hostname)) return `https://${h.hostname}${h.pathname}${h.search}`;
       } catch {}
     }
     return null;
@@ -302,7 +302,7 @@ export async function loadOwnerPool({
       owner: r.owner_team ?? null,
       keeper: !!r.is_keeper || /keeper/i.test(m?.primary_role ?? ""),
       tags: Array.isArray(st.ch_tags) ? (st.ch_tags as unknown[]).map(String) : [],
-      chLink: chUrl(r.cricheroes_link, m?.cricheroes_link),
+      chLink: chUrl(m?.cricheroes_link, r.cricheroes_link),
     };
   });
   return [...fromRegs, ...fromStarts].sort((a, b) => b.at.localeCompare(a.at));

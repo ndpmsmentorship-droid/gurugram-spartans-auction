@@ -8,21 +8,21 @@ import lucknowStrikers from "./brand/teams/lucknow-strikers.png";
 import punjabRoyals from "./brand/teams/punjab-royals-legends.png";
 
 // The fourteen Season 2 franchises, their groups (schedule draw) and owners, as
-// in the owners' meet deck (30 Oct 2026). Logos are from the league's Drive
+// in the owners' meet deck (30 Oct 2026); owners updated from Nikhil's list of 25 Nov 2026. Logos are from the league's Drive
 // (SLL'26 Repository › Team Logos), resized to 400px; teams without one yet
 // show a lettered crest.
 export type Franchise = { name: string; group: "A" | "B"; logo?: StaticImageData; owners: string[] };
 
 export const FRANCHISES: Franchise[] = [
-  { name: "ACCI", group: "A", logo: acci, owners: ["Russel A.", "Vishal Salgy", "Pardeep Mahalawat"] },
+  { name: "ACCI", group: "A", logo: acci, owners: ["Vishal Salgy", "Russell A Stamets", "Pradeep Mahalawat"] },
   { name: "Bengal Tigers", group: "A", logo: bengalTigers, owners: ["Dipak Kumar Singh", "K. Raj Bhansali"] },
   { name: "Chennai Thalaiva", group: "A", logo: chennaiThalaivas, owners: ["Vasant Kumar"] },
-  { name: "Lucknow Strikers", group: "A", logo: lucknowStrikers, owners: ["Luvkesh", "Prashant Yadav"] },
-  { name: "UP Warriors", group: "A", owners: ["Sandeep Kumar", "Bharat Sharma"] },
+  { name: "Lucknow Strikers", group: "A", logo: lucknowStrikers, owners: ["Prashant Yadav", "Luvi Grover"] },
+  { name: "UP Warriors", group: "A", owners: ["Sandeep Kumar", "Gaganpreet Singh", "Vished Banger"] },
   { name: "Tokyo Drifters", group: "A", owners: ["Vikram Chaddha", "Sumit Talwar", "Saurabh Anand"] },
   { name: "Diplomats 1", group: "A", owners: [] },
   { name: "Goan Monks", group: "B", logo: goanMonks, owners: ["Sameer Bhalla", "Aditya Sharma"] },
-  { name: "Gurugram Knights", group: "B", owners: ["Ayush Jagga"] },
+  { name: "Gurugram Knights", group: "B", owners: ["Ayush Jagga", "Prateek Suneja"] },
   { name: "Jaipur Royals", group: "B", logo: jaipurRoyals, owners: ["Saurav Suneja", "Hemant Kumar"] },
   { name: "Punjab Royals", group: "B", logo: punjabRoyals, owners: ["Sunil Bansal"] },
   { name: "Diplomats 2", group: "B", owners: [] },

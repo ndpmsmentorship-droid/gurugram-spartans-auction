@@ -15,6 +15,7 @@ Last updated: 2026-11-25
 - [x] **War Room = work in progress** for owners (coming-soon card; admins still see it with a banner). Default tab is now Plan.
 - [ ] **Before 19 Dec: the LIVE BOARD still runs Season 1 rules** — `SDLL_RULES` in src/lib/auction/rules.ts (squad 16–25, caps 3/8/13/3, bases 30K/20K/10K/5K) and `auction_rules` in the database. Align both with `SLL2_SQUAD` (needs SQL), then open the War Room to owners.
 - [ ] When SPI is published: replace "A/B · SPI pending" with the real A / B per player and add the A 6 · B 8 checks.
+- [ ] **Owners list from Nikhil (25 Nov)** in franchises.ts: ACCI = Vishal Salgy, Russell A Stamets, Pradeep Mahalawat · UP Warriors = Sandeep Kumar, Gaganpreet Singh, Vished Banger · Tokyo Drifters (marked) · Lucknow = Prashant Yadav, Luvi Grover · Punjab Royals = Sunil Bansal · Gurugram Knights = Ayush Jagga, Prateek Suneja. Still to place: #10 Parakh Kapoor (team?), #11 Saurav Suneja (Jaipur Royals? Hemant Kumar still listed), #12 Team E2E (confirmed — which slot, owners?), #7–9 blank, Diplomats 1/2 open. Only Vishal Salgy + Luvi Grover (+ Tokyo Drifters) are registered and marked; mark the rest on /admin as they register (Ayush Jagga stopped at the payment step).
 - [ ] Owner logins: Diplomats 1/2, SLL 13/14 still have no owner linked; Sachin-style test owners under 35 will show a red rules warning (no owner may be under 35).
 
 ## MASTER LIST — SLL-2 workstreams (Nikhil, 5 Nov 2026)

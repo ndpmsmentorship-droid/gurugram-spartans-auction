@@ -113,13 +113,51 @@ export default function DreamXII({ profileId, team }: { profileId: string; team:
   const [listRaw, setList] = useState<Kind | null>(null);
   const panel = useRef<HTMLDivElement>(null);
 
-  // Read the saved XII, and follow it if another tab of this browser changes it.
+  // The XII lives on the server (api/owner-xii) so phone and laptop show the same twelve; this
+  // device keeps a copy so it opens instantly and survives a dropped connection.
+  const [sync, setSync] = useState<"idle" | "saving" | "saved" | "offline">("idle");
+  const lastEdit = useRef(0); // when this device last changed the XII
+  const api = `/spartansscout/api/owner-xii?team=${encodeURIComponent(team)}`;
+  const push = async (next: (string | null)[]) => {
+    setSync("saving");
+    const r = await fetch(api, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ team, slots: next }) }).catch(() => null);
+    setSync(r?.ok ? "saved" : "offline");
+  };
   useEffect(() => {
-    const sync = () => setSlots(readSlots(storeKey));
-    sync();
-    window.addEventListener("storage", sync);
-    return () => window.removeEventListener("storage", sync);
-  }, [storeKey]);
+    let alive = true;
+    const local = () => setSlots(readSlots(storeKey));
+    const pull = async () => {
+      const startedAt = Date.now();
+      const r = await fetch(api, { cache: "no-store" }).catch(() => null);
+      const j = r?.ok ? ((await r.json().catch(() => null)) as { slots: (string | null)[] | null; at: string | null } | null) : null;
+      if (!alive || !j || lastEdit.current > startedAt) return; // an edit here since the pull started wins
+      if (j.slots && j.slots.length === SLOTS.length) {
+        setSlots(j.slots);
+        try {
+          localStorage.setItem(storeKey, JSON.stringify(j.slots));
+        } catch {
+          /* fine */
+        }
+        setSync("saved");
+      } else {
+        // Nothing on the server yet: send up what this device has (XIIs made before syncing existed).
+        const mine = readSlots(storeKey);
+        if (mine.some(Boolean)) void push(mine);
+      }
+    };
+    local();
+    void pull();
+    const onShow = () => document.visibilityState === "visible" && void pull();
+    document.addEventListener("visibilitychange", onShow);
+    window.addEventListener("storage", local);
+    const id = setInterval(pull, 60000);
+    return () => {
+      alive = false;
+      document.removeEventListener("visibilitychange", onShow);
+      window.removeEventListener("storage", local);
+      clearInterval(id);
+    };
+  }, [storeKey, api]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const byId = useMemo(() => new Map((pool ?? []).map((p) => [p.id, p])), [pool]);
   const owners = useMemo(() => (pool ?? []).filter((p) => p.status !== "rejected" && norm(p.owner) === norm(team)), [pool, team]);
@@ -144,12 +182,14 @@ export default function DreamXII({ profileId, team }: { profileId: string; team:
   }, [slots, owners, byId, pool]);
 
   const save = (next: (string | null)[]) => {
+    lastEdit.current = Date.now();
     setSlots(next);
     try {
       localStorage.setItem(storeKey, JSON.stringify(next));
     } catch {
-      /* private mode: lasts for this visit */
+      /* private mode: the server copy still keeps it */
     }
+    void push(next);
   };
   // Owners are placed on every render; their spot is saved with the owner's next change.
 
@@ -201,7 +241,7 @@ export default function DreamXII({ profileId, team }: { profileId: string; team:
           <p className="eyebrow">Your playing XII</p>
           <h2 className="mt-1 font-display text-2xl font-bold uppercase leading-tight">The twelve you have in mind</h2>
           <p className="mt-1 max-w-[62ch] text-sm text-muted">
-            Your owners are in already. Tap a slot and the best players for that role are listed on the right — pick one, or search the whole pool.
+            Your owners are in already. Tap a slot and the best players for that role are listed <span className="lg:hidden">below the XII</span><span className="hidden lg:inline">on the right</span> — pick one, or search the whole pool.
           </p>
         </div>
         <div className="text-right">
@@ -220,7 +260,7 @@ export default function DreamXII({ profileId, team }: { profileId: string; team:
         </p>
       )}
 
-      <div className="mt-4 grid gap-5 lg:grid-cols-[5fr_6fr]">
+      <div className="mt-4 grid grid-cols-1 gap-5 lg:grid-cols-[5fr_6fr]">
         {/* left: the XII */}
         <div className="space-y-3">
           {GROUPS.map((g) => (
@@ -256,14 +296,14 @@ export default function DreamXII({ profileId, team }: { profileId: string; team:
                         )}
                         <span className="min-w-0 flex-1">
                           <span className="label-mono block">{s.label}</span>
-                          {p ? <span className="block truncate text-sm font-semibold">{p.name}</span> : <span className="block text-sm text-muted">{active ? "Choose on the right →" : "Tap to choose"}</span>}
+                          {p ? <span className="block truncate text-sm font-semibold">{p.name}</span> : <span className="block text-sm text-muted">{active ? "Choose from the list →" : "Tap to choose"}</span>}
                           {p && <MarkRow p={p} showCategory={false} />}
                         </span>
                       </button>
                       {p && owner && (
                         <select
                           aria-label={`Move ${p.name}`}
-                          className="shrink-0 rounded-full border border-line bg-surface px-2 py-1 text-[0.72rem]"
+                          className="w-[5.5rem] shrink-0 rounded-full border border-line bg-surface px-2 py-1 text-[0.72rem]"
                           value=""
                           onChange={(e) => e.target.value && swap(i, Number(e.target.value))}
                         >
@@ -282,7 +322,9 @@ export default function DreamXII({ profileId, team }: { profileId: string; team:
               </ol>
             </div>
           ))}
-          <p className="text-[0.68rem] text-muted">Saved on this device; private to your team.</p>
+          <p className="text-[0.68rem] text-muted">
+            {sync === "saving" ? "Saving…" : sync === "offline" ? "Saved on this device — couldn’t reach the server, will retry on your next change." : "Saved to your account: the same XII on your phone and laptop. Private to your team."}
+          </p>
         </div>
 
         {/* right: recommendations for the chosen role */}

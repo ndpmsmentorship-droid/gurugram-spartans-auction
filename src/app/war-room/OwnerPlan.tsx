@@ -90,7 +90,7 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
         </span>
       </div>
 
-      <section className="mt-4 grid gap-2 lg:grid-cols-[2fr_5fr]">
+      <section className="mt-4 grid grid-cols-1 gap-2 lg:grid-cols-[2fr_5fr]">
         <div className="grid grid-cols-2 gap-2">
           <Tile k="Purse left" v={inr(purseLeft)} sub={`of ${inr(team.purse_total)}${topUp ? ` · +${inr(topUp)} top-ups available` : ""}`} strong />
           <Tile k="Max safe bid" v={inr(maxSafe)} sub={`keeps ${Math.max(0, target - mine.length - 1)} slots at ${inr(R.base.B)}`} strong />

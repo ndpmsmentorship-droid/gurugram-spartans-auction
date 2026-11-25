@@ -305,5 +305,6 @@ export async function loadOwnerPool({
       chLink: chUrl(m?.cricheroes_link, r.cricheroes_link),
     };
   });
-  return [...fromRegs, ...fromStarts].sort((a, b) => b.at.localeCompare(a.at));
+  // Rejected players never reach the owners (Nikhil, 25 Nov 2026): dropped here, on the server.
+  return [...fromRegs.filter((p) => p.status !== "rejected"), ...fromStarts].sort((a, b) => b.at.localeCompare(a.at));
 }

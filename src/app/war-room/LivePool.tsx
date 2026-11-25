@@ -20,7 +20,7 @@ const STAGE: Record<Tab, { label: string; colour: string; hint: string }> = {
   unpaid: { label: "Payment pending", colour: "#bc2423", hint: "Filled the form but hasn't paid the registration fee yet." },
   rejected: { label: "Rejected", colour: "#94a3b8", hint: "Not accepted by the league." },
 };
-const TABS: Tab[] = ["all", "pool", "fee_pending", "profiling_pending", "new", "recommend", "unpaid", "rejected"];
+const TABS: Tab[] = ["all", "pool", "fee_pending", "profiling_pending", "new", "recommend", "unpaid"];
 
 const Dot = ({ c, dashed }: { c: string; dashed?: boolean }) => (
   <span className="inline-block h-2 w-2 shrink-0 rounded-full" style={dashed ? { border: `1.5px dashed ${c}` } : { background: c }} />

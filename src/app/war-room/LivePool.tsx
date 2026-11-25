@@ -9,32 +9,54 @@ import { MarkRow, MarkerKey } from "./Markers";
 // new, one check done, in the pool, or rejected. Refreshes every 30 s.
 // The league's own four stages (same as its admin), so owners see exactly where each player stands.
 type Tab = PoolStatus | "all" | "recommend";
-const TABS: { key: Tab; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "recommend", label: "Needs a recommendation" },
-  { key: "new", label: "1. New · waiting" },
-  { key: "fee_pending", label: "2. Profiling ✓ · fee pending" },
-  { key: "profiling_pending", label: "3. Fee ✓ · profiling pending" },
-  { key: "pool", label: "4. In the pool" },
-  { key: "unpaid", label: "Payment pending" },
-  { key: "rejected", label: "Rejected" },
-];
-const BADGE: Record<PoolStatus, string> = {
-  unpaid: "border border-dashed border-red text-red-deep",
-  new: "bg-wash text-muted",
-  fee_pending: "bg-gold-fill text-gold",
-  profiling_pending: "bg-gold-fill text-gold",
-  pool: "bg-[color-mix(in_srgb,var(--up)_12%,transparent)] text-up",
-  rejected: "bg-[color-mix(in_srgb,var(--red)_10%,transparent)] text-red-deep",
+// One colour per stage, used on the filter bar and on every card (Nikhil, 25 Nov 2026: a calmer, clearer look).
+const STAGE: Record<Tab, { label: string; colour: string; hint: string }> = {
+  all: { label: "All", colour: "#0b1630", hint: "Every Season 2 registration, newest first." },
+  pool: { label: "In the pool", colour: "#2e7d50", hint: "Fee verified and corporate profiling passed — in the auction pool." },
+  fee_pending: { label: "Fee pending", colour: "#b7791f", hint: "Profiling passed; the league is verifying the fee." },
+  profiling_pending: { label: "Profiling pending", colour: "#2563eb", hint: "Fee verified; corporate profiling still to do." },
+  new: { label: "New", colour: "#64748b", hint: "Just registered — fee and profiling both still to check." },
+  recommend: { label: "Needs recommendation", colour: "#7c3aed", hint: "The league needs a franchise owner's recommendation before he can join the pool." },
+  unpaid: { label: "Payment pending", colour: "#bc2423", hint: "Filled the form but hasn't paid the registration fee yet." },
+  rejected: { label: "Rejected", colour: "#94a3b8", hint: "Not accepted by the league." },
 };
-const LABEL: Record<PoolStatus, string> = {
-  unpaid: "Payment pending",
-  new: "New",
-  fee_pending: "Profiling ✓ · fee pending",
-  profiling_pending: "Fee ✓ · profiling pending",
-  pool: "In the pool",
-  rejected: "Rejected",
-};
+const TABS: Tab[] = ["all", "pool", "fee_pending", "profiling_pending", "new", "recommend", "unpaid", "rejected"];
+
+const Dot = ({ c, dashed }: { c: string; dashed?: boolean }) => (
+  <span className="inline-block h-2 w-2 shrink-0 rounded-full" style={dashed ? { border: `1.5px dashed ${c}` } : { background: c }} />
+);
+
+// The card's status: a tinted stage pill, then the two checks as ticks.
+function Stage({ p }: { p: PoolEntry }) {
+  const st = STAGE[p.status];
+  const prof = p.status === "pool" || p.status === "fee_pending";
+  const fee = p.status === "pool" || p.status === "profiling_pending" || p.feePaid;
+  return (
+    <span className="flex flex-col items-end gap-1">
+      <span
+        className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[0.72rem] font-semibold"
+        style={{ background: `color-mix(in srgb, ${st.colour} 11%, transparent)`, color: st.colour }}
+      >
+        <Dot c={st.colour} dashed={p.status === "unpaid"} />
+        {st.label}
+      </span>
+      {p.status !== "rejected" && p.status !== "unpaid" && (
+        <span className="flex gap-2.5 text-[0.65rem] text-muted">
+          <Tick ok={prof} l="Profiling" />
+          <Tick ok={fee} l="Fee" />
+        </span>
+      )}
+    </span>
+  );
+}
+function Tick({ ok, l }: { ok: boolean; l: string }) {
+  return (
+    <span className={`inline-flex items-center gap-1 ${ok ? "text-up" : ""}`}>
+      <span className={`grid h-3.5 w-3.5 place-items-center rounded-full text-[0.5rem] font-bold ${ok ? "bg-up text-white" : "border border-line2"}`}>{ok ? "✓" : ""}</span>
+      {l}
+    </span>
+  );
+}
 
 const fmt = (n: number | null, d = 0) => (n == null ? "–" : n.toLocaleString("en-IN", { maximumFractionDigits: d, minimumFractionDigits: d }));
 
@@ -50,12 +72,12 @@ function StatLine({ s }: { s: NonNullable<PoolEntry["stats"]> }) {
     ["Best", s.best ?? "–"],
   ];
   return (
-    <div className="mt-1.5">
-      <dl className="flex flex-wrap gap-1">
-        {cells.map(([k, v]) => (
-          <div key={k} className="flex flex-col-reverse rounded-[6px] border border-line px-1.5 py-0.5 text-center leading-tight">
-            <dt className="text-[0.563rem] uppercase tracking-wide text-muted">{k}</dt>
-            <dd className="num text-[0.75rem] font-semibold">{v}</dd>
+    <div>
+      <dl className="grid grid-cols-4 gap-px overflow-hidden rounded-[10px] border border-line bg-line sm:grid-cols-8">
+        {cells.map(([k, v], i) => (
+          <div key={k} className={`flex flex-col-reverse px-1.5 py-1 text-center leading-tight ${i >= 5 ? "bg-[color-mix(in_srgb,var(--up)_4%,var(--surface))]" : "bg-surface"}`}>
+            <dt className="text-[0.55rem] uppercase tracking-wide text-muted">{k}</dt>
+            <dd className="num text-[0.78rem] font-semibold">{v}</dd>
           </div>
         ))}
       </dl>
@@ -175,7 +197,7 @@ export default function LivePool() {
   );
 
   return (
-    <section id="pool-top" className="mx-auto w-full max-w-[760px] scroll-mt-32">
+    <section id="pool-top" className="mx-auto w-full max-w-[1120px] scroll-mt-32">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
           <p className="eyebrow">Live pool · Season 2</p>
@@ -184,18 +206,29 @@ export default function LivePool() {
         {at && <p className="text-[0.75rem] text-muted">Updated {new Date(at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</p>}
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-1.5">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            type="button"
-            onClick={() => setTab(t.key)}
-            className={`rounded-full px-3 py-1.5 text-sm ${tab === t.key ? "bg-ink text-white" : "border border-line text-muted"}`}
-          >
-            {t.label} <span className="num opacity-70">{counts[t.key]}</span>
-          </button>
-        ))}
+      <div className="mt-4 flex gap-1 overflow-x-auto rounded-[16px] border border-line bg-surface p-1 shadow-[var(--elev-sm)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {TABS.map((k) => {
+          const st = STAGE[k];
+          const on = tab === k;
+          return (
+            <button
+              key={k}
+              type="button"
+              onClick={() => setTab(k)}
+              aria-pressed={on}
+              className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[12px] px-2.5 py-1.5 text-[0.8rem] transition ${on ? "bg-ink text-white" : "text-ink/75 hover:bg-wash"}`}
+            >
+              {k !== "all" && <Dot c={st.colour} dashed={k === "unpaid"} />}
+              {st.label}
+              <span className={`rounded-full px-1.5 text-[0.68rem] tabular-nums ${on ? "bg-white/20 text-white" : "bg-wash text-muted"}`}>{counts[k]}</span>
+            </button>
+          );
+        })}
       </div>
+      <p className="mt-2 flex items-center gap-1.5 px-1 text-[0.75rem] text-muted">
+        {tab !== "all" && <Dot c={STAGE[tab].colour} dashed={tab === "unpaid"} />}
+        {STAGE[tab].hint}
+      </p>
       <input
         value={q}
         onChange={(e) => setQ(e.target.value)}
@@ -232,25 +265,29 @@ export default function LivePool() {
         <div className="mt-3">{pager}</div>
         <ul className="mt-2 divide-y divide-line rounded-[12px] border border-line bg-surface">
           {shown.map((p) => (
-            <li key={p.id} className="flex items-start gap-3 p-3">
-              <PlayerPhoto src={p.photo} name={p.name} className="h-11 w-11 shrink-0 rounded-full" sizes="44px" />
-              <div className="min-w-0 flex-1">
-                <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm font-semibold">
-                  {p.name}
-                  <span className="rounded-full border border-line px-1.5 py-0.5 text-[0.625rem] font-normal text-muted">{p.returning ? "Returning" : "New"}</span>
+            <li
+              key={p.id}
+              className="grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-start gap-x-3 gap-y-2 px-3 py-2.5 lg:grid-cols-[2.5rem_minmax(0,1.05fr)_minmax(0,1fr)_10.5rem] lg:items-center"
+            >
+              <PlayerPhoto src={p.photo} name={p.name} className="h-10 w-10 shrink-0 rounded-full" sizes="40px" />
+              <div className="min-w-0">
+                <p className="truncate text-[0.9rem] font-semibold leading-tight">{p.name}</p>
+                <p className="truncate text-[0.72rem] leading-snug text-muted">
+                  {[p.role, p.returning ? `Returning${p.lastTeam ? ` · S1 ${p.lastTeam}` : ""}` : "New player"].join(" · ")}
                 </p>
-                <p className="text-[0.75rem] leading-snug text-muted">
-                  {p.role}
-                  {p.lastTeam ? ` · S1 ${p.lastTeam}` : ""}
-                  {!p.hasData && <span className="ml-1.5 rounded-full bg-gold-fill px-1.5 py-0.5 text-[0.625rem] text-gold">No data yet</span>}
-                </p>
-                {(p.designation || p.employer) && <p className="text-[0.75rem] leading-snug text-muted">{[p.designation, p.employer].filter(Boolean).join(", ")}</p>}
-                <MarkRow p={p} />
-                {p.stats && <StatLine s={p.stats} />}
+                {(p.designation || p.employer) && <p className="truncate text-[0.72rem] leading-snug text-muted">{[p.designation, p.employer].filter(Boolean).join(", ")}</p>}
+                <MarkRow p={p} inPool />
               </div>
-              <span className="mt-0.5 flex shrink-0 flex-col items-end gap-1">
-                <span className={`rounded-full px-2 py-1 text-[0.688rem] ${BADGE[p.status]}`}>{LABEL[p.status]}</span>
-                {p.recommend && <span className="rounded-full border border-line px-2 py-0.5 text-[0.625rem] text-ink">Needs an owner&rsquo;s recommendation</span>}
+              <div className="col-span-2 col-start-2 row-start-2 min-w-0 lg:col-span-1 lg:col-start-3 lg:row-start-1">
+                {p.stats ? <StatLine s={p.stats} /> : <p className="text-[0.72rem] text-muted">No CricHeroes numbers yet</p>}
+              </div>
+              <span className="col-start-3 row-start-1 flex flex-col items-end gap-1.5 lg:col-start-4">
+                <Stage p={p} />
+                {p.recommend && (
+                  <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[0.65rem] font-semibold" style={{ background: "color-mix(in srgb, #7c3aed 10%, transparent)", color: "#7c3aed" }}>
+                    <Dot c="#7c3aed" /> Needs a recommendation
+                  </span>
+                )}
                 {p.recommend && team && (
                   <Recommend
                     p={p}

@@ -95,15 +95,16 @@ export function TagChips({ tags }: { tags: string[] }) {
 }
 
 // Every mark a player carries, in one row.
-export function MarkRow({ p, showCategory = true }: { p: PoolEntry; showCategory?: boolean }) {
+// `inPool`: the Live pool card already shows payment and fee in its stage pill, so skip those two there.
+export function MarkRow({ p, showCategory = true, inPool = false }: { p: PoolEntry; showCategory?: boolean; inPool?: boolean }) {
   return (
     <span className="mt-1 flex flex-wrap items-center gap-1">
-      {p.status === "unpaid" && <PaymentPending />}
+      {!inPool && p.status === "unpaid" && <PaymentPending />}
       <OwnerChip team={p.owner} />
       <AgeChip band={p.ageBand} />
       {showCategory && <CategoryChip cat={p.cat} />}
       <TagChips tags={p.tags} />
-      <FeeSeal paid={p.feePaid} />
+      {!inPool && <FeeSeal paid={p.feePaid} />}
       <StatsSeal on={p.checkedOn} />
     </span>
   );

@@ -48,7 +48,7 @@ export default function OwnerPortal({
               className={`flex-1 rounded-full px-3 py-2 text-sm font-medium sm:flex-none sm:px-5 ${tab === t.key ? "bg-ink text-white" : "text-muted hover:text-ink"}`}
             >
               {t.label}
-              {t.key === "live" && <span className="ml-1.5 rounded-full bg-gold-fill px-1.5 py-0.5 align-middle text-[0.6rem] font-semibold uppercase tracking-wide text-gold">soon</span>}
+              {t.key === "live" && <span className="ml-1.5 hidden rounded-full bg-gold-fill px-1.5 py-0.5 align-middle text-[0.6rem] font-semibold uppercase tracking-wide text-gold sm:inline">soon</span>}
             </button>
           ))}
         </div>

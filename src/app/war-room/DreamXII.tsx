@@ -413,7 +413,11 @@ function Panel({
   const found = useMemo(() => {
     const t = q.trim().toLowerCase();
     if (t.length < 2) return null;
-    return avail.filter((p) => `${p.name} ${p.employer ?? ""} ${p.role} ${p.tags.join(" ")}`.toLowerCase().includes(t)).slice(0, 20);
+    const noRole = (p: PoolEntry) => /^role not given/i.test(p.role);
+    return avail
+      .filter((p) => `${p.name} ${p.employer ?? ""} ${p.role} ${p.tags.join(" ")}`.toLowerCase().includes(t))
+      .sort((a, b) => Number(noRole(a)) - Number(noRole(b)))
+      .slice(0, 20);
   }, [q, avail]);
   const shown = found ?? (more ? ranked.slice(0, 40) : ranked.slice(0, 10));
   const g = GROUPS.find((x) => x.lists.includes(list))!;

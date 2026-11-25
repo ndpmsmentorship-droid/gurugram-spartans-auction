@@ -109,53 +109,81 @@ export function MarkRow({ p, showCategory = true }: { p: PoolEntry; showCategory
   );
 }
 
-// The key at the foot of the Plan and Live pool pages.
-export function MarkerKey() {
-  const row = "flex items-start gap-2";
-  const what = "text-[0.75rem] leading-snug text-muted";
-  return (
-    <section className="mx-auto mt-8 w-full max-w-[1280px] rounded-[14px] border border-line bg-surface p-4">
-      <p className="eyebrow">What the marks mean</p>
-      <div className="mt-3 grid gap-x-6 gap-y-2.5 sm:grid-cols-2 lg:grid-cols-3">
-        <div className={row}>
-          <Seal colour="var(--red)" title="" size={16} />
-          <p className={what}><b className="text-ink">Red seal</b> — CricHeroes numbers checked and updated by the league team (date shown).</p>
-        </div>
-        <div className={row}>
-          <Seal colour="var(--up)" title="" size={16} />
-          <p className={what}><b className="text-ink">Green seal</b> — registration fee received and verified.</p>
-        </div>
-        <div className={row}>
-          <PaymentPending />
-          <p className={what}>Filled the form, hasn&rsquo;t paid yet. Not in the pool until he pays.</p>
-        </div>
-        <div className={row}>
-          <span className="flex shrink-0 gap-1">
+// The key at the foot of the Plan and Live pool pages: three quiet columns — what the league has
+// checked, who the player is, how he plays — each mark shown exactly as it appears on a player.
+const KEY: { title: string; items: { mark: React.ReactNode; name: string; text: string }[] }[] = [
+  {
+    title: "Checked by the league",
+    items: [
+      { mark: <Seal colour="var(--red)" label="CricHeroes" title="" />, name: "Numbers verified", text: "CricHeroes figures checked and entered by the league, with the date." },
+      { mark: <Seal colour="var(--up)" label="Fee paid" title="" />, name: "Fee paid", text: "Registration fee received and verified." },
+      { mark: <PaymentPending />, name: "Payment pending", text: "Form filled, fee not paid — not in the pool yet." },
+    ],
+  },
+  {
+    title: "Who he is",
+    items: [
+      {
+        mark: (
+          <span className="flex flex-wrap gap-1">
             <AgeChip band="Under 35" />
             <AgeChip band="35–39" />
             <AgeChip band="40+" />
           </span>
-          <p className={what}>Age on Sun 7 Mar 2027 (rules, Article 2). Exact ages and birth dates stay with the league.</p>
-        </div>
-        <div className={row}>
-          <span className="flex shrink-0 gap-1">
+        ),
+        name: "Age bracket",
+        text: "Age on Sun 7 Mar 2027. Exact ages stay with the league.",
+      },
+      {
+        mark: (
+          <span className="flex flex-wrap gap-1">
             <CategoryChip cat="A+" />
             <CategoryChip cat="Legend" />
           </span>
-          <p className={what}>Category: every under-35 is A+; Legend = 60+, or career avg under 10 and SR under 100. Others show &ldquo;A/B · SPI pending&rdquo; until SPI ranks are published.</p>
-        </div>
-        <div className={row}>
-          <OwnerChip team="Team" />
-          <p className={what}>A franchise owner. Owners play for their own team and are placed in its XII first.</p>
-        </div>
-        <div className={row}>
-          <TagChips tags={["Hard Hitter"]} />
-          <p className={what}>CricHeroes player tag (Hard Hitter, Accumulator, Economist, Spearhead…).</p>
-        </div>
-        <div className={row}>
-          <span className="shrink-0 rounded-full bg-gold-fill px-1.5 py-0.5 text-[0.625rem] text-gold">No data yet</span>
-          <p className={what}>No CricHeroes numbers on record yet, so he isn&rsquo;t in the sorted suggestions (search still finds him).</p>
-        </div>
+        ),
+        name: "Category",
+        text: "Under 35 is A+. Legend: 60+, or average under 10 and SR under 100. Others A or B once SPI is out.",
+      },
+      { mark: <OwnerChip team="Team" />, name: "Owner", text: "Plays for his own franchise; placed in its XII first." },
+    ],
+  },
+  {
+    title: "How he plays",
+    items: [
+      { mark: <TagChips tags={["Hard Hitter"]} />, name: "CricHeroes tag", text: "Hard Hitter, Accumulator, Economist, Spearhead and more." },
+      {
+        mark: <span className="whitespace-nowrap rounded-full bg-gold-fill px-1.5 py-0.5 text-[0.625rem] font-semibold leading-none text-gold">No data yet</span>,
+        name: "No numbers yet",
+        text: "Not in the sorted suggestions until his figures are in — search still finds him.",
+      },
+    ],
+  },
+];
+
+export function MarkerKey() {
+  return (
+    <section className="mx-auto mt-10 w-full max-w-[1280px] rounded-[18px] border border-line bg-surface px-5 py-5 shadow-[var(--elev-sm)] sm:px-7 sm:py-6">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-line pb-3">
+        <h3 className="font-display text-lg font-bold uppercase tracking-wide">What the marks mean</h3>
+        <p className="text-[0.72rem] text-muted">Every mark below appears exactly like this on a player.</p>
+      </div>
+      <div className="mt-4 grid gap-6 lg:grid-cols-3 lg:gap-0 lg:divide-x lg:divide-line">
+        {KEY.map((col, c) => (
+          <div key={col.title} className={c === 0 ? "lg:pr-7" : c === KEY.length - 1 ? "lg:pl-7" : "lg:px-7"}>
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-red">{col.title}</p>
+            <dl className="mt-3 space-y-3.5">
+              {col.items.map((it) => (
+                <div key={it.name} className="grid grid-cols-[8.5rem_1fr] items-start gap-3">
+                  <dt className="flex min-h-[1.25rem] items-center">{it.mark}</dt>
+                  <dd className="min-w-0">
+                    <p className="text-[0.8rem] font-semibold leading-tight text-ink">{it.name}</p>
+                    <p className="mt-0.5 text-[0.72rem] leading-snug text-muted">{it.text}</p>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        ))}
       </div>
     </section>
   );

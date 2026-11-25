@@ -136,9 +136,13 @@ export default function LivePool() {
     }
     return c;
   }, [pool]);
-  const matching = (pool ?? []).filter(
-    (p) => (tab === "all" || (tab === "recommend" ? p.recommend : p.status === tab)) && (!q.trim() || `${p.name} ${p.employer ?? ""} ${p.role} ${p.tags.join(" ")}`.toLowerCase().includes(q.trim().toLowerCase())),
-  );
+  // Players who haven't given their role go to the bottom (Nikhil, 25 Nov 2026); order otherwise unchanged.
+  const noRole = (p: PoolEntry) => /^role not given/i.test(p.role);
+  const matching = (pool ?? [])
+    .filter(
+      (p) => (tab === "all" || (tab === "recommend" ? p.recommend : p.status === tab)) && (!q.trim() || `${p.name} ${p.employer ?? ""} ${p.role} ${p.tags.join(" ")}`.toLowerCase().includes(q.trim().toLowerCase())),
+    )
+    .sort((a, b) => Number(noRole(a)) - Number(noRole(b)));
   // Players per page: 10, 20 or 50 (Nikhil, 25 Nov 2026). A new tab, search or page size starts at page 1.
   const [size, setSize] = useState<10 | 20 | 50>(20);
   const pageKey = `${tab}|${q}|${size}`;

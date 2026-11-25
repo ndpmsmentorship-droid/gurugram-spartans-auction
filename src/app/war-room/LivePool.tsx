@@ -61,15 +61,19 @@ function Tick({ ok, l }: { ok: boolean; l: string }) {
 const fmt = (n: number | null, d = 0) => (n == null ? "–" : n.toLocaleString("en-IN", { maximumFractionDigits: d, minimumFractionDigits: d }));
 
 function StatLine({ s }: { s: NonNullable<PoolEntry["stats"]> }) {
+  // Some imported figures are junk ("0/0", "0", or a spreadsheet date like 46299): treat those as missing.
+  const bowlBest = s.best && /^\d{1,2}\/\d{1,3}$/.test(s.best.trim()) && !/^0\/0$/.test(s.best.trim()) ? s.best.trim() : null;
+  const hs = s.hs && s.hs.trim() !== "0" && /^\d{1,3}\*?$/.test(s.hs.trim()) ? s.hs.trim() : "–";
   const cells: [string, string][] = [
     ["Mat", fmt(s.m)],
     ["Runs", fmt(s.runs)],
     ["Avg", fmt(s.avg, 1)],
     ["SR", fmt(s.sr, 1)],
-    ["HS", s.hs ?? "–"],
+    ["HS", hs],
     ["Wkts", fmt(s.wk)],
     ["Econ", fmt(s.econ, 2)],
-    ["Best", s.best ?? "–"],
+    // Best bowling when we have a real figure (e.g. 5/12); otherwise his best score with the bat (Nikhil, 25 Nov 2026).
+    bowlBest ? ["Best", bowlBest] : ["Best (bat)", hs],
   ];
   return (
     <div>

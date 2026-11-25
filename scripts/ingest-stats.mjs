@@ -80,8 +80,14 @@ async function main() {
   }
 
   // recompute all indices with the real engine
-  const { data: rows, error } = await supabase.from("scout_players").select("*");
-  if (error) throw error;
+  // Page through the whole pool: PostgREST returns at most 1,000 rows per request.
+  const rows = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supabase.from("scout_players").select("*").order("id").range(from, from + 999);
+    if (error) throw error;
+    rows.push(...data);
+    if (data.length < 1000) break;
+  }
   const idx = computeIndices(rows.map(toRaw));
   const bulk = rows.map((r, i) => ({
     id: r.id, full_name: r.full_name,

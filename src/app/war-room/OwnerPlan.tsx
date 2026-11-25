@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { normCategory } from "@/lib/scout/tier";
-import { DEFAULT_RULES, inr } from "@/lib/auction/rules";
+import { DEFAULT_RULES, SLL2_SQUAD, inr } from "@/lib/auction/rules";
+import { LEAGUE } from "@/lib/league";
 import type { PlanPlayer } from "@/lib/auction/planner";
 import { catLabel } from "@/lib/scout/tier";
 import TeamCrest from "@/app/TeamCrest";
@@ -60,8 +61,10 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
   const mine = useMemo(() => players.filter((p) => p.team_id === team.id), [players, team.id]);
   const spent = mine.reduce((a, p) => a + (p.sold_price ?? 0), 0);
   const purseLeft = team.purse_total - spent;
-  const target = Math.max(R.squadMin, 12);
-  const maxSafe = Math.max(0, purseLeft - Math.max(0, target - mine.length - 1) * R.base.B);
+  const sll2 = LEAGUE === "sdll";
+  const target = sll2 ? SLL2_SQUAD.size : Math.max(R.squadMin, 12);
+  const floor = sll2 ? SLL2_SQUAD.base.B : R.base.B; // cheapest way to fill a slot
+  const maxSafe = Math.max(0, purseLeft - Math.max(0, target - mine.length - 1) * floor);
   const topUp = Math.max(0, (team.purse_max ?? team.purse_total) - team.purse_total);
   const cats = useMemo(() => {
     const c: Record<string, number> = { "A+": 0, A: 0, B: 0, Special: 0 };
@@ -93,14 +96,24 @@ export default function OwnerPlan(props: { seasonId: string; profileId: string; 
       <section className="mt-4 grid grid-cols-1 gap-2 lg:grid-cols-[2fr_5fr]">
         <div className="grid grid-cols-2 gap-2">
           <Tile k="Purse left" v={inr(purseLeft)} sub={`of ${inr(team.purse_total)}${topUp ? ` · +${inr(topUp)} top-ups available` : ""}`} strong />
-          <Tile k="Max safe bid" v={inr(maxSafe)} sub={`keeps ${Math.max(0, target - mine.length - 1)} slots at ${inr(R.base.B)}`} strong />
+          <Tile k="Max safe bid" v={inr(maxSafe)} sub={`keeps ${Math.max(0, target - mine.length - 1)} slots at ${inr(floor)}`} strong />
         </div>
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
-          <Tile k="Squad" v={`${mine.length}`} sub={`${R.squadMin}–${R.squadMax}`} compact />
-          {(["A+", "A", "B", "Special"] as const).map((c) => (
-            <Tile key={c} k={catLabel(c)} v={`${cats[c] ?? 0}`} sub={`max ${R.cap[c]}`} warn={c !== "B" && (cats[c] ?? 0) >= R.cap[c]} compact />
-          ))}
-        </div>
+        {sll2 ? (
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+            <Tile k="Squad" v={`${mine.length}/${SLL2_SQUAD.size}`} sub="rules: squad of 18" compact />
+            {(["Legend", "A+", "A", "B"] as const).map((c) => {
+              const have = cats[c === "Legend" ? "Special" : c] ?? 0;
+              return <Tile key={c} k={c} v={`${have}/${SLL2_SQUAD.mix[c]}`} sub={`base ${inr(SLL2_SQUAD.base[c])}`} warn={have > SLL2_SQUAD.mix[c]} compact />;
+            })}
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+            <Tile k="Squad" v={`${mine.length}`} sub={`${R.squadMin}–${R.squadMax}`} compact />
+            {(["A+", "A", "B", "Special"] as const).map((c) => (
+              <Tile key={c} k={catLabel(c)} v={`${cats[c] ?? 0}`} sub={`max ${R.cap[c]}`} warn={c !== "B" && (cats[c] ?? 0) >= R.cap[c]} compact />
+            ))}
+          </div>
+        )}
       </section>
 
       <DreamXII profileId={props.profileId} team={team.name} />

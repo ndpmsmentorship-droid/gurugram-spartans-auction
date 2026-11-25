@@ -1,6 +1,6 @@
 "use client";
 
-import type { AgeBand, PoolEntry } from "@/lib/auction/owner-pool";
+import type { AgeBand, Category, PoolEntry } from "@/lib/auction/owner-pool";
 
 // The small marks on every player in the owners' portal (Plan + Live pool), and the key that
 // explains them at the foot of both pages (Nikhil, 25 Nov 2026). One shape per meaning:
@@ -44,12 +44,12 @@ export function PaymentPending() {
   );
 }
 
-// Age bracket only (the SPI brackets); never the exact age or date of birth.
-export const AGE_COLOUR: Record<AgeBand, string> = { "30–34": "#bc2423", "35–39": "#1d4ed8", "40+": "#15803d" };
+// Age bracket only (SPI brackets, age on Sun 7 Mar 2027); never the exact age or date of birth.
+export const AGE_COLOUR: Record<AgeBand, string> = { "Under 35": "#bc2423", "35–39": "#1d4ed8", "40+": "#15803d" };
 export function AgeChip({ band }: { band: AgeBand | null }) {
   if (!band) return null;
   return (
-    <span className={`${pill} text-white`} style={{ background: AGE_COLOUR[band] }} title="Age bracket used for SPI categories">
+    <span className={`${pill} text-white`} style={{ background: AGE_COLOUR[band] }} title="Age bracket on Sun 7 Mar 2027 (SLL-2 rules, Article 2)">
       {band}
     </span>
   );
@@ -64,11 +64,19 @@ export function OwnerChip({ team }: { team: string | null }) {
   );
 }
 
-// SPI category: graded after registration closes, so "SPI pending" until then.
-export function CategoryChip({ cat }: { cat: string | null }) {
+// Category per the SLL-2 rules: under 35 = A+; Legend = 60+ or career avg < 10 and SR < 100;
+// everyone else A or B by SPI rank once grading is published ("A/B · SPI pending" until then).
+const CAT_STYLE: Record<Category, { bg: string; fg: string; label: string; title: string }> = {
+  "A+": { bg: "#0b1630", fg: "#fff", label: "A+", title: "Category A+ — every player under 35 on 7 Mar 2027" },
+  Legend: { bg: "var(--gold)", fg: "#fff", label: "Legend", title: "Legend — 60+ on 7 Mar 2027, or career average under 10 and strike rate under 100 (Board may decide otherwise)" },
+  "A/B": { bg: "transparent", fg: "var(--muted)", label: "A/B · SPI pending", title: "A or B by SPI rank in his age bracket, published after registration closes" },
+};
+export function CategoryChip({ cat }: { cat: Category | null }) {
+  if (!cat) return null;
+  const c = CAT_STYLE[cat];
   return (
-    <span className={`${pill} border border-line text-muted`} title="SPI category (A+ / A / B / Legend), published after registration closes">
-      {cat ?? "SPI pending"}
+    <span className={`${pill} ${cat === "A/B" ? "border border-line" : ""}`} style={{ background: c.bg, color: c.fg }} title={c.title}>
+      {c.label}
     </span>
   );
 }
@@ -93,7 +101,7 @@ export function MarkRow({ p, showCategory = true }: { p: PoolEntry; showCategory
       {p.status === "unpaid" && <PaymentPending />}
       <OwnerChip team={p.owner} />
       <AgeChip band={p.ageBand} />
-      {showCategory && <CategoryChip cat={null} />}
+      {showCategory && <CategoryChip cat={p.cat} />}
       <TagChips tags={p.tags} />
       <FeeSeal paid={p.feePaid} />
       <StatsSeal on={p.checkedOn} />
@@ -123,15 +131,18 @@ export function MarkerKey() {
         </div>
         <div className={row}>
           <span className="flex shrink-0 gap-1">
-            <AgeChip band="30–34" />
+            <AgeChip band="Under 35" />
             <AgeChip band="35–39" />
             <AgeChip band="40+" />
           </span>
-          <p className={what}>Age bracket (SPI brackets). Exact ages and birth dates stay with the league.</p>
+          <p className={what}>Age on Sun 7 Mar 2027 (rules, Article 2). Exact ages and birth dates stay with the league.</p>
         </div>
         <div className={row}>
-          <CategoryChip cat={null} />
-          <p className={what}>SPI category — A+, A, B or Legend once grading is published after registration closes.</p>
+          <span className="flex shrink-0 gap-1">
+            <CategoryChip cat="A+" />
+            <CategoryChip cat="Legend" />
+          </span>
+          <p className={what}>Category: every under-35 is A+; Legend = 60+, or career avg under 10 and SR under 100. Others show &ldquo;A/B · SPI pending&rdquo; until SPI ranks are published.</p>
         </div>
         <div className={row}>
           <OwnerChip team="Team" />
@@ -143,15 +154,7 @@ export function MarkerKey() {
         </div>
         <div className={row}>
           <span className="shrink-0 rounded-full bg-gold-fill px-1.5 py-0.5 text-[0.625rem] text-gold">No data yet</span>
-          <p className={what}>No match numbers on record yet; rated at his category&rsquo;s median.</p>
-        </div>
-        <div className={row}>
-          <span className="mt-1 flex shrink-0 gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-ink" />
-            <span className="h-2 w-2 rounded-full bg-red" />
-            <span className="h-2 w-2 rounded-full bg-up" />
-          </span>
-          <p className={what}>In the planner: black = in your squad, red = going for him, green = our suggestion.</p>
+          <p className={what}>No CricHeroes numbers on record yet, so he isn&rsquo;t in the sorted suggestions (search still finds him).</p>
         </div>
       </div>
     </section>

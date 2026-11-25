@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PlayerPhoto } from "@/app/register/PlayerCard";
 import { findFranchise } from "@/app/franchises";
-import type { AgeBand, PoolEntry } from "@/lib/auction/owner-pool";
+import type { AgeBand, Category, PoolEntry } from "@/lib/auction/owner-pool";
 import { usePool } from "./LivePool";
-import { MarkRow, AgeChip } from "./Markers";
+import { MarkRow, AgeChip, CategoryChip } from "./Markers";
 
 // The Plan tab (Nikhil, 25 Nov 2026): the owner's own playing XII is the whole job.
 // Left: the twelve in batting order, grouped Top order · Middle order · Lower-order hitters ·
@@ -14,8 +14,8 @@ import { MarkRow, AgeChip } from "./Markers";
 // listed, sorted, with search and filters (pace / spin, age bracket). Picking one puts him
 // straight into the XII on the left. Saved on this device, per login and team.
 
-type Kind = "open" | "top" | "mid" | "wk" | "fin" | "ar" | "pace" | "spin" | "bowl";
-type Group = "top" | "middle" | "lower" | "bowl";
+type Kind = "open" | "top" | "mid" | "wk" | "fin" | "ar" | "pace" | "spin" | "bowl" | "any";
+type Group = "top" | "middle" | "lower" | "bowl" | "bench";
 const SLOTS: { kind: Kind; label: string; group: Group }[] = [
   { kind: "open", label: "Opener", group: "top" },
   { kind: "open", label: "Opener", group: "top" },
@@ -29,12 +29,21 @@ const SLOTS: { kind: Kind; label: string; group: Group }[] = [
   { kind: "pace", label: "No. 10 · pace bowler", group: "bowl" },
   { kind: "spin", label: "No. 11 · spin bowler", group: "bowl" },
   { kind: "bowl", label: "No. 12 · bowler", group: "bowl" },
+  // The bench: six more for the mandatory squad of 18 (SLL-2 rules; Nikhil, 25 Nov 2026).
+  { kind: "any", label: "Bench 1", group: "bench" },
+  { kind: "any", label: "Bench 2", group: "bench" },
+  { kind: "any", label: "Bench 3", group: "bench" },
+  { kind: "any", label: "Bench 4", group: "bench" },
+  { kind: "any", label: "Bench 5", group: "bench" },
+  { kind: "any", label: "Bench 6", group: "bench" },
 ];
+const XII = 12; // slots 1–12 play; 13–18 are the bench
 const GROUPS: { key: Group; title: string; tone: string; lists: Kind[] }[] = [
   { key: "top", title: "Top-order batters", tone: "#2563eb", lists: ["open", "top"] },
   { key: "middle", title: "Middle-order batters", tone: "#b7791f", lists: ["mid", "wk"] },
   { key: "lower", title: "Lower-order hitters", tone: "#7c3aed", lists: ["fin", "ar"] },
   { key: "bowl", title: "Bowlers", tone: "#2e7d50", lists: ["pace", "spin", "bowl"] },
+  { key: "bench", title: "Bench · 6 more for the squad of 18", tone: "#64748b", lists: ["any"] },
 ];
 const LIST_LABEL: Record<Kind, string> = {
   open: "Openers",
@@ -46,6 +55,7 @@ const LIST_LABEL: Record<Kind, string> = {
   pace: "Pace bowlers",
   spin: "Spin bowlers",
   bowl: "All bowlers",
+  any: "Best overall",
 };
 const groupOf = (k: Kind) => GROUPS.find((g) => g.lists.includes(k))!.key;
 
@@ -87,6 +97,8 @@ function fit(p: PoolEntry, kind: Kind): number {
       return SPIN.test(p.role) ? bowl : 0;
     case "bowl":
       return bowl;
+    case "any":
+      return Math.max(bat, bowl, wpm >= 0.4 && rpm >= 10 ? bat + bowl : 0);
   }
 }
 
@@ -94,10 +106,12 @@ const norm = (s: string | null | undefined) => (s ?? "").toLowerCase().replace(/
 const keyOf = (profileId: string, team: string) => `sll-xii:${profileId}:${norm(team)}`;
 const empty = () => SLOTS.map(() => null as string | null);
 
+// Saves from before the bench existed have 12 slots: keep them and add six empty bench slots.
+const pad = (v: unknown[]) => SLOTS.map((_, i) => (typeof v[i] === "string" ? (v[i] as string) : null));
 function readSlots(k: string): (string | null)[] {
   try {
     const v = JSON.parse(localStorage.getItem(k) ?? "null");
-    if (Array.isArray(v) && v.length === SLOTS.length) return v.map((x) => (typeof x === "string" ? x : null));
+    if (Array.isArray(v) && v.length >= XII) return pad(v);
   } catch {
     /* fresh start */
   }
@@ -131,10 +145,11 @@ export default function DreamXII({ profileId, team }: { profileId: string; team:
       const r = await fetch(api, { cache: "no-store" }).catch(() => null);
       const j = r?.ok ? ((await r.json().catch(() => null)) as { slots: (string | null)[] | null; at: string | null } | null) : null;
       if (!alive || !j || lastEdit.current > startedAt) return; // an edit here since the pull started wins
-      if (j.slots && j.slots.length === SLOTS.length) {
-        setSlots(j.slots);
+      if (j.slots && j.slots.length >= XII) {
+        const got = pad(j.slots);
+        setSlots(got);
         try {
-          localStorage.setItem(storeKey, JSON.stringify(j.slots));
+          localStorage.setItem(storeKey, JSON.stringify(got));
         } catch {
           /* fine */
         }
@@ -174,6 +189,7 @@ export default function DreamXII({ profileId, team }: { profileId: string; team:
       const k = kindOf(o);
       const wants: Kind[] = k === "wk" ? ["wk"] : k === "ar" ? ["ar"] : k === "bowl" ? ["pace", "spin", "bowl"] : ["open", "top", "mid", "fin"];
       let at = next.findIndex((id, i) => !id && wants.includes(SLOTS[i].kind));
+      if (at < 0) at = next.findIndex((id, i) => !id && i < XII); // owners play: XII before the bench
       if (at < 0) at = next.findIndex((id) => !id);
       if (at < 0) at = next.findIndex((id) => !owners.some((x) => x.id === id));
       if (at >= 0) next[at] = o.id;
@@ -236,21 +252,24 @@ export default function DreamXII({ profileId, team }: { profileId: string; team:
 
   return (
     <section className="mt-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="eyebrow">Your playing XII</p>
-          <h2 className="mt-1 font-display text-2xl font-bold uppercase leading-tight">The twelve you have in mind</h2>
+          <p className="eyebrow">Your squad of 18 · playing XII + bench</p>
+          <h2 className="mt-1 font-display text-2xl font-bold uppercase leading-tight">The squad you have in mind</h2>
           <p className="mt-1 max-w-[62ch] text-sm text-muted">
             Your owners are in already. Tap a slot and the best players for that role are listed <span className="lg:hidden">below the XII</span><span className="hidden lg:inline">on the right</span> — pick one, or search the whole pool.
           </p>
         </div>
-        <div className="text-right">
-          <p className="font-display text-4xl font-bold leading-none tabular-nums">
-            {filled}
-            <span className="text-xl text-muted">/12</span>
+        <div className="shrink-0 sm:text-right">
+          <p className="flex items-baseline gap-2 sm:justify-end">
+            <span className="font-display text-4xl font-bold leading-none tabular-nums">
+              {filled}
+              <span className="text-xl text-muted">/{SLOTS.length}</span>
+            </span>
+            <span className="text-[0.72rem] text-muted">picked</span>
           </p>
-          <div className="mt-1.5 h-1.5 w-32 overflow-hidden rounded-full bg-wash">
-            <div className="h-full rounded-full bg-red transition-all" style={{ width: `${(filled / 12) * 100}%` }} />
+          <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-wash sm:w-40">
+            <div className="h-full rounded-full bg-red transition-all" style={{ width: `${(filled / SLOTS.length) * 100}%` }} />
           </div>
         </div>
       </div>
@@ -264,14 +283,14 @@ export default function DreamXII({ profileId, team }: { profileId: string; team:
         {/* left: the XII */}
         <div className="space-y-3">
           {GROUPS.map((g) => (
-            <div key={g.key} className="overflow-hidden rounded-[14px] border border-line bg-surface" style={{ borderLeft: `4px solid ${g.tone}` }}>
+            <div key={g.key} className="rounded-[14px] border border-line bg-surface" style={{ borderLeft: `4px solid ${g.tone}` }}>
               <button
                 type="button"
                 onClick={() => {
                   const i = SLOTS.findIndex((s, j) => s.group === g.key && !placed[j]);
                   choose(i >= 0 ? i : SLOTS.findIndex((s) => s.group === g.key));
                 }}
-                className="flex w-full items-center justify-between px-3 py-2 text-left"
+                className="flex w-full items-center justify-between rounded-tr-[13px] px-3 py-2 text-left"
                 style={{ background: `color-mix(in srgb, ${g.tone} 9%, transparent)` }}
               >
                 <span className="text-sm font-semibold" style={{ color: g.tone }}>{g.title}</span>
@@ -297,24 +316,18 @@ export default function DreamXII({ profileId, team }: { profileId: string; team:
                         <span className="min-w-0 flex-1">
                           <span className="label-mono block">{s.label}</span>
                           {p ? <span className="block truncate text-sm font-semibold">{p.name}</span> : <span className="block text-sm text-muted">{active ? "Choose from the list →" : "Tap to choose"}</span>}
-                          {p && <MarkRow p={p} showCategory={false} />}
+                          {p && <MarkRow p={p} />}
                         </span>
                       </button>
-                      {p && owner && (
-                        <select
-                          aria-label={`Move ${p.name}`}
-                          className="w-[5.5rem] shrink-0 rounded-full border border-line bg-surface px-2 py-1 text-[0.72rem]"
-                          value=""
-                          onChange={(e) => e.target.value && swap(i, Number(e.target.value))}
-                        >
-                          <option value="">Move…</option>
-                          {SLOTS.map((t, j) => (j === i ? null : <option key={j} value={j}>{`${j + 1}. ${t.label}`}</option>))}
-                        </select>
-                      )}
-                      {p && !owner && (
-                        <button type="button" onClick={() => remove(i)} aria-label={`Remove ${p.name}`} className="shrink-0 px-1.5 text-muted hover:text-red">
-                          ✕
-                        </button>
+                      {p && (
+                        <RowMenu
+                          name={p.name}
+                          at={i}
+                          owner={owner}
+                          names={placed.map((id) => (id ? (byId.get(id)?.name ?? null) : null))}
+                          onMove={(j) => swap(i, j)}
+                          onRemove={() => remove(i)}
+                        />
                       )}
                     </li>
                   );
@@ -322,6 +335,7 @@ export default function DreamXII({ profileId, team }: { profileId: string; team:
               </ol>
             </div>
           ))}
+          <RulesCheck xii={placed.map((id, i) => ({ p: id ? byId.get(id) : undefined, i }))} owners={owners} />
           <p className="text-[0.68rem] text-muted">
             {sync === "saving" ? "Saving…" : sync === "offline" ? "Saved on this device — couldn’t reach the server, will retry on your next change." : "Saved to your account: the same XII on your phone and laptop. Private to your team."}
           </p>
@@ -374,6 +388,7 @@ function Panel({
   const [q, setQ] = useState("");
   const [band, setBand] = useState<AgeBand | null>(null);
   const [paidOnly, setPaidOnly] = useState(false);
+  const [catF, setCatF] = useState<Category | null>(null);
   const [moreFor, setMoreFor] = useState<Kind | null>(null);
   const more = moreFor === list;
   const setMore = (f: (m: boolean) => boolean) => setMoreFor(f(more) ? list : null);
@@ -382,9 +397,9 @@ function Panel({
   const avail = useMemo(
     () =>
       pool.filter(
-        (p) => p.status !== "rejected" && (!p.owner || norm(p.owner) === norm(team)) && (!band || p.ageBand === band) && (!paidOnly || p.status !== "unpaid"),
+        (p) => p.status !== "rejected" && (!p.owner || norm(p.owner) === norm(team)) && (!band || p.ageBand === band) && (!catF || p.cat === catF) && (!paidOnly || p.status !== "unpaid"),
       ),
-    [pool, team, band, paidOnly],
+    [pool, team, band, catF, paidOnly],
   );
   const ranked = useMemo(
     () =>
@@ -436,12 +451,18 @@ function Panel({
 
       <div className="mt-3 flex flex-wrap items-center gap-1.5">
         <span className="text-[0.68rem] text-muted">Age:</span>
-        {(["30–34", "35–39", "40+"] as AgeBand[]).map((b) => (
+        {(["Under 35", "35–39", "40+"] as AgeBand[]).map((b) => (
           <button key={b} type="button" onClick={() => setBand(band === b ? null : b)} className={`rounded-full ${band === b ? "ring-2 ring-ink ring-offset-1" : "opacity-70"}`} aria-pressed={band === b}>
             <AgeChip band={b} />
           </button>
         ))}
-        <label className="ml-2 flex items-center gap-1 text-[0.72rem] text-muted">
+        <span className="ml-2 text-[0.68rem] text-muted">Category:</span>
+        {(["A+", "Legend"] as Category[]).map((c) => (
+          <button key={c} type="button" onClick={() => setCatF(catF === c ? null : c)} className={`rounded-full ${catF === c ? "ring-2 ring-ink ring-offset-1" : "opacity-70"}`} aria-pressed={catF === c}>
+            <CategoryChip cat={c} />
+          </button>
+        ))}
+        <label className="flex basis-full items-center gap-1.5 pt-1 text-[0.72rem] text-muted">
           <input type="checkbox" checked={paidOnly} onChange={(e) => setPaidOnly(e.target.checked)} /> hide payment pending
         </label>
       </div>
@@ -490,7 +511,7 @@ function Choice({ n, p, inXII, onAdd }: { n: number | null; p: PoolEntry; inXII:
         <p className="truncate text-sm font-semibold">{p.name}</p>
         <p className="truncate text-[0.7rem] text-muted">{p.role}</p>
         <p className="text-[0.7rem] tabular-nums text-ink/80">{line}</p>
-        <MarkRow p={p} showCategory={false} />
+        <MarkRow p={p} />
       </div>
       <button
         type="button"
@@ -500,5 +521,139 @@ function Choice({ n, p, inXII, onAdd }: { n: number | null; p: PoolEntry; inXII:
         {inXII ? "In XII · move" : "+ Wishlist"}
       </button>
     </li>
+  );
+}
+
+// The ✓/⚠ list under the XII: the playing-XII limits in the SLL-2 rules (Article 6).
+function RulesCheck({ xii, owners }: { xii: { p: PoolEntry | undefined; i: number }[]; owners: PoolEntry[] }) {
+  const all = xii.filter((x) => x.p) as { p: PoolEntry; i: number }[];
+  const ps = all.filter((x) => x.i < XII); // the playing XII
+  const squadLeg = all.filter((x) => x.p.cat === "Legend").length;
+  const squadAPlus = all.filter((x) => x.p.cat === "A+").length;
+  const u35 = ps.filter((x) => x.p.ageBand === "Under 35").length;
+  const mid = ps.filter((x) => x.p.ageBand === "35–39").length;
+  const legends = ps.filter((x) => x.p.cat === "Legend");
+  const aPlus = ps.filter((x) => x.p.cat === "A+").length;
+  const noDob = ps.filter((x) => !x.p.ageBand).length;
+  const ownerU35 = owners.filter((o) => o.ageBand === "Under 35");
+  const rows: { ok: boolean; text: string; head?: string }[] = [
+    { ok: all.length === SLOTS.length, text: `Squad: ${all.length} of 18 — a squad of 18 is mandatory`, head: "Squad of 18" },
+    { ok: squadLeg <= 2, text: `Legends in the squad: ${squadLeg} of 2` },
+    { ok: squadAPlus <= 2, text: `A+ (under 35) in the squad: ${squadAPlus} of 2` },
+    { ok: true, text: "A 6 · B 8 in the squad — checked once SPI grades are out" },
+    { ok: u35 <= 1, text: `Under 35 (A+): ${u35} of max 1`, head: "Playing XII (slots 1–12)" },
+    { ok: mid <= 4, text: `Aged 35–39: ${mid} of max 4` },
+    { ok: legends.length <= 1, text: `Legend: ${legends.length} of max 1 (optional)` },
+    ...(legends.length ? [{ ok: legends.every((x) => x.i <= 3), text: "A Legend must bat in the top 4" }] : []),
+    { ok: true, text: aPlus ? "A cap: with an A+ playing, at most 4 A (the 6-A limit counts A+ as 2) — checked once SPI is out" : "A cap: at most 6 A in the XII — checked once SPI grades are out" },
+    ...(ownerU35.length ? [{ ok: false, text: `No owner may be under 35: ${ownerU35.map((o) => o.name).join(", ")}` }] : []),
+  ];
+  return (
+    <div className="rounded-[14px] border border-line bg-surface px-3 py-2.5">
+      <p className="label-mono">Rules check · SLL-2 rules</p>
+      <ul className="mt-1.5 space-y-1">
+        {rows.map((r) => [
+          r.head && (
+            <li key={`h-${r.head}`} className="pt-1 text-[0.65rem] font-semibold uppercase tracking-wide text-ink/70">
+              {r.head}
+            </li>
+          ),
+          <li key={r.text} className="flex items-start gap-2 text-[0.75rem] leading-snug">
+            <span className={`mt-px grid h-4 w-4 shrink-0 place-items-center rounded-full text-[0.6rem] font-bold text-white ${r.ok ? "bg-up" : "bg-red"}`}>{r.ok ? "✓" : "!"}</span>
+            <span className={r.ok ? "text-muted" : "font-semibold text-red-deep"}>{r.text}</span>
+          </li>,
+        ])}
+        {noDob > 0 && <li className="pl-6 text-[0.7rem] text-muted">{noDob} in your XII without a date of birth on file — not counted in the age limits.</li>}
+      </ul>
+    </div>
+  );
+}
+
+// One aligned action per filled slot: a Move button that opens the slot list (and Remove, except owners).
+function RowMenu({
+  name,
+  at,
+  owner,
+  names,
+  onMove,
+  onRemove,
+}: {
+  name: string;
+  at: number;
+  owner: boolean;
+  names: (string | null)[];
+  onMove: (to: number) => void;
+  onRemove: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const off = (e: MouseEvent | TouchEvent) => box.current && !box.current.contains(e.target as Node) && setOpen(false);
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", off);
+    document.addEventListener("touchstart", off);
+    document.addEventListener("keydown", esc);
+    return () => {
+      document.removeEventListener("mousedown", off);
+      document.removeEventListener("touchstart", off);
+      document.removeEventListener("keydown", esc);
+    };
+  }, [open]);
+  return (
+    <div ref={box} className="relative shrink-0 self-center">
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={`Move ${name}`}
+        onClick={() => setOpen((o) => !o)}
+        className={`inline-flex h-8 items-center gap-1 rounded-full border px-3 text-[0.75rem] font-medium transition ${open ? "border-ink bg-ink text-white" : "border-line bg-surface text-ink hover:border-ink"}`}
+      >
+        Move
+        <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true" className={`transition ${open ? "rotate-180" : ""}`}>
+          <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+      {open && (
+        <div role="menu" className="absolute right-0 top-full z-30 mt-1.5 max-h-[60vh] w-64 overflow-y-auto rounded-[12px] border border-line bg-surface p-1.5 shadow-[var(--elev-md,0_10px_30px_rgba(0,0,0,.15))]">
+          <p className="px-2 pb-1 pt-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-muted">Move {name.split(" ")[0]} to</p>
+          {SLOTS.map((t, j) =>
+            j === at ? null : (
+              <button
+                key={j}
+                role="menuitem"
+                type="button"
+                onClick={() => {
+                  onMove(j);
+                  setOpen(false);
+                }}
+                className="flex w-full items-center gap-2 rounded-[8px] px-2 py-1.5 text-left text-[0.78rem] hover:bg-wash"
+              >
+                <span className="w-5 shrink-0 text-right font-display tabular-nums text-muted">{j + 1}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate">{t.label}</span>
+                  <span className="block truncate text-[0.68rem] text-muted">{names[j] ? `swap with ${names[j]}` : "empty"}</span>
+                </span>
+              </button>
+            ),
+          )}
+          {!owner && (
+            <button
+              role="menuitem"
+              type="button"
+              onClick={() => {
+                onRemove();
+                setOpen(false);
+              }}
+              className="mt-1 w-full rounded-[8px] border-t border-line px-2 py-2 text-left text-[0.78rem] font-medium text-red-deep hover:bg-[color-mix(in_srgb,var(--red)_6%,transparent)]"
+            >
+              Remove from XII
+            </button>
+          )}
+          {owner && <p className="mt-1 border-t border-line px-2 pt-1.5 text-[0.68rem] text-muted">Owners always play — they can move, not leave the XII.</p>}
+        </div>
+      )}
+    </div>
   );
 }

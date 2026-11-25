@@ -120,7 +120,7 @@ export default async function OwnersHome({ searchParams }: { searchParams: Promi
         {/* the three parts */}
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <Card href="/war-room?tab=plan" kicker="01 · Plan" title="Plan your squad" cta="Open the planner">
-            Build the playing XII you have in mind: your own owners go in first, then pick each slot from the live pool, with our suggestions beside it.
+            Build the squad of 18 you have in mind — playing XII plus 6 bench. Your own owners go in first; pick every other slot from the live pool, with our suggestions beside it.
           </Card>
           <Card href="/war-room?tab=pool" kicker="02 · Live pool" title="Players as they register" cta="See the pool">
             <span className="mt-1 flex flex-wrap gap-2 text-[0.75rem]">
@@ -135,11 +135,11 @@ export default async function OwnersHome({ searchParams }: { searchParams: Promi
               <span className="mt-2 block text-[0.75rem]">Registrations open Mon 2 Nov 2026.</span>
             )}
           </Card>
-          <Card href="/war-room?tab=live" kicker="03 · War Room" title="Auction night" cta="Enter the War Room">
+          <Card href="/war-room?tab=live" kicker="03 · War Room · work in progress" title="Auction night" cta="Coming before 19 Dec">
             {onBlock ? (
               <span className="text-up">Live now: {onBlock} is on the block.</span>
             ) : (
-              <>Purse, max safe bid, squad gaps, and a verdict on every player on the block: XII impact, your ceiling and the chance he ends up yours.</>
+              <>Still being built. Purse, max safe bid, squad gaps and a verdict on every player on the block — opens before auction night, Sat 19 Dec.</>
             )}
           </Card>
         </div>
@@ -179,7 +179,7 @@ export default async function OwnersHome({ searchParams }: { searchParams: Promi
 
         {/* AI scout */}
         <Link
-          href="/war-room?tab=live"
+          href="/war-room?tab=plan"
           className="mt-4 flex flex-col items-start gap-3 rounded-[16px] border border-line bg-surface p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 shadow-[var(--elev-sm)] transition hover:shadow-[var(--elev)]"
         >
           <span>

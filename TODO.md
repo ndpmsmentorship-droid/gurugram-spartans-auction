@@ -3,13 +3,19 @@
 Running list. New items go under the right heading; tick with `[x]` when done (move to Done at the bottom).
 Last updated: 2026-11-25
 
-## 🔴 TOP PRIORITY — owners' page (Nikhil, 25 Nov 2026)
-- [ ] **AI feature + suggestions chat bot for owners** — link it (ANTHROPIC_API_KEY on Vercel, AIChat on every owners' tab) **by Wed 16 Dec 2026, 3 days before the 19 Dec auction**. Reminder set for 16 Dec.
-- [x] **1. Plan = the owner's own playing XII.** The first job on Plan is to complete a wishlist of the XII they imagine: 12 slots in batting order (openers, top, middle, finisher, keeper, all-rounders, bowlers), saved per owner.
-- [x] **2. The team's own owners go in first, compulsorily.** Owners marked on /admin (registrations.owner_team) fill XII slots automatically and can be moved between slots but never removed.
-- [x] **3. Search + suggestions per slot.** Each empty slot opens a search over the live pool, with our top suggestions for that role next to it.
-- [x] **4. Live pool shows unpaid registrations too**, tagged clearly "Payment pending" so owners know they aren't in the pool yet.
-- [x] **5. Marker key** at the end of the Plan and Live pool pages: red seal = CricHeroes numbers updated by the league; green seal = fee paid; Payment pending; age band (30–34 red · 35–39 blue · 40+ green, no exact ages or DOB); category (SPI pending until grading is published); Owner; CricHeroes player tags.
+## 🔴 TOP PRIORITY — owners' page (Nikhil, 25 Nov 2026) · owner logins go out EOD 25 Nov
+- [ ] **AI feature + suggestions chat bot for owners** — link it (ANTHROPIC_API_KEY on Vercel, AIChat on every owners' tab) **by Wed 16 Dec 2026, 3 days before the 19 Dec auction**. Cloud reminder set for 16 Dec 10:00 IST (claude.ai/code/routines/trig_01AxpbTAbmC7qYA7ahEnKoSp).
+- [x] **Plan = the owner's own squad of 18** (LIVE 25 Nov): playing XII in batting order grouped Top order · Middle order · Lower-order hitters · Bowlers, **+ 6 bench (squad of 18 is mandatory)**. Old strategy cards / batting order / bowling attack / to-buy removed.
+- [x] **Owners go in first, compulsorily** — owner marker on /admin (registrations.owner_team) → placed in the XII automatically, can Move (menu), can't be removed. Unregistered deck owners named in a note.
+- [x] **Right column = sorted recommendations** for the tapped slot/role (Openers, Top order, Middle, Keepers, Finishers, All-rounders, Pace, Spin, All bowlers, Best overall for the bench) + search + age / category / hide-unpaid filters; "+ Wishlist" drops the player into the squad.
+- [x] **Syncs phone + laptop**: api/owner-xii → private Storage bucket `owner-plans` (one JSON per login+team, 18 slots; old 12-slot saves padded).
+- [x] **Categories per the SLL-2 rules**: age on Sun 7 Mar 2027 → Under 35 / 35–39 / 40+; Under 35 = A+; Legend = 60+ or career avg < 10 and SR < 100; others "A/B · SPI pending". Plan tiles = squad 18 (Legend 2 · A+ 2 · A 6 · B 8, SLL-2 bases). Rules check: squad of 18, ≤2 Legend, ≤2 A+; XII ≤1 under 35, ≤4 aged 35–39, ≤1 Legend in the top 4, 6-A cap note, no owner under 35.
+- [x] **Live pool**: Payment pending tab (awaiting_payment registrations + players who stopped at the payment step, from registration_starts); marks on every row; **10 / 20 / 50 per page** with Previous/Next.
+- [x] **Marker key** at the foot of Plan + Live pool.
+- [x] **War Room = work in progress** for owners (coming-soon card; admins still see it with a banner). Default tab is now Plan.
+- [ ] **Before 19 Dec: the LIVE BOARD still runs Season 1 rules** — `SDLL_RULES` in src/lib/auction/rules.ts (squad 16–25, caps 3/8/13/3, bases 30K/20K/10K/5K) and `auction_rules` in the database. Align both with `SLL2_SQUAD` (needs SQL), then open the War Room to owners.
+- [ ] When SPI is published: replace "A/B · SPI pending" with the real A / B per player and add the A 6 · B 8 checks.
+- [ ] Owner logins: Diplomats 1/2, SLL 13/14 still have no owner linked; Sachin-style test owners under 35 will show a red rules warning (no owner may be under 35).
 
 ## MASTER LIST — SLL-2 workstreams (Nikhil, 5 Nov 2026)
 Strategy + status live here; work happens in separate sessions. Key dates (auction moved 12 → 19 Dec on 8 Nov): registration closes **29 Nov** · auction **Sat 19 Dec** · opener **Sat 23 Jan 2027** · final **Sun 14 Mar**.

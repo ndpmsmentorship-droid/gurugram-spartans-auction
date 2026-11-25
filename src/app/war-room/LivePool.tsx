@@ -136,12 +136,42 @@ export default function LivePool() {
     }
     return c;
   }, [pool]);
-  const shown = (pool ?? []).filter(
-    (p) => (tab === "all" || (tab === "recommend" ? p.recommend : p.status === tab)) && (!q.trim() || `${p.name} ${p.employer ?? ""} ${p.role}`.toLowerCase().includes(q.trim().toLowerCase())),
+  const matching = (pool ?? []).filter(
+    (p) => (tab === "all" || (tab === "recommend" ? p.recommend : p.status === tab)) && (!q.trim() || `${p.name} ${p.employer ?? ""} ${p.role} ${p.tags.join(" ")}`.toLowerCase().includes(q.trim().toLowerCase())),
+  );
+  // Players per page: 10, 20 or 50 (Nikhil, 25 Nov 2026). A new tab, search or page size starts at page 1.
+  const [size, setSize] = useState<10 | 20 | 50>(20);
+  const pageKey = `${tab}|${q}|${size}`;
+  const [pg, setPg] = useState({ key: "", n: 0 });
+  const pages = Math.max(1, Math.ceil(matching.length / size));
+  const page = pg.key === pageKey ? Math.min(pg.n, pages - 1) : 0;
+  const goTo = (n: number) => {
+    setPg({ key: pageKey, n });
+    document.getElementById("pool-top")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  const shown = matching.slice(page * size, page * size + size);
+  const pick = (n: 10 | 20 | 50) => setSize(n);
+  const pager = matching.length > 0 && (
+    <div className="flex flex-wrap items-center justify-between gap-2 text-[0.78rem]">
+      <span className="text-muted">
+        {page * size + 1}–{Math.min(matching.length, page * size + size)} of {matching.length}
+      </span>
+      <span className="flex items-center gap-1.5">
+        <button type="button" disabled={page === 0} onClick={() => goTo(page - 1)} className="rounded-full border border-line px-3 py-1.5 disabled:opacity-40">
+          ← Previous
+        </button>
+        <span className="px-1 tabular-nums text-muted">
+          {page + 1} / {pages}
+        </span>
+        <button type="button" disabled={page >= pages - 1} onClick={() => goTo(page + 1)} className="rounded-full border border-line px-3 py-1.5 disabled:opacity-40">
+          Next →
+        </button>
+      </span>
+    </div>
   );
 
   return (
-    <section className="mx-auto w-full max-w-[760px]">
+    <section id="pool-top" className="mx-auto w-full max-w-[760px] scroll-mt-32">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
           <p className="eyebrow">Live pool · Season 2</p>
@@ -165,18 +195,38 @@ export default function LivePool() {
       <input
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="Search by name, company or role"
+        placeholder="Search by name, company, role or tag"
         className="mt-3 w-full rounded-full border border-line bg-surface px-4 py-2.5 text-sm outline-none focus:border-red"
       />
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        <span className="flex items-center gap-1 text-[0.78rem]">
+          <span className="mr-1 text-muted">Show</span>
+          {([10, 20, 50] as const).map((n) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() => pick(n)}
+              aria-pressed={size === n}
+              className={`rounded-full px-3 py-1 tabular-nums ${size === n ? "bg-ink text-white" : "border border-line text-muted hover:text-ink"}`}
+            >
+              {n}
+            </button>
+          ))}
+          <span className="ml-1 text-muted">at a time</span>
+        </span>
+        {pool && matching.length > 0 && <span className="text-[0.78rem] text-muted">{matching.length} players</span>}
+      </div>
 
       {pool === null ? (
         <p className="mt-6 text-sm text-muted">Loading the pool…</p>
-      ) : shown.length === 0 ? (
+      ) : matching.length === 0 ? (
         <p className="mt-6 rounded-[12px] border border-line p-4 text-sm text-muted">
           {pool.length ? "No players match." : "No registrations yet. Registrations open on Mon 2 Nov 2026; players appear here the moment they sign up."}
         </p>
       ) : (
-        <ul className="mt-4 divide-y divide-line rounded-[12px] border border-line bg-surface">
+        <>
+        <div className="mt-3">{pager}</div>
+        <ul className="mt-2 divide-y divide-line rounded-[12px] border border-line bg-surface">
           {shown.map((p) => (
             <li key={p.id} className="flex items-start gap-3 p-3">
               <PlayerPhoto src={p.photo} name={p.name} className="h-11 w-11 shrink-0 rounded-full" sizes="44px" />
@@ -219,6 +269,8 @@ export default function LivePool() {
             </li>
           ))}
         </ul>
+        <div className="mt-3">{pager}</div>
+        </>
       )}
       <p className="mt-3 text-[0.688rem] text-muted">
         The league vets every registration. Contact details stay with the league office.

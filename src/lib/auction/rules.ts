@@ -47,6 +47,17 @@ const USCL_RULES: Rules = {
   step: { "A+": 5000, A: 3000, B: 2000, Special: 1000 },
 };
 
+/** SLL-2 Rules & Regulations (decided 4–5 Nov 2026): squad of 18 = Legend 2 · A+ 2 · A 6 · B 8;
+ *  base / raise / cap: Legend 15K/5K/50K · A+ 35K/10K/75K · A 35K/10K/75K · B 20K/5K/50K.
+ *  Used by the owners' Plan tiles. NOTE: the live board's checks (SDLL_RULES + auction_rules in the
+ *  database) still carry the Season 1 numbers — align both before the 19 Dec auction. */
+export const SLL2_SQUAD = {
+  size: 18,
+  mix: { Legend: 2, "A+": 2, A: 6, B: 8 } as const,
+  base: { Legend: 15000, "A+": 35000, A: 35000, B: 20000 } as const,
+  cap: { Legend: 50000, "A+": 75000, A: 75000, B: 50000 } as const,
+};
+
 /** USCL purse: starting amount and the two optional top-ups (rulebook p.4). */
 export const USCL_PURSE = { start: 175000, topUps: [50000, 25000] };
 /** USCL rulebook: buyers aged above 30 and below 35 — max 3 per squad (2 may play). */

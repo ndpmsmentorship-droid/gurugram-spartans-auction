@@ -2,16 +2,16 @@
 
 _Local Claude memory does not transfer across machines — this file is the source of truth. Last updated 2026-11-25._
 
-## 🔴 TOP PRIORITY — 25 Nov 2026: owners' page (Nikhil)
-Full list in TODO.md (top section). In short:
-1. **Plan tab = the owner's wishlist playing XII first** (12 slots, batting order), suggestions second.
-2. **The franchise's own owners are placed in the XII automatically and can't be removed** (owner marker on playfulventures.co.in/admin → `registrations.owner_team`).
-3. **Every slot: search the live pool + our suggestions for that role.**
-4. **Live pool includes "Payment pending" registrations** (page 1 saved, fee not paid) with a clear tag.
-5. **Marker key** at the foot of Plan + Live pool (CricHeroes seal red, fee-paid seal green, payment pending, age band, category, owner, CricHeroes tags).
-- **AI chat bot / suggestions:** link it by **Wed 16 Dec 2026** (3 days before the 19 Dec auction) — needs ANTHROPIC_API_KEY on Vercel.
-- CricHeroes player tags (Hard Hitter, Economist…) are in `player_master.stats.ch_tags` (25 Nov).
-- **Items 1–5 LIVE 25 Nov:** `src/app/war-room/DreamXII.tsx` (two-column Plan: XII left, recommendations right; owners auto-placed + locked, "Move…" to swap; saved in localStorage `sll-xii:<profile>:<team>`), `Markers.tsx` (seals, chips, MarkerKey at the foot of Plan + Live pool), `owner-pool.ts` now returns awaiting_payment rows AND players who stopped at the form's payment step (registration_starts step=payment, no registration; id `start:<id>`, 25 on 25 Nov) as status `unpaid` + feePaid, ageBand (bracket only, never DOB), owner (registrations.owner_team), keeper, tags, keeper dismissals. Old OwnerPlan strategy/lineup UI removed (planner.ts / lineup.ts still used by the War Room). Local preview: `SPARTANS_DEV_FIXTURE=1 npx next dev` now has 140 fixture registrations (every stage, 2 Spartans owners).
+## 🔴 25 Nov 2026 — owners' portal rebuilt for the owner logins (Nikhil; logins go out EOD 25 Nov)
+Full checklist in TODO.md (top). Code map:
+- **Plan tab** = `src/app/war-room/DreamXII.tsx` (squad of 18: XII by group + 6 bench; right column = sorted recommendations per role; owners auto-placed/locked with a Move menu; RulesCheck per the SLL-2 rules) inside `OwnerPlan.tsx` (purse tiles: squad 18 = Legend 2 · A+ 2 · A 6 · B 8 from `SLL2_SQUAD` in rules.ts).
+- **Saving:** `src/app/api/owner-xii/route.ts` → private Storage bucket `owner-plans/xii/<profile>/<team>.json` (no table); the device keeps a copy; re-pulls on focus + every 60 s.
+- **Data:** `src/lib/auction/owner-pool.ts` — every registration + players stopped at the payment step (registration_starts step=payment, id `start:<id>`) as status `unpaid`; feePaid, ageBand + cat (age on AGE_CUTOFF 2027-03-07: Under 35 = A+, Legend = 60+ or avg<10 & SR<100, else A/B), owner (registrations.owner_team), keeper, CricHeroes tags (player_master.stats.ch_tags), keeper dismissals.
+- **Marks + key:** `src/app/war-room/Markers.tsx`. **Live pool:** `LivePool.tsx` (Payment pending tab, 10/20/50 per page).
+- **War Room** shows a work-in-progress card to owners (`OwnerPortal.tsx`); admins see the real one. Default tab = Plan.
+- ⚠ **Live board still on Season 1 rules** (SDLL_RULES + DB auction_rules) — align before 19 Dec, then open the War Room.
+- **AI chat bot:** link by Wed 16 Dec (reminder routine trig_01AxpbTAbmC7qYA7ahEnKoSp); needs ANTHROPIC_API_KEY on Vercel.
+- Local preview: `SPARTANS_DEV_FIXTURE=1 npx next dev` has 140 fixture registrations (set FIXTURE_PROFILE role to "owner" to see the owner view; don't commit that).
 
 ## ▶ LATEST — 30 Oct → 2 Nov 2026 (SLL-2 build-out + registration UAT)
 

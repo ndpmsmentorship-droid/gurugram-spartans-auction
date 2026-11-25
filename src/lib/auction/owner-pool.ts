@@ -12,7 +12,13 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // "unpaid" (25 Nov 2026, Nikhil): page 1 of the form saved, fee not paid yet. Owners now see them too,
 // clearly tagged "Payment pending", so they know the player is not in the pool yet.
 export type PoolStatus = "unpaid" | "new" | "fee_pending" | "profiling_pending" | "pool" | "rejected";
-export type AgeBand = "30–34" | "35–39" | "40+";
+// SLL-2 Rules, Article 2 (SPI): age = completed years on Sun 7 Mar 2027 (the last league match).
+export type AgeBand = "Under 35" | "35–39" | "40+";
+// Category from the rules: every under-35 is A+; a Legend is 60+ on the cut-off, or has a career
+// average under 10 AND strike rate under 100 (the Board may make exceptions). 35–39 and 40+ split
+// A / B by SPI rank, published after registration closes — until then "A/B" (SPI pending).
+export type Category = "A+" | "Legend" | "A/B";
+export const AGE_CUTOFF = "2027-03-07";
 export type PoolEntry = {
   id: string;
   name: string;
@@ -35,6 +41,7 @@ export type PoolEntry = {
   at: string; // registered
   feePaid: boolean; // the league's accounts team verified the registration fee (never the amount or UTR)
   ageBand: AgeBand | null; // SPI age bracket only; owners never see the date of birth
+  cat: Category | null; // null = no date of birth on file yet
   owner: string | null; // franchise this player owns (owner marker on the league admin)
   keeper: boolean;
   tags: string[]; // CricHeroes player-type tags, e.g. Hard Hitter · Economist
@@ -203,11 +210,24 @@ export async function loadOwnerPool({
     return typeof st._by === "string" && /cricheroes/i.test(st._by) && typeof st._updated === "string" ? st._updated : null;
   };
 
-  const band = (dob: string | null): AgeBand | null => {
+  const ageOn = (dob: string | null) => {
     if (!dob) return null;
-    const y = Math.floor((Date.now() - new Date(dob).getTime()) / (365.25 * 864e5));
-    if (!Number.isFinite(y) || y < 30) return null;
-    return y < 35 ? "30–34" : y < 40 ? "35–39" : "40+";
+    const b = new Date(dob), c = new Date(AGE_CUTOFF);
+    if (Number.isNaN(b.getTime())) return null;
+    return c.getFullYear() - b.getFullYear() - (c.getMonth() < b.getMonth() || (c.getMonth() === b.getMonth() && c.getDate() < b.getDate()) ? 1 : 0);
+  };
+  const band = (dob: string | null): AgeBand | null => {
+    const y = ageOn(dob);
+    if (y == null) return null;
+    return y < 35 ? "Under 35" : y < 40 ? "35–39" : "40+";
+  };
+  const catOf = (dob: string | null, s: PoolEntry["stats"]): Category | null => {
+    const y = ageOn(dob);
+    if (y == null) return null;
+    if (y < 35) return "A+";
+    if (y >= 60) return "Legend";
+    if (s && (s.m ?? 0) >= 10 && s.avg != null && s.sr != null && s.avg < 10 && s.sr < 100) return "Legend";
+    return "A/B";
   };
   const fromStarts: PoolEntry[] = stalled.map((x) => {
     const m = x.master_id ? masters.get(x.master_id) : undefined;
@@ -231,6 +251,7 @@ export async function loadOwnerPool({
       at: x.last_active_at ?? x.created_at,
       feePaid: false,
       ageBand: band(m?.dob ?? null),
+      cat: catOf(m?.dob ?? null, headline(m)),
       owner: null,
       keeper: /keeper/i.test(m?.primary_role ?? ""),
       tags: Array.isArray(st.ch_tags) ? (st.ch_tags as unknown[]).map(String) : [],
@@ -260,6 +281,7 @@ export async function loadOwnerPool({
       at: r.created_at,
       feePaid: r.fee_status === "verified",
       ageBand: band(r.dob ?? m?.dob ?? null),
+      cat: catOf(r.dob ?? m?.dob ?? null, headline(m)),
       owner: r.owner_team ?? null,
       keeper: !!r.is_keeper || /keeper/i.test(m?.primary_role ?? ""),
       tags: Array.isArray(st.ch_tags) ? (st.ch_tags as unknown[]).map(String) : [],

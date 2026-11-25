@@ -63,7 +63,7 @@ export default async function WarRoomPage({ searchParams }: { searchParams: Prom
   const planPlayers = [...byPerson.values()].map((p) => (SPI_PUBLISHED || p.team_id ? p : { ...p, auction_category: null })) as WRPlayer[];
   return (
     <OwnerPortal
-      tab={(["plan", "pool", "live"] as PortalTab[]).includes(tab as PortalTab) ? (tab as PortalTab) : "live"}
+      tab={(["plan", "pool", "live"] as PortalTab[]).includes(tab as PortalTab) ? (tab as PortalTab) : "plan"}
       warRoom={{
         league: LEAGUE,
         leagueName: LEAGUE_NAME[LEAGUE],

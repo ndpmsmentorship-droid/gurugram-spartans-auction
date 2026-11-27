@@ -27,7 +27,7 @@ export const FRANCHISES: Franchise[] = [
   { name: "Punjab Royals", group: "B", logo: punjabRoyals, owners: ["Sunil Bansal"] },
   { name: "Diplomats 2", group: "B", owners: [] },
   { name: "SLL 13", group: "B", owners: ["Puneet"] },
-  { name: "SLL 14", group: "B", owners: [] },
+  { name: "Srinagar", group: "B", owners: [] }, // was placeholder SLL 14; confirmed 27 Nov 2026, owners TBA
 ];
 
 // Past sheets spell teams loosely ("Chennai Thalaiva", "Punjab Royals").

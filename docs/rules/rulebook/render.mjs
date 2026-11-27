@@ -8,7 +8,7 @@ const dir = path.dirname(new URL(import.meta.url).pathname);
 const out = process.argv[2] || path.join(dir, "SLL-2 Rule Book.pdf");
 // optional: a different body page and footer label (letterhead stays the same)
 const src = process.argv[3] || "rulebook.html";
-const label = process.argv[4] || "SLL-2 Rules &amp; Regulations &middot; Issued 3 November 2026";
+const label = process.argv[4] || "SLL-2 Rules &amp; Regulations &middot; Issued 3 November 2026 &middot; amended 27 November 2026";
 const bandOut = process.argv[5];
 const crest = fs.readFileSync(path.join(dir, "crest.b64"), "utf8").trim();
 const wm = fs.readFileSync(path.join(dir, "wm.b64"), "utf8").trim();

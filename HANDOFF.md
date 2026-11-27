@@ -50,7 +50,7 @@ Branch **`simple-stages`** in BOTH repos: playful-site 08305e5 (admin) + gurugra
 - **Two checks, two teams.** Accounts: **Fee received ✓** → mail "Payment received and verified". LinkedIn: 500+ / Under 500 vetted (unchanged).
 - **Corporate profiling = three buttons:** **Approve into pool** (status approved → mail "Congratulations! You're selected for the Season 2 auction pool"),
   **Recommendation required** (status **under_review** — no new DB status, so the check constraint is untouched → mail asking for a franchise
-  owner's recommendation by **29 Nov** (REG_CLOSES_LABEL); they reply to the mail with owner + franchise), **Reject** (no mail).
+  owner's recommendation by **7 Dec** (extended from 29 Nov on 27 Nov) (REG_CLOSES_LABEL); they reply to the mail with owner + franchise), **Reject** (no mail).
 - **Approve is disabled until LinkedIn is checked AND the fee is verified** (the button says which is missing). Before this, Approve silently
   moved such players to under_review — that is why the Approved tab was empty. **Rows already in under_review were parked by that old rule,
   not marked "recommendation required" by anyone**: they now show as "Recommendation required" (admin tab + owners' pool) but were sent no

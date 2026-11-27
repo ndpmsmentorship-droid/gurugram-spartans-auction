@@ -19,7 +19,7 @@ Last updated: 2026-11-25
 - [ ] Owner logins: Diplomats 1/2, SLL 13/14 still have no owner linked; Sachin-style test owners under 35 will show a red rules warning (no owner may be under 35).
 
 ## MASTER LIST — SLL-2 workstreams (Nikhil, 5 Nov 2026)
-Strategy + status live here; work happens in separate sessions. Key dates (auction moved 12 → 19 Dec on 8 Nov): registration closes **29 Nov** · auction **Sat 19 Dec** · opener **Sat 23 Jan 2027** · final **Sun 14 Mar**.
+Strategy + status live here; work happens in separate sessions. Key dates (auction moved 12 → 19 Dec on 8 Nov): registration closes **7 Dec** (extended from 29 Nov on 27 Nov 2026) · auction **Sat 19 Dec** · opener **Sat 23 Jan 2027** · final **Sun 14 Mar**.
 
 **Owners group**
 - [ ] Rule book — issued 3 Nov, live at playfulventures.co.in/rules (disclaimer added 5 Nov). Next: send to owners group. Settled 5 Nov: A+ inside the 6-A XII cap (max 4 A with an A+), owners/retained cost = category price, no owner may be under 35
@@ -30,7 +30,7 @@ Strategy + status live here; work happens in separate sessions. Key dates (aucti
 - [ ] Sponsorship deck — Aug deck is out of date: 14 teams, 45 matches, 23 Jan–14 Mar, Essex Farms, SLL-2 name; placeholders still open (S1 recap, reach, contacts)
 
 **Tech**
-- [ ] Registration form — public again 5 Nov at ₹1,000; daily vetting until 29 Nov; UAT test rows still in DB (leave until Nikhil says)
+- [ ] Registration form — public again 5 Nov at ₹1,000; daily vetting until 7 Dec; UAT test rows still in DB (leave until Nikhil says)
   - [x] **Split into two pages — LIVE 7 Nov 2026** (v4 SQL run 6 Nov). Admin "Payment pending" tab = follow-up list; unpaid rows never reach the owners' pool. Was: page 1 = all details + uploads, validated and saved as a pending registration; page 2 = payment (QR / UTR / screenshot) attached to that saved row. Reason: players have paid but the form never got submitted — payment sits inside the long form and every check runs only after paying. Admin should list "details saved, payment pending" so the team can chase them
   - [x] **"What you get" section — LIVE 7 Nov on the payment step (page 2), not the top of /register:** make the page enticing — list what ₹1,000 and ₹4,000 buy; items to be confirmed by Nikhil before they go on the page
 - [ ] Auction day portal — owner logins: 10 of 14 linked 7 Nov (`scripts/sll2-owner-logins.mts`; all on one common starting password with a forced change at first sign-in, `scripts/sll2-owner-reset.mts`, 7 Nov; username list in ~/Downloads/SDLL/Teams & Owners/; Diplomats 1/2, SLL 13/14 wait for owners), dry run on a test board, sponsor swap, SLL-1 maroon leftovers, Auction Record + lot clips
@@ -40,7 +40,7 @@ Strategy + status live here; work happens in separate sessions. Key dates (aucti
 - [ ] Ground booking — Essex Farms for every match day 23 Jan–14 Mar (slots, deposit, written confirmation)
 
 **Marketing**
-- [ ] Social media strategy — registration push to 29 Nov, auction-night content, season calendar; handles for the site footer
+- [ ] Social media strategy — registration push to 7 Dec, auction-night content, season calendar; handles for the site footer
 
 ## Owners' meeting — Fri 30 Oct 2026 (Vivanta by Taj, Dwarka)
 Agenda order: 1 Registration → 2 Owners Portal + Ball Library demo → 3 Auction rules → 4 League rules → 5 What the ₹5 lakh fee buys → Q&A + next steps.
@@ -55,7 +55,7 @@ Dates now: auction Sat 12 Dec 2026 · opener Sat 16 Jan 2027 · final Sun 7 Mar 
 **1. Registration (explain first)**
 - [ ] 1 slide: player flow — search name → returning player confirms / new player fills form → ₹ fee → vetting → category → auction pool
 - [ ] Live numbers on the day: registered / vetted / pending (from /admin)
-- [ ] Ask owners to push their own players to register before 29 Nov; share the link + QR
+- [ ] Ask owners to push their own players to register before 7 Dec; share the link + QR
 - [ ] Answer ready: who vets, how categories are set, what an owner can see about a player
 
 **2. Owners Portal + Ball Library — tour and demo**
@@ -381,5 +381,5 @@ Not yet approved — for the next discussion:
 - [ ] SLL-2 Rules & Regulations draft (Midnight Stadium): https://claude.ai/artifact/64Z8cPbgkG9S58Z64EzPgS · PDF ~/Downloads/SDLL/SLL-2 Rules (Draft 4 Nov 2026).pdf — get sign-off on every Proposed/Open item
 - [ ] Shanti Devi Players Index (SPI) methodology draft: https://claude.ai/artifact/52KYBhdN1paNyTtDTqd7sZ · PDF alongside — decided (4 Nov): age on 7 Mar 2027 (last league match); playing XII = under-35 max 1, 35–39 max 4, 40+ any, A max 6; Legend = 60+ or (avg<10 and SR<100) or Board pick; base/raise/cap from owners deck; every player gets an overall + age-bracket rank
 - [ ] Once the SPI formula is signed off: compute scores, both ranks and categories from player_master.stats for the pool; show them in the War Room / pool list
-  - 7 Nov: Planner + War Room now show unsold players as "SPI pending" (tier.ts SPI_PUBLISHED). After reg closes 29 Nov: get missing DOBs, compute SPI, panel sign-off (~3 Dec), write auction_category, set SPI_PUBLISHED true before the 19 Dec auction
+  - 7 Nov: Planner + War Room now show unsold players as "SPI pending" (tier.ts SPI_PUBLISHED). After reg closes 7 Dec (was 29 Nov): get missing DOBs, compute SPI, panel sign-off (~3 Dec), write auction_category, set SPI_PUBLISHED true before the 19 Dec auction
 - [ ] Old rule book doc (7fziqrSJa5TWeyBrMbCFzp) is stale (12 teams, ₹6L purse, 2 Jan auction, ₹3,000) — superseded by the new draft

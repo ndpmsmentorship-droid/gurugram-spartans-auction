@@ -1,9 +1,9 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAuctionSeasonId, AUCTION_DIVISIONS } from "@/lib/auction/target";
+import { getAuctionSeasonId, OWNER_DIVISIONS } from "@/lib/auction/target";
 
 /** The auction-season team a signed-in owner owns, or null (admins and everyone else). */
-export async function ownTeam(profile: { id: string; role: string } | null): Promise<{ id: string; name: string } | null> {
+export async function ownTeam(profile: { id: string; role: string } | null): Promise<{ id: string; name: string; division: string } | null> {
   if (!profile || profile.role !== "owner") return null;
   const seasonId = await getAuctionSeasonId();
   if (!seasonId) return null;
@@ -11,9 +11,9 @@ export async function ownTeam(profile: { id: string; role: string } | null): Pro
   const sb = createAdminClient() as any;
   const { data } = await sb
     .from("teams")
-    .select("id, name")
+    .select("id, name, division")
     .eq("season_id", seasonId)
-    .in("division", AUCTION_DIVISIONS)
+    .in("division", OWNER_DIVISIONS)
     .eq("owner_profile_id", profile.id)
     .maybeSingle();
   return data ?? null;

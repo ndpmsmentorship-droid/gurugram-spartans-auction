@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAuctionSeasonId, AUCTION_DIVISIONS } from "@/lib/auction/target";
+import { getAuctionSeasonId, OWNER_DIVISIONS } from "@/lib/auction/target";
 import { readLiveLot } from "@/lib/auction/read";
 import { LEAGUE_NAME, LEAGUE } from "@/lib/league";
 import { SPI_PUBLISHED } from "@/lib/scout/tier";
@@ -28,7 +28,7 @@ export default async function WarRoomPage({ searchParams }: { searchParams: Prom
   const sb = createAdminClient() as unknown as { from: (t: string) => any }; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   const [{ data: teams }, { data: pool }, lot] = await Promise.all([
-    sb.from("teams").select("id, name, purse_total, purse_max, owner_profile_id, logo_url").eq("season_id", seasonId).in("division", AUCTION_DIVISIONS).order("name"),
+    sb.from("teams").select("id, name, purse_total, purse_max, owner_profile_id, logo_url").eq("season_id", seasonId).in("division", OWNER_DIVISIONS).order("name"),
     selectAll(sb, "scout_players", "id, source_id, cricheroes_link, full_name, photo_url, age, primary_role, batting_style, bowling_style, is_keeper, auction_category, bat_matches, runs, bat_avg, bat_sr, wickets, economy, bowl_sr, bat_index, bowl_index, overall_index, team_id, sold_price, acquired, rtm_against, is_rejected"),
     readLiveLot(seasonId),
   ]);

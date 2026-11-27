@@ -17,6 +17,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
  */
 // "USCL" = the Urban Sports Champions League franchises (one group of 14).
 export const AUCTION_DIVISIONS = ["Group A", "Group B", "USCL"];
+// Owner-facing pages (owners' home, Plan, Live pool) also know the "Demo" division: the Demo XI team
+// behind the shared demo login (Nikhil, 27 Nov 2026). Never on the board, console or admin lists.
+export const DEMO_DIVISION = "Demo";
+export const OWNER_DIVISIONS = [...AUCTION_DIVISIONS, DEMO_DIVISION];
 
 export async function getAuctionSeasonId(): Promise<string | null> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

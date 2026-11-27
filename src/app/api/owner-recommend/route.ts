@@ -1,6 +1,7 @@
 import { getCurrentProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ownTeam } from "@/lib/auction/owner-team";
+import { DEMO_DIVISION } from "@/lib/auction/target";
 
 // An owner recommends (or withdraws a recommendation for) a player whose corporate profiling asked for a
 // franchise owner's recommendation (Nikhil, 23 Nov 2026). One per team per player; the league admin sees
@@ -12,6 +13,8 @@ export async function POST(req: Request) {
   const profile = await getCurrentProfile();
   const team = await ownTeam(profile);
   if (!profile || !team) return Response.json({ error: "Only a franchise owner can recommend a player." }, { status: 403 });
+  // The demo login looks around; it never sends the league a real recommendation.
+  if (team.division === DEMO_DIVISION) return Response.json({ error: "This is the demo login — recommendations are switched off here." }, { status: 403 });
   const body = (await req.json().catch(() => null)) as { id?: string; on?: boolean; note?: string } | null;
   const id = String(body?.id ?? "");
   if (!/^[0-9a-f-]{36}$/i.test(id)) return Response.json({ error: "Unknown player." }, { status: 400 });

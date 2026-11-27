@@ -3,6 +3,8 @@
 // beside the real admin emails. Admins sign in with their full email; owners just
 // type their username.
 export const OWNER_EMAIL_DOMAIN = "owners.sdll";
+// The shared demo owner login (Demo XI, division "Demo"): its password can't be changed from the portal.
+export const DEMO_USERNAME = "demo";
 
 export function usernameToEmail(identifier: string): string {
   const id = identifier.trim();

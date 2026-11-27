@@ -4,7 +4,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAuctionSeasonId, AUCTION_DIVISIONS } from "@/lib/auction/target";
+import { getAuctionSeasonId, OWNER_DIVISIONS } from "@/lib/auction/target";
 import { readLiveLot } from "@/lib/auction/read";
 import { loadOwnerPool } from "@/lib/auction/owner-pool";
 import { DEFAULT_RULES, SLL2_SQUAD, inr } from "@/lib/auction/rules";
@@ -51,7 +51,7 @@ export default async function OwnersHome({ searchParams }: { searchParams: Promi
   const seasonId = await getAuctionSeasonId();
   const sb = createAdminClient() as unknown as { from: (t: string) => any }; // eslint-disable-line @typescript-eslint/no-explicit-any
   const [{ data: teams }, lot, pool] = await Promise.all([
-    sb.from("teams").select("id, name, division, purse_total, purse_max, owner_profile_id, logo_url").eq("season_id", seasonId).in("division", AUCTION_DIVISIONS).order("name"),
+    sb.from("teams").select("id, name, division, purse_total, purse_max, owner_profile_id, logo_url").eq("season_id", seasonId).in("division", OWNER_DIVISIONS).order("name"),
     readLiveLot(seasonId),
     loadOwnerPool({ photos: false }),
   ]);
@@ -102,6 +102,19 @@ export default async function OwnersHome({ searchParams }: { searchParams: Promi
             </p>
             <h1 className="mt-1 font-display text-3xl font-bold uppercase leading-tight sm:text-4xl">{team.name}</h1>
             {owners.length > 0 && <p className="mt-1 text-sm text-white/75">{owners.join(" · ")}</p>}
+            {/* The SLL-2 rule book (Nikhil, 27 Nov 2026): categories, squad of 18, playing-XII limits, auction rules. */}
+            <a
+              href="https://playfulventures.co.in/rules"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/10 px-3.5 py-1.5 text-[0.8rem] font-semibold text-white transition-colors hover:bg-white hover:text-ink"
+            >
+              <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z" />
+                <path d="M4 21V5M9 7h6M9 11h6" />
+              </svg>
+              Rules &amp; regulations
+            </a>
           </div>
           <div className="flex w-full items-baseline gap-3 border-t border-white/15 pt-4 sm:ml-auto sm:block sm:w-auto sm:border-0 sm:pt-0 sm:text-right">
             <p className="font-display text-4xl font-bold leading-none">{days}</p>

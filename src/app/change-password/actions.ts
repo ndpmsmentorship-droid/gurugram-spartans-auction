@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { DEMO_USERNAME, usernameToEmail } from "@/lib/owner-auth";
 
 export type PwState = { error: string } | null;
 
@@ -20,6 +21,7 @@ export async function changePassword(_prev: PwState, form: FormData): Promise<Pw
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+  if (user.email === usernameToEmail(DEMO_USERNAME)) return { error: "This is the shared demo login — its password stays as it is." };
 
   const { error } = await supabase.auth.updateUser({ password });
   if (error) return { error: error.message.includes("different") ? "Choose a password other than the starting one." : "Couldn't save the password. Please try again." };

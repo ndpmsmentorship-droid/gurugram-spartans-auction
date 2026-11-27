@@ -160,8 +160,9 @@ export default function LivePool() {
     }
     return c;
   }, [pool]);
-  // Players who haven't given their role go to the bottom (Nikhil, 25 Nov 2026); order otherwise unchanged.
-  const noRole = (p: PoolEntry) => /^role not given/i.test(p.role);
+  // Payment pending goes to the very bottom (Nikhil, 27 Nov 2026), then players who haven't given their
+  // role (25 Nov 2026); order otherwise unchanged (newest first).
+  const noRole = (p: PoolEntry) => (p.status === "unpaid" ? 2 : 0) + (/^role not given/i.test(p.role) ? 1 : 0);
   const matching = (pool ?? [])
     .filter(
       (p) => (tab === "all" || (tab === "recommend" ? p.recommend : p.status === tab)) && (!q.trim() || `${p.name} ${p.employer ?? ""} ${p.role} ${p.tags.join(" ")}`.toLowerCase().includes(q.trim().toLowerCase())),

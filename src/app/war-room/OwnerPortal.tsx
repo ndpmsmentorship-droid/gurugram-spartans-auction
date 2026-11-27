@@ -13,7 +13,7 @@ export type PortalTab = "plan" | "pool" | "live";
 const TABS: { key: PortalTab; label: string }[] = [
   { key: "plan", label: "Plan" },
   { key: "pool", label: "Live pool" },
-  { key: "live", label: "War Room" },
+  { key: "live", label: "War Zone" },
 ];
 
 export default function OwnerPortal({
@@ -48,9 +48,26 @@ export default function OwnerPortal({
               className={`flex-1 rounded-full px-3 py-2 text-sm font-medium sm:flex-none sm:px-5 ${tab === t.key ? "bg-ink text-white" : "text-muted hover:text-ink"}`}
             >
               {t.label}
-              {t.key === "live" && <span className="ml-1.5 hidden rounded-full bg-gold-fill px-1.5 py-0.5 align-middle text-[0.6rem] font-semibold uppercase tracking-wide text-gold sm:inline">soon</span>}
+              {t.key === "live" && <span className="ml-1.5 rounded-full bg-gold-fill px-1.5 py-0.5 align-middle text-[0.6rem] font-semibold uppercase tracking-wide text-gold">soon</span>}
             </button>
           ))}
+          {/* The ball library, signed in with full access (/api/library → ndpms.in), and the SLL-2 rule
+              book (Nikhil, 27 Nov 2026). The library shows a "Back to your Plan" button. */}
+          <span className="ml-auto flex shrink-0 items-center gap-1 self-center">
+            <a href="/spartansscout/api/library" className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-2 text-sm font-medium hover:border-ink">
+              <span aria-hidden>▶</span>
+              <span className="hidden sm:inline">Ball Library</span>
+              <span className="sm:hidden">Library</span>
+            </a>
+            <a
+              href="https://playfulventures.co.in/rules"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden rounded-full px-3 py-2 text-sm text-muted hover:text-ink sm:inline-flex"
+            >
+              Rules ↗
+            </a>
+          </span>
         </div>
       </nav>
 
@@ -72,7 +89,7 @@ export default function OwnerPortal({
             </>
           ) : (
             <section className="mx-auto max-w-[640px] rounded-[18px] border border-line bg-surface p-6 text-center shadow-[var(--elev-sm)] sm:p-10">
-              <p className="eyebrow">War Room · work in progress</p>
+              <p className="eyebrow">War Zone · coming soon</p>
               <h2 className="mt-2 font-display text-3xl font-bold uppercase leading-tight">Your auction-night console</h2>
               <p className="mx-auto mt-3 max-w-[46ch] text-sm text-muted">
                 Purse, open slots, the player on the block and who can still afford him — live on auction night, Sat 19 Dec. We&rsquo;re still building it and will open it before the auction.

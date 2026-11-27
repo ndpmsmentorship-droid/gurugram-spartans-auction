@@ -109,6 +109,9 @@ export default async function RootLayout({
 }>) {
   // In parallel: these were sequential Supabase round-trips on every request.
   const [profile, auctionLive] = await Promise.all([getCurrentProfile(), isAuctionLive()]);
+  // Owners see only their portal (Nikhil, 27 Nov 2026): no menu, no auction badge, no breadcrumbs —
+  // the crest (back to /owners) and Sign out stay.
+  const OWNER = profile?.role === "owner";
 
   // Only the two public routes are advertised to a signed-out visitor —
   // everything else redirects to /login (see proxy.ts), so linking to it from
@@ -124,9 +127,9 @@ export default async function RootLayout({
         LIBRARY,
         ...(profile?.role === "admin" ? [{ href: "/admin/auction", label: "Admin" }] : []),
       ]
-    : profile?.role === "owner"
+    : OWNER
     ? // Owners live in their portal (/owners), which has its own tabs.
-      [BIG_SCREEN]
+      []
     : DEMO_MODE
     ? // Demo: every major page for everyone (locked pages bounce to Sign in).
       [
@@ -165,7 +168,7 @@ export default async function RootLayout({
           style={{ borderBottom: "2px solid var(--red)" }}
         >
           <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between gap-4 px-4 sm:px-7">
-            <Link href="/" className="inline-flex shrink-0 items-center gap-2.5">
+            <Link href={OWNER ? "/owners" : "/"} className="inline-flex shrink-0 items-center gap-2.5">
               <Image
                 src={crest}
                 alt=""
@@ -209,7 +212,7 @@ export default async function RootLayout({
             <div className="flex shrink-0 items-center gap-3">
               {/* Reflects the actual lot state — it used to be hardcoded, so the
                   masthead claimed a live auction at all times. */}
-              {auctionLive ? (
+              {OWNER ? null : auctionLive ? (
                 <span className="hidden items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 font-mono text-[0.625rem] uppercase tracking-[0.16em] text-white sm:inline-flex">
                   <span className="relative flex h-1.5 w-1.5">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#F0564A] opacity-75" />
@@ -245,7 +248,7 @@ export default async function RootLayout({
         </header>
         {/* SDLL's partners — not USCL's, so hidden while USCL is switched in */}
         {!USCL && <SponsorBar />}
-        <Crumbs />
+        {!OWNER && <Crumbs />}
         <div className="flex flex-1 flex-col">{children}</div>
       </body>
     </html>

@@ -11,7 +11,7 @@ import OwnerPortal, { type PortalTab } from "./OwnerPortal";
 import { selectAll } from "@/lib/supabase/select-all";
 import { inRegistrationPool } from "@/lib/auction/reg-pool";
 
-export const metadata: Metadata = { title: "War Room" };
+export const metadata: Metadata = { title: "Owners’ portal" };
 export const dynamic = "force-dynamic";
 
 // The owners' portal, one page: Plan (squad strategies), Live pool (Season 2
@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
 // arrive over realtime — no reloads mid-auction.
 export default async function WarRoomPage({ searchParams }: { searchParams: Promise<{ team?: string; tab?: string }> }) {
   const profile = await getCurrentProfile();
-  if (!profile) redirect("/login?next=/war-room");
+  if (!profile) redirect("/login?next=/owners");
   const { team: teamParam, tab } = await searchParams;
 
   const seasonId = await getAuctionSeasonId();

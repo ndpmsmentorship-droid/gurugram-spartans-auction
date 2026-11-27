@@ -13,6 +13,7 @@ import playfulWhite from "./brand/playful-ventures-white.png";
 import { LEAGUE } from "@/lib/league";
 import SponsorBar from "./SponsorBar";
 import Crumbs from "./Crumbs";
+import HideOnOwners from "./HideOnOwners";
 import NavProgress from "./NavProgress";
 import { DEMO_MODE } from "./site-config";
 
@@ -212,6 +213,7 @@ export default async function RootLayout({
             <div className="flex shrink-0 items-center gap-3">
               {/* Reflects the actual lot state — it used to be hardcoded, so the
                   masthead claimed a live auction at all times. */}
+              <HideOnOwners>
               {OWNER ? null : auctionLive ? (
                 <span className="hidden items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 font-mono text-[0.625rem] uppercase tracking-[0.16em] text-white sm:inline-flex">
                   <span className="relative flex h-1.5 w-1.5">
@@ -226,6 +228,7 @@ export default async function RootLayout({
                   Auction Idle
                 </span>
               )}
+              </HideOnOwners>
               {profile ? (
                 <form action={signOut}>
                   <button

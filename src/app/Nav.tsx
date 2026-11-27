@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { isOwnersPage } from "./owners-chrome";
 
 export type NavItem = { href: string; label: string; external?: boolean };
 
@@ -9,6 +10,7 @@ export type NavItem = { href: string; label: string; external?: boolean };
 // WITHOUT the /spartansscout basePath, so these compare cleanly.
 export default function Nav({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
+  if (isOwnersPage(pathname)) return <span className="flex-1" />;
 
   return (
     <nav className="flex items-center gap-1 overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

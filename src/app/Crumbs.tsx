@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { isOwnersPage } from "./owners-chrome";
 
 // Back button + breadcrumb trail under the sponsor bar on every page but Home.
 // usePathname() excludes the /spartansscout basePath, so paths compare cleanly.
@@ -55,7 +56,7 @@ export default function Crumbs() {
   useEffect(() => {
     if (pathname !== first.current) setMoved(true);
   }, [pathname]);
-  if (pathname === "/") return null;
+  if (pathname === "/" || isOwnersPage(pathname)) return null;
 
   const crumbs = trail(pathname);
   const parent = crumbs.length > 1 ? crumbs[crumbs.length - 2].href : "/";
